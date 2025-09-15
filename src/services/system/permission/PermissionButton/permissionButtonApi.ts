@@ -237,7 +237,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.get<ButtonInterfacePermission[]>({
       url: PermissionButtonApi.getButtonInterfaces,
       params: { buttonId },
-    });
+    }, { successMessageMode: 'none' });
   },
 
   /**

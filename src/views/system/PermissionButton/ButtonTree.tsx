@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Tree, Input, Spin, Empty, Tag, Space, Button, Card, theme } from 'antd';
-import { SearchOutlined, ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo } from 'react';
+import { SearchOutlined, ReloadOutlined, PlusOutlined, FolderOutlined, FileOutlined } from '@ant-design/icons';
+import { useState, useCallback, useMemo, type ReactNode } from 'react';
 import type React from 'react';
 import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { usePermission } from '@/hooks/usePermission';
+import ButtonModal from './ButtonModal';
 
 /**
  * 按钮树组件Props
@@ -22,6 +23,7 @@ interface ButtonTreeProps {
 interface TreeNode {
   key: string;
   title: React.ReactNode;
+  icon?: ReactNode | ((props: any) => ReactNode);
   children?: TreeNode[];
   isLeaf?: boolean;
   data: PermissionButtonModel | null;
@@ -32,9 +34,13 @@ interface TreeNode {
  * 以树形结构展示权限按钮，按菜单分组
  */
 const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonId }) => {
+  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [formVisible, setFormVisible] = useState(false);
+  const [editingButton, setEditingButton] = useState<PermissionButtonModel | null>(null);
   const { token } = theme.useToken();
+
   // 权限检查
   const canAdd = usePermission(['system:permission:button:add']);
   const canEdit = usePermission(['system:permission:button:edit']);
@@ -72,6 +78,23 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     refetch();
   }, [refetch]);
 
+  // 保存按钮的mutation
+  const saveButtonMutation = useMutation({
+    mutationFn: (formData: any) => {
+      if (editingButton?.id) {
+        return permissionButtonService.updateButton({ ...formData, id: editingButton.id });
+      } else {
+        return permissionButtonService.addButton(formData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
+      setFormVisible(false);
+      setEditingButton(null);
+      refetch();
+    },
+  });
+
   /**
    * 处理树节点选择
    * @param selectedKeys 选中的节点keys
@@ -100,6 +123,32 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   }, []);
 
   /**
+   * 处理新增按钮
+   */
+  const handleAdd = useCallback(() => {
+    setEditingButton(null);
+    setFormVisible(true);
+  }, []);
+
+  /**
+   * 处理表单提交
+   */
+  const handleFormSubmit = useCallback(
+    (formData: any) => {
+      saveButtonMutation.mutate(formData);
+    },
+    [saveButtonMutation],
+  );
+
+  /**
+   * 处理表单取消
+   */
+  const handleFormCancelClick = useCallback(() => {
+    setFormVisible(false);
+    setEditingButton(null);
+  }, []);
+
+  /**
    * 构建树形数据
    */
   const treeData = useMemo(() => {
@@ -125,29 +174,20 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     // 转换为树形结构
     const nodes: TreeNode[] = Object.values(menuGroups).map((group) => ({
       key: group.menuId,
+      icon: <FolderOutlined />,
       title: (
-        <div className="flex items-center justify-between space-x-2">
+        <>
           <span className="font-medium">{group.menuName}</span>
-          <Tag color={token.colorPrimary}>{group.buttons.length}</Tag>
-        </div>
+          <Tag className='ml-4!' color={token.colorPrimary}>
+            {group.buttons.length}
+          </Tag>
+        </>
       ),
       data: null,
       children: group.buttons.map((button: PermissionButtonModel) => ({
         key: button.id,
-        title: (
-          <div className="flex items-center justify-between group">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">{button.name}</span>
-              <Tag color={button.status ? 'green' : 'red'}>{button.status ? '启用' : '禁用'}</Tag>
-            </div>
-            <div className="opacity-0 group-hover:opacity-100">
-              <Space size="small">
-                {canEdit && <Button color="primary" variant="link" size="small" icon={<EditOutlined />} />}
-                {canDelete && <Button color="danger" variant="link" size="small" icon={<DeleteOutlined />} />}
-              </Space>
-            </div>
-          </div>
-        ),
+        icon: <FileOutlined />,
+        title: <span className={`text-sm ${!button.status ? 'line-through text-gray-400' : ''}`}>{button.name}</span>,
         data: button,
         isLeaf: true,
       })),
@@ -179,12 +219,12 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
       styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 } }}
       extra={
         <Space>
-          <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading} size="small">
+          <Button type="default" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading} size="small">
             刷新
           </Button>
           {canAdd && (
-            <Button type="primary" size="small" icon={<PlusOutlined />}>
-              新增按钮
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAdd}>
+              新增
             </Button>
           )}
         </Space>
@@ -211,12 +251,22 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
             expandedKeys={expandedKeys}
             selectedKeys={selectedButtonId ? [selectedButtonId] : []}
             showLine
-            showIcon={false}
+            showIcon
+            blockNode
             titleRender={renderTreeNode}
             className="permission-button-tree"
           />
         )}
       </div>
+
+      {/* 按钮表单Modal */}
+      <ButtonModal
+        open={formVisible}
+        button={editingButton}
+        onOk={handleFormSubmit}
+        onCancel={handleFormCancelClick}
+        loading={saveButtonMutation.isPending}
+      />
     </Card>
   );
 };

@@ -9,7 +9,7 @@ import {
 import { usePermission } from '@/hooks/usePermission';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
-import ButtonForm from './ButtonForm';
+import ButtonModal from './ButtonModal';
 
 /**
  * 按钮详情组件Props
@@ -77,7 +77,7 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
    */
   const handleDelete = useCallback(() => {
     if (!button) return;
-    
+
     modal.confirm({
       title: '删除按钮',
       content: '确定删除按钮吗？数据删除后将无法恢复！',
@@ -100,7 +100,7 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
   }, [button?.id]);
 
   if (editing && button) {
-    return <ButtonForm button={button} onSave={handleSaveEdit} onCancel={handleCancelEdit} />;
+    return <ButtonModal open={editing} button={button} onOk={handleSaveEdit} onCancel={handleCancelEdit} />;
   }
 
   if (!button) {
@@ -166,11 +166,15 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
       label: '更新时间',
       children: button.updateTime,
     },
-    ...(button.description ? [{
-      key: '9',
-      label: '描述',
-      children: button.description,
-    }] : []),
+    ...(button.description
+      ? [
+          {
+            key: '9',
+            label: '描述',
+            children: button.description,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -189,12 +193,7 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
               </Button>
             )}
             {canEdit && (
-              <Button
-                color="orange"
-                variant="outlined"
-                icon={<EditOutlined />}
-                onClick={handleEdit}
-              >
+              <Button color="orange" variant="outlined" icon={<EditOutlined />} onClick={handleEdit}>
                 编辑
               </Button>
             )}
