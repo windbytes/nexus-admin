@@ -158,20 +158,26 @@ export const permissionButtonService: IPermissionButtonService = {
    * 获取权限按钮列表
    */
   async getButtonList(params: ButtonSearchParams): Promise<PageResult<PermissionButtonModel>> {
-    return HttpRequest.get<PageResult<PermissionButtonModel>>({
-      url: PermissionButtonApi.getButtonList,
-      params,
-    });
+    return HttpRequest.get<PageResult<PermissionButtonModel>>(
+      {
+        url: PermissionButtonApi.getButtonList,
+        params,
+      },
+      { successMessageMode: 'none' },
+    );
   },
 
   /**
    * 获取权限按钮详情
    */
   async getButtonDetail(buttonId: string): Promise<PermissionButtonModel> {
-    return HttpRequest.get<PermissionButtonModel>({
-      url: PermissionButtonApi.getButtonDetail,
-      params: { buttonId },
-    });
+    return HttpRequest.get<PermissionButtonModel>(
+      {
+        url: PermissionButtonApi.getButtonDetail,
+        params: { buttonId },
+      },
+      { successMessageMode: 'none' },
+    );
   },
 
   /**

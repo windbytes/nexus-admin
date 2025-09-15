@@ -14,7 +14,7 @@ import { menuService } from '@/services/system/menu/menuApi';
  * 按钮表单组件Props
  */
 interface ButtonFormProps {
-  button?: PermissionButtonModel;
+  button?: PermissionButtonModel | null;
   onSave: () => void;
   onCancel: () => void;
 }

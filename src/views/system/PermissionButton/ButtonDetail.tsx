@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, Descriptions, Tag, Space, Button, Divider, Spin } from 'antd';
-import { EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Card, Descriptions, Tag, Space, Button, Switch, Popconfirm } from 'antd';
+import { EditOutlined, DeleteOutlined, CopyOutlined, PlusOutlined } from '@ant-design/icons';
 import { useState, useCallback } from 'react';
 import type React from 'react';
 import {
@@ -8,39 +7,47 @@ import {
   type PermissionButtonModel,
 } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { usePermission } from '@/hooks/usePermission';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import ButtonForm from './ButtonForm';
-import ButtonInterfacePermission from './ButtonInterfacePermission';
 
 /**
  * 按钮详情组件Props
  */
 interface ButtonDetailProps {
-  button: PermissionButtonModel;
-  onRefresh: () => void;
+  button: PermissionButtonModel | null;
 }
 
 /**
  * 按钮详情组件
- * 展示权限按钮的详细信息和关联的接口权限
+ * 展示权限按钮的详细信息
  */
-const ButtonDetail: React.FC<ButtonDetailProps> = ({ button, onRefresh }) => {
+const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
+  const { modal } = App.useApp();
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
 
   // 权限检查
+  const canAdd = usePermission(['system:permission:button:add']);
   const canEdit = usePermission(['system:permission:button:edit']);
   const canDelete = usePermission(['system:permission:button:delete']);
+  const canCopy = usePermission(['system:permission:button:copy']);
 
-  /**
-   * 查询按钮关联的接口权限
-   */
-  const {
-    data: interfacePermissions,
-    isLoading: interfaceLoading,
-    refetch: refetchInterfaces,
-  } = useQuery({
-    queryKey: ['button-interfaces', button.id],
-    queryFn: () => permissionButtonService.getButtonInterfaces(button.id),
-    enabled: !!button.id,
+  // 切换按钮状态的mutation
+  const toggleButtonStatusMutation = useMutation({
+    mutationFn: ({ buttonId, status }: { buttonId: string; status: boolean }) =>
+      permissionButtonService.toggleButtonStatus(buttonId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
+    },
+  });
+
+  // 删除按钮的mutation
+  const deleteButtonMutation = useMutation({
+    mutationFn: (buttonId: string) => permissionButtonService.deleteButton(buttonId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
+    },
   });
 
   /**
@@ -62,110 +69,149 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button, onRefresh }) => {
    */
   const handleSaveEdit = useCallback(() => {
     setEditing(false);
-    onRefresh();
-  }, [onRefresh]);
+    queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
+  }, [queryClient]);
 
   /**
    * 处理删除
    */
   const handleDelete = useCallback(() => {
-    // TODO: 实现删除逻辑
-    console.log('删除按钮:', button.id);
-  }, [button.id]);
+    if (!button) return;
+    
+    modal.confirm({
+      title: '删除按钮',
+      content: '确定删除按钮吗？数据删除后将无法恢复！',
+      onOk: async () => {
+        try {
+          await deleteButtonMutation.mutateAsync(button.id);
+        } catch (error) {
+          console.error('删除失败:', error);
+        }
+      },
+    });
+  }, [button, deleteButtonMutation, modal]);
 
   /**
-   * 处理刷新接口权限
+   * 处理复制
    */
-  const handleRefreshInterfaces = useCallback(() => {
-    refetchInterfaces();
-  }, [refetchInterfaces]);
+  const handleCopy = useCallback(() => {
+    // TODO: 实现复制逻辑
+    console.log('复制按钮:', button?.id);
+  }, [button?.id]);
 
-  if (editing) {
+  if (editing && button) {
     return <ButtonForm button={button} onSave={handleSaveEdit} onCancel={handleCancelEdit} />;
   }
 
+  if (!button) {
+    return (
+      <Card className="min-h-1/3 max-h-1/2">
+        <div className="flex flex-col items-center justify-center h-32 text-gray-400">
+          <div className="text-4xl mb-2">📋</div>
+          <div>请选择权限按钮</div>
+        </div>
+      </Card>
+    );
+  }
+
+  // 按钮详情的描述列表
+  const items = [
+    {
+      key: '1',
+      label: '按钮类型',
+      children: <Tag color="blue">权限按钮</Tag>,
+    },
+    {
+      key: '2',
+      label: '按钮状态',
+      children: (
+        <Popconfirm
+          title="切换按钮状态"
+          description={`确定${button.status ? '禁用' : '启用'}按钮吗？`}
+          onConfirm={() => {
+            toggleButtonStatusMutation.mutate({ buttonId: button.id, status: !button.status });
+          }}
+        >
+          <Switch size="small" checked={button.status} disabled={!canEdit} />
+        </Popconfirm>
+      ),
+    },
+    {
+      key: '3',
+      label: '按钮名称',
+      children: button.name,
+    },
+    {
+      key: '4',
+      label: '权限标识',
+      children: <Tag color="blue">{button.code}</Tag>,
+    },
+    {
+      key: '5',
+      label: '所属菜单',
+      children: button.parentMenuName,
+    },
+    {
+      key: '6',
+      label: '排序',
+      children: button.sortNo,
+    },
+    {
+      key: '7',
+      label: '创建时间',
+      children: button.createTime,
+    },
+    {
+      key: '8',
+      label: '更新时间',
+      children: button.updateTime,
+    },
+    ...(button.description ? [{
+      key: '9',
+      label: '描述',
+      children: button.description,
+    }] : []),
+  ];
+
   return (
-    <div className="h-full flex flex-col">
-      {/* 按钮基本信息 */}
-      <Card
-        title="按钮信息"
+    <Card className="min-h-1/3 max-h-1/2 button-detail-card">
+      <Descriptions
+        column={2}
         size="small"
-        className="mb-4"
+        bordered
+        items={items}
+        title="按钮详情"
         extra={
           <Space>
+            {canAdd && (
+              <Button type="primary" icon={<PlusOutlined />}>
+                新增子按钮
+              </Button>
+            )}
             {canEdit && (
-              <Button type="primary" icon={<EditOutlined />} size="small" onClick={handleEdit}>
+              <Button
+                color="orange"
+                variant="outlined"
+                icon={<EditOutlined />}
+                onClick={handleEdit}
+              >
                 编辑
               </Button>
             )}
+            {canCopy && (
+              <Button color="cyan" variant="outlined" icon={<CopyOutlined />} onClick={handleCopy}>
+                复制
+              </Button>
+            )}
             {canDelete && (
-              <Button danger icon={<DeleteOutlined />} size="small" onClick={handleDelete}>
+              <Button color="danger" variant="outlined" icon={<DeleteOutlined />} onClick={handleDelete}>
                 删除
               </Button>
             )}
-            <Button type="text" icon={<ReloadOutlined />} size="small" onClick={onRefresh}>
-              刷新
-            </Button>
           </Space>
         }
-      >
-        <Descriptions column={2} size="small">
-          <Descriptions.Item label="按钮名称" span={2}>
-            <span className="font-medium">{button.name}</span>
-          </Descriptions.Item>
-          <Descriptions.Item label="权限标识">
-            <Tag color="blue">{button.code}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="状态">
-            <Tag color={button.status ? 'green' : 'red'}>{button.status ? '启用' : '禁用'}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="所属菜单">{button.parentMenuName}</Descriptions.Item>
-          <Descriptions.Item label="排序">{button.sortNo}</Descriptions.Item>
-          <Descriptions.Item label="创建时间">{button.createTime}</Descriptions.Item>
-          <Descriptions.Item label="更新时间">{button.updateTime}</Descriptions.Item>
-          {button.description && (
-            <Descriptions.Item label="描述" span={2}>
-              {button.description}
-            </Descriptions.Item>
-          )}
-        </Descriptions>
-      </Card>
-
-      <Divider />
-
-      {/* 关联的接口权限 */}
-      <div className="flex-1">
-        <Card
-          title="关联接口权限"
-          size="small"
-          className="h-full"
-          styles={{ body: { height: 'calc(100% - 57px)', padding: 0 } }}
-          extra={
-            <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              size="small"
-              onClick={handleRefreshInterfaces}
-              loading={interfaceLoading}
-            >
-              刷新
-            </Button>
-          }
-        >
-          {interfaceLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Spin />
-            </div>
-          ) : (
-            <ButtonInterfacePermission
-              buttonId={button.id}
-              interfacePermissions={interfacePermissions || []}
-              onRefresh={handleRefreshInterfaces}
-            />
-          )}
-        </Card>
-      </div>
-    </div>
+      />
+    </Card>
   );
 };
 

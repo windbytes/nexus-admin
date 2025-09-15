@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { Tree, Input, Spin, Empty, Tag, Space, Button } from 'antd';
-import { SearchOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { Tree, Input, Spin, Empty, Tag, Space, Button, Card, theme } from 'antd';
+import { SearchOutlined, ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo } from 'react';
 import type React from 'react';
 import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
@@ -31,10 +31,10 @@ interface TreeNode {
  * 按钮树组件
  * 以树形结构展示权限按钮，按菜单分组
  */
-const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonId, loading = false }) => {
+const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonId }) => {
   const [searchText, setSearchText] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-
+  const { token } = theme.useToken();
   // 权限检查
   const canAdd = usePermission(['system:permission:button:add']);
   const canEdit = usePermission(['system:permission:button:edit']);
@@ -78,9 +78,9 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
    * @param info 选择信息
    */
   const handleSelect = useCallback(
-    (selectedKeys: React.Key[], info: any) => {
+    (_selectedKeys: React.Key[], info: any) => {
       const { node } = info;
-      if (node?.data && !node.data.menuId) {
+      if (node?.data && node.data.menuType === 3) {
         // 如果选中的是按钮节点
         onSelectButton(node.data);
       } else {
@@ -126,9 +126,9 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     const nodes: TreeNode[] = Object.values(menuGroups).map((group) => ({
       key: group.menuId,
       title: (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between space-x-2">
           <span className="font-medium">{group.menuName}</span>
-          <Tag color="blue">{group.buttons.length}</Tag>
+          <Tag color={token.colorPrimary}>{group.buttons.length}</Tag>
         </div>
       ),
       data: null,
@@ -142,11 +142,8 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
             </div>
             <div className="opacity-0 group-hover:opacity-100">
               <Space size="small">
-                {canEdit && (
-                  <Button type="link" size="small" icon={<PlusOutlined />}>
-                    编辑
-                  </Button>
-                )}
+                {canEdit && <Button color="primary" variant="link" size="small" icon={<EditOutlined />} />}
+                {canDelete && <Button color="danger" variant="link" size="small" icon={<DeleteOutlined />} />}
               </Space>
             </div>
           </div>
@@ -157,7 +154,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     }));
 
     return nodes;
-  }, [buttonListResponse?.records, canEdit]);
+  }, [buttonListResponse?.records, canEdit, canDelete]);
 
   /**
    * 渲染树节点标题
@@ -176,33 +173,33 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* 搜索和操作栏 */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="space-y-3">
-          <Input.Search
-            placeholder="搜索权限按钮..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onSearch={handleSearch}
-            allowClear
-            enterButton={<SearchOutlined />}
-          />
-          <div className="flex justify-between">
-            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} size="small">
-              刷新
+    <Card
+      title="按钮列表"
+      className="h-full flex flex-col"
+      styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 } }}
+      extra={
+        <Space>
+          <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading} size="small">
+            刷新
+          </Button>
+          {canAdd && (
+            <Button type="primary" size="small" icon={<PlusOutlined />}>
+              新增按钮
             </Button>
-            {canAdd && (
-              <Button type="primary" size="small" icon={<PlusOutlined />}>
-                新增按钮
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+          )}
+        </Space>
+      }
+    >
+      <Input.Search
+        placeholder="请输入按钮名称"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onSearch={handleSearch}
+        allowClear
+        enterButton={<SearchOutlined />}
+      />
 
-      {/* 树形结构 */}
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
         {treeData.length === 0 ? (
           <Empty description="暂无权限按钮" image={Empty.PRESENTED_IMAGE_SIMPLE} className="mt-8" />
         ) : (
@@ -210,6 +207,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
             treeData={treeData}
             onSelect={handleSelect}
             onExpand={handleExpand}
+            defaultExpandAll
             expandedKeys={expandedKeys}
             selectedKeys={selectedButtonId ? [selectedButtonId] : []}
             showLine
@@ -219,7 +217,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
           />
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 
