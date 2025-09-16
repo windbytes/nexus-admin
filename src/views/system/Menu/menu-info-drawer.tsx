@@ -243,7 +243,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           <Radio.Group buttonStyle="solid" onChange={(e) => handleMenuTypeChange(e.target.value)}>
             <Radio.Button value={MenuType.SUB_MENU}>子菜单</Radio.Button>
             <Radio.Button value={MenuType.SUB_ROUTE}>子路由</Radio.Button>
-            <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button>
+            {/* <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button> */}
             <Radio.Button value={MenuType.TOP_LEVEL}>目录</Radio.Button>
           </Radio.Group>
         </Form.Item>
