@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReloadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Card, Table, Button, Space, Tag, Tooltip, type TableProps, App, Modal, Select } from 'antd';
+import { Card, Table, Button, Space, Tag, Tooltip, type TableProps, App } from 'antd';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type React from 'react';
 import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import InterfacePermissionMappingModal from './InterfacePermissionMappingModal';
 
 // 接口权限类型
 interface InterfacePermission {
@@ -29,8 +30,6 @@ interface ComponentState {
   };
   // 添加映射相关状态
   addMappingModalVisible: boolean;
-  availablePermissions: InterfacePermission[];
-  selectedPermissionIds: string[];
 }
 
 /**
@@ -58,8 +57,6 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
       totalPage: 0,
     },
     addMappingModalVisible: false,
-    availablePermissions: [],
-    selectedPermissionIds: [],
   });
 
   // 查询按钮接口权限数据
@@ -81,34 +78,6 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
       };
     },
     enabled: !!button?.id,
-  });
-
-  // 查询可用的接口权限列表（用于添加映射）
-  const {
-    data: availablePermissionsData,
-    isLoading: availablePermissionsLoading,
-  } = useQuery({
-    queryKey: ['available-interface-permissions'],
-    queryFn: async () => {
-      // 这里应该调用获取所有接口权限的API
-      // 暂时返回空数组，实际项目中需要实现
-      return [];
-    },
-    enabled: state.addMappingModalVisible,
-  });
-
-  // 添加映射的mutation
-  const addMappingMutation = useMutation({
-    mutationFn: async (permissionIds: string[]) => {
-      if (!button?.id) throw new Error('按钮ID不能为空');
-      return await permissionButtonService.assignButtonInterfaces(button.id, permissionIds);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['button-interface-permission', button?.id, state.pagination.current, state.pagination.pageSize],
-      });
-      updateState({ addMappingModalVisible: false, selectedPermissionIds: [] });
-    },
   });
 
   // 删除映射的mutation
@@ -141,14 +110,6 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
   }, [initialData]);
 
   // 初始化可用权限数据
-  useEffect(() => {
-    if (availablePermissionsData) {
-      setState((prev) => ({
-        ...prev,
-        availablePermissions: availablePermissionsData,
-      }));
-    }
-  }, [availablePermissionsData]);
 
   // 更新状态的辅助函数
   const updateState = useCallback((updates: Partial<ComponentState>) => {
@@ -181,20 +142,14 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
 
   // 处理取消添加映射
   const handleCancelAddMapping = useCallback(() => {
-    updateState({ addMappingModalVisible: false, selectedPermissionIds: [] });
+    updateState({ addMappingModalVisible: false });
   }, [updateState]);
 
   // 处理确认添加映射
   const handleConfirmAddMapping = useCallback(() => {
-    if (state.selectedPermissionIds.length === 0) {
-      modal.warning({
-        title: '请选择接口权限',
-        content: '请至少选择一个接口权限进行映射',
-      });
-      return;
-    }
-    addMappingMutation.mutate(state.selectedPermissionIds);
-  }, [state.selectedPermissionIds, addMappingMutation, modal]);
+    updateState({ addMappingModalVisible: false });
+    refetch();
+  }, [updateState, refetch]);
 
   // 处理删除映射
   const handleDeleteMapping = useCallback(
@@ -211,7 +166,6 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
     },
     [deleteMappingMutation, modal],
   );
-
 
   // 表格列定义
   const columns: TableProps<InterfacePermission>['columns'] = useMemo(
@@ -287,12 +241,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
       styles={{ body: { flex: 1 } }}
       extra={
         <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAddMapping}
-            disabled={!button?.id}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMapping} disabled={!button?.id}>
             添加映射
           </Button>
           <Button
@@ -334,48 +283,25 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
             <div className="flex flex-col items-center">
               <div className="text-xs text-gray-500 mb-2">
                 {!hasButtonData && <span className="text-gray-400">📋 请先选择按钮</span>}
-                {hasButtonData && !hasMappings && <span className="text-gray-400">📋 暂无接口权限映射，点击上方"添加映射"按钮进行映射</span>}
-                {hasButtonData && hasMappings && <span className="text-green-500">✅ 已映射 {state.permissionList.length} 个接口权限</span>}
+                {hasButtonData && !hasMappings && (
+                  <span className="text-gray-400">📋 暂无接口权限映射，点击上方"添加映射"按钮进行映射</span>
+                )}
+                {hasButtonData && hasMappings && (
+                  <span className="text-green-500">✅ 已映射 {state.permissionList.length} 个接口权限</span>
+                )}
               </div>
             </div>
           );
         }}
       />
-      
+
       {/* 添加映射Modal */}
-      <Modal
-        title="添加接口权限映射"
+      <InterfacePermissionMappingModal
         open={state.addMappingModalVisible}
+        button={button}
         onOk={handleConfirmAddMapping}
         onCancel={handleCancelAddMapping}
-        width={600}
-        confirmLoading={addMappingMutation.isPending}
-      >
-        <div className="space-y-4">
-          <div className="text-sm text-gray-600">
-            请选择要映射到按钮 "{button?.name}" 的接口权限：
-          </div>
-          <Select
-            mode="multiple"
-            placeholder="请选择接口权限"
-            value={state.selectedPermissionIds}
-            onChange={(value) => updateState({ selectedPermissionIds: value })}
-            style={{ width: '100%' }}
-            loading={availablePermissionsLoading}
-            options={state.availablePermissions.map(permission => ({
-              label: `${permission.name} (${permission.code})`,
-              value: permission.id,
-            }))}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-          />
-          <div className="text-xs text-gray-500">
-            提示：接口权限的编辑需要在专门的接口权限管理模块中进行
-          </div>
-        </div>
-      </Modal>
+      />
     </Card>
   );
 };

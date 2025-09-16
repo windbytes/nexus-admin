@@ -1,5 +1,6 @@
 import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
+import type { InterfacePermission } from '../../menu/menuApi';
 
 /**
  * 权限按钮相关接口枚举
@@ -21,6 +22,8 @@ const PermissionButtonApi = {
   toggleButtonStatus: '/system/permission/button/toggleStatus',
   // 获取按钮关联的接口权限
   getButtonInterfaces: '/system/permission/button/interfaces',
+  // 获取所有接口权限
+  getAllInterfaces: '/system/permission/interface/list',
   // 分配按钮接口权限
   assignButtonInterfaces: '/system/permission/button/assignInterfaces',
 };
@@ -142,6 +145,12 @@ export interface IPermissionButtonService {
   getButtonInterfaces(buttonId: string): Promise<ButtonInterfacePermission[]>;
 
   /**
+   * 获取所有接口权限
+   * @returns 接口权限列表
+   */
+  getAllInterfaces(): Promise<InterfacePermission[]>;
+
+  /**
    * 分配按钮接口权限
    * @param buttonId 按钮ID
    * @param interfaceIds 接口权限ID列表
@@ -234,10 +243,25 @@ export const permissionButtonService: IPermissionButtonService = {
    * 获取按钮关联的接口权限
    */
   async getButtonInterfaces(buttonId: string): Promise<ButtonInterfacePermission[]> {
-    return HttpRequest.get<ButtonInterfacePermission[]>({
-      url: PermissionButtonApi.getButtonInterfaces,
-      params: { buttonId },
-    }, { successMessageMode: 'none' });
+    return HttpRequest.get<ButtonInterfacePermission[]>(
+      {
+        url: PermissionButtonApi.getButtonInterfaces,
+        params: { buttonId },
+      },
+      { successMessageMode: 'none' },
+    );
+  },
+
+  /**
+   * 获取所有接口权限
+   */
+  async getAllInterfaces(): Promise<InterfacePermission[]> {
+    return HttpRequest.get<InterfacePermission[]>(
+      {
+        url: PermissionButtonApi.getAllInterfaces,
+      },
+      { successMessageMode: 'none' },
+    );
   },
 
   /**
