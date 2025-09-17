@@ -327,6 +327,140 @@ const mockButtonInterfaceData = [
   },
 ];
 
+// 模拟所有接口权限数据
+const mockInterfaceData = [
+  {
+    id: '1',
+    code: 'api_user_add',
+    name: '新增用户接口',
+    path: '/api/system/user/add',
+    method: 'POST',
+    menuId: '259950204508307456',
+    menuName: '用户管理',
+    description: '用于新增用户信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '2',
+    code: 'api_user_edit',
+    name: '编辑用户接口',
+    path: '/api/system/user/edit',
+    method: 'PUT',
+    menuId: '259950204508307456',
+    menuName: '用户管理',
+    description: '用于编辑用户信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '3',
+    code: 'api_user_delete',
+    name: '删除用户接口',
+    path: '/api/system/user/delete',
+    method: 'DELETE',
+    menuId: '259950204508307456',
+    menuName: '用户管理',
+    description: '用于删除用户信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '4',
+    code: 'api_user_view',
+    name: '查看用户接口',
+    path: '/api/system/user/view',
+    method: 'GET',
+    menuId: '259950204508307456',
+    menuName: '用户管理',
+    description: '用于查看用户信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '5',
+    code: 'api_user_list',
+    name: '用户列表接口',
+    path: '/api/system/user/list',
+    method: 'GET',
+    menuId: '259950204508307456',
+    menuName: '用户管理',
+    description: '用于获取用户列表的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '6',
+    code: 'api_role_add',
+    name: '新增角色接口',
+    path: '/api/system/role/add',
+    method: 'POST',
+    menuId: '259950204508307457',
+    menuName: '角色管理',
+    description: '用于新增角色信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '7',
+    code: 'api_role_edit',
+    name: '编辑角色接口',
+    path: '/api/system/role/edit',
+    method: 'PUT',
+    menuId: '259950204508307457',
+    menuName: '角色管理',
+    description: '用于编辑角色信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '8',
+    code: 'api_role_delete',
+    name: '删除角色接口',
+    path: '/api/system/role/delete',
+    method: 'DELETE',
+    menuId: '259950204508307457',
+    menuName: '角色管理',
+    description: '用于删除角色信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '9',
+    code: 'api_role_assign',
+    name: '分配角色权限接口',
+    path: '/api/system/role/assign',
+    method: 'POST',
+    menuId: '259950204508307457',
+    menuName: '角色管理',
+    description: '用于分配角色权限的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+  {
+    id: '10',
+    code: 'api_menu_add',
+    name: '新增菜单接口',
+    path: '/api/system/menu/add',
+    method: 'POST',
+    menuId: '259950204508307458',
+    menuName: '菜单管理',
+    description: '用于新增菜单信息的接口',
+    status: true,
+    createTime: '2024-01-01 10:00:00',
+    updateTime: '2024-01-01 10:00:00',
+  },
+];
+
 export default defineMock([
   // 获取权限按钮列表
   {
@@ -335,27 +469,27 @@ export default defineMock([
     enabled: true,
     body: (req) => {
       const { pageNumber = 1, pageSize = 10, name, code, menuId, status } = req.query;
-      
+
       let filteredData = [...mockButtonData];
-      
+
       // 根据查询条件过滤数据
       if (name) {
-        filteredData = filteredData.filter(item => item.name.includes(name));
+        filteredData = filteredData.filter((item) => item.name.includes(name));
       }
       if (code) {
-        filteredData = filteredData.filter(item => item.code.includes(code));
+        filteredData = filteredData.filter((item) => item.code.includes(code));
       }
       if (menuId) {
-        filteredData = filteredData.filter(item => item.menuId === menuId);
+        filteredData = filteredData.filter((item) => item.menuId === menuId);
       }
       if (status !== undefined) {
-        filteredData = filteredData.filter(item => item.status === (status === 'true'));
+        filteredData = filteredData.filter((item) => item.status === (status === 'true'));
       }
-      
+
       const startIndex = (pageNumber - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const records = filteredData.slice(startIndex, endIndex);
-      
+
       return {
         code: 200,
         message: '操作成功',
@@ -369,7 +503,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 获取权限按钮详情
   {
     url: '/api/system/permission/button/detail',
@@ -377,8 +511,8 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonId } = req.query;
-      const button = mockButtonData.find(item => item.id === buttonId);
-      
+      const button = mockButtonData.find((item) => item.id === buttonId);
+
       if (!button) {
         return {
           code: 404,
@@ -386,7 +520,7 @@ export default defineMock([
           data: null,
         };
       }
-      
+
       return {
         code: 200,
         message: '操作成功',
@@ -394,7 +528,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 新增权限按钮
   {
     url: '/api/system/permission/button/add',
@@ -409,9 +543,9 @@ export default defineMock([
         createBy: 'admin',
         updateBy: 'admin',
       };
-      
-      mockButtonData.push(newButton);
-      
+
+      mockButtonData.push(newButton as any);
+
       return {
         code: 200,
         message: '新增成功',
@@ -419,7 +553,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 编辑权限按钮
   {
     url: '/api/system/permission/button/update',
@@ -427,8 +561,8 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { id, ...updateData } = req.body;
-      const buttonIndex = mockButtonData.findIndex(item => item.id === id);
-      
+      const buttonIndex = mockButtonData.findIndex((item) => item.id === id);
+
       if (buttonIndex === -1) {
         return {
           code: 404,
@@ -436,14 +570,14 @@ export default defineMock([
           data: false,
         };
       }
-      
+
       mockButtonData[buttonIndex] = {
         ...mockButtonData[buttonIndex],
         ...updateData,
         updateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
         updateBy: 'admin',
       };
-      
+
       return {
         code: 200,
         message: '更新成功',
@@ -451,7 +585,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 删除权限按钮
   {
     url: '/api/system/permission/button/delete',
@@ -459,8 +593,8 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonId } = req.query;
-      const buttonIndex = mockButtonData.findIndex(item => item.id === buttonId);
-      
+      const buttonIndex = mockButtonData.findIndex((item) => item.id === buttonId);
+
       if (buttonIndex === -1) {
         return {
           code: 404,
@@ -468,9 +602,9 @@ export default defineMock([
           data: false,
         };
       }
-      
+
       mockButtonData.splice(buttonIndex, 1);
-      
+
       return {
         code: 200,
         message: '删除成功',
@@ -478,7 +612,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 批量删除权限按钮
   {
     url: '/api/system/permission/button/batchDelete',
@@ -486,14 +620,14 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonIds } = req.body;
-      
+
       buttonIds.forEach((id: string) => {
-        const buttonIndex = mockButtonData.findIndex(item => item.id === id);
+        const buttonIndex = mockButtonData.findIndex((item) => item.id === id);
         if (buttonIndex !== -1) {
           mockButtonData.splice(buttonIndex, 1);
         }
       });
-      
+
       return {
         code: 200,
         message: '批量删除成功',
@@ -501,7 +635,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 切换权限按钮状态
   {
     url: '/api/system/permission/button/toggleStatus',
@@ -509,8 +643,8 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonId, status } = req.body;
-      const buttonIndex = mockButtonData.findIndex(item => item.id === buttonId);
-      
+      const buttonIndex = mockButtonData.findIndex((item) => item.id === buttonId);
+
       if (buttonIndex === -1) {
         return {
           code: 404,
@@ -518,11 +652,11 @@ export default defineMock([
           data: false,
         };
       }
-      
+
       mockButtonData[buttonIndex].status = status;
       mockButtonData[buttonIndex].updateTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
       mockButtonData[buttonIndex].updateBy = 'admin';
-      
+
       return {
         code: 200,
         message: '状态切换成功',
@@ -530,7 +664,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 获取按钮关联的接口权限
   {
     url: '/api/system/permission/button/interfaces',
@@ -538,8 +672,8 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonId } = req.query;
-      const interfaces = mockButtonInterfaceData.filter(item => item.buttonId === buttonId);
-      
+      const interfaces = mockButtonInterfaceData.filter((item) => item.buttonId === buttonId);
+
       return {
         code: 200,
         message: '操作成功',
@@ -547,7 +681,21 @@ export default defineMock([
       };
     },
   },
-  
+
+  // 获取所有接口权限
+  {
+    url: '/api/system/permission/interface/list',
+    method: 'GET',
+    enabled: true,
+    body: (_req) => {
+      return {
+        code: 200,
+        message: '操作成功',
+        data: mockInterfaceData,
+      };
+    },
+  },
+
   // 分配按钮接口权限
   {
     url: '/api/system/permission/button/assignInterfaces',
@@ -555,17 +703,17 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { buttonId, interfaceIds } = req.body;
-      
+
       // 先删除该按钮的现有接口权限
       const existingIndexes = mockButtonInterfaceData
-        .map((item, index) => item.buttonId === buttonId ? index : -1)
-        .filter(index => index !== -1)
+        .map((item, index) => (item.buttonId === buttonId ? index : -1))
+        .filter((index) => index !== -1)
         .reverse(); // 从后往前删除，避免索引变化
-      
-      existingIndexes.forEach(index => {
+
+      existingIndexes.forEach((index) => {
         mockButtonInterfaceData.splice(index, 1);
       });
-      
+
       // 添加新的接口权限
       interfaceIds.forEach((interfaceId: string, index: number) => {
         mockButtonInterfaceData.push({
@@ -577,7 +725,7 @@ export default defineMock([
           createTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
         });
       });
-      
+
       return {
         code: 200,
         message: '分配成功',
