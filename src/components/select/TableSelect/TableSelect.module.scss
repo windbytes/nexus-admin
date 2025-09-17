@@ -38,6 +38,10 @@
   }
 }
 
+.selected {
+  background-color: var(--ant-table-row-selected-bg);
+}
+
 // 暗色主题适配
 [data-theme='dark'] {
   .tableSelect {

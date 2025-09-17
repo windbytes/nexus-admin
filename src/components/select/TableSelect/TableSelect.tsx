@@ -108,7 +108,8 @@ const TableSelect = <T extends Record<string, any> = any>({
     setState(prev => ({ 
       ...prev, 
       open: false,
-      searchValue: '', // 选择后清空搜索值
+      searchValue: '', // 选择后清空搜索值，让输入框显示选中项的值
+      selectedRowIndex: -1, // 重置选中行索引
     }));
     onSelect?.(record, [record], { type });
   }, [onChange, onSelect]);
@@ -177,9 +178,9 @@ const TableSelect = <T extends Record<string, any> = any>({
   // 处理输入框失焦
   const handleInputBlur = useCallback(() => {
     // 延迟关闭，以便点击表格行能正常选择
-    setTimeout(() => {
-      setState(prev => ({ ...prev, open: false }));
-    }, 100);
+    // setTimeout(() => {
+    //   setState(prev => ({ ...prev, open: false }));
+    // }, 100);
   }, []);
 
   // 处理输入框清空
@@ -210,6 +211,11 @@ const TableSelect = <T extends Record<string, any> = any>({
       if (state.rawData.length === 0) {
         loadData();
       }
+    }
+    
+    // 如果输入框为空，重置选中行索引
+    if (!inputValue) {
+      setState(prev => ({ ...prev, selectedRowIndex: -1 }));
     }
   }, [handleSearch, state.open, state.rawData.length, loadData, value, onChange]);
 
@@ -275,13 +281,30 @@ const TableSelect = <T extends Record<string, any> = any>({
             const rows = tableBody.querySelectorAll('tr');
             const selectedRow = rows[state.selectedRowIndex];
             if (selectedRow) {
-              selectedRow.scrollIntoView({ block: 'nearest' });
+              // 使用 block: 'center' 确保选中行在视口中央，并增加额外的滚动选项
+              selectedRow.scrollIntoView({ 
+                block: 'center',
+                inline: 'nearest',
+                behavior: 'smooth'
+              });
+              
+              // 如果滚动到最底部，确保完全可见
+              const tableContainer = dropdownRef.current?.querySelector('.ant-table-body');
+              if (tableContainer) {
+                const containerRect = tableContainer.getBoundingClientRect();
+                const rowRect = selectedRow.getBoundingClientRect();
+                
+                // 如果选中行在容器底部附近，额外滚动一点确保完全可见
+                if (rowRect.bottom > containerRect.bottom - 10) {
+                  tableContainer.scrollTop += 20;
+                }
+              }
             }
           }
         } catch (error) {
           console.warn('Failed to scroll to selected row:', error);
         }
-      }, 0);
+      }, 50); // 增加延迟时间确保表格渲染完成
 
       return () => clearTimeout(timer);
     }
