@@ -287,7 +287,7 @@ const TableSelect = <T extends Record<string, any> = any>({
       // 检查点击是否在组件内部
       if (
         dropdownRef.current?.contains(target) ||
-        inputRef.current?.contains(target)
+        inputRef.current?.nativeElement.contains(target)
       ) {
         return;
       }

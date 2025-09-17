@@ -44,6 +44,7 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
         title: '接口名称',
         dataIndex: 'name',
         searchable: true,
+        fixed: 'left',
         width: 150,
       },
       {
