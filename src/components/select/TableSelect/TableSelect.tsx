@@ -176,11 +176,19 @@ const TableSelect = <T extends Record<string, any> = any>({
   }, [state.open, state.rawData.length, loadData]);
 
   // 处理输入框失焦
-  const handleInputBlur = useCallback(() => {
-    // 延迟关闭，以便点击表格行能正常选择
-    // setTimeout(() => {
-    //   setState(prev => ({ ...prev, open: false }));
-    // }, 100);
+  const handleInputBlur = useCallback((e: React.FocusEvent) => {
+    // 延迟检查，确保能够捕获到相关元素的焦点
+    setTimeout(() => {
+      const relatedTarget = e.relatedTarget as Element | null;
+      
+      // 如果焦点转移到了组件内部的元素（下拉层、表格、翻页等），不关闭下拉层
+      if (relatedTarget && dropdownRef.current?.contains(relatedTarget)) {
+        return;
+      }
+      
+      // 如果焦点转移到了组件外部的元素，关闭下拉层
+      setState(prev => ({ ...prev, open: false }));
+    }, 100); // 适中的延迟时间
   }, []);
 
   // 处理输入框清空
@@ -268,6 +276,33 @@ const TableSelect = <T extends Record<string, any> = any>({
       isCurrentValue && styles.currentValue,
     );
   }, [state.selectedRowIndex, value, keyField]);
+
+  // 监听全局点击事件，处理点击外部关闭下拉层
+  useEffect(() => {
+    if (!state.open) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      
+      // 检查点击是否在组件内部
+      if (
+        dropdownRef.current?.contains(target) ||
+        inputRef.current?.contains(target)
+      ) {
+        return;
+      }
+      
+      // 点击在组件外部，关闭下拉层
+      setState(prev => ({ ...prev, open: false }));
+    };
+
+    // 添加事件监听器，使用 capture 阶段确保能够捕获到事件
+    document.addEventListener('mousedown', handleClickOutside, true);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+    };
+  }, [state.open]);
 
   // 键盘导航时滚动到选中行
   useEffect(() => {
