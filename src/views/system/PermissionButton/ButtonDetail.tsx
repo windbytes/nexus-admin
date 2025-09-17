@@ -99,10 +99,6 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
     console.log('复制按钮:', button?.id);
   }, [button?.id]);
 
-  if (editing && button) {
-    return <ButtonModal open={editing} button={button} onOk={handleSaveEdit} onCancel={handleCancelEdit} />;
-  }
-
   if (!button) {
     return (
       <Card className="min-h-1/3 max-h-1/2">
@@ -178,39 +174,43 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
   ];
 
   return (
-    <Card className="min-h-1/3 max-h-1/2 button-detail-card">
-      <Descriptions
-        column={2}
-        size="small"
-        bordered
-        items={items}
-        title="按钮详情"
-        extra={
-          <Space>
-            {canAdd && (
-              <Button type="primary" icon={<PlusOutlined />}>
-                新增子按钮
-              </Button>
-            )}
-            {canEdit && (
-              <Button color="orange" variant="outlined" icon={<EditOutlined />} onClick={handleEdit}>
-                编辑
-              </Button>
-            )}
-            {canCopy && (
-              <Button color="cyan" variant="outlined" icon={<CopyOutlined />} onClick={handleCopy}>
-                复制
-              </Button>
-            )}
-            {canDelete && (
-              <Button color="danger" variant="outlined" icon={<DeleteOutlined />} onClick={handleDelete}>
-                删除
-              </Button>
-            )}
-          </Space>
-        }
-      />
-    </Card>
+    <>
+      <Card className="min-h-1/3 max-h-1/2 button-detail-card">
+        <Descriptions
+          column={2}
+          size="small"
+          bordered
+          items={items}
+          title="按钮详情"
+          extra={
+            <Space>
+              {canAdd && (
+                <Button type="primary" icon={<PlusOutlined />}>
+                  新增子按钮
+                </Button>
+              )}
+              {canEdit && (
+                <Button color="orange" variant="outlined" icon={<EditOutlined />} onClick={handleEdit}>
+                  编辑
+                </Button>
+              )}
+              {canCopy && (
+                <Button color="cyan" variant="outlined" icon={<CopyOutlined />} onClick={handleCopy}>
+                  复制
+                </Button>
+              )}
+              {canDelete && (
+                <Button color="danger" variant="outlined" icon={<DeleteOutlined />} onClick={handleDelete}>
+                  删除
+                </Button>
+              )}
+            </Space>
+          }
+        />
+      </Card>
+      {/* 按钮编辑Modal */}
+      <ButtonModal open={editing} button={button} onOk={handleSaveEdit} onCancel={handleCancelEdit} />
+    </>
   );
 };
 

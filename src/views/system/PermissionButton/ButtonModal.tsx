@@ -58,7 +58,7 @@ const ButtonModal: React.FC<ButtonModalProps> = ({
     } else {
       form.resetFields();
     }
-  }, [button, form]);
+  }, [button, form, open]);
 
   /**
    * 处理表单提交
