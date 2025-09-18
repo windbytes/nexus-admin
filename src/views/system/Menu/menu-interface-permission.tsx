@@ -311,6 +311,9 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
       // 准备保存的数据
       const updatedItem = {
         ...state.permissionList.find((item) => item.id === id)!,
+        name: state.editForm.name,
+        path: state.editForm.path,
+        method: state.editForm.method,
         code: state.editForm.code,
         remark: state.editForm.remark,
         updateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -595,7 +598,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
     <Card
       className="flex-1 max-h-full flex flex-col"
       title="接口权限列表"
-      styles={{ body: { flex: 1 } }}
+      styles={{ body: { flex: 1, maxHeight:0 } }}
       extra={
         <Button
           color="default"
@@ -623,7 +626,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
           pageSizeOptions: ['10', '20', '50', '100'],
         }}
         onChange={handleTableChange}
-        scroll={{ x: 'max-content', y: '100%' }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 740px)' }}
         size="middle"
         bordered
         footer={() => {
