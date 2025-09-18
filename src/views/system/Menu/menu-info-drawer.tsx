@@ -110,6 +110,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
             const newItem: any = {
               ...item,
+              value: item.id,
               selectable:
                 menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(item.children) || item.children.length === 0,
               title: (

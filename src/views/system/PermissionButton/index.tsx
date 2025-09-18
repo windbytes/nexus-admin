@@ -4,8 +4,8 @@ import type React from 'react';
 import ButtonTree from './ButtonTree';
 import ButtonDetail from './ButtonDetail';
 import ButtonInterfacePermission from './ButtonInterfacePermission';
-import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import './permissionButton.scss';
+import type { MenuModel } from '@/services/system/menu/type';
 
 /**
  * 按钮列表主组件
@@ -13,13 +13,13 @@ import './permissionButton.scss';
  */
 const PermissionButton: React.FC = () => {
   const { token } = theme.useToken();
-  const [selectedButton, setSelectedButton] = useState<PermissionButtonModel | null>(null);
+  const [selectedButton, setSelectedButton] = useState<MenuModel | null>(null);
 
   /**
    * 处理按钮选择
    * @param button 选中的按钮
    */
-  const handleSelectButton = useCallback((button: PermissionButtonModel | null) => {
+  const handleSelectButton = useCallback((button: MenuModel | null) => {
     setSelectedButton(button);
   }, []);
 

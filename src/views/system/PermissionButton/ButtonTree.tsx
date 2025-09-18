@@ -1,18 +1,29 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tree, Input, Spin, Empty, Tag, Space, Button, Card, theme } from 'antd';
-import { SearchOutlined, ReloadOutlined, PlusOutlined, FolderOutlined, FileOutlined } from '@ant-design/icons';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Tree, Input, Spin, Empty, Tag, Space, Button, Card } from 'antd';
+import { SearchOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo, type ReactNode } from 'react';
 import type React from 'react';
-import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { usePermission } from '@/hooks/usePermission';
+import { useTranslation } from 'react-i18next';
+import { addIcon } from '@/utils/optimized-icons';
 import ButtonModal from './ButtonModal';
+import type { MenuModel } from '@/services/system/menu/type';
+
+// 菜单类型枚举
+const MenuType = {
+  TOP_LEVEL: 0,
+  SUB_MENU: 1,
+  SUB_ROUTE: 2,
+  PERMISSION_BUTTON: 3,
+} as const;
+type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 /**
  * 按钮树组件Props
  */
 interface ButtonTreeProps {
-  onSelectButton: (button: PermissionButtonModel | null) => void;
+  onSelectButton: (button: MenuModel | null) => void;
   selectedButtonId?: string;
   loading?: boolean;
 }
@@ -26,7 +37,7 @@ interface TreeNode {
   icon?: ReactNode | ((props: any) => ReactNode);
   children?: TreeNode[];
   isLeaf?: boolean;
-  data: PermissionButtonModel | null;
+  data: MenuModel | null;
 }
 
 /**
@@ -34,34 +45,70 @@ interface TreeNode {
  * 以树形结构展示权限按钮，按菜单分组
  */
 const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonId }) => {
-  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [formVisible, setFormVisible] = useState(false);
-  const [editingButton, setEditingButton] = useState<PermissionButtonModel | null>(null);
-  const { token } = theme.useToken();
+  const [editingButton, setEditingButton] = useState<MenuModel | null>(null);
+  const { t } = useTranslation();
 
   // 权限检查
   const canAdd = usePermission(['system:permission:button:add']);
-  const canEdit = usePermission(['system:permission:button:edit']);
-  const canDelete = usePermission(['system:permission:button:delete']);
 
   /**
-   * 查询权限按钮列表
+   * 查询菜单目录数据
    */
-  const {
-    data: buttonListResponse,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['permission-buttons', searchText],
-    queryFn: () =>
-      permissionButtonService.getButtonList({
-        name: searchText || undefined,
-        pageNum: 1,
-        pageSize: 1000, // 获取所有数据用于树形展示
-      }),
+  const { data: allDirectoryData, isLoading: menuLoading, refetch } = useQuery({
+    queryKey: ['sys_menu_directory'],
+    queryFn: async () => {
+      return await permissionButtonService.getButtonList({ pageNum: 1, pageSize: 1000, name: searchText });
+    },
   });
+
+  /**
+   * 处理刷新
+   */
+  const handleRefresh = useCallback(() => {
+    // 刷新菜单数据
+    refetch();
+  }, [refetch]);
+
+  /**
+   * 递归处理目录数据，将菜单数据转换为树形结构
+   */
+  const translateDirectory = useCallback(
+    (data: MenuModel[]): TreeNode[] => {
+      const loop = (items: any[]): TreeNode[] =>
+        items.map((item) => {
+          const iconNode = item.icon ? addIcon(item.icon) : null;
+          const newItem: TreeNode = {
+            ...item,
+            key: item.id,
+            title: (
+              <Space>
+                {iconNode}
+                {t(item.title || item.name)}
+                {item.menuType === MenuType.PERMISSION_BUTTON && (
+                  <Tag color="blue">
+                    按钮
+                  </Tag>
+                )}
+              </Space>
+            ),
+            data: item.menuType === MenuType.PERMISSION_BUTTON ? item : null,
+            isLeaf: item.menuType === MenuType.PERMISSION_BUTTON,
+          };
+
+          if (Array.isArray(item.children) && item.children.length > 0) {
+            newItem.children = loop(item.children);
+          }
+
+          return newItem;
+        });
+
+      return loop(data);
+    },
+    [t],
+  );
 
   /**
    * 处理搜索
@@ -70,13 +117,6 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   const handleSearch = useCallback((value: string) => {
     setSearchText(value);
   }, []);
-
-  /**
-   * 处理刷新
-   */
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
 
   // 保存按钮的mutation
   const saveButtonMutation = useMutation({
@@ -88,10 +128,10 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
       setFormVisible(false);
       setEditingButton(null);
-      refetch();
+      // 刷新页面以重新加载数据
+      window.location.reload();
     },
   });
 
@@ -103,11 +143,11 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   const handleSelect = useCallback(
     (_selectedKeys: React.Key[], info: any) => {
       const { node } = info;
-      if (node?.data && node.data.menuType === 3) {
-        // 如果选中的是按钮节点
+      if (node?.data && node.data.menuType === MenuType.PERMISSION_BUTTON) {
+        // 如果选中的是按钮节点，调用onSelectButton
         onSelectButton(node.data);
       } else {
-        // 如果选中的是菜单节点，清空选择
+        // 如果选中的是其他类型节点，清空选择
         onSelectButton(null);
       }
     },
@@ -152,49 +192,11 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
    * 构建树形数据
    */
   const treeData = useMemo(() => {
-    if (!buttonListResponse?.records) return [];
+    if (!allDirectoryData) return [];
 
-    // 按菜单分组
-    const menuGroups = buttonListResponse.records.reduce(
-      (acc, button: PermissionButtonModel) => {
-        const menuId = button.parentMenuId || 'root';
-        if (!acc[menuId]) {
-          acc[menuId] = {
-            menuId,
-            menuName: button.parentMenuName || '根菜单',
-            buttons: [],
-          };
-        }
-        acc[menuId].buttons.push(button);
-        return acc;
-      },
-      {} as Record<string, { menuId: string; menuName: string; buttons: PermissionButtonModel[] }>,
-    );
-
-    // 转换为树形结构
-    const nodes: TreeNode[] = Object.values(menuGroups).map((group) => ({
-      key: group.menuId,
-      icon: <FolderOutlined />,
-      title: (
-        <>
-          <span className="font-medium">{group.menuName}</span>
-          <Tag className='ml-4!' color={token.colorPrimary}>
-            {group.buttons.length}
-          </Tag>
-        </>
-      ),
-      data: null,
-      children: group.buttons.map((button: PermissionButtonModel) => ({
-        key: button.id,
-        icon: <FileOutlined />,
-        title: <span className={`text-sm ${!button.status ? 'line-through text-gray-400' : ''}`}>{button.name}</span>,
-        data: button,
-        isLeaf: true,
-      })),
-    }));
-
-    return nodes;
-  }, [buttonListResponse?.records, canEdit, canDelete]);
+    // 直接使用菜单数据构建树形结构，后端返回的数据已经是树形结构
+    return translateDirectory(allDirectoryData);
+  }, [allDirectoryData, translateDirectory]);
 
   /**
    * 渲染树节点标题
@@ -204,7 +206,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     return nodeData.title;
   }, []);
 
-  if (isLoading) {
+  if (menuLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Spin size="large" />
@@ -219,7 +221,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
       styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 } }}
       extra={
         <Space>
-          <Button type="default" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading} size="small">
+          <Button type="default" icon={<ReloadOutlined />} onClick={handleRefresh} loading={menuLoading} size="small">
             刷新
           </Button>
           {canAdd && (
@@ -248,11 +250,9 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
             onSelect={handleSelect}
             onExpand={handleExpand}
             defaultExpandAll
+            blockNode
             expandedKeys={expandedKeys}
             selectedKeys={selectedButtonId ? [selectedButtonId] : []}
-            showLine
-            showIcon
-            blockNode
             titleRender={renderTreeNode}
             className="permission-button-tree"
           />

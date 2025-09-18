@@ -1,13 +1,14 @@
-import type { PageQueryParams, PageResult } from '@/types/global';
+import type { PageQueryParams } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 import type { InterfacePermission } from '../../menu/menuApi';
+import type { MenuModel } from '../../menu/type';
 
 /**
  * 权限按钮相关接口枚举
  */
 const PermissionButtonApi = {
   // 获取权限按钮列表
-  getButtonList: '/system/permission/button/list',
+  getButtonList: '/system/permission/button/getButtonList',
   // 获取权限按钮详情
   getButtonDetail: '/system/permission/button/detail',
   // 新增权限按钮
@@ -23,30 +24,10 @@ const PermissionButtonApi = {
   // 获取按钮关联的接口权限
   getButtonInterfaces: '/system/permission/button/interfaces',
   // 获取所有接口权限
-  getAllInterfaces: '/system/permission/interface/list',
+  getNotAssignedInterfaces: '/system/permission/button/getNotAssignedInterfaces',
   // 分配按钮接口权限
   assignButtonInterfaces: '/system/permission/button/assignInterfaces',
 };
-
-/**
- * 权限按钮数据类型
- */
-export interface PermissionButtonModel {
-  id: string;
-  name: string;
-  code: string;
-  menuId: string;
-  menuName: string;
-  parentMenuId: string;
-  parentMenuName: string;
-  description?: string;
-  status: boolean;
-  sortNo: number;
-  createTime: string;
-  updateTime: string;
-  createBy: string;
-  updateBy: string;
-}
 
 /**
  * 权限按钮查询参数
@@ -64,8 +45,8 @@ export interface ButtonSearchParams extends PageQueryParams {
 export interface ButtonFormData {
   id?: string;
   name: string;
-  code: string;
-  menuId: string;
+  perms: string;
+  parentId: string;
   description?: string;
   status?: boolean;
   sortNo?: number;
@@ -92,14 +73,14 @@ export interface IPermissionButtonService {
    * @param params 查询参数
    * @returns 按钮列表
    */
-  getButtonList(params: ButtonSearchParams): Promise<PageResult<PermissionButtonModel>>;
+  getButtonList(params: ButtonSearchParams): Promise<MenuModel[]>;
 
   /**
    * 获取权限按钮详情
    * @param buttonId 按钮ID
    * @returns 按钮详情
    */
-  getButtonDetail(buttonId: string): Promise<PermissionButtonModel>;
+  getButtonDetail(buttonId: string): Promise<MenuModel>;
 
   /**
    * 新增权限按钮
@@ -146,9 +127,10 @@ export interface IPermissionButtonService {
 
   /**
    * 获取所有接口权限
+   * @param buttonId 按钮ID
    * @returns 接口权限列表
    */
-  getAllInterfaces(): Promise<InterfacePermission[]>;
+  getAllInterfaces(buttonId: string): Promise<InterfacePermission[]>;
 
   /**
    * 分配按钮接口权限
@@ -166,8 +148,8 @@ export const permissionButtonService: IPermissionButtonService = {
   /**
    * 获取权限按钮列表
    */
-  async getButtonList(params: ButtonSearchParams): Promise<PageResult<PermissionButtonModel>> {
-    return HttpRequest.get<PageResult<PermissionButtonModel>>(
+  async getButtonList(params: ButtonSearchParams): Promise<MenuModel[]> {
+    return HttpRequest.get<MenuModel[]>(
       {
         url: PermissionButtonApi.getButtonList,
         params,
@@ -179,8 +161,8 @@ export const permissionButtonService: IPermissionButtonService = {
   /**
    * 获取权限按钮详情
    */
-  async getButtonDetail(buttonId: string): Promise<PermissionButtonModel> {
-    return HttpRequest.get<PermissionButtonModel>(
+  async getButtonDetail(buttonId: string): Promise<MenuModel> {
+    return HttpRequest.get<MenuModel>(
       {
         url: PermissionButtonApi.getButtonDetail,
         params: { buttonId },
@@ -255,10 +237,11 @@ export const permissionButtonService: IPermissionButtonService = {
   /**
    * 获取所有接口权限
    */
-  async getAllInterfaces(): Promise<InterfacePermission[]> {
+  async getAllInterfaces(buttonId: string): Promise<InterfacePermission[]> {
     return HttpRequest.get<InterfacePermission[]>(
       {
-        url: PermissionButtonApi.getAllInterfaces,
+        url: PermissionButtonApi.getNotAssignedInterfaces,
+        params: { buttonId },
       },
       { successMessageMode: 'none' },
     );

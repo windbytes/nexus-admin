@@ -1,15 +1,27 @@
-import { useCallback, useEffect } from 'react';
-import { Button, Modal, Form, Input, Select, Switch, InputNumber } from 'antd';
-import type { PermissionButtonModel, ButtonFormData } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Button, Modal, Form, Input, TreeSelect, Switch, InputNumber, Space } from 'antd';
+import type { ButtonFormData } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { menuService } from '@/services/system/menu/menuApi';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { addIcon } from '@/utils/optimized-icons';
+import type { MenuModel } from '@/services/system/menu/type';
+
+// 菜单类型枚举
+const MenuType = {
+  TOP_LEVEL: 0,
+  SUB_MENU: 1,
+  SUB_ROUTE: 2,
+  PERMISSION_BUTTON: 3,
+} as const;
+type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 /**
  * 按钮Modal组件Props
  */
 interface ButtonModalProps {
   open: boolean;
-  button?: PermissionButtonModel | null;
+  button?: MenuModel | null;
   onOk: (formData: ButtonFormData) => void;
   onCancel: () => void;
   loading?: boolean;
@@ -19,27 +31,58 @@ interface ButtonModalProps {
  * 按钮Modal组件
  * 合并了DragModal和ButtonForm的功能
  */
-const ButtonModal: React.FC<ButtonModalProps> = ({ 
-  open, 
-  button, 
-  onOk, 
-  onCancel, 
-  loading = false 
-}) => {
+const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel, loading = false }) => {
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   /**
-   * 查询菜单选项
+   * 递归处理目录数据，只允许选择子菜单和子路由类型的节点
    */
-  const { data: menuList } = useMutation({
-    mutationFn: () => menuService.getAllMenus({}),
-    onSuccess: (menus: any[]) => {
-      return menus.map((menu: any) => ({
-        label: menu.name,
-        value: menu.id,
-      }));
+  const translateDirectory = useCallback(
+    (data: any[]): any[] => {
+      const loop = (items: any[]): any[] =>
+        items.map((item) => {
+          const iconNode = item.icon ? addIcon(item.icon) : null;
+
+          const newItem: any = {
+            ...item,
+            value: item.id,
+            selectable: item.menuType === MenuType.SUB_MENU || item.menuType === MenuType.SUB_ROUTE, // 子菜单和子路由都可以选择
+            title: (
+              <Space>
+                {iconNode}
+                {t(item.title || item.name)}
+              </Space>
+            ),
+          };
+
+          if (Array.isArray(item.children) && item.children.length > 0) {
+            newItem.children = loop(item.children);
+          }
+
+          return newItem;
+        });
+
+      return loop(data);
     },
+    [t],
+  );
+
+  /**
+   * 查询目录数据
+   */
+  const { data: allDirectoryData, isLoading } = useQuery({
+    queryKey: ['sys_menu_directory'],
+    queryFn: async () => {
+      return await menuService.getDirectory();
+    },
+    enabled: open,
   });
+
+  // 根据菜单类型进行过滤并国际化
+  const directoryData = useMemo(() => {
+    return translateDirectory(allDirectoryData || []);
+  }, [allDirectoryData, translateDirectory]);
 
   /**
    * 初始化表单数据
@@ -49,8 +92,8 @@ const ButtonModal: React.FC<ButtonModalProps> = ({
     if (button) {
       form.setFieldsValue({
         name: button.name,
-        code: button.code,
-        menuId: button.menuId,
+        perms: button.perms,
+        parentId: button.parentId,
         description: button.description,
         status: button.status,
         sortNo: button.sortNo,
@@ -76,38 +119,23 @@ const ButtonModal: React.FC<ButtonModalProps> = ({
     }
   }, [form, onOk]);
 
-  /**
-   * 处理确定按钮点击
-   */
-  const handleOk = useCallback(() => {
-    handleFormSubmit();
-  }, [handleFormSubmit]);
-
   return (
     <Modal
       title={button ? '编辑按钮' : '新增按钮'}
       open={open}
-      onOk={handleOk}
-      onCancel={onCancel}
       width={600}
       confirmLoading={loading}
       footer={
         <div className="flex justify-end space-x-2">
           <Button onClick={onCancel}>取消</Button>
-          <Button type="primary" onClick={handleOk} loading={loading}>
+          <Button type="primary" onClick={handleFormSubmit} loading={loading}>
             {button ? '更新' : '保存'}
           </Button>
         </div>
       }
     >
       <div className="h-full">
-        <Form
-          form={form}
-          layout="horizontal"
-          onFinish={handleFormSubmit}
-          labelCol={{ span: 4 }}
-          className="h-full flex flex-col"
-        >
+        <Form form={form} layout="horizontal" labelCol={{ span: 4 }} className="h-full flex flex-col">
           <div className="flex-1 overflow-auto p-4">
             <Form.Item
               name="name"
@@ -121,7 +149,7 @@ const ButtonModal: React.FC<ButtonModalProps> = ({
             </Form.Item>
 
             <Form.Item
-              name="code"
+              name="perms"
               label="权限标识"
               rules={[
                 { required: true, message: '请输入权限标识' },
@@ -131,12 +159,15 @@ const ButtonModal: React.FC<ButtonModalProps> = ({
               <Input placeholder="请输入权限标识，如：user:add" />
             </Form.Item>
 
-            <Form.Item name="menuId" label="所属菜单" rules={[{ required: true, message: '请选择所属菜单' }]}>
-              <Select
-                placeholder="请选择所属菜单"
-                options={menuList}
+            <Form.Item name="parentId" label="所属菜单" rules={[{ required: true, message: '请选择所属菜单' }]}>
+              <TreeSelect
                 showSearch
-                filterOption={(input, option: any) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                loading={isLoading}
+                style={{ width: '100%' }}
+                styles={{ popup: { root: { maxHeight: 400, overflow: 'auto' } } }}
+                placeholder="请选择所属菜单"
+                treeData={directoryData}
+                treeNodeFilterProp="title"
               />
             </Form.Item>
 

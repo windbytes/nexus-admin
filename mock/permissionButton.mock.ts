@@ -464,9 +464,9 @@ const mockInterfaceData = [
 export default defineMock([
   // 获取权限按钮列表
   {
-    url: '/api/system/permission/button/list',
+    url: '/api/system/permission/button/getButtonList',
     method: 'GET',
-    enabled: true,
+    enabled: false,
     body: (req) => {
       const { pageNumber = 1, pageSize = 10, name, code, menuId, status } = req.query;
 
@@ -684,9 +684,9 @@ export default defineMock([
 
   // 获取所有接口权限
   {
-    url: '/api/system/permission/interface/list',
+    url: '/api/system/permission/button/getNotAssignedInterfaces',
     method: 'GET',
-    enabled: true,
+    enabled: false,
     body: (_req) => {
       return {
         code: 200,

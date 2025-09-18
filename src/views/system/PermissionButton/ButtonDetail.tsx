@@ -2,20 +2,18 @@ import { Card, Descriptions, Tag, Space, Button, Switch, Popconfirm } from 'antd
 import { EditOutlined, DeleteOutlined, CopyOutlined, PlusOutlined } from '@ant-design/icons';
 import { useState, useCallback } from 'react';
 import type React from 'react';
-import {
-  permissionButtonService,
-  type PermissionButtonModel,
-} from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { usePermission } from '@/hooks/usePermission';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import ButtonModal from './ButtonModal';
+import type { MenuModel } from '@/services/system/menu/type';
 
 /**
  * 按钮详情组件Props
  */
 interface ButtonDetailProps {
-  button: PermissionButtonModel | null;
+  button: MenuModel | null;
 }
 
 /**
@@ -140,12 +138,12 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
     {
       key: '4',
       label: '权限标识',
-      children: <Tag color="blue">{button.code}</Tag>,
+      children: <Tag color="blue">{button.perms}</Tag>,
     },
     {
       key: '5',
       label: '所属菜单',
-      children: button.parentMenuName,
+      children: button.parentId,
     },
     {
       key: '6',

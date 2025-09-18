@@ -37,7 +37,7 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
   const fetchInterfaceData = async (
     _id: string,
   ): Promise<{ columns: TableColumnConfig<InterfacePermission>[]; data: InterfacePermission[] }> => {
-    const data = await permissionButtonService.getAllInterfaces();
+    const data = await permissionButtonService.getAllInterfaces(button?.id || '');
 
     const columns: TableColumnConfig<InterfacePermission>[] = [
       {
