@@ -1,0 +1,84 @@
+.tableSelect {
+  position: relative;
+  
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    margin-top: 4px;
+    padding: 6px;
+    border: 1px solid var(--ant-color-border);
+    border-radius: var(--ant-border-radius-lg);
+    background: var(--ant-color-bg-container);
+    box-shadow: var(--ant-box-shadow);
+    
+    .tableSection {
+      flex: 1;
+      overflow: hidden;
+      
+      .loadingContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 128px;
+      }
+      
+    }
+  }
+  
+  .suffixIcon {
+    color: var(--antd-color-text-tertiary);
+    transition: transform 0.2s ease;
+    
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.selected {
+  background-color: var(--ant-table-row-selected-bg);
+}
+
+// 暗色主题适配
+[data-theme='dark'] {
+  .tableSelect {
+    .dropdown {
+      background: var(--antd-color-bg-container);
+      border-color: var(--antd-color-border);
+      
+      .searchSection {
+        border-bottom-color: var(--antd-color-border-secondary);
+      }
+      
+      .tableSection {
+        .table {
+          :global(.ant-table-thead > tr > th) {
+            background: var(--antd-color-bg-container);
+            border-bottom-color: var(--antd-color-border-secondary);
+            color: var(--antd-color-text);
+          }
+          
+          :global(.ant-table-tbody > tr > td) {
+            border-bottom-color: var(--antd-color-border-secondary);
+            color: var(--antd-color-text);
+          }
+        }
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .tableSelect {
+    .dropdown {
+      width: 100vw;
+      max-width: calc(100vw - 32px);
+      left: -16px;
+      right: -16px;
+    }
+  }
+}

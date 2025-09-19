@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify-icon/react';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
-import { getIcon, getOpenKeys, searchRoute } from '@/utils/utils';
+import { getIcon } from '@/utils/optimized-icons';
+import { getOpenKeys, searchRoute } from '@/utils/utils';
 import type { RouteItem } from '@/types/route';
 import { useShallow } from 'zustand/shallow';
 import { useTabStore } from '@/stores/tabStore';
@@ -80,7 +81,7 @@ const MenuComponent = () => {
   };
 
   useEffect(() => {
-    const openKey = getOpenKeys(pathname);
+    const openKey = getOpenKeys(pathname, menus);
     const route = searchRoute(pathname, menus);
     if (route && Object.keys(route).length) {
       if (dynamicTitle) {
@@ -107,8 +108,8 @@ const MenuComponent = () => {
   // 使用useMemo优化openKeys的计算
   const currentOpenKeys = useMemo(() => {
     const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
-    return getOpenKeys(targetPath);
-  }, [activeKey, pathname]);
+    return getOpenKeys(targetPath, menus);
+  }, [activeKey, pathname, menus]);
 
   const onOpenChange = (openKeys: string[]) => {
     if (!accordion) return setOpenKeys(openKeys);

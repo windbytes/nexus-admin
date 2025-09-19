@@ -38,6 +38,10 @@ const translation = {
     statusCode: '状态码',
     reason: '原因',
     requestTimeout: '请求超时，请稍后重试',
+    notFound: '请求的资源不存在',
+    forbidden: '没有权限访问该资源',
+    clientError: '客户端请求错误',
+    serverError: '服务器错误',
   },
   placeholder: '请输入搜索内容',
   // 标签相关

@@ -1,13 +1,46 @@
+import { useState, useCallback } from 'react';
+import { Layout, theme } from 'antd';
+import type React from 'react';
+import ButtonTree from './ButtonTree';
+import ButtonDetail from './ButtonDetail';
+import ButtonInterfacePermission from './ButtonInterfacePermission';
+import './permissionButton.scss';
+import type { MenuModel } from '@/services/system/menu/type';
+
+/**
+ * 按钮列表主组件
+ * 提供权限按钮的树形展示和详情查看功能
+ */
 const PermissionButton: React.FC = () => {
+  const { token } = theme.useToken();
+  const [selectedButton, setSelectedButton] = useState<MenuModel | null>(null);
+
+  /**
+   * 处理按钮选择
+   * @param button 选中的按钮
+   */
+  const handleSelectButton = useCallback((button: MenuModel | null) => {
+    setSelectedButton(button);
+  }, []);
+
   return (
-    <>
-      <div>权限按钮维护模块</div>
-      <pre>
-        按钮权限列表 按钮权限展示（按钮名称、所属页面、权限标识） 按模块/页面分组展示 按钮权限搜索和筛选 按钮状态管理
-        按钮权限配置 新增按钮权限（按钮信息、权限标识） 编辑按钮权限 删除按钮权限 按钮权限与菜单关联 按钮权限分配
-        角色按钮权限分配 按钮权限批量操作 按钮权限预览功能
-      </pre>
-    </>
+    <Layout>
+      <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
+        {/* 左侧按钮树 */}
+        <ButtonTree
+          onSelectButton={handleSelectButton}
+          selectedButtonId={selectedButton?.id}
+        />
+      </Layout.Sider>
+      <Layout.Content className="flex flex-col ml-4 gap-4">
+        {/* 按钮详情 */}
+        <ButtonDetail 
+          button={selectedButton} 
+        />
+        {/* 按钮接口权限列表 */}
+        <ButtonInterfacePermission button={selectedButton} />
+      </Layout.Content>
+    </Layout>
   );
 };
 

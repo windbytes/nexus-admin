@@ -8,7 +8,7 @@ import {
   queryEndpointConfigType,
   updateEndpointType,
 } from '@/services/integrated/endpointType/endpointTypeApi';
-import { addIcon } from '@/utils/utils';
+import { addIcon } from '@/utils/optimized-icons';
 import EndpointTypeModal from './EndpointTypeModal';
 import {
   DeleteOutlined,

@@ -1,5 +1,5 @@
 import { Badge, theme } from 'antd';
-import { getIcon } from '@/utils/utils';
+import { getIcon } from '@/utils/optimized-icons';
 import HighlightText from './HighlightText';
 import type { SearchResultItem } from '../types';
 

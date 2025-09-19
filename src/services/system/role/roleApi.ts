@@ -1,5 +1,6 @@
 import { HttpRequest } from '@/utils/request';
 import type { RoleMenu, RoleModel, RoleSearchParams, UserSearchParams } from './type';
+import type { PageResult } from '@/types/global';
 
 /**
  * 枚举角色相关的api
@@ -8,7 +9,7 @@ const RoleApi = {
   /**
    * 获取角色列表（分页查询）
    */
-  getRoleList: '/system/role/getRoleList',
+  getRoleListPage: '/system/role/getRoleListPage',
   /**
    * 获取角色详情
    */
@@ -73,11 +74,15 @@ const RoleApi = {
  */
 export interface IRoleService {
   /**
+   * 获取不在该角色下的所有可用用户
+   */
+  getRoleDetail(roleId: string): Promise<RoleModel>;
+  /**
    * 获取角色列表（包含分页数据）
    * @param params 角色参数(包含分页信息)
    * @returns 角色列表
    */
-  getRoleList(params: RoleSearchParams): Promise<Record<string, any>>;
+  getRoleListPage(params: RoleSearchParams): Promise<PageResult<RoleModel>>;
 
   /**
    * 新增角色
@@ -167,14 +172,31 @@ export interface IRoleService {
  */
 export const roleService: IRoleService = {
   /**
+   * 获取角色详情
+   * @param roleId 角色ID
+   * @returns 角色详情
+   */
+  async getRoleDetail(roleId: string): Promise<RoleModel> {
+    return await HttpRequest.get(
+      {
+        url: RoleApi.getRoleDetail,
+        params: { roleId },
+        adapter: 'fetch',
+      },
+      {
+        successMessageMode: 'none',
+      },
+    );
+  },
+  /**
    * 获取角色列表（包含分页数据）
    * @param params 角色参数(包含分页信息)
    * @returns 角色列表
    */
-  async getRoleList(params: RoleSearchParams): Promise<Record<string, any>> {
-    return await HttpRequest.post(
+  async getRoleListPage(params: RoleSearchParams): Promise<PageResult<RoleModel>> {
+    return await HttpRequest.post<PageResult<RoleModel>>(
       {
-        url: RoleApi.getRoleList,
+        url: RoleApi.getRoleListPage,
         data: params,
       },
       {

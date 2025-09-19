@@ -39,6 +39,11 @@
         margin-bottom: -1px;
         z-index: 1;
       }
+      
+      .tab-label {
+        cursor: pointer;
+        user-select: none;
+      }
     }
     
     .ant-tabs-tab-remove {

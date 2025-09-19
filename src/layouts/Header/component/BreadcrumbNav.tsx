@@ -3,7 +3,7 @@ import { memo, useEffect, useState } from "react";
 import { Breadcrumb } from "antd";
 import { Link, useLocation } from "react-router";
 import type { RouteItem } from "@/types/route";
-import { getIcon } from "@/utils/utils";
+import { getIcon } from "@/utils/optimized-icons";
 import { useMenuStore, usePreferencesStore } from "@/stores/store";
 import { t } from "i18next";
 import { useTranslation } from "react-i18next";

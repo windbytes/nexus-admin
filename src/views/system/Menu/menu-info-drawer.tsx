@@ -23,9 +23,9 @@ import {
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import IconPanel from '@/components/IconPanel';
+import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
 import { menuService } from '@/services/system/menu/menuApi';
-import { addIcon } from '@/utils/utils';
+import { addIcon } from '@/utils/optimized-icons';
 
 // 菜单类型枚举
 const MenuType = {
@@ -110,6 +110,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
             const newItem: any = {
               ...item,
+              value: item.id,
               selectable:
                 menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(item.children) || item.children.length === 0,
               title: (
@@ -159,6 +160,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         ...values,
         status: Boolean(values.status),
         icon: values.originalIcon,
+        routeQuery: values.routeQuery ? values.routeQuery : {},
       };
       onOk(formData);
     } catch (errorInfo: any) {
@@ -242,7 +244,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           <Radio.Group buttonStyle="solid" onChange={(e) => handleMenuTypeChange(e.target.value)}>
             <Radio.Button value={MenuType.SUB_MENU}>子菜单</Radio.Button>
             <Radio.Button value={MenuType.SUB_ROUTE}>子路由</Radio.Button>
-            <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button>
+            {/* <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button> */}
             <Radio.Button value={MenuType.TOP_LEVEL}>目录</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -259,7 +261,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           </Form.Item>
         )}
         {menuType !== MenuType.TOP_LEVEL && (
-          <Form.Item name="parentId" label="上级菜单">
+          <Form.Item name="parentId" label="上级菜单" rules={[{ required: true, message: '请选择上级菜单!' }]}>
             <TreeSelect
               showSearch
               loading={isLoading}
@@ -322,7 +324,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
                   <Dropdown
                     trigger={['click']}
                     placement="bottom"
-                    popupRender={() => <IconPanel onSelect={handleIconSelect} />}
+                    popupRender={() => <OptimizedIconPanel onSelect={handleIconSelect} />}
                     overlayClassName="w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl"
                   >
                     <SettingOutlined className="cursor-pointer" />

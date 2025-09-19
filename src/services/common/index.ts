@@ -1,4 +1,5 @@
 import { HttpRequest } from '@/utils/request';
+import type { MenuModel } from '../system/menu/type';
 
 /**
  * 菜单相关接口枚举
@@ -26,7 +27,7 @@ interface ICommonService {
    * @param roleId 角色ID
    * @returns 菜单列表
    */
-  getMenuListByRoleId(roleId: string, token?: string): Promise<any[]>;
+  getMenuListByRoleId(roleId: string, token?: string): Promise<MenuModel[]>;
 
   /**
    * 用户退出登录
@@ -50,11 +51,12 @@ export const commonService: ICommonService = {
    * @param roleId 角色ID
    * @returns 菜单列表
    */
-  getMenuListByRoleId(roleId: string, token?: string): Promise<any[]> {
+  getMenuListByRoleId(roleId: string, token?: string): Promise<MenuModel[]> {
     return HttpRequest.get(
       {
         url: CommonApi.getMenuListByRoleId,
         params: { roleId },
+        adapter: 'fetch',
       },
       { successMessageMode: 'none', token },
     );

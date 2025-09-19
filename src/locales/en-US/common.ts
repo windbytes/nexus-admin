@@ -38,6 +38,10 @@ const translation = {
     statusCode: 'status code',
     reason: 'reason',
     requestTimeout: 'request timeout, please try again later',
+    notFound: 'The requested resource does not exist',
+    forbidden: 'You do not have permission to access this resource',
+    clientError: 'Client request error',
+    serverError: 'Server error',
   },
   placeholder: 'please input content to search',
   // 标签相关

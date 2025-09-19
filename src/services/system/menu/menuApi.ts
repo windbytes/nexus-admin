@@ -5,6 +5,9 @@ import type { MenuDirectoryItem, MenuModel } from './type';
 export interface InterfacePermission {
   id: string;
   code: string;
+  name: string;
+  path: string;
+  method: string;
   remark: string;
   createTime: string;
   updateTime: string;
@@ -15,6 +18,9 @@ export interface CreateInterfacePermissionRequest {
   menuId: string;
   code: string;
   remark: string;
+  path: string;
+  method: string;
+  name: string;
 }
 
 // 更新接口权限请求参数
@@ -22,6 +28,9 @@ export interface UpdateInterfacePermissionRequest {
   id: string;
   code: string;
   remark: string;
+  path: string;
+  method: string;
+  name: string;
 }
 
 // 查询接口权限列表请求参数
