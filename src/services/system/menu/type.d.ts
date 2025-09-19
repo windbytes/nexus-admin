@@ -14,6 +14,11 @@ export interface MenuModel {
   parentId: string;
 
   /**
+   * 上级菜单名称
+   */
+  parentName: string;
+
+  /**
    * url
    */
   url: string;

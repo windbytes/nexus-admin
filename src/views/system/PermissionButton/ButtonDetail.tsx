@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import ButtonModal from './ButtonModal';
 import type { MenuModel } from '@/services/system/menu/type';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 按钮详情组件Props
@@ -23,6 +24,9 @@ interface ButtonDetailProps {
 const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
   const { modal } = App.useApp();
   const queryClient = useQueryClient();
+  const { t } = useTranslation()
+
+
   const [editing, setEditing] = useState(false);
 
   // 权限检查
@@ -143,7 +147,7 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
     {
       key: '5',
       label: '所属菜单',
-      children: button.parentId,
+      children: t(button.parentName),
     },
     {
       key: '6',

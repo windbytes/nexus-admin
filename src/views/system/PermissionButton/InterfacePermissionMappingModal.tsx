@@ -1,19 +1,20 @@
 import { useState, useEffect, useCallback, useId } from 'react';
 import { App, Tag } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import type { InterfacePermission } from '@/services/system/menu/menuApi';
 import DragModal from '@/components/modal/DragModal';
 import { TableSelect } from '@/components/select/TableSelect';
 import type { TableColumnConfig } from '@/components/select/TableSelect/types';
+import type { MenuModel } from '@/services/system/menu/type';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 接口权限映射Modal组件Props
  */
 interface InterfacePermissionMappingModalProps {
   open: boolean;
-  button: PermissionButtonModel | null;
+  button: MenuModel | null;
   onOk: () => void;
   onCancel: () => void;
 }
@@ -29,6 +30,7 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
   onCancel,
 }) => {
   const { modal } = App.useApp();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedPermissions, setSelectedPermissions] = useState<InterfacePermission[]>([]);
   const interfaceSelectorId = useId();
@@ -52,6 +54,9 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
         dataIndex: 'menuName',
         searchable: true,
         width: 150,
+        render(value) {
+          return t(value);
+        },
       },
       {
         title: '接口编码',

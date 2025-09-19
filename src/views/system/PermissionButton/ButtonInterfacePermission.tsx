@@ -3,7 +3,7 @@ import { ReloadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { Card, Table, Button, Space, Tag, Tooltip, type TableProps, App } from 'antd';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type React from 'react';
-import type { PermissionButtonModel } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import type { MenuModel } from '@/services/system/menu/type';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import InterfacePermissionMappingModal from './InterfacePermissionMappingModal';
 
@@ -36,7 +36,7 @@ interface ComponentState {
  * 按钮接口权限组件Props
  */
 interface ButtonInterfacePermissionProps {
-  button: PermissionButtonModel | null;
+  button: MenuModel | null;
 }
 
 /**
@@ -82,9 +82,9 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
 
   // 删除映射的mutation
   const deleteMappingMutation = useMutation({
-    mutationFn: async (mappingId: string) => {
+    mutationFn: async ({buttonId, interfaces}: {buttonId: string, interfaces: string[]}) => {
       // 这里应该调用删除映射的API，暂时使用现有的方法
-      return await permissionButtonService.deleteButton(mappingId);
+      return await permissionButtonService.deleteMapping(buttonId, interfaces);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -160,11 +160,11 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          deleteMappingMutation.mutate(record.id);
+          deleteMappingMutation.mutate({ buttonId: button?.id || '', interfaces: [record.id] });
         },
       });
     },
-    [deleteMappingMutation, modal],
+    [deleteMappingMutation, modal, button?.id],
   );
 
   // 表格列定义

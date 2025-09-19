@@ -8,25 +8,27 @@ import type { MenuModel } from '../../menu/type';
  */
 const PermissionButtonApi = {
   // 获取权限按钮列表
-  getButtonList: '/system/permission/button/getButtonList',
+  getButtonList: '/sys/permission/button/getButtonList',
   // 获取权限按钮详情
-  getButtonDetail: '/system/permission/button/detail',
+  getButtonDetail: '/sys/permission/button/detail',
   // 新增权限按钮
-  addButton: '/system/permission/button/add',
+  addButton: '/sys/permission/button/add',
   // 编辑权限按钮
-  updateButton: '/system/permission/button/update',
+  updateButton: '/sys/permission/button/update',
   // 删除权限按钮
-  deleteButton: '/system/permission/button/delete',
+  deleteButton: '/sys/permission/button/delete',
   // 批量删除权限按钮
-  batchDeleteButtons: '/system/permission/button/batchDelete',
+  batchDeleteButtons: '/sys/permission/button/batchDelete',
+  // 删除按钮的映射接口
+  deleteMapping: '/sys/permission/button/deleteMapping',
   // 切换权限按钮状态
-  toggleButtonStatus: '/system/permission/button/toggleStatus',
+  toggleButtonStatus: '/sys/permission/button/toggleStatus',
   // 获取按钮关联的接口权限
-  getButtonInterfaces: '/system/permission/button/interfaces',
+  getButtonInterfaces: '/sys/permission/button/interfaces',
   // 获取所有接口权限
-  getNotAssignedInterfaces: '/system/permission/button/getNotAssignedInterfaces',
+  getNotAssignedInterfaces: '/sys/permission/button/getNotAssignedInterfaces',
   // 分配按钮接口权限
-  assignButtonInterfaces: '/system/permission/button/assignInterfaces',
+  assignButtonInterfaces: '/sys/permission/button/assignInterfaces',
 };
 
 /**
@@ -109,6 +111,13 @@ export interface IPermissionButtonService {
    * @returns 删除结果
    */
   batchDeleteButtons(buttonIds: string[]): Promise<boolean>;
+
+  /**
+   * 删除按钮的映射
+   * @param buttonId 按钮ID
+   * @param interfaces 权限接口ID
+   */
+  deleteMapping(buttonId: string, interfaces: string[]): Promise<boolean>;
 
   /**
    * 切换权限按钮状态
@@ -208,6 +217,19 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.batchDeleteButtons,
       data: { buttonIds },
+    });
+  },
+
+  /**
+   * 删除按钮映射
+   */
+  async deleteMapping(buttonId: string, interfaces: string[]): Promise<boolean> {
+    return HttpRequest.post<boolean>({
+      url: PermissionButtonApi.deleteButton,
+      data: {
+        buttonId,
+        interfaces,
+      },
     });
   },
 
