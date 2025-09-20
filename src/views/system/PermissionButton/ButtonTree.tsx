@@ -130,8 +130,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     onSuccess: () => {
       setFormVisible(false);
       setEditingButton(null);
-      // 刷新页面以重新加载数据
-      window.location.reload();
+      refetch();
     },
   });
 

@@ -162,6 +162,7 @@ export const permissionButtonService: IPermissionButtonService = {
       {
         url: PermissionButtonApi.getButtonList,
         params,
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' },
     );
@@ -175,6 +176,7 @@ export const permissionButtonService: IPermissionButtonService = {
       {
         url: PermissionButtonApi.getButtonDetail,
         params: { buttonId },
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' },
     );
@@ -187,6 +189,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.addButton,
       data,
+      adapter: 'fetch',
     });
   },
 
@@ -197,6 +200,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.updateButton,
       data,
+      adapter: 'fetch',
     });
   },
 
@@ -207,6 +211,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.delete({
       url: PermissionButtonApi.deleteButton,
       params: { buttonId },
+      adapter: 'fetch',
     });
   },
 
@@ -217,6 +222,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.batchDeleteButtons,
       data: { buttonIds },
+      adapter: 'fetch',
     });
   },
 
@@ -230,6 +236,7 @@ export const permissionButtonService: IPermissionButtonService = {
         buttonId,
         interfaces,
       },
+      adapter: 'fetch',
     });
   },
 
@@ -240,6 +247,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.toggleButtonStatus,
       data: { buttonId, status },
+      adapter: 'fetch',
     });
   },
 
@@ -251,6 +259,7 @@ export const permissionButtonService: IPermissionButtonService = {
       {
         url: PermissionButtonApi.getButtonInterfaces,
         params: { buttonId },
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' },
     );
@@ -264,6 +273,7 @@ export const permissionButtonService: IPermissionButtonService = {
       {
         url: PermissionButtonApi.getNotAssignedInterfaces,
         params: { buttonId },
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' },
     );
@@ -276,6 +286,7 @@ export const permissionButtonService: IPermissionButtonService = {
     return HttpRequest.post({
       url: PermissionButtonApi.assignButtonInterfaces,
       data: { buttonId, interfaceIds },
+      adapter: 'fetch',
     });
   },
 };
