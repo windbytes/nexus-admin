@@ -2,6 +2,7 @@ import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlin
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
 import React, { useState, Suspense, memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
 
 import FullScreen from './component/FullScreen';
 import MessageBox from './component/MessageBox';
@@ -22,14 +23,17 @@ const Setting = React.lazy(() => import('./component/Setting'));
  */
 const Header = () => {
   const [openSetting, setOpenSetting] = useState<boolean>(false);
-  // 只获取更新配置的函数
-  const updatePreferences = usePreferencesStore((state) => state.updatePreferences);
-  // 获取配置是否开启头部
-  const headerEnable = usePreferencesStore((state) => state.preferences.header.enable);
-  // 订阅部件配置
-  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = usePreferencesStore(
-    (state) => state.preferences.widget,
+  
+  // 使用 useShallow 优化选择器，避免不必要的重渲染
+  const { updatePreferences, headerEnable, widgetConfig } = usePreferencesStore(
+    useShallow((state) => ({
+      updatePreferences: state.updatePreferences,
+      headerEnable: state.preferences.header.enable,
+      widgetConfig: state.preferences.widget,
+    }))
   );
+  
+  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
   const { t } = useTranslation();
 
   /**
