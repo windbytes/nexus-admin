@@ -57,6 +57,13 @@ export const dynamicRoutes: RouteObject[] = [
       menuKey: "login",
     },
   },
+  {
+    path: "/login2",
+    component: LazyLoad("Login2").type,
+    handle: {
+      menuKey: "login2",
+    },
+  }
 ];
 
 // 路由处理方式
@@ -109,7 +116,9 @@ export const Router = () => {
   const routes = useMemo(() => {
     // 将动态路由和错误路由合并到一起
     const dynamicChildren = handleRouter(menus);
-    dynamicRoutes[0].children = [...dynamicChildren, ...errorRoutes];
+    if (dynamicRoutes && dynamicRoutes[0]) {
+      dynamicRoutes[0].children = [...dynamicChildren, ...errorRoutes];
+    }
     return generateRouter(dynamicRoutes); // 假设 generateRouter 是生成最终路由配置的函数
   }, [menus]); // 仅当 `menus` 变化时重新计算路由
 

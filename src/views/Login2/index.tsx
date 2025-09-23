@@ -2,7 +2,7 @@ import type React from 'react';
 import { useRef, useState, useEffect } from 'react';
 import { Button, Checkbox, Col, Form, Image, Input, Row, Modal, Typography } from 'antd';
 import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
 import { useNavigate } from 'react-router';
@@ -250,6 +250,13 @@ const Login: React.FC = () => {
     refetch();
   };
 
+  /**
+   * 切换到另一个登录界面
+   */
+  const switchLoginStyle = () => {
+    navigate('/login');
+  };
+
   return (
     <div className={`${styles['login-page']} ${isAnimating ? styles['animate'] : ''}`}>
       {/* 背景装饰 */}
@@ -269,6 +276,14 @@ const Login: React.FC = () => {
           </div>
           <Text className={styles['app-name'] || ""}>{t('common.app.name')}</Text>
         </div>
+        {/* 切换登录样式按钮 */}
+        <Button
+          type="text"
+          icon={<SwapOutlined />}
+          onClick={switchLoginStyle}
+          className={styles['switch-btn'] || ""}
+          title="切换到传统登录界面"
+        />
       </div>
 
       {/* 主要内容区域 */}

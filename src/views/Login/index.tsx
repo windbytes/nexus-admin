@@ -1,8 +1,8 @@
 import type React from 'react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Button, Checkbox, Col, Form, Image, Input, Row, Modal } from 'antd';
 import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
 import { useNavigate } from 'react-router';
@@ -37,12 +37,19 @@ const Login: React.FC = () => {
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [loginData, setLoginData] = useState<LoginResponse | null>(null);
+  // 动画状态
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
   
   // 验证码
   const { data, refetch } = useQuery<{ key: string; code: any }>({
     queryKey: ['getCode'],
     queryFn: loginService.getCaptcha,
   });
+
+  // 页面加载时启动动画
+  useEffect(() => {
+    setIsAnimating(true);
+  }, []);
 
   /**
    * 处理角色选择
@@ -241,12 +248,24 @@ const Login: React.FC = () => {
     refetch();
   };
 
+  /**
+   * 切换到另一个登录界面
+   */
+  const switchLoginStyle = () => {
+    navigate('/login2');
+  };
+
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className={`w-full h-full flex flex-col ${isAnimating ? styles['login-page-animated'] : ''}`}>
       {/* 标题 */}
-      <div className="h-[80px] flex items-center ml-40">
+      <div className="h-[80px] flex items-center justify-between px-40">
         <div className="flex items-center">
-          <img className="login-icon my-0" width="40" src={logo} alt="logo" />
+          <img 
+            className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`} 
+            width="40" 
+            src={logo} 
+            alt="logo" 
+          />
           <span
             className="ml-5 text-3xl text-[#000000]"
             style={{
@@ -257,9 +276,17 @@ const Login: React.FC = () => {
             {t('common.app.name')}
           </span>
         </div>
+        {/* 切换登录样式按钮 */}
+        <Button
+          type="text"
+          icon={<SwapOutlined />}
+          onClick={switchLoginStyle}
+          className={styles['switch-btn-traditional'] || ""}
+          title="切换到现代登录界面"
+        />
       </div>
       <div className={styles['login-container']}>
-        <div className={styles['login-box']}>
+        <div className={`${styles['login-box']} ${isAnimating ? styles['login-box-animated'] : ''}`}>
           {/* 左边图案和标题 */}
           <div className={styles['login-left']}>
             <div className="title mt-18">
@@ -283,9 +310,13 @@ const Login: React.FC = () => {
                 <span className="font-bold">{t('login.login')}</span>
               </p>
             </div>
-            <div className="form" style={{ marginTop: '40px' }}>
+            <div className={`form ${isAnimating ? styles['form-animated'] : ''}`} style={{ marginTop: '40px' }}>
               <Form form={form} name="login" labelCol={{ span: 5 }} size="large" autoComplete="off" onFinish={submit}>
-                <Form.Item name="username" rules={[{ required: true, message: t('login.enterUsername') }]}>
+                <Form.Item 
+                  name="username" 
+                  rules={[{ required: true, message: t('login.enterUsername') }]}
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Input
                     size="large"
                     ref={inputRef}
@@ -296,7 +327,11 @@ const Login: React.FC = () => {
                     prefix={<UserOutlined />}
                   />
                 </Form.Item>
-                <Form.Item name="password" rules={[{ required: true, message: t('login.enterPassword') }]}>
+                <Form.Item 
+                  name="password" 
+                  rules={[{ required: true, message: t('login.enterPassword') }]}
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Input.Password
                     size="large"
                     allowClear
@@ -305,7 +340,7 @@ const Login: React.FC = () => {
                     prefix={<LockOutlined />}
                   />
                 </Form.Item>
-                <Form.Item>
+                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Row gutter={8}>
                     <Col span={18}>
                       <Form.Item name="captcha" noStyle rules={[{ required: true, message: t('login.enterCaptcha') }]}>
@@ -325,10 +360,14 @@ const Login: React.FC = () => {
                   </Row>
                 </Form.Item>
                 {/* 记住密码 */}
-                <Form.Item name="remember" valuePropName="checked">
+                <Form.Item 
+                  name="remember" 
+                  valuePropName="checked"
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Checkbox>{t('login.remember')}</Checkbox>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
                     {t('login.login')}
                   </Button>

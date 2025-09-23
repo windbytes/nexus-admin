@@ -85,6 +85,7 @@
   padding: 24px 40px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .logo-container {
@@ -127,6 +128,38 @@
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
   margin: 0;
+}
+
+/* 切换按钮样式 */
+.switch-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  .anticon {
+    font-size: 20px;
+  }
 }
 
 /* 主要内容区域 */
