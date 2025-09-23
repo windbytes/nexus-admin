@@ -47,8 +47,10 @@ const Login: React.FC = () => {
   /**
    * 处理角色选择
    */
-  const handleRoleSelect = async (roleId: string, roleData?: UserRole[]) => {
-    if (!loginData) return;
+  const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
+    // 使用传入的loginResponseData或当前状态中的loginData
+    const currentLoginData = loginResponseData || loginData;
+    if (!currentLoginData) return;
 
     try {
       setLoading(true);
@@ -65,10 +67,10 @@ const Login: React.FC = () => {
 
       // 更新用户存储
       userStore.login(
-        loginData.username, 
-        loginData.accessToken, 
-        loginData.refreshToken, 
-        selectedRole.roleName
+        currentLoginData.username, 
+        currentLoginData.accessToken, 
+        currentLoginData.refreshToken, 
+        selectedRole.id
       );
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
@@ -89,11 +91,11 @@ const Login: React.FC = () => {
       }
 
       // 获取角色对应的菜单
-      const menu = await commonService.getMenuListByRoleId(roleId, loginData.accessToken);
+      const menu = await commonService.getMenuListByRoleId(roleId, currentLoginData.accessToken);
       setMenus(menu);
 
       // 确定首页路径
-      let homePath = loginData.homePath;
+      let homePath = currentLoginData.homePath;
       if (!homePath) {
         const firstRoute = findMenuByRoute(menu);
         if (firstRoute) {
@@ -200,7 +202,7 @@ const Login: React.FC = () => {
             } else if (loginResponse.userRoles.length === 1) {
               // 单角色情况，直接登录
               const role = loginResponse.userRoles[0];
-              await handleRoleSelect(role.id, loginResponse.userRoles);
+              await handleRoleSelect(role.id, loginResponse.userRoles, loginResponse);
             } else {
               // 多角色情况，显示角色选择界面
               setUserRoles(loginResponse.userRoles);
