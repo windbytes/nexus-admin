@@ -1,5 +1,5 @@
-import { App, Avatar, Divider, Dropdown, theme, type MenuProps } from "antd";
-import { memo, type ReactNode } from "react";
+import { App, Avatar, Divider, Dropdown, theme, type MenuProps, message } from "antd";
+import { memo, type ReactNode, useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -18,6 +18,8 @@ import { commonService } from "@/services/common";
 import { usePreferencesStore } from "@/stores/store";
 import { useUserStore } from "@/stores/userStore";
 import { useTabStore } from "@/stores/tabStore";
+import { frameworkService } from "@/services/framework/frameworkApi";
+import { useOptimizedQuery, useOptimizedMutation } from "@/hooks/useOptimizedQuery";
 
 /**
  * 用户信息下拉框
@@ -34,6 +36,64 @@ const UserDropdown: React.FC = () => {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
+
+  // 使用 React Query 获取用户角色列表
+  const {
+    data: userRoles = [],
+    isLoading: loading,
+    error: rolesError,
+  } = useOptimizedQuery(
+    ['user-roles', userStore.loginUser],
+    () => frameworkService.getUserRolesByUserId(userStore.loginUser),
+    {
+      enabled: userStore.isLogin && !!userStore.loginUser,
+      staleTime: 5 * 60 * 1000, // 5分钟缓存
+      gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
+    }
+  );
+
+  // 更新用户角色列表到 store
+  useMemo(() => {
+    if (userRoles.length > 0) {
+      userStore.setUserRoles(userRoles);
+    }
+  }, [userRoles, userStore]);
+
+  // 角色切换的 mutation
+  const roleSwitchMutation = useOptimizedMutation(
+    async (roleId: string) => {
+      // 更新当前角色
+      userStore.switchRole(roleId);
+      
+      // 重新获取菜单数据（为后续菜单重新加载做准备）
+      await commonService.getMenuListByRoleId(roleId, userStore.token);
+      
+      return roleId;
+    },
+    {
+      onSuccess: () => {
+        // 清空当前标签页
+        resetTabs();
+        
+        // 显示成功消息
+        message.success('角色切换成功，页面将刷新');
+        
+        // 延迟刷新页面，让用户看到成功消息
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      },
+      onError: (error) => {
+        console.error('角色切换失败:', error);
+        message.error('角色切换失败');
+      },
+    }
+  );
+
+  // 角色切换处理
+  const handleRoleSwitch = (roleId: string) => {
+    roleSwitchMutation.mutate(roleId);
+  };
 
   // 菜单栏
   const items: MenuProps["items"] = [
@@ -53,30 +113,58 @@ const UserDropdown: React.FC = () => {
     },
     {
       key: "switchRole",
-      label: t("layout.header.userDropdown.switchRole"),
+      label: (
+        <div className="flex items-center justify-between">
+          <span>{t("layout.header.userDropdown.switchRole")}</span>
+          <span className="text-xs text-gray-500">
+            {userStore.role || '未选择角色'}
+          </span>
+        </div>
+      ),
       icon: <UserOutlined />,
-      disabled: false,
+      disabled: loading || userRoles.length === 0 || roleSwitchMutation.isPending,
       popupStyle: {
         width: 220,
       },
       popupOffset: [2, 8],
       children: [
-        {
-          key: "role1",
-          label: "角色1",
-          icon: <UserOutlined />,
+        // 加载状态
+        ...(loading ? [{
+          key: 'loading',
+          label: '加载中...',
+          icon: <SyncOutlined spin />,
+          disabled: true,
+        }] : []),
+        // 错误状态
+        ...(rolesError ? [{
+          key: 'error',
+          label: '加载失败，点击重试',
+          icon: <ExclamationCircleOutlined />,
           onClick: () => {
-            // 跳转到问题反馈
+            // 重新获取角色列表
+            window.location.reload();
           },
-        },
-        {
-          key: "role2",
-          label: "角色2",
+        }] : []),
+        // 角色列表
+        ...userRoles.map((role) => ({
+          key: role.id,
+          label: (
+            <div className="flex items-center justify-between">
+              <span>{role.roleName}</span>
+              <div className="flex items-center gap-1">
+                {userStore.currentRoleId === role.id && (
+                  <span className="text-xs text-green-500">当前</span>
+                )}
+                {roleSwitchMutation.isPending && roleSwitchMutation.variables === role.id && (
+                  <SyncOutlined spin className="text-xs" />
+                )}
+              </div>
+            </div>
+          ),
           icon: <UserOutlined />,
-          onClick: () => {
-            // 跳转到常见问题
-          },
-        },
+          disabled: roleSwitchMutation.isPending,
+          onClick: () => handleRoleSwitch(role.id),
+        })),
       ],
     },
     {

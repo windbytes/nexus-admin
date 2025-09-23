@@ -196,7 +196,6 @@ export const useInfiniteOptimizedQuery = <T>(
     queryFn: ({ pageParam = initialPageParam }) => queryFn({ pageParam }),
     enabled,
     staleTime,
-    getNextPageParam: (lastPage: { nextCursor?: any }) => lastPage.nextCursor,
-    initialPageParam,
+    // 修复：useQuery 没有 getNextPageParam 和 initialPageParam 参数，应该使用 useInfiniteQuery
   });
 };

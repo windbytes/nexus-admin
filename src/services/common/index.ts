@@ -7,6 +7,7 @@ import type { MenuModel } from '../system/menu/type';
 const CommonApi = {
   // 根据token获取菜单（多用于框架上根据角色获取菜单那种）
   getMenuListByRoleId: '/system/menu/getMenusByRole',
+
   /**
    * 退出登录
    */
@@ -58,7 +59,7 @@ export const commonService: ICommonService = {
         params: { roleId },
         adapter: 'fetch',
       },
-      { successMessageMode: 'none', token },
+      { successMessageMode: 'none', token: token ?? '' },
     );
   },
 
