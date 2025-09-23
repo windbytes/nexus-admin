@@ -8,7 +8,7 @@ const FrameworkApi = {
     /**
    * 根据用户ID获取角色列表
    */
-    getUserRolesByUserId: '/sys/framework/queryRolesByUserId',
+    getUserRolesByUserName: '/sys/framework/queryRolesByUserName',
 };
 
 /**
@@ -16,9 +16,9 @@ const FrameworkApi = {
  */
 interface IFrameworkService {
   /**
-   * 根据用户ID获取角色列表
+   * 根据用户名获取角色列表
    */
-  getUserRolesByUserId(userId: string): Promise<RoleModel[]>;
+  getUserRolesByUserName(username: string): Promise<RoleModel[]>;
 }
 
 /**
@@ -27,14 +27,14 @@ interface IFrameworkService {
 export const frameworkService: IFrameworkService = {
   /*
    * 根据用户ID获取角色列表
-   * @param userId 用户ID
+   * @param userName 用户名
    * @returns 角色列表
    */
-  getUserRolesByUserId(userId: string): Promise<RoleModel[]> {
+  getUserRolesByUserName(username: string): Promise<RoleModel[]> {
     return HttpRequest.get(
       {
-        url: FrameworkApi.getUserRolesByUserId,
-        params: { userId },
+        url: FrameworkApi.getUserRolesByUserName,
+        params: { username },
         adapter: 'fetch',
       },
       { successMessageMode: 'none' },

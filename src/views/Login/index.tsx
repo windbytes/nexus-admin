@@ -1,12 +1,12 @@
 import type React from 'react';
 import { useRef, useState } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row } from 'antd';
+import { Button, Checkbox, Col, Form, Image, Input, Row, Modal } from 'antd';
 import logo from '@/assets/images/icon-512.png';
 import { LockOutlined, SecurityScanOutlined, UserOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
 import { useNavigate } from 'react-router';
-import { loginService } from '@/services/login/loginApi';
+import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { antdUtils } from '@/utils/antdUtil';
@@ -16,6 +16,7 @@ import { commonService } from '@/services/common';
 import { useUserStore } from '@/stores/userStore';
 import { useTranslation } from 'react-i18next';
 import { useTabStore } from '@/stores/tabStore';
+import RoleSelector from '@/components/RoleSelector';
 
 /**
  * 登录模块
@@ -29,8 +30,14 @@ const Login: React.FC = () => {
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
+  
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
+  // 角色选择相关状态
+  const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [loginData, setLoginData] = useState<LoginResponse | null>(null);
+  
   // 验证码
   const { data, refetch } = useQuery<{ key: string; code: any }>({
     queryKey: ['getCode'],
@@ -38,16 +45,107 @@ const Login: React.FC = () => {
   });
 
   /**
+   * 处理角色选择
+   */
+  const handleRoleSelect = async (roleId: string, roleData?: UserRole[]) => {
+    if (!loginData) return;
+
+    try {
+      setLoading(true);
+      
+      // 使用传入的角色数据或当前状态中的角色数据
+      const rolesToUse = roleData || userRoles;
+      
+      // 查找选中的角色
+      const selectedRole = rolesToUse.find(role => role.id === roleId);
+      if (!selectedRole) {
+        antdUtils.message?.error('选择的角色不存在');
+        return;
+      }
+
+      // 更新用户存储
+      userStore.login(
+        loginData.username, 
+        loginData.accessToken, 
+        loginData.refreshToken, 
+        selectedRole.roleName
+      );
+      userStore.setCurrentRoleId(roleId);
+      // 将UserRole转换为RoleModel格式
+      const roleModels = rolesToUse.map(role => ({
+        id: role.id,
+        roleCode: role.roleType, // 使用roleType作为roleCode
+        roleName: role.roleName,
+        roleType: role.roleType,
+        status: role.status,
+        remark: role.remark || '',
+      }));
+      userStore.setUserRoles(roleModels);
+
+      // 清空缓存
+      resetTabs();
+      if ((window as any).__keepAliveClearAllCache) {
+        (window as any).__keepAliveClearAllCache();
+      }
+
+      // 获取角色对应的菜单
+      const menu = await commonService.getMenuListByRoleId(roleId, loginData.accessToken);
+      setMenus(menu);
+
+      // 确定首页路径
+      let homePath = loginData.homePath;
+      if (!homePath) {
+        const firstRoute = findMenuByRoute(menu);
+        if (firstRoute) {
+          homePath = (firstRoute as any).path;
+        } else {
+          antdUtils.notification?.error({
+            message: t('login.loginFail'),
+            description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
+          });
+          return;
+        }
+      }
+      
+      if (!homePath) {
+        antdUtils.notification?.error({
+          message: t('login.loginFail'),
+          description: '无法确定首页路径！',
+        });
+        return;
+      }
+      
+      userStore.setHomePath(homePath);
+
+      // 关闭角色选择弹窗
+      setShowRoleSelector(false);
+      
+      antdUtils.notification?.success({
+        message: t('login.loginSuccess'),
+        description: t('login.welcome'),
+      });
+
+      // 跳转到首页
+      navigate(homePath);
+    } catch (error) {
+      console.error('角色选择失败:', error);
+      antdUtils.message?.error('角色选择失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
    * 登录表单提交
    * @param values 提交表单的数据
    */
-  const submit = async (values: any) => {
+  const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key;
+    values.checkKey = data?.key || '';
     setLoading(true);
-    // 这里考虑返回的内容不仅包括token，还包括用户登录的角色（需要存储在本地，用于刷新页面时重新根据角色获取菜单）、配置的首页地址（供登录后进行跳转）
+    
     try {
-      const { code, data, message } = await loginService.login(values);
+      const { code, data: loginResponse, message } = await loginService.login(values);
 
       // 根据code判定登录状态（和枚举的状态码进行判定） 只会存在几种情况，用户名不存在，用户名或密码错误，用户名冻结，验证码错误或者过期
       // case中使用{}包裹的目的是为了保证变量做用于仅限于case块
@@ -84,42 +182,30 @@ const Login: React.FC = () => {
         // 登录成功
         case HttpCodeEnum.SUCCESS:
           {
-            // 没有配置首页地址默认跳到第一个菜单
-            const { accessToken, refreshToken, roleId } = data;
-
-            userStore.login(values.username, accessToken, refreshToken, roleId);
-            // 登录成功后清空 TabBar 和 KeepAlive 缓存
-            resetTabs();
-            // 清空 KeepAlive 缓存
-            if ((window as any).__keepAliveClearAllCache) {
-              (window as any).__keepAliveClearAllCache();
+            // 保存登录数据
+            setLoginData(loginResponse);
+            
+            // 检查角色信息
+            if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
+              // 没有角色信息，提示错误
+              antdUtils.modal?.error({
+                title: '登录失败',
+                content: '您的账户没有分配任何角色，请联系管理员配置角色权限！',
+                onOk: () => {
+                  // 刷新验证码
+                  refetch();
+                },
+              });
+              return;
+            } else if (loginResponse.userRoles.length === 1) {
+              // 单角色情况，直接登录
+              const role = loginResponse.userRoles[0];
+              await handleRoleSelect(role.id, loginResponse.userRoles);
+            } else {
+              // 多角色情况，显示角色选择界面
+              setUserRoles(loginResponse.userRoles);
+              setShowRoleSelector(true);
             }
-            let { homePath } = data;
-            // 登录成功根据角色获取菜单
-            const menu = await commonService.getMenuListByRoleId(roleId, accessToken);
-            setMenus(menu);
-            // 判断是否配置了默认跳转的首页地址
-            if (!homePath) {
-              // 获取第一个是路由的地址
-              const firstRoute = findMenuByRoute(menu);
-              if (firstRoute) {
-                homePath = (firstRoute as any).path;
-              } else {
-                // 没有配置默认首页地址，也没有菜单，则提示错误
-                antdUtils.notification?.error({
-                  message: t('login.loginFail'),
-                  description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
-                });
-                return;
-              }
-            }
-            userStore.setHomePath(homePath);
-            antdUtils.notification?.success({
-              message: t('login.loginSuccess'),
-              description: t('login.welcome'),
-            });
-            // 跳转到首页
-            navigate(homePath);
           }
           break;
         default:
@@ -270,6 +356,25 @@ const Login: React.FC = () => {
           蜀ICP备2023022276号-2
         </a>
       </div>
+
+      {/* 角色选择弹窗 */}
+      <Modal
+        title="选择角色"
+        open={showRoleSelector}
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        width={600}
+        centered
+      >
+        {userRoles.length > 0 && (
+          <RoleSelector
+            roles={userRoles}
+            onSelect={handleRoleSelect}
+            loading={loading}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

@@ -19,7 +19,8 @@ import { usePreferencesStore } from "@/stores/store";
 import { useUserStore } from "@/stores/userStore";
 import { useTabStore } from "@/stores/tabStore";
 import { frameworkService } from "@/services/framework/frameworkApi";
-import { useOptimizedQuery, useOptimizedMutation } from "@/hooks/useOptimizedQuery";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useShallow } from "zustand/shallow";
 
 /**
  * 用户信息下拉框
@@ -29,39 +30,58 @@ const UserDropdown: React.FC = () => {
   const updatePreferences = usePreferencesStore(
     (state) => state.updatePreferences
   );
-  const userStore = useUserStore();
-  const { resetTabs } = useTabStore();
+  const userStore = useUserStore(
+    useShallow((state) => ({
+      loginUser: state.loginUser,
+      isLogin: state.isLogin,
+      token: state.token,
+      currentRoleId: state.currentRoleId,
+      role: state.role,
+      switchRole: state.switchRole,
+      logout: state.logout,
+    }))
+  );
+  const { resetTabs } = useTabStore(
+    useShallow((state) => ({
+      resetTabs: state.resetTabs,
+    }))
+  );
   const { token } = theme.useToken();
   const { modal } = App.useApp();
   const { t } = useTranslation();
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // 使用 React Query 获取用户角色列表
   const {
     data: userRoles = [],
     isLoading: loading,
     error: rolesError,
-  } = useOptimizedQuery(
-    ['user-roles', userStore.loginUser],
-    () => frameworkService.getUserRolesByUserId(userStore.loginUser),
-    {
-      enabled: userStore.isLogin && !!userStore.loginUser,
-      staleTime: 5 * 60 * 1000, // 5分钟缓存
-      gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
-    }
-  );
+  } = useQuery({
+    queryKey: ['user-roles', userStore.loginUser],
+    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser),
+    enabled: userStore.isLogin && !!userStore.loginUser,
+    staleTime: 5 * 60 * 1000, // 5分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+  });
 
-  // 更新用户角色列表到 store
-  useMemo(() => {
-    if (userRoles.length > 0) {
-      userStore.setUserRoles(userRoles);
-    }
-  }, [userRoles, userStore]);
+  // 使用 useMemo 计算当前角色信息，避免无限循环
+  const currentRoleInfo = useMemo(() => {
+    const currentRoleId = userStore.currentRoleId;
+    const currentRole = userRoles.find(role => role.id === currentRoleId);
+    return {
+      currentRoleId,
+      currentRoleName: currentRole?.roleName || userStore.role || '未选择角色',
+      hasRoles: userRoles.length > 0,
+    };
+  }, [userRoles, userStore.currentRoleId, userStore.role]);
 
   // 角色切换的 mutation
-  const roleSwitchMutation = useOptimizedMutation(
-    async (roleId: string) => {
+  const roleSwitchMutation = useMutation({
+    mutationFn: async (roleId: string) => {
       // 更新当前角色
       userStore.switchRole(roleId);
       
@@ -70,25 +90,23 @@ const UserDropdown: React.FC = () => {
       
       return roleId;
     },
-    {
-      onSuccess: () => {
-        // 清空当前标签页
-        resetTabs();
-        
-        // 显示成功消息
-        message.success('角色切换成功，页面将刷新');
-        
-        // 延迟刷新页面，让用户看到成功消息
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      },
-      onError: (error) => {
-        console.error('角色切换失败:', error);
-        message.error('角色切换失败');
-      },
-    }
-  );
+    onSuccess: () => {
+      // 清空当前标签页
+      resetTabs();
+      
+      // 显示成功消息
+      message.success('角色切换成功，页面将刷新');
+      
+      // 延迟刷新页面，让用户看到成功消息
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error('角色切换失败:', error);
+      message.error('角色切换失败');
+    },
+  });
 
   // 角色切换处理
   const handleRoleSwitch = (roleId: string) => {
@@ -117,12 +135,12 @@ const UserDropdown: React.FC = () => {
         <div className="flex items-center justify-between">
           <span>{t("layout.header.userDropdown.switchRole")}</span>
           <span className="text-xs text-gray-500">
-            {userStore.role || '未选择角色'}
+            {currentRoleInfo.currentRoleName}
           </span>
         </div>
       ),
       icon: <UserOutlined />,
-      disabled: loading || userRoles.length === 0 || roleSwitchMutation.isPending,
+      disabled: loading || !currentRoleInfo.hasRoles || roleSwitchMutation.isPending,
       popupStyle: {
         width: 220,
       },
@@ -142,7 +160,7 @@ const UserDropdown: React.FC = () => {
           icon: <ExclamationCircleOutlined />,
           onClick: () => {
             // 重新获取角色列表
-            window.location.reload();
+            queryClient.invalidateQueries({ queryKey: ['user-roles'] });
           },
         }] : []),
         // 角色列表
@@ -152,7 +170,7 @@ const UserDropdown: React.FC = () => {
             <div className="flex items-center justify-between">
               <span>{role.roleName}</span>
               <div className="flex items-center gap-1">
-                {userStore.currentRoleId === role.id && (
+                {currentRoleInfo.currentRoleId === role.id && (
                   <span className="text-xs text-green-500">当前</span>
                 )}
                 {roleSwitchMutation.isPending && roleSwitchMutation.variables === role.id && (
