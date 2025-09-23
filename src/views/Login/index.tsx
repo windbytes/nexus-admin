@@ -71,13 +71,13 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
-
       // 更新用户存储
       userStore.login(
         currentLoginData.username, 
         currentLoginData.accessToken, 
         currentLoginData.refreshToken, 
-        selectedRole.id
+        selectedRole.id,
+        selectedRole.roleCode
       );
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式

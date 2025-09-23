@@ -4,13 +4,17 @@ import type { RoleModel } from '@/services/system/role/type';
 
 // 定义用户信息的store
 interface UserState {
+  // 登录用户名
   loginUser: string;
   isLogin: boolean;
   homePath: string;
   token: string;
   // 刷新token
   refreshToken: string;
-  role: string;
+  // 当前角色ID
+  roleId: string;
+  // 当前角色Code
+  roleCode: string;
   // 当前角色ID
   currentRoleId: string;
   // 用户角色列表
@@ -20,7 +24,8 @@ interface UserState {
     loginUser: string,
     token: string,
     refreshToken: string,
-    role: string,
+    roleId: string,
+    roleCode: string,
   ) => void;
   logout: () => void;
   setHomePath: (homePath: string) => void;
@@ -38,11 +43,12 @@ export const useUserStore = create<UserState>()(
       homePath: '/home',
       token: '',
       refreshToken: '',
-      role: '',
+      roleId: '',
+      roleCode: '',
       currentRoleId: '',
       userRoles: [],
-      login: (loginUser = '', token = '', refreshToken = '', role = '') =>
-        set({ loginUser, isLogin: true, token, refreshToken, role }),
+      login: (loginUser = '', token = '', refreshToken = '', roleId = '', roleCode = '') =>
+        set({ loginUser, isLogin: true, token, refreshToken, roleId, roleCode }),
       setToken: (token: string) => set({ token }),
       logout: () =>
         set({
@@ -50,7 +56,8 @@ export const useUserStore = create<UserState>()(
           isLogin: false,
           homePath: '/home',
           token: '',
-          role: '',
+          roleId: '',
+          roleCode: '',
           currentRoleId: '',
           userRoles: [],
         }),
@@ -63,7 +70,8 @@ export const useUserStore = create<UserState>()(
           if (newRole) {
             return { 
               currentRoleId: roleId, 
-              role: newRole.roleName 
+              roleId: newRole.id,
+              roleCode: newRole.roleCode,
             };
           }
           return state;

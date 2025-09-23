@@ -36,7 +36,7 @@ const UserDropdown: React.FC = () => {
       isLogin: state.isLogin,
       token: state.token,
       currentRoleId: state.currentRoleId,
-      role: state.role,
+      roleCode: state.roleCode,
       switchRole: state.switchRole,
       logout: state.logout,
     }))
@@ -60,12 +60,7 @@ const UserDropdown: React.FC = () => {
     error: rolesError,
   } = useQuery({
     queryKey: ['user-roles', userStore.loginUser],
-    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser),
-    enabled: userStore.isLogin && !!userStore.loginUser,
-    staleTime: 5 * 60 * 1000, // 5分钟缓存
-    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
+    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser)
   });
 
   // 使用 useMemo 计算当前角色信息，避免无限循环
@@ -74,10 +69,10 @@ const UserDropdown: React.FC = () => {
     const currentRole = userRoles.find(role => role.id === currentRoleId);
     return {
       currentRoleId,
-      currentRoleName: currentRole?.roleName || userStore.role || '未选择角色',
+      currentRoleName: currentRole?.roleName || userStore.roleCode || '未选择角色',
       hasRoles: userRoles.length > 0,
     };
-  }, [userRoles, userStore.currentRoleId, userStore.role]);
+  }, [userRoles, userStore.currentRoleId, userStore.roleCode]);
 
   // 角色切换的 mutation
   const roleSwitchMutation = useMutation({

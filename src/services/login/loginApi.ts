@@ -25,6 +25,8 @@ export interface UserRole {
   id: string;
   /** 角色名称 */
   roleName: string;
+  /** 角色Code */
+  roleCode: string;
   /** 角色类型 */
   roleType: string;
   /** 角色描述 */

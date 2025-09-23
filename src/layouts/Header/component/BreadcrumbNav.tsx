@@ -95,7 +95,7 @@ function patchBreadcrumb(
       
       // 如果是当前路径，添加链接
       if (menu.path === targetPath) {
-        breadcrumbItem.title = (
+        breadcrumbItem['title'] = (
           <>
             {joinIcon && menu.meta?.icon && getIcon(menu.meta.icon)}
             <Link to={menu.path}>{t(menu.meta?.title as string)}</Link>
