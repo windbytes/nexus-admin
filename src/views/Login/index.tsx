@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useRef, useState, useEffect } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row, Modal } from 'antd';
+import { Button, Checkbox, Col, Form, Image, Input, Row, Modal, Typography } from 'antd';
 import logo from '@/assets/images/icon-512.png';
 import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
@@ -17,6 +17,8 @@ import { useUserStore } from '@/stores/userStore';
 import { useTranslation } from 'react-i18next';
 import { useTabStore } from '@/stores/tabStore';
 import RoleSelector from '@/components/RoleSelector';
+
+const { Text } = Typography;
 
 /**
  * 登录模块
@@ -377,25 +379,28 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="w-[440px] my-0 mx-auto py-[20px] px-0">
-        <p className="text-center mb-2">Copyright@2025 499475142@qq.com All Rights Reserved</p>
-        <a
-          target="_blank"
-          rel="noreferrer"
-          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51012202001944"
-          className="inline-block h-[20px] leading-5 text-decoration-none"
-        >
-          <img src={filing} className="float-left" alt="无图片" />
-          <p className="float-left h-5 leading-5 m-[0_0_0_5px] text-[#939393]!">川公网安备51012202001944</p>
-        </a>
-        <a
-          href="https://beian.miit.gov.cn/"
-          target="_blank"
-          rel="noreferrer"
-          className="absolute inline-block text-[#939393]! text-decoration-none ml-1.5"
-        >
-          蜀ICP备2023022276号-2
-        </a>
+      {/* 底部版权信息 */}
+      <div className={styles['login-footer']}>
+        <Text className={styles['copyright'] || ""}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
+        <div className={styles['filing-info']}>
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51012202001944"
+            className={styles['filing-link']}
+          >
+            <img src={filing} alt="备案图标" />
+            <Text className={styles['filing-text'] || ""}>川公网安备51012202001944</Text>
+          </a>
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noreferrer"
+            className={styles['icp-link']}
+          >
+            <Text className={styles['icp-text'] || ""}>蜀ICP备2023022276号-2</Text>
+          </a>
+        </div>
       </div>
 
       {/* 角色选择弹窗 */}
