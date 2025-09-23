@@ -29,7 +29,7 @@ const PermissionButton: React.FC = () => {
         {/* 左侧按钮树 */}
         <ButtonTree
           onSelectButton={handleSelectButton}
-          selectedButtonId={selectedButton?.id}
+          selectedButtonId={selectedButton ? selectedButton.id : ''}
         />
       </Layout.Sider>
       <Layout.Content className="flex flex-col ml-4 gap-4">
