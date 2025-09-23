@@ -80,15 +80,18 @@ const ScreenLock: React.FC = () => {
 
           {/* 密码输入区域 */}
           <div className={style["password-section"]}>
+            <div className={style["input-wrapper"]}>
+              <UserOutlined className={style["input-icon"]} />
               <Input.Password
                 ref={pwdRef}
                 value={password}
-                prefix={<UserOutlined style={{ fontSize: '18px' }} />}
                 onChange={handlePasswordChange}
                 placeholder="请输入密码"
                 onPressEnter={validatePassword}
+                className={style["password-input"]}
                 size="large"
               />
+            </div>
             <div className={style["unlock-hint"]}>
               <Text type="secondary">按 Enter 键解锁</Text>
             </div>
