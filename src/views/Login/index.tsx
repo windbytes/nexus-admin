@@ -17,6 +17,7 @@ import { useUserStore } from '@/stores/userStore';
 import { useTranslation } from 'react-i18next';
 import { useTabStore } from '@/stores/tabStore';
 import RoleSelector from '@/components/RoleSelector';
+import { usePreferencesStore } from '@/stores/store';
 
 const { Text } = Typography;
 
@@ -32,6 +33,7 @@ const Login: React.FC = () => {
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
+  const { updatePreferences } = usePreferencesStore();
   
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
@@ -130,6 +132,9 @@ const Login: React.FC = () => {
 
       // 关闭角色选择弹窗
       setShowRoleSelector(false);
+      
+      // 直接解锁屏幕
+      updatePreferences("widget", "lockScreenStatus", false);
       
       antdUtils.notification?.success({
         message: t('login.loginSuccess'),

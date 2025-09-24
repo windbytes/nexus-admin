@@ -248,7 +248,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
             blockNode
             showIcon
             rootClassName="flex-1 overflow-auto my-2!"
-            treeData={data}
+            treeData={data ?? []}
             defaultExpandAll
             selectedKeys={selectedKeys}
             switcherIcon={<CaretDownOutlined style={{ fontSize: '14px' }} />}

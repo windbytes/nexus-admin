@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type React from 'react';
 import type { MenuModel } from '@/services/system/menu/type';
 import { menuService, type InterfacePermission } from '@/services/system/menu/menuApi';
+import { usePermission } from '@/hooks/usePermission';
 
 // 组件状态类型 - 合并所有状态
 interface ComponentState {
@@ -61,6 +62,11 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
   // 输入框引用
   const codeInputRef = useRef<any>(null);
   const remarkInputRef = useRef<any>(null);
+
+  // 是否有菜单接口的新增、编辑、删除权限
+  const hasAddPermission = usePermission(['system:menu:interface:add']);
+  const hasEditPermission = usePermission(['system:menu:interface:edit']);
+  const hasDeletePermission = usePermission(['system:menu:interface:delete']);
 
   // 查询菜单接口权限数据
   const {
@@ -562,9 +568,12 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
 
           return (
             <Space size="small">
+              {hasEditPermission && (
               <Tooltip title="编辑">
                 <Button type="link" icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)} />
               </Tooltip>
+              )}
+              {hasDeletePermission && (
               <Tooltip title="删除">
                 <Button
                   type="link"
@@ -575,6 +584,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                   loading={savePermissionMutation.isPending}
                 />
               </Tooltip>
+              )}
             </Space>
           );
         },
@@ -661,6 +671,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                 )}
                 {!hasMenuData && <span className="text-gray-400">📋 请先选择菜单</span>}
               </div>
+              {hasAddPermission && (
               <Button
                 type={buttonType}
                 style={{ width: '100%' }}
@@ -668,8 +679,9 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                 disabled={buttonDisabled}
                 title={tooltipText}
               >
-                {buttonText}
-              </Button>
+                  {buttonText}
+                </Button>
+              )}
             </div>
           );
         }}

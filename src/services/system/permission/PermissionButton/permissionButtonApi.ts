@@ -231,7 +231,7 @@ export const permissionButtonService: IPermissionButtonService = {
    */
   async deleteMapping(buttonId: string, interfaces: string[]): Promise<boolean> {
     return HttpRequest.post<boolean>({
-      url: PermissionButtonApi.deleteButton,
+      url: PermissionButtonApi.deleteMapping,
       data: {
         buttonId,
         interfaces,
