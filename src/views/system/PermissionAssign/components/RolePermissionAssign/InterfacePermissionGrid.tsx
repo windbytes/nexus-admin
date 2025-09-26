@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Checkbox, Card, Spin, Empty, Tag, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import type React from 'react';
 import type { InterfacePermission } from '@/services/system/menu/menuApi';
 
@@ -17,7 +17,7 @@ interface InterfacePermissionGridProps {
  * 接口权限网格组件
  * 以网格形式展示接口权限分配
  */
-const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = ({
+const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
   checkedKeys,
   onCheck,
 }) => {
@@ -192,6 +192,8 @@ const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = ({
       </div>
     </div>
   );
-};
+});
+
+InterfacePermissionGrid.displayName = 'InterfacePermissionGrid';
 
 export default InterfacePermissionGrid;

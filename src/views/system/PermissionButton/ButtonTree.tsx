@@ -60,7 +60,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   const { data: allDirectoryData, isLoading: menuLoading, refetch } = useQuery({
     queryKey: ['sys_menu_directory'],
     queryFn: async () => {
-      return await permissionButtonService.getButtonList({ pageNum: 1, pageSize: 1000, name: searchText });
+      return await permissionButtonService.getButtonList({ name: searchText });
     },
   });
 

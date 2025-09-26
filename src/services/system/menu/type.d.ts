@@ -140,6 +140,11 @@ export interface MenuModel {
    * 更新时间
    */
   updateTime: string;
+
+  /**
+   * 子菜单
+   */
+  children?: MenuModel[];
 }
 
 /**

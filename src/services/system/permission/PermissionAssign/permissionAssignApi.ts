@@ -5,11 +5,11 @@ import { HttpRequest } from '@/utils/request';
  */
 const PermissionAssignApi = {
   // 获取权限分配列表
-  getPermissionAssignList: '/system/permission/assign/list',
+  getPermissionAssignList: '/sys/permission/assign/list',
   // 分配角色权限
-  assignRolePermission: '/system/permission/assign/role',
+  assignRolePermission: '/sys/permission/assign/role',
   // 获取角色权限详情
-  getRolePermissionDetail: '/system/permission/assign/roleDetail',
+  getRolePermissionDetail: '/sys/permission/assign/roleDetail',
 };
 
 /**
@@ -75,10 +75,10 @@ export interface IPermissionAssignService {
 
   /**
    * 获取角色权限详情
-   * @param roleId 角色ID
+   * @param roleCode 角色编码
    * @returns 角色权限详情
    */
-  getRolePermissionDetail(roleId: string): Promise<{
+  getRolePermissionDetail(roleCode: string): Promise<{
     menuPermissions: string[];
     buttonPermissions: string[];
     interfacePermissions: string[];
@@ -116,14 +116,14 @@ export const permissionAssignService: IPermissionAssignService = {
   /**
    * 获取角色权限详情
    */
-  async getRolePermissionDetail(roleId: string): Promise<{
+  async getRolePermissionDetail(roleCode: string): Promise<{
     menuPermissions: string[];
     buttonPermissions: string[];
     interfacePermissions: string[];
   }> {
     return HttpRequest.get({
       url: PermissionAssignApi.getRolePermissionDetail,
-      params: { roleId },
+      params: { roleCode },
     });
   },
 };

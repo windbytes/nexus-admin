@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
       react({
         // 只在生产环境下启用 React 编译器优化
         babel: isProduction ? {
-          plugins: ['babel-plugin-react-compiler'],
+          plugins: [['babel-plugin-react-compiler']],
         } : undefined,
       }),
       tailwindcss(),

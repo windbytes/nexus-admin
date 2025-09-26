@@ -7,6 +7,10 @@ import type { PageResult } from '@/types/global';
  */
 const RoleApi = {
   /**
+   * 获取角色列表
+   */
+  getRoleList: '/system/role/getRoleList',
+  /**
    * 获取角色列表（分页查询）
    */
   getRoleListPage: '/system/role/getRoleListPage',
@@ -77,6 +81,14 @@ export interface IRoleService {
    * 获取不在该角色下的所有可用用户
    */
   getRoleDetail(roleId: string): Promise<RoleModel>;
+  /**
+   * 获取角色列表
+  /**
+   * 获取角色列表（不分页）
+   * @param params 角色参数
+   * @returns 角色列表
+   */
+  getRoleList(params: Record<string, any>): Promise<RoleModel[]>;
   /**
    * 获取角色列表（包含分页数据）
    * @param params 角色参数(包含分页信息)
@@ -182,6 +194,22 @@ export const roleService: IRoleService = {
         url: RoleApi.getRoleDetail,
         params: { roleId },
         adapter: 'fetch',
+      },
+      {
+        successMessageMode: 'none',
+      },
+    );
+  },
+  /**
+   * 获取角色列表（不分页）
+   * @param params 角色参数
+   * @returns 角色列表
+   */
+  async getRoleList(params: Record<string, any>): Promise<RoleModel[]> {
+    return await HttpRequest.post(
+      {
+        url: RoleApi.getRoleList,
+        data: params,
       },
       {
         successMessageMode: 'none',

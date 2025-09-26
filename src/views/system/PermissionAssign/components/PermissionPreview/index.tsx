@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, Select, Button, Space, Spin, Tabs, Row, Col, Descriptions, Tag, Table, Badge } from 'antd';
 import { UserOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo } from 'react';
@@ -7,13 +7,15 @@ import { permissionAssignService } from '@/services/system/permission/Permission
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { roleService } from '@/services/system/role/roleApi';
 import type { TableProps } from 'antd';
+import type { RoleModel } from '@/services/system/role/type';
+import type { MenuModel } from '@/services/system/menu/type';
 
 /**
  * 权限预览组件Props
  */
 interface PermissionPreviewProps {
   /** 角色ID，如果提供则直接使用，否则需要选择角色 */
-  roleId?: string;
+  roleCode?: string;
   /** 是否显示角色选择器 */
   showRoleSelector?: boolean;
   /** 是否显示刷新按钮 */
@@ -25,14 +27,14 @@ interface PermissionPreviewProps {
  * 展示角色的完整权限信息
  */
 const PermissionPreview: React.FC<PermissionPreviewProps> = ({
-  roleId: propRoleId,
+  roleCode: propRoleCode,
   showRoleSelector = true,
   showRefreshButton = true,
 }) => {
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(propRoleId || null);
-
+  const [selectedRoleCode, setSelectedRoleCode] = useState<string | null>(propRoleCode || null);
+  const queryClient = useQueryClient();
   // 使用传入的roleId或内部选择的roleId
-  const currentRoleId = propRoleId || selectedRoleId;
+  const currentRoleCode = propRoleCode || selectedRoleCode;
 
   /**
    * 查询角色列表
@@ -47,18 +49,18 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
    * 查询角色基本信息
    */
   const { data: roleInfo, isLoading: roleInfoLoading } = useQuery({
-    queryKey: ['role-info', currentRoleId],
-    queryFn: () => roleService.getRoleDetail(currentRoleId || ''),
-    enabled: !!currentRoleId,
+    queryKey: ['role-info', currentRoleCode],
+    queryFn: () => roleService.getRoleDetail(currentRoleCode || ''),
+    enabled: !!currentRoleCode,
   });
 
   /**
    * 查询角色权限详情
    */
   const { data: rolePermissions, isLoading: permissionsLoading } = useQuery({
-    queryKey: ['role-permissions', currentRoleId],
-    queryFn: () => permissionAssignService.getRolePermissionDetail(currentRoleId || ''),
-    enabled: !!currentRoleId,
+    queryKey: ['role-permissions', currentRoleCode],
+    queryFn: () => permissionAssignService.getRolePermissionDetail(currentRoleCode || ''),
+    enabled: !!currentRoleCode,
   });
 
   /**
@@ -82,12 +84,9 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
     queryFn: () => {
       if (!rolePermissions?.buttonPermissions?.length) return [];
       return permissionButtonService
-        .getButtonList({
-          pageNum: 1,
-          pageSize: 100,
-        })
+        .getButtonList({})
         .then((response) =>
-          response.records.filter((button) => rolePermissions.buttonPermissions?.includes(button.id)),
+          response.filter((button: MenuModel) => rolePermissions.buttonPermissions?.includes(button.id)),
         );
     },
     enabled: !!rolePermissions?.buttonPermissions?.length,
@@ -95,17 +94,17 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
 
   /**
    * 处理角色选择
-   * @param roleId 选中的角色ID
+   * @param roleCode 选中的角色编码
    */
-  const handleRoleSelect = useCallback((roleId: string) => {
-    setSelectedRoleId(roleId);
+  const handleRoleSelect = useCallback((roleCode: string) => {
+    setSelectedRoleCode(roleCode);
   }, []);
 
   /**
    * 处理刷新
    */
   const handleRefresh = useCallback(() => {
-    // 这里可以触发相关查询的刷新
+    queryClient.invalidateQueries({ queryKey: ['role-permissions', currentRoleCode] });
   }, []);
 
   /**
@@ -113,9 +112,9 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
    */
   const roleOptions = useMemo(() => {
     if (!roleListResponse?.records) return [];
-    return roleListResponse.records.map((role: any) => ({
-      label: role.name,
-      value: role.id,
+    return roleListResponse.records.map((role: RoleModel) => ({
+      label: role.roleName,
+      value: role.roleCode,
     }));
   }, [roleListResponse?.records]);
 
@@ -229,7 +228,7 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
   const isLoading = roleInfoLoading || permissionsLoading;
 
   return (
-    <div className="h-full flex flex-col space-y-4">
+    <div className="h-full flex flex-col gap-4">
       {/* 角色选择栏 */}
       {showRoleSelector && (
         <Card size="small">
@@ -241,7 +240,7 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
                 <Select
                   placeholder="请选择要查看权限的角色"
                   style={{ width: 300 }}
-                  value={currentRoleId}
+                  value={currentRoleCode}
                   onChange={handleRoleSelect}
                   loading={roleListLoading}
                   showSearch
@@ -262,7 +261,7 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
       )}
 
       {/* 权限预览内容 */}
-      {!currentRoleId ? (
+      {!currentRoleCode ? (
         <Card className="h-full flex items-center justify-center">
           <div className="text-center text-gray-500">
             <UserOutlined className="text-4xl mb-4" />

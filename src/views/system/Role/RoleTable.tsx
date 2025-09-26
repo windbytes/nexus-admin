@@ -1,11 +1,12 @@
+import type { RoleModel } from '@/services/system/role/type';
 import { Table, type TableProps } from 'antd';
 import type React from 'react';
 
 interface RoleTableProps {
-  tableData: any[];
+  tableData: RoleModel[];
   loading: boolean;
   columns: TableProps['columns'];
-  onRow: (record: any) => any;
+  onRow: (record: RoleModel) => any;
   rowSelection: TableProps['rowSelection'];
   height: number;
   // 分页配置
@@ -29,12 +30,12 @@ const RoleTable: React.FC<RoleTableProps> = ({
   return (
     <Table
       size="small"
-      onRow={onRow}
+      onRow={onRow as any}
       style={{ marginTop: '8px' }}
       bordered
-      pagination={pagination}
-      dataSource={tableData}
-      columns={columns}
+      pagination={pagination as any}
+      dataSource={tableData || []}
+      columns={columns || []}
       loading={loading}
       rowKey="id"
       scroll={{ x: 'max-content', y: height - 128 }}

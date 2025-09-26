@@ -1,4 +1,3 @@
-import type { PageQueryParams } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 import type { InterfacePermission } from '../../menu/menuApi';
 import type { MenuModel } from '../../menu/type';
@@ -34,7 +33,7 @@ const PermissionButtonApi = {
 /**
  * 权限按钮查询参数
  */
-export interface ButtonSearchParams extends PageQueryParams {
+export interface ButtonSearchParams {
   name?: string;
   code?: string;
   menuId?: string;

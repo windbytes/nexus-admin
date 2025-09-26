@@ -30,19 +30,19 @@ const PermissionAssign: React.FC = () => {
           {
             key: 'role-assign',
             label: '角色权限分配',
-            className: 'h-full',
+            className: 'h-full pt-4',
             children: <RolePermissionAssign />,
           },
           {
             key: 'permission-preview',
             label: '权限预览',
-            className: 'h-full',
+            className: 'h-full pt-4',
             children: <PermissionPreview />,
           },
           {
             key: 'batch-operation',
             label: '批量操作',
-            className: 'h-full',
+            className: 'h-full pt-4',
             children: <BatchPermissionOperation />,
           },
         ]}
