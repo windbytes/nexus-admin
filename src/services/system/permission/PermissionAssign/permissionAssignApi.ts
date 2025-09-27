@@ -124,6 +124,6 @@ export const permissionAssignService: IPermissionAssignService = {
     return HttpRequest.get({
       url: PermissionAssignApi.getRolePermissionDetail,
       params: { roleCode },
-    });
+    }, {successMessageMode: 'none'});
   },
 };

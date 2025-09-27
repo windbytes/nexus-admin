@@ -116,7 +116,7 @@ const mockPermissionAssignData = [
 
 // 模拟角色权限详情数据
 const mockRolePermissionDetails = {
-  'admin-role': {
+  'admin': {
     menuPermissions: [
       '235123826202185728', // 系统管理
       '259950204508307456', // 用户管理

@@ -134,17 +134,20 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
   }
 
   return (
-    <div className="h-full overflow-auto">
-      <Tree
-        checkable
-        checkedKeys={checkedKeys}
-        onCheck={handleCheck}
-        onExpand={handleExpand}
-        expandedKeys={expandedKeys}
-        treeData={treeData}
-        showLine
-        className="button-permission-tree"
-      />
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-auto">
+        <Tree
+          checkable
+          checkedKeys={checkedKeys}
+          onCheck={handleCheck}
+          onExpand={handleExpand}
+          expandedKeys={expandedKeys}
+          treeData={treeData}
+          showLine
+          className="button-permission-tree"
+          virtual={false}
+        />
+      </div>
     </div>
   );
 });

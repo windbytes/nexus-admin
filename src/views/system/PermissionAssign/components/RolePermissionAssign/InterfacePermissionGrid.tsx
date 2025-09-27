@@ -118,9 +118,9 @@ const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* 搜索和全选栏 */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex justify-between items-center">
           <Input.Search
             placeholder="搜索接口权限..."

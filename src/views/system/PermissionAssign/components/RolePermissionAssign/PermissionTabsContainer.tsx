@@ -73,7 +73,11 @@ const PermissionTabsContainer: React.FC<PermissionTabsContainerProps> = memo(({
       );
     }
 
-    return permissionComponent;
+    return (
+      <div className="h-full overflow-hidden">
+        {permissionComponent}
+      </div>
+    );
   }, [currentRoleCode, isLoading]);
 
   /**
@@ -104,16 +108,26 @@ const PermissionTabsContainer: React.FC<PermissionTabsContainerProps> = memo(({
   ], [renderPermissionContent, menuCheckedKeys, buttonCheckedKeys, interfaceCheckedKeys, onMenuPermissionChange, onButtonPermissionChange, onInterfacePermissionChange]);
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 h-0 overflow-hidden">
       <Card
         title={`${activeTab === 'menu' ? '菜单' : activeTab === 'button' ? '按钮' : '接口'}权限分配`}
         className="h-full flex flex-col"
-        styles={{ body: { flex: 1 } }}
+        styles={{ 
+          body: { 
+            flex: 1, 
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
+          } 
+        }}
       >
         <Tabs
           activeKey={activeTab}
           onChange={onTabChange}
           items={tabItems}
+          style={{ height: '100%' }}
+          tabBarStyle={{ marginBottom: 0 }}
         />
       </Card>
     </div>
