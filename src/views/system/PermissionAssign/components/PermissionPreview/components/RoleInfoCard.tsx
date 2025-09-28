@@ -8,7 +8,7 @@ import type { RoleModel } from '@/services/system/role/type';
  */
 interface RoleInfoCardProps {
   /** 角色信息 */
-  roleInfo?: RoleModel;
+  roleInfo?: RoleModel | undefined;
 }
 
 /**

@@ -11,11 +11,11 @@ import InterfacePermissionTable from './InterfacePermissionTable';
  */
 interface DetailPermissionTabsProps {
   /** 菜单权限数据 */
-  menuDetails?: MenuModel[];
+  menuDetails?: MenuModel[] | undefined;
   /** 菜单权限加载状态 */
   menuDetailsLoading?: boolean;
   /** 按钮权限数据 */
-  buttonDetails?: MenuModel[];
+  buttonDetails?: MenuModel[] | undefined;
   /** 按钮权限加载状态 */
   buttonDetailsLoading?: boolean;
   /** 菜单权限数量 */
