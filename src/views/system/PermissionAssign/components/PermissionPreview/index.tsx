@@ -40,7 +40,7 @@ const PermissionPreview: React.FC<PermissionPreviewProps> = ({
    * 查询角色列表
    */
   const { data: roleListResponse, isLoading: roleListLoading } = useQuery({
-    queryKey: ['role-list'],
+    queryKey: ['role-list-page'],
     queryFn: () => roleService.getRoleListPage({ pageNum: 1, pageSize: 100 }),
     enabled: showRoleSelector,
   });
