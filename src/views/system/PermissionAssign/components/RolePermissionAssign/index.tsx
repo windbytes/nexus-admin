@@ -78,13 +78,9 @@ const RolePermissionAssign: React.FC<RolePermissionAssignProps> = memo(({
       permissionIds: string[];
     }) => permissionAssignService.assignRolePermission(currentRoleCode || '', permissionType, permissionIds),
     onSuccess: () => {
-      message.success('权限分配成功');
       queryClient.invalidateQueries({ queryKey: ['role-permissions', currentRoleCode] });
       onComplete?.();
-    },
-    onError: (error: any) => {
-      message.error(error.message || '权限分配失败');
-    },
+    }
   });
 
   /**
@@ -167,6 +163,7 @@ const RolePermissionAssign: React.FC<RolePermissionAssignProps> = memo(({
               showSaveButton={showSaveButton}
               showRefreshButton={showRefreshButton}
               saveLoading={assignPermissionMutation.isPending}
+              activeTab={activeTab}
             />
           </Row>
         </Card>

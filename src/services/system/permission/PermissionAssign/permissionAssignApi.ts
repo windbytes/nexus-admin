@@ -9,7 +9,7 @@ const PermissionAssignApi = {
   // 获取权限分配列表
   getPermissionAssignList: '/sys/permission/assign/list',
   // 分配角色权限
-  assignRolePermission: '/sys/permission/assign/role',
+  assignRolePermission: '/sys/permission/assign/assignRolePermission',
   // 获取角色权限详情
   getRolePermissionDetail: '/sys/permission/assign/roleDetail',
   // 获取菜单接口列表

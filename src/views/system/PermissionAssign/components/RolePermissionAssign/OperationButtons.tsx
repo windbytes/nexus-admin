@@ -21,6 +21,7 @@ interface OperationButtonsProps {
   saveLoading?: boolean;
   /** 刷新按钮加载状态 */
   refreshLoading?: boolean;
+  activeTab: 'menu' | 'button' | 'interface';
 }
 
 /**
@@ -35,6 +36,7 @@ const OperationButtons: React.FC<OperationButtonsProps> = memo(({
   showRefreshButton = true,
   saveLoading = false,
   refreshLoading = false,
+  activeTab,
 }) => {
   return (
     <Col>
@@ -57,7 +59,7 @@ const OperationButtons: React.FC<OperationButtonsProps> = memo(({
             loading={saveLoading}
             disabled={!hasRole}
           >
-            保存权限
+            保存{activeTab === 'menu' ? '菜单' : activeTab === 'button' ? '按钮' : '接口'}权限
           </Button>
         )}
       </Space>
