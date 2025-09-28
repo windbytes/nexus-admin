@@ -33,6 +33,36 @@ interface PermissionTabsContainerProps {
 }
 
 /**
+ * 菜单权限组件包装 - 独立memo，避免其他权限变化时重渲染
+ */
+const MenuPermissionTreeWrapper = memo<{
+  checkedKeys: string[];
+  onCheck: (keys: string[]) => void;
+}>(({ checkedKeys, onCheck }) => (
+  <MenuPermissionTree checkedKeys={checkedKeys} onCheck={onCheck} />
+));
+
+/**
+ * 按钮权限组件包装 - 独立memo，避免其他权限变化时重渲染
+ */
+const ButtonPermissionTreeWrapper = memo<{
+  checkedKeys: string[];
+  onCheck: (keys: string[]) => void;
+}>(({ checkedKeys, onCheck }) => (
+  <ButtonPermissionTree checkedKeys={checkedKeys} onCheck={onCheck} />
+));
+
+/**
+ * 接口权限组件包装 - 独立memo，避免其他权限变化时重渲染
+ */
+const InterfacePermissionGridWrapper = memo<{
+  checkedKeys: string[];
+  onCheck: (keys: string[]) => void;
+}>(({ checkedKeys, onCheck }) => (
+  <InterfacePermissionGrid checkedKeys={checkedKeys} onCheck={onCheck} />
+));
+
+/**
  * 权限分配Tabs容器组件
  * 专门负责Tabs切换和权限内容渲染
  */
@@ -81,31 +111,46 @@ const PermissionTabsContainer: React.FC<PermissionTabsContainerProps> = memo(({
   }, [currentRoleCode, isLoading]);
 
   /**
-   * Tabs组件的items配置 - 使用useMemo优化
+   * 菜单权限Tab配置 - 独立memo，只依赖菜单相关状态
+   */
+  const menuTabItem = useMemo(() => ({
+    key: 'menu',
+    label: '菜单权限',
+    children: renderPermissionContent(
+      <MenuPermissionTreeWrapper checkedKeys={menuCheckedKeys} onCheck={onMenuPermissionChange} />
+    ),
+  }), [renderPermissionContent, menuCheckedKeys, onMenuPermissionChange]);
+
+  /**
+   * 按钮权限Tab配置 - 独立memo，只依赖按钮相关状态
+   */
+  const buttonTabItem = useMemo(() => ({
+    key: 'button',
+    label: '按钮权限',
+    children: renderPermissionContent(
+      <ButtonPermissionTreeWrapper checkedKeys={buttonCheckedKeys} onCheck={onButtonPermissionChange} />
+    ),
+  }), [renderPermissionContent, buttonCheckedKeys, onButtonPermissionChange]);
+
+  /**
+   * 接口权限Tab配置 - 独立memo，只依赖接口相关状态
+   */
+  const interfaceTabItem = useMemo(() => ({
+    key: 'interface',
+    label: '接口权限',
+    children: renderPermissionContent(
+      <InterfacePermissionGridWrapper checkedKeys={interfaceCheckedKeys} onCheck={onInterfacePermissionChange} />
+    ),
+  }), [renderPermissionContent, interfaceCheckedKeys, onInterfacePermissionChange]);
+
+  /**
+   * Tabs组件的items配置 - 组合所有tab项
    */
   const tabItems = useMemo(() => [
-    {
-      key: 'menu',
-      label: '菜单权限',
-      children: renderPermissionContent(
-        <MenuPermissionTree checkedKeys={menuCheckedKeys} onCheck={onMenuPermissionChange} />
-      ),
-    },
-    {
-      key: 'button',
-      label: '按钮权限',
-      children: renderPermissionContent(
-        <ButtonPermissionTree checkedKeys={buttonCheckedKeys} onCheck={onButtonPermissionChange} />
-      ),
-    },
-    {
-      key: 'interface',
-      label: '接口权限',
-      children: renderPermissionContent(
-        <InterfacePermissionGrid checkedKeys={interfaceCheckedKeys} onCheck={onInterfacePermissionChange} />
-      ),
-    },
-  ], [renderPermissionContent, menuCheckedKeys, buttonCheckedKeys, interfaceCheckedKeys, onMenuPermissionChange, onButtonPermissionChange, onInterfacePermissionChange]);
+    menuTabItem,
+    buttonTabItem,
+    interfaceTabItem,
+  ], [menuTabItem, buttonTabItem, interfaceTabItem]);
 
   return (
     <div className="flex-1 h-0 overflow-hidden">

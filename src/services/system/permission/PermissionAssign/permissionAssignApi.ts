@@ -1,4 +1,6 @@
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
+import type { InterfacePermission } from '../../menu/menuApi';
 
 /**
  * 权限分配相关接口枚举
@@ -10,6 +12,8 @@ const PermissionAssignApi = {
   assignRolePermission: '/sys/permission/assign/role',
   // 获取角色权限详情
   getRolePermissionDetail: '/sys/permission/assign/roleDetail',
+  // 获取菜单接口列表
+  getMenuInterfacePage: '/sys/permission/assign/getMenuInterfacePage',
 };
 
 /**
@@ -50,6 +54,16 @@ export interface PermissionAssignItem {
 }
 
 /**
+ * 接口分页查询参数
+ */
+interface MenuInterfacePageParams extends PageQueryParams{
+  menuId?: string;
+  code?: string;
+  remark?: string;
+  name?: string;
+}
+
+/**
  * 权限分配服务接口
  */
 export interface IPermissionAssignService {
@@ -83,6 +97,13 @@ export interface IPermissionAssignService {
     buttonPermissions: string[];
     interfacePermissions: string[];
   }>;
+
+  /**
+   * 获取菜单接口列表
+   * @param params 查询参数
+   * @returns 菜单接口列表
+   */
+  getMenuInterfacePage(params: MenuInterfacePageParams): Promise<PageResult<InterfacePermission>>;
 }
 
 /**
@@ -124,6 +145,16 @@ export const permissionAssignService: IPermissionAssignService = {
     return HttpRequest.get({
       url: PermissionAssignApi.getRolePermissionDetail,
       params: { roleCode },
+    }, {successMessageMode: 'none'});
+  },
+
+  /**
+   * 获取菜单接口列表
+   */
+  async getMenuInterfacePage(params: MenuInterfacePageParams): Promise<PageResult<InterfacePermission>> {
+    return HttpRequest.post<PageResult<InterfacePermission>>({
+      url: PermissionAssignApi.getMenuInterfacePage,
+      data: params,
     }, {successMessageMode: 'none'});
   },
 };

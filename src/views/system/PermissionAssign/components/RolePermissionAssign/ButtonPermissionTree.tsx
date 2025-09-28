@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Tree, Spin, Empty, Tag, Space } from 'antd';
-import { useCallback, useMemo, useState, memo, type ReactNode } from 'react';
+import { Table, Spin, Empty, Tag } from 'antd';
+import { useMemo, memo } from 'react';
 import type React from 'react';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
-import type { TreeProps } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import type { MenuModel } from '@/services/system/menu/type';
 import { addIcon } from '@/utils/optimized-icons';
 import { useTranslation } from 'react-i18next';
@@ -18,18 +18,6 @@ const MenuType = {
 type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 /**
- * 树节点数据类型
- */
-interface TreeNode {
-  key: string;
-  title: React.ReactNode;
-  icon?: ReactNode | ((props: any) => ReactNode);
-  children?: TreeNode[];
-  isLeaf?: boolean;
-  data: MenuModel | null;
-}
-
-/**
  * 按钮权限树组件Props
  */
 interface ButtonPermissionTreeProps {
@@ -38,88 +26,115 @@ interface ButtonPermissionTreeProps {
 }
 
 /**
- * 按钮权限树组件
- * 以树形结构展示按钮权限分配
+ * 按钮权限表格组件
+ * 以表格树结构展示按钮权限分配，只允许选中菜单类型为3的按钮
  */
 const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checkedKeys, onCheck }) => {
   const { t } = useTranslation();
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   /**
    * 查询权限按钮列表
    */
-  const { data: allDirectoryData, isLoading } = useQuery({
+  const { data: menuList, isLoading } = useQuery({
     queryKey: ['permission-buttons'],
     queryFn: () => permissionButtonService.getButtonList({}),
   });
 
   /**
-   * 递归处理目录数据，将菜单数据转换为树形结构
+   * 获取所有按钮菜单ID（只包括菜单类型为3的项）
+   * @param menus 菜单列表
    */
-    const translateDirectory = useCallback(
-      (data: MenuModel[]): TreeNode[] => {
-        const loop = (items: any[]): TreeNode[] =>
-          items.map((item) => {
-            const iconNode = item.icon ? addIcon(item.icon) : null;
-            const newItem: TreeNode = {
-              ...item,
-              key: item.id,
-              title: (
-                <Space>
-                  {iconNode}
-                  {t(item.title || item.name)}
-                  {item.menuType === MenuType.PERMISSION_BUTTON && (
-                    <Tag color="blue">
-                      按钮
-                    </Tag>
-                  )}
-                </Space>
-              ),
-              data: item.menuType === MenuType.PERMISSION_BUTTON ? item : null,
-              isLeaf: item.menuType === MenuType.PERMISSION_BUTTON,
-            };
-  
-            if (Array.isArray(item.children) && item.children.length > 0) {
-              newItem.children = loop(item.children);
-            }
-  
-            return newItem;
-          });
-  
-        return loop(data);
-      },
-      [t],
-    );
+  const getAllButtonIds = (menus: MenuModel[]): string[] => {
+    const ids: string[] = [];
+    const traverse = (items: MenuModel[]) => {
+      items.forEach((item) => {
+        if (item.menuType === MenuType.PERMISSION_BUTTON) {
+          ids.push(item.id);
+        }
+        if (item.children && item.children.length > 0) {
+          traverse(item.children);
+        }
+      });
+    };
+    traverse(menus);
+    return ids;
+  };
 
   /**
-   * 构建树形数据
+   * 表格列定义
    */
-  const treeData = useMemo(() => {
-    if (!allDirectoryData) return [];
-
-    // 直接使用菜单数据构建树形结构，后端返回的数据已经是树形结构
-    return translateDirectory(allDirectoryData);
-  }, [allDirectoryData, translateDirectory]);
-
-  /**
-   * 处理树节点选中
-   * @param checkedKeysValue 选中的节点keys
-   */
-  const handleCheck: TreeProps['onCheck'] = useCallback(
-    (checkedKeysValue: any) => {
-      const keys = checkedKeysValue.checked;
-      onCheck(keys);
+  const columns: ColumnsType<MenuModel> = [
+    {
+      title: '按钮名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string, record: MenuModel) => (
+        <div className="flex items-center space-x-2">
+          {record.icon && addIcon(record.icon)}
+          <span className="font-medium">{t(name)}</span>
+          {record.menuType === MenuType.PERMISSION_BUTTON && (
+            <Tag color="blue">按钮</Tag>
+          )}
+        </div>
+      ),
     },
-    [onCheck],
-  );
+    {
+      title: '按钮编码',
+      dataIndex: 'code',
+      key: 'code',
+      render: (code: string) => <Tag color="purple">{code || '-'}</Tag>,
+    },
+    {
+      title: '菜单路径',
+      dataIndex: 'url',
+      key: 'url',
+      render: (url: string) => <Tag color="green">{url || '-'}</Tag>,
+    },
+    {
+      title: '组件路径',
+      dataIndex: 'component',
+      key: 'component',
+      ellipsis: true,
+      render: (component: string) => component || '-',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: boolean) => <Tag color={status ? 'green' : 'red'}>{status ? '启用' : '禁用'}</Tag>,
+    },
+    {
+      title: '排序',
+      dataIndex: 'sortNo',
+      key: 'sortNo',
+      width: 80,
+    },
+  ];
 
   /**
-   * 处理树节点展开
-   * @param keys 展开的节点keys
+   * Table 行选择配置 - 只允许选中菜单类型为3（按钮）的行
    */
-  const handleExpand = useCallback((keys: React.Key[]) => {
-    setExpandedKeys(keys as string[]);
-  }, []);
+  const rowSelection = useMemo(() => ({
+    selectedRowKeys: checkedKeys,
+    onChange: (selectedRowKeys: React.Key[]) => {
+      onCheck(selectedRowKeys as string[]);
+    },
+    onSelectAll: (selected: boolean) => {
+      if (selected) {
+        // 全选时，只选择所有按钮类型的菜单
+        const allButtonIds = getAllButtonIds(menuList || []);
+        onCheck(allButtonIds);
+      } else {
+        // 取消全选时，清空所有选择
+        onCheck([]);
+      }
+    },
+    getCheckboxProps: (record: MenuModel) => ({
+      name: record.name,
+      // 只允许选中菜单类型为3的行
+      disabled: record.menuType !== MenuType.PERMISSION_BUTTON,
+    }),
+  }), [checkedKeys, menuList, onCheck]);
 
   if (isLoading) {
     return (
@@ -129,26 +144,26 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
     );
   }
 
-  if (!treeData.length) {
+  if (!menuList || menuList.length === 0) {
     return <Empty description="暂无按钮权限数据" image={Empty.PRESENTED_IMAGE_SIMPLE} className="mt-8" />;
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-auto">
-        <Tree
-          checkable
-          checkedKeys={checkedKeys}
-          onCheck={handleCheck}
-          onExpand={handleExpand}
-          expandedKeys={expandedKeys}
-          treeData={treeData}
-          showLine
-          className="button-permission-tree"
-          virtual={false}
-        />
-      </div>
-    </div>
+    <Table<MenuModel>
+      columns={columns}
+      dataSource={menuList || []}
+      loading={isLoading}
+      rowKey="id"
+      rowSelection={rowSelection}
+      pagination={false}
+      bordered
+      scroll={{ x: 'max-content', y: 'calc(100vh - 536px)' }}
+      expandable={{
+        defaultExpandAllRows: true,
+        childrenColumnName: 'children',
+      }}
+      className="h-full mt-4 button-permission-table"
+    />
   );
 });
 

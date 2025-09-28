@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { Checkbox, Card, Spin, Empty, Tag, Input } from 'antd';
+import { Spin, Tag, Input, Table } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo, memo } from 'react';
 import type React from 'react';
+import type { ColumnsType } from 'antd/es/table';
 import type { InterfacePermission } from '@/services/system/menu/menuApi';
+import { permissionAssignService } from '@/services/system/permission/PermissionAssign/permissionAssignApi';
+import { useTranslation } from 'react-i18next';
 
 /**
- * 接口权限网格组件Props
+ * 接口权限表格组件Props
  */
 interface InterfacePermissionGridProps {
   checkedKeys: string[];
@@ -14,40 +17,38 @@ interface InterfacePermissionGridProps {
 }
 
 /**
- * 接口权限网格组件
- * 以网格形式展示接口权限分配
+ * 接口权限表格组件
+ * 以表格形式展示接口权限分配，支持分页和搜索
  */
 const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
   checkedKeys,
   onCheck,
 }) => {
   const [searchText, setSearchText] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const { t } = useTranslation();
 
   /**
    * 查询接口权限列表
-   * 这里需要根据实际API调整
+   * 支持分页和搜索
    */
-  const { data: interfaceList, isLoading } = useQuery({
-    queryKey: ['interface-permissions', searchText],
+  const { data: pageData, isLoading } = useQuery({
+    queryKey: ['interface-permissions', searchText, currentPage, pageSize],
     queryFn: async () => {
-      // 这里应该调用获取所有接口权限的API
-      // 暂时返回空数组，实际应该调用相应的API
-      return [] as InterfacePermission[];
+      return permissionAssignService.getMenuInterfacePage({
+        pageNum: currentPage,
+        pageSize: pageSize,
+        name: searchText,
+      });
     },
   });
 
-  /**
-   * 过滤后的接口权限列表
-   */
-  const filteredInterfaces = useMemo(() => {
-    if (!interfaceList) return [];
-    if (!searchText) return interfaceList;
-    
-    return interfaceList.filter(interfaceItem =>
-      interfaceItem.code.toLowerCase().includes(searchText.toLowerCase()) ||
-      interfaceItem.remark.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [interfaceList, searchText]);
+  // 解构分页数据
+  const interfaceList = pageData?.records || [];
+  const total = pageData?.totalRow || 0;
+
 
   /**
    * 处理搜索
@@ -55,49 +56,133 @@ const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
    */
   const handleSearch = useCallback((value: string) => {
     setSearchText(value);
+    setCurrentPage(1); // 搜索时重置到第一页
   }, []);
 
   /**
-   * 处理单个接口权限选中
-   * @param interfaceId 接口权限ID
-   * @param checked 是否选中
+   * 处理输入框变化
+   * @param e 输入事件
    */
-  const handleInterfaceCheck = useCallback((interfaceId: string, checked: boolean) => {
-    if (checked) {
-      onCheck([...checkedKeys, interfaceId]);
-    } else {
-      onCheck(checkedKeys.filter(key => key !== interfaceId));
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  }, []);
+
+  /**
+   * 处理清空搜索
+   */
+  const handleClear = useCallback(() => {
+    setInputValue('');
+    setSearchText('');
+    setCurrentPage(1);
+  }, []);
+
+
+  /**
+   * 处理分页变化
+   * @param page 页码
+   * @param size 每页大小
+   */
+  const handlePageChange = useCallback((page: number, size?: number) => {
+    setCurrentPage(page);
+    if (size && size !== pageSize) {
+      setPageSize(size);
     }
-  }, [checkedKeys, onCheck]);
+  }, [pageSize]);
 
   /**
-   * 处理全选/取消全选
-   * @param checked 是否全选
+   * Table 列定义
    */
-  const handleSelectAll = useCallback((checked: boolean) => {
-    if (checked) {
-      const allIds = filteredInterfaces.map(item => item.id);
-      onCheck(allIds);
-    } else {
-      onCheck([]);
-    }
-  }, [filteredInterfaces, onCheck]);
+  const columns: ColumnsType<InterfacePermission> = useMemo(() => [
+    {
+      title: '所属菜单',
+      dataIndex: 'menuName',
+      key: 'menuName',
+      width: 150,
+      render: (menuName) => (
+        <Tag color="blue">{t(menuName)}</Tag>
+      ),
+    },
+    {
+      title: '接口编码',
+      dataIndex: 'code',
+      key: 'code',
+      width: 240,
+      render: (code) => (
+        <Tag color="purple">{code}</Tag>
+      ),
+    },
+    {
+      title: '接口名称',
+      dataIndex: 'name',
+      key: 'name',
+      width: 200,
+      ellipsis: true,
+    },
+    {
+      title: '请求路径',
+      dataIndex: 'path',
+      key: 'path',
+      width: 300,
+      ellipsis: true,
+      render: (path) => (
+        <code className="bg-gray-100 px-2 py-1 rounded">{path}</code>
+      ),
+    },
+    {
+      title: '请求方法',
+      dataIndex: 'method',
+      align: 'center',
+      key: 'method',
+      width: 100,
+      render: (method) => {
+        const methodColors = {
+          GET: 'green',
+          POST: 'blue',
+          PUT: 'orange',
+          DELETE: 'red',
+          PATCH: 'purple',
+        };
+        return (
+          <Tag color={methodColors[method as keyof typeof methodColors] || 'default'}>
+            {method}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: '描述',
+      dataIndex: 'remark',
+      key: 'remark',
+      ellipsis: true,
+      render: (remark) => remark || '暂无描述',
+    },
+  ], [t]);
 
   /**
-   * 检查是否全选
+   * Table 行选择配置
    */
-  const isAllSelected = useMemo(() => {
-    if (filteredInterfaces.length === 0) return false;
-    return filteredInterfaces.every(item => checkedKeys.includes(item.id));
-  }, [filteredInterfaces, checkedKeys]);
-
-  /**
-   * 检查是否部分选中
-   */
-  const isIndeterminate = useMemo(() => {
-    const selectedCount = filteredInterfaces.filter(item => checkedKeys.includes(item.id)).length;
-    return selectedCount > 0 && selectedCount < filteredInterfaces.length;
-  }, [filteredInterfaces, checkedKeys]);
+  const rowSelection = useMemo(() => ({
+    selectedRowKeys: checkedKeys,
+    onChange: (selectedRowKeys: React.Key[]) => {
+      onCheck(selectedRowKeys as string[]);
+    },
+    onSelectAll: (selected: boolean) => {
+      if (selected) {
+        // 全选时，添加当前页所有行
+        const currentPageIds = interfaceList.map(item => item.id);
+        const newSelectedKeys = [...new Set([...checkedKeys, ...currentPageIds])];
+        onCheck(newSelectedKeys);
+      } else {
+        // 取消全选时，移除当前页所有行
+        const currentPageIds = interfaceList.map(item => item.id);
+        const newSelectedKeys = checkedKeys.filter(key => !currentPageIds.includes(key));
+        onCheck(newSelectedKeys);
+      }
+    },
+    getCheckboxProps: (record: InterfacePermission) => ({
+      name: record.name,
+    }),
+  }), [checkedKeys, interfaceList, onCheck]);
 
   if (isLoading) {
     return (
@@ -107,93 +192,51 @@ const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
     );
   }
 
-  if (!interfaceList || interfaceList.length === 0) {
-    return (
-      <Empty
-        description="暂无接口权限数据"
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        className="mt-8"
-      />
-    );
-  }
-
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* 搜索和全选栏 */}
-      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+    <div className="h-full flex flex-col">
+      {/* 搜索栏 */}
+      <div className="p-4 flex-shrink-0">
         <div className="flex justify-between items-center">
           <Input.Search
             placeholder="搜索接口权限..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={inputValue}
+            onChange={handleInputChange}
             onSearch={handleSearch}
+            onClear={handleClear}
             allowClear
             enterButton={<SearchOutlined />}
             style={{ width: 300 }}
           />
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              checked={isAllSelected}
-              indeterminate={isIndeterminate}
-              onChange={(e) => handleSelectAll(e.target.checked)}
-            >
-              全选
-            </Checkbox>
-            <Tag color="blue">
-              已选择 {checkedKeys.length} 项
-            </Tag>
-          </div>
+          <Tag color="blue">
+            已选择 {checkedKeys.length} 项
+          </Tag>
         </div>
       </div>
 
-      {/* 接口权限网格 */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredInterfaces.map((interfaceItem) => (
-            <Card
-              key={interfaceItem.id}
-              size="small"
-              className={`interface-permission-card ${
-                checkedKeys.includes(interfaceItem.id) ? 'border-blue-500 bg-blue-50' : ''
-              }`}
-              hoverable
-              onClick={() => handleInterfaceCheck(interfaceItem.id, !checkedKeys.includes(interfaceItem.id))}
-            >
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  checked={checkedKeys.includes(interfaceItem.id)}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleInterfaceCheck(interfaceItem.id, e.target.checked);
-                  }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Tag color="purple">
-                      {interfaceItem.code}
-                    </Tag>
-                  </div>
-                  <div className="text-sm text-gray-600 line-clamp-2">
-                    {interfaceItem.remark || '暂无描述'}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {filteredInterfaces.length === 0 && searchText && (
-          <Empty
-            description="未找到匹配的接口权限"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            className="mt-8"
-          />
-        )}
-      </div>
+      {/* 接口权限表格 */}
+      <Table<InterfacePermission>
+        columns={columns}
+        dataSource={interfaceList}
+        bordered
+        rowKey="id"
+        loading={isLoading}
+        rowSelection={rowSelection}
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
+          onChange: handlePageChange,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+          pageSizeOptions: ['10', '20', '50', '100'],
+          showLessItems: true,
+        }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 656px)' }}
+        className="h-full"
+      />
     </div>
   );
 });
-
-InterfacePermissionGrid.displayName = 'InterfacePermissionGrid';
 
 export default InterfacePermissionGrid;

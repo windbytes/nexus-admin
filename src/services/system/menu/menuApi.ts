@@ -6,6 +6,8 @@ export interface InterfacePermission {
   id: string;
   code: string;
   name: string;
+  // 所属菜单名称
+  menuName: string;
   path: string;
   method: string;
   remark: string;
