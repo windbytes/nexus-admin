@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Select, Space } from 'antd';
+import { Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { useMemo, memo } from 'react';
+import { memo } from 'react';
 import type React from 'react';
 import { roleService } from '@/services/system/role/roleApi';
-import type { RoleModel } from '@/services/system/role/type';
+import { UniversalRoleSelector } from '@/components/UniversalRoleSelector';
 
 /**
  * 角色选择栏组件Props
@@ -20,7 +20,7 @@ interface RoleSelectorBarProps {
 
 /**
  * 角色选择栏组件
- * 专门负责角色选择功能
+ * 使用通用角色选择组件，专门负责角色选择功能
  */
 const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({
   currentRoleCode,
@@ -35,30 +35,18 @@ const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({
     queryFn: () => roleService.getRoleList({}),
   });
 
-  /**
-   * 获取角色选项
-   */
-  const roleOptions = useMemo(() => {
-    if (!roleListResponse) return [];
-    return roleListResponse.map((role: RoleModel) => ({
-      label: role.roleName,
-      value: role.roleCode,
-    }));
-  }, [roleListResponse]);
-
   return (
     <Space>
       <UserOutlined className="text-gray-500" />
       <span className="font-medium">选择角色：</span>
-      <Select
-        placeholder="请选择要分配权限的角色"
-        style={{ width: 300 }}
-        value={currentRoleCode}
-        onChange={onRoleChange}
+      <UniversalRoleSelector
+        roles={roleListResponse || []}
+        selectedRole={currentRoleCode}
+        mode="single"
+        onSelect={onRoleChange}
         loading={loading || roleListLoading}
-        showSearch
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-        options={roleOptions}
+        placeholder="请选择要分配权限的角色"
+        width={300}
       />
     </Space>
   );
