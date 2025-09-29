@@ -80,9 +80,9 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
     },
     {
       title: '按钮编码',
-      dataIndex: 'code',
-      key: 'code',
-      render: (code: string) => <Tag color="purple">{code || '-'}</Tag>,
+      dataIndex: 'perms',
+      key: 'perms',
+      render: (perms: string) => <Tag color="purple">{perms || '-'}</Tag>,
     },
     {
       title: '菜单路径',
