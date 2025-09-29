@@ -10,7 +10,7 @@ interface ParamDrawerProps {
   open: boolean;
   title: string;
   loading: boolean;
-  initialValues?: Partial<SysParam>;
+  initialValues?: Partial<SysParam> | undefined;
   onOk: (values: SysParamFormData) => void;
   onCancel: () => void;
 }

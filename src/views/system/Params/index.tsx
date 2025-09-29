@@ -11,6 +11,7 @@ import {
   type SysParam,
   type SysParamSearchParams,
   type SysParamFormData,
+  type ExportOptions,
 } from '@/services/system/params';
 import { updateParamCache, deleteParamCache, clearAllParamCache } from '@/utils/paramService';
 import { PAGINATION_CONFIG } from './config';
@@ -124,10 +125,10 @@ const Params: React.FC = () => {
   // 导出参数
   const exportMutation = useMutation({
     mutationFn: (options: { type: 'all' | 'selected'; selectedIds?: number[]; searchParams?: SysParamSearchParams }) => {
-      const exportOptions = {
+      const exportOptions: ExportOptions = {
         type: options.type,
-        selectedIds: options.selectedIds,
-        searchParams: options.searchParams,
+        ...(options.selectedIds && { selectedIds: options.selectedIds }),
+        ...(options.searchParams && { searchParams: options.searchParams }),
       };
       return sysParamService.exportParams(exportOptions);
     },
@@ -232,10 +233,10 @@ const Params: React.FC = () => {
 
   // 处理导出
   const handleExport = useCallback((type: 'all' | 'selected') => {
-    const exportOptions = {
+    const exportOptions: { type: 'all' | 'selected'; selectedIds?: number[]; searchParams?: SysParamSearchParams } = {
       type,
-      selectedIds: type === 'selected' ? selectedRowKeys as number[] : undefined,
-      searchParams: type === 'all' ? searchParams : undefined,
+      ...(type === 'selected' && { selectedIds: selectedRowKeys as number[] }),
+      ...(type === 'all' && { searchParams }),
     };
     
     exportMutation.mutate(exportOptions);
