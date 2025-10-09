@@ -1,0 +1,256 @@
+import type React from 'react';
+import { Table, Button, Space, Tooltip, Tag, Switch } from 'antd';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  DatabaseOutlined,
+} from '@ant-design/icons';
+import type { DatabaseDriver } from '@/services/resource/database/driverApi';
+import type { TablePaginationConfig, TableProps } from 'antd';
+import { memo } from 'react';
+
+interface DriverTableProps {
+  data: DatabaseDriver[];
+  loading: boolean;
+  selectedRowKeys: React.Key[];
+  onSelectionChange: (selectedRowKeys: React.Key[], selectedRows: DatabaseDriver[]) => void;
+  onEdit: (record: DatabaseDriver) => void;
+  onDelete: (record: DatabaseDriver) => void;
+  onDownload: (record: DatabaseDriver) => void;
+  onStatusChange: (record: DatabaseDriver, checked: boolean) => void;
+  pagination?: TableProps<DatabaseDriver>['pagination'];
+}
+
+/**
+ * 格式化文件大小
+ */
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
+};
+
+/**
+ * 获取数据库类型标签颜色
+ */
+const getDatabaseTypeColor = (type: string): string => {
+  const colorMap: Record<string, string> = {
+    MySQL: 'blue',
+    PostgreSQL: 'cyan',
+    Oracle: 'red',
+    SQLServer: 'orange',
+    DB2: 'purple',
+    SQLite: 'green',
+    MariaDB: 'geekblue',
+    DM: 'magenta',
+    KingBase: 'volcano',
+    GBase: 'gold',
+  };
+  return colorMap[type] || 'default';
+};
+
+/**
+ * 驱动表格组件
+ */
+const DriverTable: React.FC<DriverTableProps> = memo(
+  ({
+    data,
+    loading,
+    selectedRowKeys,
+    onSelectionChange,
+    onEdit,
+    onDelete,
+    onDownload,
+    onStatusChange,
+    pagination,
+  }) => {
+    // 表格列配置
+    const columns: TableProps<DatabaseDriver>['columns'] = [
+      {
+        title: '序号',
+        dataIndex: 'id',
+        key: 'id',
+        fixed: 'left',
+        width: 70,
+        align: 'center',
+        render: (_: any, __: any, index: number) => {
+          const pageNum = (pagination as TablePaginationConfig)?.current || 1;
+          const pageSize = (pagination as TablePaginationConfig)?.pageSize || 20;
+          return (pageNum - 1) * pageSize + index + 1;
+        },
+      },
+      {
+        title: '驱动名称',
+        dataIndex: 'name',
+        key: 'name',
+        width: 180,
+        fixed: 'left',
+        ellipsis: true,
+        render: (value: string) => (
+          <div className="flex items-center gap-2">
+            <DatabaseOutlined className="text-blue-500" />
+            <span className="font-medium">{value}</span>
+          </div>
+        ),
+      },
+      {
+        title: '数据库类型',
+        dataIndex: 'databaseType',
+        key: 'databaseType',
+        width: 120,
+        align: 'center',
+        render: (value: string) => <Tag color={getDatabaseTypeColor(value)}>{value}</Tag>,
+      },
+      {
+        title: '驱动类',
+        dataIndex: 'driverClass',
+        key: 'driverClass',
+        width: 280,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (value: string) => (
+          <Tooltip title={value}>
+            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{value}</code>
+          </Tooltip>
+        ),
+      },
+      {
+        title: '驱动版本',
+        dataIndex: 'driverVersion',
+        key: 'driverVersion',
+        width: 120,
+        align: 'center',
+        render: (value: string) => value || '-',
+      },
+      {
+        title: '文件名称',
+        dataIndex: 'fileName',
+        key: 'fileName',
+        width: 200,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (value: string) => (
+          <Tooltip title={value}>
+            <span className="text-blue-600">{value}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: '文件大小',
+        dataIndex: 'fileSize',
+        key: 'fileSize',
+        width: 100,
+        align: 'center',
+        render: (value: number) => formatFileSize(value),
+      },
+      {
+        title: '上传时间',
+        dataIndex: 'uploadTime',
+        key: 'uploadTime',
+        width: 180,
+        align: 'center',
+        render: (value: string) => {
+          if (!value) return '-';
+          return new Date(value).toLocaleString('zh-CN');
+        },
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: 100,
+        align: 'center',
+        render: (value: boolean, record: DatabaseDriver) => (
+          <Switch
+            checked={value}
+            onChange={(checked) => onStatusChange(record, checked)}
+            checkedChildren="启用"
+            unCheckedChildren="禁用"
+          />
+        ),
+      },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 200,
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (value: string) => (
+          <Tooltip title={value}>
+            <span>{value || '-'}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: '操作',
+        key: 'action',
+        width: 180,
+        align: 'center',
+        fixed: 'right',
+        render: (_: any, record: DatabaseDriver) => (
+          <Space size="small">
+            <Tooltip title="编辑">
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => onEdit(record)}
+                className="text-blue-500 hover:text-blue-600"
+              />
+            </Tooltip>
+            <Tooltip title="下载">
+              <Button
+                type="text"
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={() => onDownload(record)}
+                className="text-green-500 hover:text-green-600"
+              />
+            </Tooltip>
+            <Tooltip title="删除">
+              <Button
+                type="text"
+                size="small"
+                icon={<DeleteOutlined />}
+                onClick={() => onDelete(record)}
+                className="text-red-500 hover:text-red-600"
+              />
+            </Tooltip>
+          </Space>
+        ),
+      },
+    ];
+
+    // 行选择配置
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: onSelectionChange,
+    };
+
+    return (
+      <Table
+        bordered
+        columns={columns}
+        dataSource={data}
+        rowKey="id"
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={pagination as TablePaginationConfig}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
+        size="middle"
+      />
+    );
+  },
+);
+
+DriverTable.displayName = 'DriverTable';
+
+export default DriverTable;
+
