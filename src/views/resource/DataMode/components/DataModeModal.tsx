@@ -36,6 +36,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
     const [dataSource, setDataSource] = useState<DataSourceType>('database');
     const [jsonText, setJsonText] = useState('');
     const [schemaText, setSchemaText] = useState('');
+    const [status, setStatus] = useState<boolean>(true);
     
     const jsonEditorRef = useRef<CodeEditorRef>(null);
     const schemaEditorRef = useRef<CodeEditorRef>(null);
@@ -112,11 +113,13 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         setDataSource(initialValues.dataSource || 'database');
         setSchemaText(initialValues.schemaJson || '');
         setJsonText(initialValues.sourceJson || '');
+        setStatus(initialValues.status ?? true);
       } else if (open) {
         form.resetFields();
         setDataSource('database');
         setSchemaText('');
         setJsonText('');
+        setStatus(true);
       }
     }, [open, initialValues, form]);
 
@@ -221,7 +224,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
           dataSource,
           schemaJson: currentSchemaText,
           sourceJson: dataSource === 'json' ? (jsonEditorRef.current?.getValue() || jsonText) : undefined,
-          status: Boolean(values.status),
+          status: status,
         };
 
         onOk(submitData);
@@ -243,6 +246,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       setDataSource('database');
       setSchemaText('');
       setJsonText('');
+      setStatus(true);
       onCancel();
     };
 
@@ -266,8 +270,8 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">状态：</span>
                 <Switch 
-                  checked={form.getFieldValue('status')}
-                  onChange={(checked) => form.setFieldValue('status', checked)}
+                  checked={status}
+                  onChange={(checked) => setStatus(checked)}
                   checkedChildren="启用" 
                   unCheckedChildren="禁用" 
                 />

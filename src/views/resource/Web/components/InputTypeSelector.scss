@@ -1,7 +1,7 @@
-.data-source-selector {
+.input-type-selector {
   margin-bottom: 24px;
 
-  .data-source-cards {
+  .input-type-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
@@ -11,7 +11,7 @@
     }
   }
 
-  .data-source-card {
+  .input-type-card {
     position: relative;
     padding: 24px 16px;
     border: 2px solid #d9d9d9;
@@ -31,6 +31,17 @@
       border-color: var(--ant-color-primary);
       background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
       box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+
+      &:hover {
+        border-color: #d9d9d9;
+        box-shadow: none;
+        transform: none;
+      }
     }
 
     .card-icon {
