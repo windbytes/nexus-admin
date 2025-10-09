@@ -270,7 +270,7 @@ export const driverService = {
    * 批量下载驱动文件
    */
   async batchDownloadDriver(ids: string[]): Promise<void> {
-    const response = await HttpRequest.post<Blob>({
+    const response = await HttpRequest.postDownload<Blob>({
       url: DriverAction.batchDownload,
       data: { ids },
       responseType: 'blob',

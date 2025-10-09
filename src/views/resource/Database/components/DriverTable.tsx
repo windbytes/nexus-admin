@@ -191,7 +191,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
       {
         title: '操作',
         key: 'action',
-        width: 180,
+        width: 160,
         align: 'center',
         fixed: 'right',
         render: (_: any, record: DatabaseDriver) => (
@@ -200,27 +200,24 @@ const DriverTable: React.FC<DriverTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined />}
+                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!"/>}
                 onClick={() => onEdit(record)}
-                className="text-blue-500 hover:text-blue-600"
               />
             </Tooltip>
             <Tooltip title="下载">
               <Button
                 type="text"
                 size="small"
-                icon={<DownloadOutlined />}
+                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!"/>}
                 onClick={() => onDownload(record)}
-                className="text-green-500 hover:text-green-600"
               />
             </Tooltip>
             <Tooltip title="删除">
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined />}
+                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!"/>}
                 onClick={() => onDelete(record)}
-                className="text-red-500 hover:text-red-600"
               />
             </Tooltip>
           </Space>
