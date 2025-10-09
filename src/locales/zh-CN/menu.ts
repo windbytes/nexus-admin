@@ -42,6 +42,11 @@ const menu = {
     param: '系统参数',
     announcement: '系统公告',
   },
+  permission: {
+    button: '按钮管理',
+    assign: '权限分配',
+    audit: '权限审计',
+  },
   monitor: {
     main: '系统监控',
     timer: '定时器',
@@ -76,7 +81,7 @@ const menu = {
     docWriter: '文档编辑器',
   },
   apps: {
-    add: "新增应用"
-  }
+    add: '新增应用',
+  },
 };
 export default menu;

@@ -114,19 +114,58 @@ export const addIcon = (name: string | undefined | null) => {
 };
 
 /**
- * @description 获取需要展开的 subMenu
+ * @description 根据菜单结构获取需要展开的 subMenu
  * @param {String} path 当前访问地址
+ * @param {Array} menus 菜单列表
  * @returns array
  */
-export const getOpenKeys = (path: string) => {
-  let newStr = '';
-  const newArr: string[] = [];
-  const arr = path.split('/').map((i) => `/${i}`);
-  for (let i = 1; i < arr.length - 1; i++) {
-    newStr += arr[i];
-    newArr.push(newStr);
-  }
-  return newArr;
+export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
+  const openKeys: string[] = [];
+  
+  /**
+   * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
+   * @param menuList 菜单列表
+   * @param targetPath 目标路径
+   * @param parentPaths 父级路径数组
+   * @returns 是否找到目标路径
+   */
+  const findMenuPath = (menuList: RouteItem[], targetPath: string, parentPaths: string[] = []): boolean => {
+    for (const menu of menuList) {
+      // 跳过隐藏的菜单项
+      if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
+        continue;
+      }
+      
+      // 如果找到目标路径
+      if (menu.path === targetPath) {
+        // 将当前路径的所有父级路径添加到 openKeys
+        openKeys.push(...parentPaths);
+        return true;
+      }
+      
+      // 如果有子菜单，递归查找
+      if (menu.children && menu.children.length > 0) {
+        const currentParentPaths = [...parentPaths, menu.path];
+        if (findMenuPath(menu.children, targetPath, currentParentPaths)) {
+          return true;
+        }
+      }
+      
+      // 如果有子路由，也递归查找
+      if (menu.childrenRoute && menu.childrenRoute.length > 0) {
+        const currentParentPaths = [...parentPaths, menu.path];
+        if (findMenuPath(menu.childrenRoute, targetPath, currentParentPaths)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  
+  // 在菜单中查找目标路径
+  findMenuPath(menus, path);
+  
+  return openKeys;
 };
 
 /**

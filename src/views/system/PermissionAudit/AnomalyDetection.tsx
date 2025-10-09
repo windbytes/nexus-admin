@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Table, Select, Button, Space, Tag, Spin, Empty, Modal, message, App } from 'antd';
+import { Card, Table, Select, Button, Space, Tag, Modal, message, App } from 'antd';
 import { ReloadOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo, useId } from 'react';
 import type React from 'react';
-import { permissionService } from '@/services/system/permission/permissionApi';
+import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 import type { TableProps } from 'antd';
 
 /**
@@ -31,7 +31,7 @@ const AnomalyDetection: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['anomaly-detection', searchParams],
-    queryFn: () => permissionService.getAnomalyDetection(searchParams),
+    queryFn: () => permissionAuditService.getAnomalyDetection(searchParams),
   });
 
   /**
@@ -58,7 +58,7 @@ const AnomalyDetection: React.FC = () => {
    * @param value 参数值
    */
   const handleSearchParamChange = useCallback((key: string, value: any) => {
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
       [key]: value,
       pageNumber: 1, // 重置页码
@@ -71,7 +71,7 @@ const AnomalyDetection: React.FC = () => {
    * @param pageSize 页大小
    */
   const handleTableChange = useCallback((page: number, pageSize: number) => {
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
       pageNumber: page,
       pageSize,
@@ -91,29 +91,35 @@ const AnomalyDetection: React.FC = () => {
    * 处理解决异常
    * @param anomalyId 异常ID
    */
-  const handleResolveAnomaly = useCallback((anomalyId: string) => {
-    modal.confirm({
-      title: '确认解决',
-      content: '确定要标记此异常为已解决吗？',
-      onOk: () => {
-        handleAnomalyMutation.mutate({ anomalyId, status: 'resolved' });
-      },
-    });
-  }, [handleAnomalyMutation, modal]);
+  const handleResolveAnomaly = useCallback(
+    (anomalyId: string) => {
+      modal.confirm({
+        title: '确认解决',
+        content: '确定要标记此异常为已解决吗？',
+        onOk: () => {
+          handleAnomalyMutation.mutate({ anomalyId, status: 'resolved' });
+        },
+      });
+    },
+    [handleAnomalyMutation, modal],
+  );
 
   /**
    * 处理忽略异常
    * @param anomalyId 异常ID
    */
-  const handleIgnoreAnomaly = useCallback((anomalyId: string) => {
-    modal.confirm({
-      title: '确认忽略',
-      content: '确定要忽略此异常吗？',
-      onOk: () => {
-        handleAnomalyMutation.mutate({ anomalyId, status: 'ignored' });
-      },
-    });
-  }, [handleAnomalyMutation, modal]);
+  const handleIgnoreAnomaly = useCallback(
+    (anomalyId: string) => {
+      modal.confirm({
+        title: '确认忽略',
+        content: '确定要忽略此异常吗？',
+        onOk: () => {
+          handleAnomalyMutation.mutate({ anomalyId, status: 'ignored' });
+        },
+      });
+    },
+    [handleAnomalyMutation, modal],
+  );
 
   /**
    * 处理刷新
@@ -156,10 +162,10 @@ const AnomalyDetection: React.FC = () => {
    */
   const getAnomalyTypeTag = useCallback((anomalyType: string) => {
     const typeMap: Record<string, { color: string; text: string }> = {
-      'unusual_access': { color: 'red', text: '异常访问' },
-      'permission_escalation': { color: 'orange', text: '权限提升' },
-      'unused_permission': { color: 'blue', text: '未使用权限' },
-      'excessive_permission': { color: 'purple', text: '过度权限' },
+      unusual_access: { color: 'red', text: '异常访问' },
+      permission_escalation: { color: 'orange', text: '权限提升' },
+      unused_permission: { color: 'blue', text: '未使用权限' },
+      excessive_permission: { color: 'purple', text: '过度权限' },
     };
     const typeInfo = typeMap[anomalyType] || { color: 'default', text: anomalyType };
     return <Tag color={typeInfo.color}>{typeInfo.text}</Tag>;
@@ -196,9 +202,7 @@ const AnomalyDetection: React.FC = () => {
         dataIndex: 'description',
         key: 'description',
         ellipsis: true,
-        render: (description: string) => (
-          <span className="text-gray-700">{description}</span>
-        ),
+        render: (description: string) => <span className="text-gray-700">{description}</span>,
       },
       {
         title: '检测时间',
@@ -221,12 +225,7 @@ const AnomalyDetection: React.FC = () => {
         align: 'center',
         render: (_, record) => (
           <Space size="small">
-            <Button
-              type="link"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetail(record)}
-            >
+            <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
               详情
             </Button>
             {record.status === 'pending' && (
@@ -274,7 +273,9 @@ const AnomalyDetection: React.FC = () => {
       <Card size="small">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-200">
-            <label htmlFor={anomalyTypeId} className="text-sm font-medium mb-1 block">异常类型：</label>
+            <label htmlFor={anomalyTypeId} className="text-sm font-medium mb-1 block">
+              异常类型：
+            </label>
             <Select
               id={anomalyTypeId}
               placeholder="请选择异常类型"
@@ -291,12 +292,7 @@ const AnomalyDetection: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-              loading={isLoading}
-            >
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading}>
               刷新
             </Button>
           </div>
@@ -356,19 +352,17 @@ const AnomalyDetection: React.FC = () => {
                   {getStatusTag(selectedAnomaly.status)}
                 </div>
               </div>
-              
+
               <div>
                 <span className="text-sm text-gray-500">检测时间：</span>
                 <span className="ml-2">{selectedAnomaly.detectedTime}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm text-gray-500">描述：</span>
-                <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
-                  {selectedAnomaly.description}
-                </div>
+                <div className="mt-1 p-3 bg-gray-50 rounded text-sm">{selectedAnomaly.description}</div>
               </div>
-              
+
               {selectedAnomaly.details && (
                 <div>
                   <span className="text-sm text-gray-500">详细信息：</span>

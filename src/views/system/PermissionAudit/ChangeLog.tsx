@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card, Table, Select, DatePicker, Button, Space, Tag, Spin, Empty, Descriptions, Modal } from 'antd';
-import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Table, Select, DatePicker, Button, Tag, Descriptions, Modal } from 'antd';
+import { EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo, useId } from 'react';
 import type React from 'react';
-import { permissionService, type PermissionChangeLog } from '@/services/system/permission/permissionApi';
+import {
+  permissionAuditService,
+  type PermissionChangeLog,
+} from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 import type { TableProps } from 'antd';
 
 /**
@@ -34,7 +37,7 @@ const ChangeLog: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['permission-change-log', searchParams],
-    queryFn: () => permissionService.getPermissionChangeLog(searchParams),
+    queryFn: () => permissionAuditService.getPermissionChangeLog(searchParams),
   });
 
   /**
@@ -43,7 +46,7 @@ const ChangeLog: React.FC = () => {
    * @param value 参数值
    */
   const handleSearchParamChange = useCallback((key: string, value: any) => {
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
       [key]: value,
       pageNumber: 1, // 重置页码
@@ -56,7 +59,7 @@ const ChangeLog: React.FC = () => {
    * @param pageSize 页大小
    */
   const handleTableChange = useCallback((page: number, pageSize: number) => {
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
       pageNumber: page,
       pageSize,
@@ -154,18 +157,14 @@ const ChangeLog: React.FC = () => {
         dataIndex: 'targetName',
         key: 'targetName',
         ellipsis: true,
-        render: (name: string) => (
-          <span className="font-medium">{name}</span>
-        ),
+        render: (name: string) => <span className="font-medium">{name}</span>,
       },
       {
         title: '操作人',
         dataIndex: 'operatorName',
         key: 'operatorName',
         width: 120,
-        render: (name: string) => (
-          <span className="text-blue-600">{name}</span>
-        ),
+        render: (name: string) => <span className="text-blue-600">{name}</span>,
       },
       {
         title: '操作时间',
@@ -179,9 +178,7 @@ const ChangeLog: React.FC = () => {
         dataIndex: 'description',
         key: 'description',
         ellipsis: true,
-        render: (description: string) => (
-          <span className="text-gray-600">{description}</span>
-        ),
+        render: (description: string) => <span className="text-gray-600">{description}</span>,
       },
       {
         title: '操作',
@@ -189,12 +186,7 @@ const ChangeLog: React.FC = () => {
         width: 100,
         align: 'center',
         render: (_, record) => (
-          <Button
-            type="link"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record)}
-          >
+          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
             详情
           </Button>
         ),
@@ -209,7 +201,9 @@ const ChangeLog: React.FC = () => {
       <Card size="small">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-200">
-            <label htmlFor={operationTypeId} className="text-sm font-medium mb-1 block">操作类型：</label>
+            <label htmlFor={operationTypeId} className="text-sm font-medium mb-1 block">
+              操作类型：
+            </label>
             <Select
               id={operationTypeId}
               placeholder="请选择操作类型"
@@ -227,7 +221,9 @@ const ChangeLog: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-200">
-            <label htmlFor={targetTypeId} className="text-sm font-medium mb-1 block">目标类型：</label>
+            <label htmlFor={targetTypeId} className="text-sm font-medium mb-1 block">
+              目标类型：
+            </label>
             <Select
               id={targetTypeId}
               placeholder="请选择目标类型"
@@ -243,14 +239,17 @@ const ChangeLog: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-200">
-            <label htmlFor={timeRangeId} className="text-sm font-medium mb-1 block">时间范围：</label>
+            <label htmlFor={timeRangeId} className="text-sm font-medium mb-1 block">
+              时间范围：
+            </label>
             <DatePicker.RangePicker
               id={timeRangeId}
               placeholder={['开始时间', '结束时间']}
-              value={searchParams.startTime && searchParams.endTime ? [
-                searchParams.startTime as any,
-                searchParams.endTime as any,
-              ] : null}
+              value={
+                searchParams.startTime && searchParams.endTime
+                  ? [searchParams.startTime as any, searchParams.endTime as any]
+                  : null
+              }
               onChange={(dates) => {
                 if (dates) {
                   handleSearchParamChange('startTime', dates[0]?.format('YYYY-MM-DD'));
@@ -264,22 +263,11 @@ const ChangeLog: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleRefresh}
-            >
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleRefresh}>
               搜索
             </Button>
-            <Button onClick={handleResetSearch}>
-              重置
-            </Button>
-            <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-              loading={isLoading}
-            >
+            <Button onClick={handleResetSearch}>重置</Button>
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading}>
               刷新
             </Button>
           </div>
@@ -289,7 +277,7 @@ const ChangeLog: React.FC = () => {
       {/* 变更日志表格 */}
       <div className="flex-1">
         <Card title="变更日志" size="small" className="h-full">
-          <Table
+          <Table<PermissionChangeLog>
             columns={columns}
             dataSource={changeLogResponse?.records || []}
             loading={isLoading}
@@ -325,26 +313,18 @@ const ChangeLog: React.FC = () => {
         {selectedLog && (
           <div className="py-4">
             <Descriptions column={2} size="small">
-              <Descriptions.Item label="操作类型">
-                {getOperationTypeTag(selectedLog.operationType)}
-              </Descriptions.Item>
-              <Descriptions.Item label="目标类型">
-                {getTargetTypeTag(selectedLog.targetType)}
-              </Descriptions.Item>
+              <Descriptions.Item label="操作类型">{getOperationTypeTag(selectedLog.operationType)}</Descriptions.Item>
+              <Descriptions.Item label="目标类型">{getTargetTypeTag(selectedLog.targetType)}</Descriptions.Item>
               <Descriptions.Item label="目标名称">
                 <span className="font-medium">{selectedLog.targetName}</span>
               </Descriptions.Item>
               <Descriptions.Item label="操作人">
                 <span className="text-blue-600">{selectedLog.operatorName}</span>
               </Descriptions.Item>
-              <Descriptions.Item label="操作时间">
-                {selectedLog.operationTime}
-              </Descriptions.Item>
-              <Descriptions.Item label="描述">
-                {selectedLog.description}
-              </Descriptions.Item>
+              <Descriptions.Item label="操作时间">{selectedLog.operationTime}</Descriptions.Item>
+              <Descriptions.Item label="描述">{selectedLog.description}</Descriptions.Item>
             </Descriptions>
-            
+
             {selectedLog.beforeData && (
               <div className="mt-4">
                 <h4 className="font-medium mb-2">变更前数据：</h4>
@@ -353,7 +333,7 @@ const ChangeLog: React.FC = () => {
                 </pre>
               </div>
             )}
-            
+
             {selectedLog.afterData && (
               <div className="mt-4">
                 <h4 className="font-medium mb-2">变更后数据：</h4>

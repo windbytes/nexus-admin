@@ -5,7 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Outlet, useLocation } from "react-router";
 import AuthRouter from "@/router/AuthRouter";
 import { ErrorFallback } from "@/router/ErrorBoundary";
-import KeepAlive from "@/components/KeepAlive";
+import ActivityKeepAlive from "@/components/KeepAlive/ActivityKeepAlive";
 
 /**
  * 中间主内容区域
@@ -21,9 +21,9 @@ const Content: React.FC = () => {
       <Suspense fallback={<Skeleton />}>
         <ErrorBoundary key={location.pathname} fallback={<ErrorFallback />}>
           <AuthRouter>
-            <KeepAlive>
+            <ActivityKeepAlive>
               <Outlet />
-            </KeepAlive>
+            </ActivityKeepAlive>
           </AuthRouter>
         </ErrorBoundary>
       </Suspense>

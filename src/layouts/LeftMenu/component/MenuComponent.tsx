@@ -81,7 +81,7 @@ const MenuComponent = () => {
   };
 
   useEffect(() => {
-    const openKey = getOpenKeys(pathname);
+    const openKey = getOpenKeys(pathname, menus);
     const route = searchRoute(pathname, menus);
     if (route && Object.keys(route).length) {
       if (dynamicTitle) {
@@ -108,8 +108,8 @@ const MenuComponent = () => {
   // 使用useMemo优化openKeys的计算
   const currentOpenKeys = useMemo(() => {
     const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
-    return getOpenKeys(targetPath);
-  }, [activeKey, pathname]);
+    return getOpenKeys(targetPath, menus);
+  }, [activeKey, pathname, menus]);
 
   const onOpenChange = (openKeys: string[]) => {
     if (!accordion) return setOpenKeys(openKeys);

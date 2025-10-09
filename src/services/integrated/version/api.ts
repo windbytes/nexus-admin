@@ -156,10 +156,10 @@ export const versionsService: IVersionsService = {
           branch: params.branch,
           keyword: params.keyword,
         },
+        adapter: 'fetch',
       },
       {
         successMessageMode: 'none',
-        requestType: 'fetch',
       },
     );
     return response;
@@ -171,7 +171,7 @@ export const versionsService: IVersionsService = {
   async getVersionDetail(workflowId: string, versionId: string): Promise<WorkflowVersion> {
     const response = await HttpRequest.get({
       url: VersionsApi.getVersionDetail.replace('{workflowId}', workflowId).replace('{versionId}', versionId),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -183,7 +183,7 @@ export const versionsService: IVersionsService = {
     const response = await HttpRequest.post({
       url: VersionsApi.createVersion.replace('{workflowId}', params.workflowId),
       data: params,
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -195,7 +195,7 @@ export const versionsService: IVersionsService = {
     const response = await HttpRequest.post({
       url: VersionsApi.publishVersion.replace('{workflowId}', params.workflowId).replace('{version}', params.version),
       data: params,
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -206,7 +206,7 @@ export const versionsService: IVersionsService = {
   async deleteVersion(workflowId: string, versionId: string): Promise<boolean> {
     const response = await HttpRequest.delete({
       url: VersionsApi.deleteVersion.replace('{workflowId}', workflowId).replace('{versionId}', versionId),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -221,7 +221,7 @@ export const versionsService: IVersionsService = {
     const response = await HttpRequest.post({
       url: VersionsApi.compareVersions.replace('{workflowId}', params.workflowId),
       data: params,
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -233,7 +233,7 @@ export const versionsService: IVersionsService = {
     const response = await HttpRequest.post({
       url: VersionsApi.rollbackVersion.replace('{workflowId}', params.workflowId),
       data: params,
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -245,7 +245,7 @@ export const versionsService: IVersionsService = {
     const response = await HttpRequest.get({
       url: VersionsApi.downloadVersion.replace('{workflowId}', workflowId).replace('{versionId}', versionId),
       responseType: 'blob',
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -256,7 +256,7 @@ export const versionsService: IVersionsService = {
   async getVersionLocks(workflowId: string): Promise<WorkflowLock[]> {
     const response = await HttpRequest.get({
       url: VersionsApi.getVersionLocks.replace('{workflowId}', workflowId),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -267,7 +267,7 @@ export const versionsService: IVersionsService = {
   async getVersionBranches(workflowId: string): Promise<WorkflowBranch[]> {
     const response = await HttpRequest.get({
       url: VersionsApi.getVersionBranches.replace('{workflowId}', workflowId),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -285,7 +285,7 @@ export const versionsService: IVersionsService = {
   }> {
     const response = await HttpRequest.get({
       url: VersionsApi.assessVersionImpact.replace('{workflowId}', workflowId).replace('{versionId}', versionId),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -296,7 +296,7 @@ export const versionsService: IVersionsService = {
   async lockVersion(workflowId: string, version: string): Promise<WorkflowLock> {
     const response = await HttpRequest.post({
       url: VersionsApi.lockVersion.replace('{workflowId}', workflowId).replace('{version}', version),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },
@@ -307,7 +307,7 @@ export const versionsService: IVersionsService = {
   async unlockVersion(workflowId: string, version: string): Promise<boolean> {
     const response = await HttpRequest.delete({
       url: VersionsApi.unlockVersion.replace('{workflowId}', workflowId).replace('{version}', version),
-      requestType: 'fetch',
+      adapter: 'fetch',
     });
     return response;
   },

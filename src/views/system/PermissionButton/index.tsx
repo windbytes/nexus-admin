@@ -1,47 +1,46 @@
-import { Card, Tabs } from 'antd';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { Layout, theme } from 'antd';
 import type React from 'react';
-import ButtonList from './ButtonList';
-import ButtonAssign from './ButtonAssign';
+import ButtonTree from './ButtonTree';
+import ButtonDetail from './ButtonDetail';
+import ButtonInterfacePermission from './ButtonInterfacePermission';
+import './permissionButton.scss';
+import type { MenuModel } from '@/services/system/menu/type';
 
 /**
- * 权限按钮管理主组件
- * 提供权限按钮的维护和分配功能
+ * 按钮列表主组件
+ * 提供权限按钮的树形展示和详情查看功能
  */
 const PermissionButton: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('list');
+  const { token } = theme.useToken();
+  const [selectedButton, setSelectedButton] = useState<MenuModel | null>(null);
 
   /**
-   * 处理Tab切换
-   * @param key 选中的Tab key
+   * 处理按钮选择
+   * @param button 选中的按钮
    */
-  const handleTabChange = (key: string) => {
-    setActiveTab(key);
-  };
+  const handleSelectButton = useCallback((button: MenuModel | null) => {
+    setSelectedButton(button);
+  }, []);
 
   return (
-    <div className="permission-button-container h-full">
-      <Card className="h-full" bodyStyle={{ padding: 0 }}>
-        <Tabs
-          activeKey={activeTab}
-          onChange={handleTabChange}
-          items={[
-            {
-              key: 'list',
-              label: '按钮列表',
-              children: <ButtonList />,
-            },
-            {
-              key: 'assign',
-              label: '权限分配',
-              children: <ButtonAssign />,
-            },
-          ]}
-          className="h-full"
-          tabBarStyle={{ marginBottom: 0, padding: '0 24px' }}
+    <Layout>
+      <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
+        {/* 左侧按钮树 */}
+        <ButtonTree
+          onSelectButton={handleSelectButton}
+          selectedButtonId={selectedButton ? selectedButton.id : ''}
         />
-      </Card>
-    </div>
+      </Layout.Sider>
+      <Layout.Content className="flex flex-col ml-4 gap-4">
+        {/* 按钮详情 */}
+        <ButtonDetail 
+          button={selectedButton} 
+        />
+        {/* 按钮接口权限列表 */}
+        <ButtonInterfacePermission button={selectedButton} />
+      </Layout.Content>
+    </Layout>
   );
 };
 

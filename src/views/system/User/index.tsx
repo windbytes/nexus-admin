@@ -397,7 +397,7 @@ const User: React.FC = () => {
         <div className="flex-1 min-h-0">
           <Table
             bordered
-            columns={columns}
+            columns={columns || []}
             dataSource={data}
             rowKey="id"
             rowSelection={{

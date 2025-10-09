@@ -1,5 +1,4 @@
 import {
-  injectable,
   type WorkflowLineEntity,
 } from '@flowgram.ai/free-layout-editor';
 
@@ -7,7 +6,6 @@ import {
  * 运行时服务
  * 用于其他地方进行依赖注入
  */
-@injectable()
 export class RunningService {
   /**
    * 是否为流动线

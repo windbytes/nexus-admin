@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type React from 'react';
 import type { MenuModel } from '@/services/system/menu/type';
 import { menuService, type InterfacePermission } from '@/services/system/menu/menuApi';
+import { usePermission } from '@/hooks/usePermission';
 
 // 组件状态类型 - 合并所有状态
 interface ComponentState {
@@ -61,6 +62,11 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
   // 输入框引用
   const codeInputRef = useRef<any>(null);
   const remarkInputRef = useRef<any>(null);
+
+  // 是否有菜单接口的新增、编辑、删除权限
+  const hasAddPermission = usePermission(['system:menu:interface:add']);
+  const hasEditPermission = usePermission(['system:menu:interface:edit']);
+  const hasDeletePermission = usePermission(['system:menu:interface:delete']);
 
   // 查询菜单接口权限数据
   const {
@@ -311,6 +317,9 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
       // 准备保存的数据
       const updatedItem = {
         ...state.permissionList.find((item) => item.id === id)!,
+        name: state.editForm.name,
+        path: state.editForm.path,
+        method: state.editForm.method,
         code: state.editForm.code,
         remark: state.editForm.remark,
         updateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -559,9 +568,12 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
 
           return (
             <Space size="small">
+              {hasEditPermission && (
               <Tooltip title="编辑">
                 <Button type="link" icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)} />
               </Tooltip>
+              )}
+              {hasDeletePermission && (
               <Tooltip title="删除">
                 <Button
                   type="link"
@@ -572,6 +584,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                   loading={savePermissionMutation.isPending}
                 />
               </Tooltip>
+              )}
             </Space>
           );
         },
@@ -595,7 +608,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
     <Card
       className="flex-1 max-h-full flex flex-col"
       title="接口权限列表"
-      styles={{ body: { flex: 1 } }}
+      styles={{ body: { flex: 1, maxHeight:0 } }}
       extra={
         <Button
           color="default"
@@ -623,7 +636,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
           pageSizeOptions: ['10', '20', '50', '100'],
         }}
         onChange={handleTableChange}
-        scroll={{ x: 'max-content', y: '100%' }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 740px)' }}
         size="middle"
         bordered
         footer={() => {
@@ -658,6 +671,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                 )}
                 {!hasMenuData && <span className="text-gray-400">📋 请先选择菜单</span>}
               </div>
+              {hasAddPermission && (
               <Button
                 type={buttonType}
                 style={{ width: '100%' }}
@@ -665,8 +679,9 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                 disabled={buttonDisabled}
                 title={tooltipText}
               >
-                {buttonText}
-              </Button>
+                  {buttonText}
+                </Button>
+              )}
             </div>
           );
         }}

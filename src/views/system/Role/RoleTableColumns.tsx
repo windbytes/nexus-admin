@@ -175,7 +175,7 @@ const getRoleTableColumns = ({
                 }}
               />
             </Tooltip>
-            <Tooltip title="授权菜单">
+            {/* <Tooltip title="授权菜单">
               <Button
                 type="text"
                 icon={
@@ -190,7 +190,7 @@ const getRoleTableColumns = ({
                   });
                 }}
               />
-            </Tooltip>
+            </Tooltip> */}
             <Dropdown menu={{ items: more(record) }} placement="bottomRight" trigger={['click']}>
               <Button type="text" icon={<MoreOutlined className="text-xl" />} />
             </Dropdown>

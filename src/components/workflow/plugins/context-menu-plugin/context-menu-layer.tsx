@@ -1,7 +1,5 @@
 import {
   FreeLayoutPluginContext,
-  inject,
-  injectable,
   Layer,
   WorkflowHoverService,
   type WorkflowNodeEntity,
@@ -15,15 +13,23 @@ import {
 /**
  * 右键菜单图层
  */
-@injectable()
 export class ContextMenuLayer extends Layer {
-  @inject(FreeLayoutPluginContext) ctx: FreeLayoutPluginContext;
+  ctx: FreeLayoutPluginContext;
+  nodePanelService: WorkflowNodePanelService;
+  hoverService: WorkflowHoverService;
 
-  @inject(WorkflowNodePanelService) nodePanelService: WorkflowNodePanelService;
+  constructor(
+    ctx: FreeLayoutPluginContext,
+    nodePanelService: WorkflowNodePanelService,
+    hoverService: WorkflowHoverService
+  ) {
+    super();
+    this.ctx = ctx;
+    this.nodePanelService = nodePanelService;
+    this.hoverService = hoverService;
+  }
 
-  @inject(WorkflowHoverService) hoverService: WorkflowHoverService;
-
-  onReady(): void {
+  override onReady(): void {
     this.listenPlaygroundEvent('contextmenu', (e) => {
       this.openNodePanel(e);
       e.preventDefault();

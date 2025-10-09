@@ -45,6 +45,6 @@ jobs:
           scp -i private_key.pem -C -r dist.tar.gz $USERNAME@$HOST:/work/nexus
           # 解压并替换目标目录 --strip-components=1  表示解压后删除第一层目录（dist）
           ssh -i private_key.pem $USERNAME@$HOST "tar -zxvf /work/nexus/dist.tar.gz --strip-components=1 -C /work/nexus"
-          ssh -i private_key.pem $USERNAME@$HOST "rm -rf dist.tar.gz"
+          ssh -i private_key.pem $USERNAME@$HOST "rm -rf /work/nexus/dist.tar.gz"
           ssh -i private_key.pem $USERNAME@$HOST "sudo systemctl reload nginx"
           rm private_key.pem

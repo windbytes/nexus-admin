@@ -2,6 +2,58 @@ import type { Response } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
+ * 登录请求参数
+ */
+export interface LoginParams {
+  /** 用户名 */
+  username: string;
+  /** 密码 */
+  password: string;
+  /** 验证码 */
+  captcha: string;
+  /** 验证码key */
+  checkKey: string;
+  /** 记住密码 */
+  remember?: boolean;
+}
+
+/**
+ * 用户角色信息
+ */
+export interface UserRole {
+  /** 角色ID */
+  id: string;
+  /** 角色名称 */
+  roleName: string;
+  /** 角色Code */
+  roleCode: string;
+  /** 角色类型 */
+  roleType: string;
+  /** 角色描述 */
+  remark?: string;
+  /** 角色状态 */
+  status: boolean;
+}
+
+/**
+ * 登录响应数据
+ */
+export interface LoginResponse {
+  /** 访问令牌 */
+  accessToken: string;
+  /** 刷新令牌 */
+  refreshToken: string;
+  /** 用户ID */
+  userId: string;
+  /** 用户名 */
+  username: string;
+  /** 首页路径 */
+  homePath?: string;
+  /** 用户角色列表 */
+  userRoles: UserRole[];
+}
+
+/**
  * 枚举登录需要的接口地址
  */
 const LoginApi = {
@@ -24,7 +76,7 @@ interface ILoginService {
    * @param params 登录参数
    * @returns 登录结果
    */
-  login(params: any): Promise<Response>;
+  login(params: LoginParams): Promise<Response>;
 
   /**
    * 获取验证码
@@ -42,7 +94,7 @@ export const loginService: ILoginService = {
    * @param params 登录参数
    * @returns 登录结果
    */
-  login(params: any): Promise<Response> {
+  login(params: LoginParams): Promise<Response> {
     return HttpRequest.post<Response>(
       {
         url: LoginApi.login,

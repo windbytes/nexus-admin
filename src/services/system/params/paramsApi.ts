@@ -1,4 +1,4 @@
-import { HttpRequest, RequestType } from '@/utils/request';
+import { HttpRequest } from '@/utils/request';
 import type { PageResult } from '@/types/global';
 import type { SysParam, SysParamSearchParams, SysParamFormData, ParamCategory, ExportOptions } from './type';
 
@@ -146,8 +146,9 @@ export const sysParamService: ISysParamService = {
       {
         url: SysParamAction.queryParams,
         data: params,
+        adapter: 'fetch',
       },
-      { successMessageMode: 'none', requestType: RequestType.FETCH },
+      { successMessageMode: 'none' },
     );
     return response;
   },
@@ -176,8 +177,9 @@ export const sysParamService: ISysParamService = {
     const response = await HttpRequest.get<string>(
       {
         url: `${SysParamAction.getParamByCode}/${code}`,
+        adapter: 'fetch',
       },
-      { successMessageMode: 'none', requestType: RequestType.FETCH },
+      { successMessageMode: 'none' },
     );
     return response;
   },

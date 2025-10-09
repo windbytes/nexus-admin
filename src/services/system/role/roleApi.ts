@@ -1,14 +1,19 @@
 import { HttpRequest } from '@/utils/request';
 import type { RoleMenu, RoleModel, RoleSearchParams, UserSearchParams } from './type';
+import type { PageResult } from '@/types/global';
 
 /**
  * 枚举角色相关的api
  */
 const RoleApi = {
   /**
-   * 获取角色列表（分页查询）
+   * 获取角色列表
    */
   getRoleList: '/system/role/getRoleList',
+  /**
+   * 获取角色列表（分页查询）
+   */
+  getRoleListPage: '/system/role/getRoleListPage',
   /**
    * 获取角色详情
    */
@@ -77,11 +82,19 @@ export interface IRoleService {
    */
   getRoleDetail(roleId: string): Promise<RoleModel>;
   /**
+   * 获取角色列表
+  /**
+   * 获取角色列表（不分页）
+   * @param params 角色参数
+   * @returns 角色列表
+   */
+  getRoleList(params: Record<string, any>): Promise<RoleModel[]>;
+  /**
    * 获取角色列表（包含分页数据）
    * @param params 角色参数(包含分页信息)
    * @returns 角色列表
    */
-  getRoleList(params: RoleSearchParams): Promise<Record<string, any>>;
+  getRoleListPage(params: RoleSearchParams): Promise<PageResult<RoleModel>>;
 
   /**
    * 新增角色
@@ -180,10 +193,26 @@ export const roleService: IRoleService = {
       {
         url: RoleApi.getRoleDetail,
         params: { roleId },
+        adapter: 'fetch',
       },
       {
         successMessageMode: 'none',
-        requestType: 'fetch'
+      },
+    );
+  },
+  /**
+   * 获取角色列表（不分页）
+   * @param params 角色参数
+   * @returns 角色列表
+   */
+  async getRoleList(params: Record<string, any>): Promise<RoleModel[]> {
+    return await HttpRequest.post(
+      {
+        url: RoleApi.getRoleList,
+        data: params,
+      },
+      {
+        successMessageMode: 'none',
       },
     );
   },
@@ -192,10 +221,10 @@ export const roleService: IRoleService = {
    * @param params 角色参数(包含分页信息)
    * @returns 角色列表
    */
-  async getRoleList(params: RoleSearchParams): Promise<Record<string, any>> {
-    return await HttpRequest.post(
+  async getRoleListPage(params: RoleSearchParams): Promise<PageResult<RoleModel>> {
+    return await HttpRequest.post<PageResult<RoleModel>>(
       {
-        url: RoleApi.getRoleList,
+        url: RoleApi.getRoleListPage,
         data: params,
       },
       {

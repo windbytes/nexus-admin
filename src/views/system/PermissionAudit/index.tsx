@@ -22,7 +22,7 @@ const PermissionAudit: React.FC = () => {
 
   return (
     <div className="permission-audit-container h-full">
-      <Card className="h-full" bodyStyle={{ padding: 0 }}>
+      <Card className="h-full" styles={{ body: { padding: 0 } }}>
         <Tabs
           activeKey={activeTab}
           onChange={handleTabChange}

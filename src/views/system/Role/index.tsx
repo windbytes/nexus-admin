@@ -57,7 +57,7 @@ const Role: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_roles', searchParams],
-    queryFn: () => roleService.getRoleList({ ...searchParams }),
+    queryFn: () => roleService.getRoleListPage({ ...searchParams }),
   });
 
   // 处理检索
@@ -220,7 +220,7 @@ const Role: React.FC = () => {
         />
         {/* 表格数据 */}
         <RoleTable
-          tableData={tableData?.data || []}
+          tableData={tableData?.records || []}
           loading={isLoading}
           columns={columns}
           onRow={onRow}
@@ -233,7 +233,7 @@ const Role: React.FC = () => {
             hideOnSinglePage: false,
             showSizeChanger: true,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: tableData?.total || 0,
+            total: tableData?.totalRow || 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

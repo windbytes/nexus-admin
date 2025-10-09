@@ -15,8 +15,8 @@ export const createSyncVariablePlugin: PluginCreator<SyncVariablePluginOptions> 
   definePluginCreator<SyncVariablePluginOptions, FreeLayoutPluginContext>({
     /**
      * 画布注册阶段初始化该插件
-     * @param ctx
-     * @param opts
+     * @param _ctx
+     * @param _opts
      */
-    onInit(ctx, opts) {},
+    onInit(_ctx, _opts) {},
   });

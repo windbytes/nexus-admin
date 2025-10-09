@@ -14,6 +14,11 @@ export interface MenuModel {
   parentId: string;
 
   /**
+   * 上级菜单名称
+   */
+  parentName: string;
+
+  /**
    * url
    */
   url: string;
@@ -135,6 +140,11 @@ export interface MenuModel {
    * 更新时间
    */
   updateTime: string;
+
+  /**
+   * 子菜单
+   */
+  children?: MenuModel[];
 }
 
 /**

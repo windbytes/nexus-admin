@@ -110,6 +110,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
             const newItem: any = {
               ...item,
+              value: item.id,
               selectable:
                 menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(item.children) || item.children.length === 0,
               title: (
@@ -159,6 +160,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         ...values,
         status: Boolean(values.status),
         icon: values.originalIcon,
+        routeQuery: values.routeQuery ? values.routeQuery : {},
       };
       onOk(formData);
     } catch (errorInfo: any) {
@@ -242,7 +244,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           <Radio.Group buttonStyle="solid" onChange={(e) => handleMenuTypeChange(e.target.value)}>
             <Radio.Button value={MenuType.SUB_MENU}>子菜单</Radio.Button>
             <Radio.Button value={MenuType.SUB_ROUTE}>子路由</Radio.Button>
-            <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button>
+            {/* <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button> */}
             <Radio.Button value={MenuType.TOP_LEVEL}>目录</Radio.Button>
           </Radio.Group>
         </Form.Item>

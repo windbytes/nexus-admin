@@ -3,7 +3,7 @@ import { Card, Row, Col, Statistic, Table, DatePicker, Button, Space, Spin, Empt
 import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useState, useCallback, useMemo } from 'react';
 import type React from 'react';
-import { permissionService } from '@/services/system/permission/permissionApi';
+import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 import type { TableProps } from 'antd';
 import { useECharts } from '@/hooks/useECharts';
 
@@ -26,7 +26,7 @@ const UsageStatistics: React.FC = () => {
   } = useQuery({
     queryKey: ['permission-statistics', timeRange],
     queryFn: () =>
-      permissionService.getPermissionStatistics(
+      permissionAuditService.getPermissionStatistics(
         timeRange ? { startTime: timeRange[0], endTime: timeRange[1] } : undefined,
       ),
   });

@@ -1,4 +1,5 @@
 import type { MenuModel } from '@/services/system/menu/type';
+import type { PageQueryParams } from '@/types/global';
 
 /**
  * 系统角色
@@ -38,7 +39,7 @@ export interface RoleModel {
 /**
  * 角色查询参数
  */
-export interface RoleSearchParams {
+export interface RoleSearchParams extends PageQueryParams{
   /**
    * 角色编码
    */
@@ -51,8 +52,6 @@ export interface RoleSearchParams {
    * 角色状态
    */
   status?: string;
-  pageNum: number;
-  pageSize: number;
 }
 
 // 定义 state 的类型

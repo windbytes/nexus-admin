@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { Tabs, Dropdown, Button, type TabsProps, type MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
 import { useTabStore, type TabItem } from '@/stores/tabStore';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
@@ -27,6 +28,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
   const [contextMenuPosition, setContextMenuPosition] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [contextMenuTabKey, setContextMenuTabKey] = React.useState<string>('');
 
+  // 使用 useShallow 优化状态选择，减少不必要的重渲染
   const {
     tabs,
     activeKey,
@@ -42,9 +44,27 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     resetTabs,
     addTab,
     setTabs,
-  } = useTabStore();
-  const { menus } = useMenuStore();
-  const { homePath } = useUserStore();
+  } = useTabStore(
+    useShallow((state) => ({
+      tabs: state.tabs,
+      activeKey: state.activeKey,
+      setActiveKey: state.setActiveKey,
+      removeTab: state.removeTab,
+      closeOtherTabs: state.closeOtherTabs,
+      closeLeftTabs: state.closeLeftTabs,
+      closeRightTabs: state.closeRightTabs,
+      closeAllTabs: state.closeAllTabs,
+      reloadTab: state.reloadTab,
+      pinTab: state.pinTab,
+      unpinTab: state.unpinTab,
+      resetTabs: state.resetTabs,
+      addTab: state.addTab,
+      setTabs: state.setTabs,
+    }))
+  );
+  
+  const { menus } = useMenuStore(useShallow((state) => ({ menus: state.menus })));
+  const { homePath } = useUserStore(useShallow((state) => ({ homePath: state.homePath })));
 
   // 根据当前路径查找路由信息
   const findRouteByPath = useCallback(
@@ -84,7 +104,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           const homeTabItem: TabItem = {
             key: homePath,
             label: homeRoute.meta?.title || homePath,
-            icon: homeRoute.meta?.icon,
+            ...(homeRoute.meta?.icon && { icon: homeRoute.meta.icon }),
             path: homePath,
             closable: false, // 第一个tab不可关闭
             route: homeRoute,
@@ -102,7 +122,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           const currentTabItem: TabItem = {
             key: pathname,
             label: currentRoute.meta?.title || pathname,
-            icon: currentRoute.meta?.icon,
+            ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
             path: pathname,
             closable: true,
             route: currentRoute,
@@ -136,7 +156,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const homeTabItem: TabItem = {
               key: homePath,
               label: homeRoute.meta?.title || homePath,
-              icon: homeRoute.meta?.icon,
+              ...(homeRoute.meta?.icon && { icon: homeRoute.meta.icon }),
               path: homePath,
               closable: false,
               route: homeRoute,
@@ -153,7 +173,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const currentTabItem: TabItem = {
               key: pathname,
               label: currentRoute.meta?.title || pathname,
-              icon: currentRoute.meta?.icon,
+              ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
               path: pathname,
               closable: true,
               route: currentRoute,
@@ -172,9 +192,11 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         const homeTabIndex = tabs.findIndex(tab => tab.key === homePath);
         if (homeTabIndex > 0) {
           const homeTab = tabs[homeTabIndex];
-          const otherTabs = tabs.filter(tab => tab.key !== homePath);
-          const newTabs = [homeTab, ...otherTabs];
-          setTabs(newTabs, activeKey);
+          if (homeTab) {
+            const otherTabs = tabs.filter(tab => tab.key !== homePath);
+            const newTabs = [homeTab, ...otherTabs];
+            setTabs(newTabs, activeKey);
+          }
         }
       }
     }
@@ -200,7 +222,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           const currentTabItem: TabItem = {
             key: pathname,
             label: currentRoute.meta?.title || pathname,
-            icon: currentRoute.meta?.icon,
+            ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
             path: pathname,
             closable: true,
             route: currentRoute,
@@ -222,7 +244,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         const homeTabItem: TabItem = {
           key: homePath,
           label: homeRoute.meta?.title || homePath,
-          icon: homeRoute.meta?.icon,
+          ...(homeRoute.meta?.icon && { icon: homeRoute.meta.icon }),
           path: homePath,
           closable: false, // 第一个tab不可关闭
           route: homeRoute,
@@ -237,11 +259,13 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         // 只有当homePath不在第一个位置时才重新排序，避免不必要的操作
         if (homeTabIndex > 0) {
           const homeTab = tabs[homeTabIndex];
-          const otherTabs = tabs.filter((tab) => tab.key !== homePath);
-          const newTabs = [homeTab, ...otherTabs];
+          if (homeTab) {
+            const otherTabs = tabs.filter((tab) => tab.key !== homePath);
+            const newTabs = [homeTab, ...otherTabs];
 
-          // 使用setTabs方法，一次性更新状态
-          setTabs(newTabs, activeKey);
+            // 使用setTabs方法，一次性更新状态
+            setTabs(newTabs, activeKey);
+          }
         }
       }
     }
@@ -270,13 +294,13 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     }
 
     // 如果tabs存在但只有一个且是homePath，且当前路径不是homePath，则添加新tab
-    if (tabs.length === 1 && tabs[0].key === homePath && pathname !== homePath) {
+    if (tabs.length === 1 && tabs[0]?.key === homePath && pathname !== homePath) {
       const route = findRouteByPath(pathname);
       if (route) {
         const tabItem: TabItem = {
           key: pathname,
           label: route.meta?.title || pathname,
-          icon: route.meta?.icon,
+          ...(route.meta?.icon && { icon: route.meta.icon }),
           path: pathname,
           closable: true,
           route,
@@ -294,7 +318,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
       const tabItem: TabItem = {
         key: pathname,
         label: route.meta?.title || pathname,
-        icon: route.meta?.icon,
+        ...(route.meta?.icon && { icon: route.meta.icon }),
         path: pathname,
         closable: true,
         route,
@@ -592,7 +616,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           activeKey={activeKey}
           onTabClick={handleTabClick}
           onEdit={handleTabEdit}
-          items={tabItems}
+          items={tabItems || []}
           size="middle"
           hideAdd
           className="tab-bar-tabs"
@@ -602,7 +626,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         {/* 右侧功能区域 */}
         <div className="tab-bar-actions">
           {/* 下拉菜单 */}
-          <Dropdown menu={{ items: getMenuItems() }} placement="bottomRight" trigger={['click']}>
+          <Dropdown menu={{ items: getMenuItems() || [] }} placement="bottomRight" trigger={['click']}>
             <Button type="text" size="small" icon={<DownOutlined />} className="tab-action-btn" />
           </Dropdown>
         </div>
@@ -610,7 +634,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
 
       {/* 统一的右键菜单 */}
       <Dropdown
-        menu={{ items: getMenuItems(contextMenuTabKey) }}
+        menu={{ items: getMenuItems(contextMenuTabKey) || [] }}
         open={contextMenuVisible}
         onOpenChange={(open) => !open && handleContextMenuClose()}
         placement="bottomLeft"

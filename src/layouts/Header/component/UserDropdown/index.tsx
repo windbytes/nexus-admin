@@ -1,5 +1,5 @@
-import { App, Avatar, Divider, Dropdown, theme, type MenuProps } from "antd";
-import { memo, type ReactNode } from "react";
+import { App, Avatar, Divider, Dropdown, theme, type MenuProps, message } from "antd";
+import { memo, type ReactNode, useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -18,6 +18,9 @@ import { commonService } from "@/services/common";
 import { usePreferencesStore } from "@/stores/store";
 import { useUserStore } from "@/stores/userStore";
 import { useTabStore } from "@/stores/tabStore";
+import { frameworkService } from "@/services/framework/frameworkApi";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useShallow } from "zustand/shallow";
 
 /**
  * 用户信息下拉框
@@ -27,13 +30,83 @@ const UserDropdown: React.FC = () => {
   const updatePreferences = usePreferencesStore(
     (state) => state.updatePreferences
   );
-  const userStore = useUserStore();
-  const { resetTabs } = useTabStore();
+  const userStore = useUserStore(
+    useShallow((state) => ({
+      loginUser: state.loginUser,
+      isLogin: state.isLogin,
+      token: state.token,
+      currentRoleId: state.currentRoleId,
+      roleCode: state.roleCode,
+      switchRole: state.switchRole,
+      logout: state.logout,
+    }))
+  );
+  const { resetTabs } = useTabStore(
+    useShallow((state) => ({
+      resetTabs: state.resetTabs,
+    }))
+  );
   const { token } = theme.useToken();
   const { modal } = App.useApp();
   const { t } = useTranslation();
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // 使用 React Query 获取用户角色列表
+  const {
+    data: userRoles = [],
+    isLoading: loading,
+    error: rolesError,
+  } = useQuery({
+    queryKey: ['user-roles', userStore.loginUser],
+    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser)
+  });
+
+  // 使用 useMemo 计算当前角色信息，避免无限循环
+  const currentRoleInfo = useMemo(() => {
+    const currentRoleId = userStore.currentRoleId;
+    const currentRole = userRoles.find(role => role.id === currentRoleId);
+    return {
+      currentRoleId,
+      currentRoleName: currentRole?.roleName || userStore.roleCode || '未选择角色',
+      hasRoles: userRoles.length > 0,
+    };
+  }, [userRoles, userStore.currentRoleId, userStore.roleCode]);
+
+  // 角色切换的 mutation
+  const roleSwitchMutation = useMutation({
+    mutationFn: async (roleId: string) => {
+      // 更新当前角色
+      userStore.switchRole(roleId);
+      
+      // 重新获取菜单数据（为后续菜单重新加载做准备）
+      await commonService.getMenuListByRoleId(roleId, userStore.token);
+      
+      return roleId;
+    },
+    onSuccess: () => {
+      // 清空当前标签页
+      resetTabs();
+      
+      // 显示成功消息
+      message.success('角色切换成功，页面将刷新');
+      
+      // 延迟刷新页面，让用户看到成功消息
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error('角色切换失败:', error);
+      message.error('角色切换失败');
+    },
+  });
+
+  // 角色切换处理
+  const handleRoleSwitch = (roleId: string) => {
+    roleSwitchMutation.mutate(roleId);
+  };
 
   // 菜单栏
   const items: MenuProps["items"] = [
@@ -53,30 +126,58 @@ const UserDropdown: React.FC = () => {
     },
     {
       key: "switchRole",
-      label: t("layout.header.userDropdown.switchRole"),
+      label: (
+        <div className="flex items-center justify-between">
+          <span>{t("layout.header.userDropdown.switchRole")}</span>
+          <span className="text-xs text-gray-500">
+            {currentRoleInfo.currentRoleName}
+          </span>
+        </div>
+      ),
       icon: <UserOutlined />,
-      disabled: false,
+      disabled: loading || !currentRoleInfo.hasRoles || roleSwitchMutation.isPending,
       popupStyle: {
         width: 220,
       },
       popupOffset: [2, 8],
       children: [
-        {
-          key: "role1",
-          label: "角色1",
-          icon: <UserOutlined />,
+        // 加载状态
+        ...(loading ? [{
+          key: 'loading',
+          label: '加载中...',
+          icon: <SyncOutlined spin />,
+          disabled: true,
+        }] : []),
+        // 错误状态
+        ...(rolesError ? [{
+          key: 'error',
+          label: '加载失败，点击重试',
+          icon: <ExclamationCircleOutlined />,
           onClick: () => {
-            // 跳转到问题反馈
+            // 重新获取角色列表
+            queryClient.invalidateQueries({ queryKey: ['user-roles'] });
           },
-        },
-        {
-          key: "role2",
-          label: "角色2",
+        }] : []),
+        // 角色列表
+        ...userRoles.map((role) => ({
+          key: role.id,
+          label: (
+            <div className="flex items-center justify-between">
+              <span>{role.roleName}</span>
+              <div className="flex items-center gap-1">
+                {currentRoleInfo.currentRoleId === role.id && (
+                  <span className="text-xs text-green-500">当前</span>
+                )}
+                {roleSwitchMutation.isPending && roleSwitchMutation.variables === role.id && (
+                  <SyncOutlined spin className="text-xs" />
+                )}
+              </div>
+            </div>
+          ),
           icon: <UserOutlined />,
-          onClick: () => {
-            // 跳转到常见问题
-          },
-        },
+          disabled: roleSwitchMutation.isPending,
+          onClick: () => handleRoleSwitch(role.id),
+        })),
       ],
     },
     {
