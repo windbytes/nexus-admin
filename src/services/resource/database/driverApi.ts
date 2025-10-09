@@ -132,7 +132,7 @@ export const driverService = {
     const response = await HttpRequest.post<PageResult<DatabaseDriver>>({
       url: DriverAction.list,
       data: params,
-    });
+    }, {successMessageMode: 'none'});
     return response;
   },
 
