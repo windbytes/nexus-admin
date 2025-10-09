@@ -115,7 +115,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(
         title={title}
         open={open}
         onCancel={handleCancel}
-        width={700}
+        width={800}
         footer={
           <Space>
             <Button onClick={handleCancel}>取消</Button>
@@ -130,7 +130,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(
         <Form
           form={form}
           layout="horizontal"
-          labelCol={{ span: 5 }}
+          labelCol={{ span: 4 }}
           wrapperCol={{ span: 18 }}
           initialValues={{
             status: true,
