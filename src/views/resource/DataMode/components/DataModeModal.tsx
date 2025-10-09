@@ -295,7 +295,8 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         <Form
           form={form}
           disabled={isViewMode}
-          labelCol={{ span: 3 }}
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 18 }}
           initialValues={{
             status: true,
             dataSource: 'database',
@@ -359,6 +360,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                     >
                       <Select
                         placeholder="请选择端点"
+                        style={{ width: 'calc(100% - 118px)' }}
                         loading={loadingEndpoints}
                         options={endpoints.map((ep) => ({
                           value: ep.id,
@@ -369,15 +371,16 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                         }
                       />
-                    </Form.Item>
-                    <Button
-                      type="primary"
-                      onClick={handleGenerateFromEndpoint}
-                      loading={queryFromEndpointMutation.isPending}
-                      className="self-end mb-6"
+                      <Button
+                        type="primary"
+                        onClick={handleGenerateFromEndpoint}
+                        loading={queryFromEndpointMutation.isPending}
+                        className="self-end mb-6 ml-4"
                     >
                       查询并生成
                     </Button>
+                    </Form.Item>
+                    
                   </div>
                 </div>
               )}

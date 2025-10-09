@@ -50,7 +50,7 @@ const DataMode: React.FC = () => {
     }),
     {
       modalVisible: false,
-      modalTitle: '新增数据模式',
+      modalTitle: '新增JSON数据模式',
       currentRecord: null,
       isViewMode: false,
       selectedRowKeys: [],
@@ -168,7 +168,7 @@ const DataMode: React.FC = () => {
   const handleAdd = useCallback(() => {
     dispatch({
       modalVisible: true,
-      modalTitle: '新增数据模式',
+      modalTitle: '新增JSON数据模式',
       currentRecord: null,
       isViewMode: false,
     });
@@ -180,7 +180,7 @@ const DataMode: React.FC = () => {
   const handleView = useCallback((record: JsonDataMode) => {
     dispatch({
       modalVisible: true,
-      modalTitle: '查看数据模式',
+      modalTitle: '查看JSON数据模式',
       currentRecord: record,
       isViewMode: true,
     });
@@ -192,7 +192,7 @@ const DataMode: React.FC = () => {
   const handleEdit = useCallback((record: JsonDataMode) => {
     dispatch({
       modalVisible: true,
-      modalTitle: '编辑数据模式',
+      modalTitle: '编辑JSON数据模式',
       currentRecord: record,
       isViewMode: false,
     });
@@ -206,7 +206,7 @@ const DataMode: React.FC = () => {
       modal.confirm({
         title: '确认删除',
         icon: <ExclamationCircleOutlined />,
-        content: `确定要删除数据模式"${record.name}"吗？此操作不可恢复。`,
+        content: `确定要删除JSON数据模式"${record.name}"吗？此操作不可恢复。`,
         okText: '确定',
         okType: 'danger',
         cancelText: '取消',
@@ -223,14 +223,14 @@ const DataMode: React.FC = () => {
    */
   const handleBatchDelete = useCallback(() => {
     if (state.selectedRowKeys.length === 0) {
-      message.warning('请先选择要删除的数据模式！');
+      message.warning('请先选择要删除的JSON数据模式！');
       return;
     }
 
     modal.confirm({
       title: '确认批量删除',
       icon: <ExclamationCircleOutlined />,
-      content: `确定要删除选中的 ${state.selectedRowKeys.length} 个数据模式吗？此操作不可恢复。`,
+      content: `确定要删除选中的 ${state.selectedRowKeys.length} 个JSON数据模式吗？此操作不可恢复。`,
       okText: '确定',
       okType: 'danger',
       cancelText: '取消',
@@ -258,7 +258,7 @@ const DataMode: React.FC = () => {
    */
   const handleBatchExport = useCallback(() => {
     if (state.selectedRowKeys.length === 0) {
-      message.warning('请先选择要导出的数据模式！');
+      message.warning('请先选择要导出的JSON数据模式！');
       return;
     }
 
