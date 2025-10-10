@@ -235,7 +235,7 @@ export const dataModeService = {
     const response = await HttpRequest.post<PageResult<JsonDataMode>>({
       url: DataModeAction.list,
       data: params,
-    });
+    }, { successMessageMode: 'none' });
     return response;
   },
 
@@ -332,7 +332,7 @@ export const dataModeService = {
    * 导出Schema文件
    */
   async exportSchema(id: string, name: string): Promise<void> {
-    const response = await HttpRequest.get<Blob>({
+    const response = await HttpRequest.postDownload<Blob>({
       url: `${DataModeAction.exportSchema}/${id}`,
       responseType: 'blob',
     });

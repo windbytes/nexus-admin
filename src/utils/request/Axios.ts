@@ -169,7 +169,7 @@ export class RAxios {
       { 
         ...options,
         isTransformResponse: false,
-        isReturnNativeResponse: true
+        isReturnNativeResponse: false
       }
     );
   }

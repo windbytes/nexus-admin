@@ -250,7 +250,7 @@ export const driverService = {
    * 下载驱动文件
    */
   async downloadDriver(id: string, fileName: string): Promise<void> {
-    const response = await HttpRequest.get<Blob>({
+    const response = await HttpRequest.postDownload<Blob>({
       url: `${DriverAction.download}/${id}`,
       responseType: 'blob',
     });

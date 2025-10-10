@@ -260,7 +260,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
       {
         title: '操作',
         key: 'action',
-        width: 220,
+        width: 200,
         align: 'center',
         fixed: 'right',
         render: (_: any, record: JsonDataMode) => (
