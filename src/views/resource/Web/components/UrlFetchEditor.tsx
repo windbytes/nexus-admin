@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Form, Input, Button, App } from 'antd';
 import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { webServiceApi } from '@/services/resource/webServiceApi';
+import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
 
 interface UrlFetchEditorProps {
   disabled: boolean;

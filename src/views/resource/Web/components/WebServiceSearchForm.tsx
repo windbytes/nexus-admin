@@ -2,8 +2,8 @@ import type React from 'react';
 import { memo } from 'react';
 import { Card, Form, Input, Select, Button, Space, Row, Col } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
-import type { WebServiceSearchParams } from '@/services/resource/webServiceApi';
-import { WEB_SERVICE_CATEGORIES } from '@/services/resource/webServiceApi';
+import type { WebServiceSearchParams } from '@/services/resource/webservice/webServiceApi';
+import { WEB_SERVICE_CATEGORIES } from '@/services/resource/webservice/webServiceApi';
 
 interface WebServiceSearchFormProps {
   onSearch: (params: WebServiceSearchParams) => void;

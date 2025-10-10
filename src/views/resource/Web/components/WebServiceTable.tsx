@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Table, Button, Space, Tag, Tooltip, Switch } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, DownloadOutlined, FileTextOutlined } from '@ant-design/icons';
 import type { TableProps, TablePaginationConfig } from 'antd';
-import type { WebService } from '@/services/resource/webServiceApi';
+import type { WebService } from '@/services/resource/webservice/webServiceApi';
 import dayjs from 'dayjs';
 
 interface WebServiceTableProps {

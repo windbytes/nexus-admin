@@ -2,7 +2,7 @@ import type React from 'react';
 import { memo } from 'react';
 import { Form, Input, Button, Card, Select } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { PARAMETER_TYPES } from '@/services/resource/webServiceApi';
+import { PARAMETER_TYPES } from '@/services/resource/webservice/webServiceApi';
 
 const { TextArea } = Input;
 

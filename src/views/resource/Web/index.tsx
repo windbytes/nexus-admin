@@ -7,8 +7,8 @@ import type {
   WebService,
   WebServiceSearchParams,
   WebServiceFormData,
-} from '@/services/resource/webServiceApi';
-import { webServiceApi } from '@/services/resource/webServiceApi';
+} from '@/services/resource/webservice/webServiceApi';
+import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
 import {
   WebServiceSearchForm,
   WebServiceTableActions,
