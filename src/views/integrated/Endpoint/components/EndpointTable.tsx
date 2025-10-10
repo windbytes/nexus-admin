@@ -1,0 +1,227 @@
+import React from 'react';
+import { Table, Tag, Space, Button, Switch, Tooltip } from 'antd';
+import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExportOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import type { TableProps, TablePaginationConfig } from 'antd';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+
+interface EndpointTableProps {
+  /** 数据源 */
+  data: Endpoint[];
+  /** 加载状态 */
+  loading: boolean;
+  /** 选中的行 */
+  selectedRowKeys: React.Key[];
+  /** 选择变更回调 */
+  onSelectionChange: (selectedRowKeys: React.Key[], selectedRows: Endpoint[]) => void;
+  /** 查看回调 */
+  onView: (record: Endpoint) => void;
+  /** 编辑回调 */
+  onEdit: (record: Endpoint) => void;
+  /** 删除回调 */
+  onDelete: (record: Endpoint) => void;
+  /** 导出回调 */
+  onExport: (record: Endpoint) => void;
+  /** 测试回调 */
+  onTest: (record: Endpoint) => void;
+  /** 状态变更回调 */
+  onStatusChange: (record: Endpoint, checked: boolean) => void;
+  /** 分页配置 */
+  pagination: TablePaginationConfig;
+}
+
+/**
+ * 端点表格组件
+ */
+const EndpointTable: React.FC<EndpointTableProps> = ({
+  data,
+  loading,
+  selectedRowKeys,
+  onSelectionChange,
+  onView,
+  onEdit,
+  onDelete,
+  onExport,
+  onTest,
+  onStatusChange,
+  pagination,
+}) => {
+  /**
+   * 获取端点类型标签颜色
+   */
+  const getEndpointTypeColor = (type: string): string => {
+    const colorMap: Record<string, string> = {
+      http: 'blue',
+      database: 'green',
+      webservice: 'purple',
+      file: 'orange',
+      timer: 'cyan',
+      mq: 'magenta',
+    };
+    return colorMap[type] || 'default';
+  };
+
+  /**
+   * 获取端点类型名称
+   */
+  const getEndpointTypeName = (type: string): string => {
+    const option = ENDPOINT_TYPE_OPTIONS.find((opt) => opt.value === type);
+    return option?.label || type;
+  };
+
+  const columns: TableProps<Endpoint>['columns'] = [
+    {
+      title: '端点名称',
+      dataIndex: 'name',
+      key: 'name',
+      width: 200,
+      fixed: 'left',
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (name) => (
+        <Tooltip placement="topLeft" title={name}>
+          {name}
+        </Tooltip>
+      ),
+    },
+    {
+      title: '端点编码',
+      dataIndex: 'code',
+      key: 'code',
+      width: 180,
+    },
+    {
+      title: '端点类型',
+      dataIndex: 'endpointType',
+      key: 'endpointType',
+      width: 150,
+      render: (type: string) => (
+        <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>
+      ),
+    },
+    {
+      title: '端点分类',
+      dataIndex: 'category',
+      key: 'category',
+      width: 120,
+      render: (category) => category || '-',
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+      width: 250,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (description) => (
+        <Tooltip placement="topLeft" title={description}>
+          {description || '-'}
+        </Tooltip>
+      ),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'center',
+      width: 100,
+      render: (status: boolean, record) => (
+        <Switch
+          checked={status}
+          checkedChildren="启用"
+          unCheckedChildren="禁用"
+          onChange={(checked) => onStatusChange(record, checked)}
+        />
+      ),
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      width: 180,
+      render: (time) => time || '-',
+    },
+    {
+      title: '操作',
+      key: 'action',
+      align: 'center',
+      width: 280,
+      fixed: 'right',
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="link"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => onView(record)}
+          >
+            查看
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          >
+            编辑
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            icon={<ThunderboltOutlined />}
+            onClick={() => onTest(record)}
+          >
+            测试
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            icon={<ExportOutlined />}
+            onClick={() => onExport(record)}
+          >
+            导出
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(record)}
+          >
+            删除
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <Table<Endpoint>
+      rowKey="id"
+      columns={columns}
+      dataSource={data}
+      loading={loading}
+      pagination={pagination}
+      scroll={{ x: 1500 }}
+      rowSelection={{
+        selectedRowKeys,
+        onChange: onSelectionChange,
+      }}
+    />
+  );
+};
+
+export default React.memo(EndpointTable);
+
