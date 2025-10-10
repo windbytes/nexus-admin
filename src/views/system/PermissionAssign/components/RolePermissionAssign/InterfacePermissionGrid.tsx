@@ -218,6 +218,7 @@ const InterfacePermissionGrid: React.FC<InterfacePermissionGridProps> = memo(({
         columns={columns}
         dataSource={interfaceList}
         bordered
+        size="middle"
         rowKey="id"
         loading={isLoading}
         rowSelection={rowSelection}

@@ -41,8 +41,9 @@ const EndpointSearchForm: React.FC<EndpointSearchFormProps> = memo(({ onSearch, 
             category: undefined,
             status: undefined,
           }}
+          labelCol={{ span: 4 }}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <Form.Item name="name" label="端点名称" colon={false} className="mb-0">
               <Input allowClear autoComplete="off" placeholder="请输入端点名称" />
             </Form.Item>

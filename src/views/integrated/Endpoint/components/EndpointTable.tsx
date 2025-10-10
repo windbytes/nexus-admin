@@ -210,6 +210,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   return (
     <Table<Endpoint>
       rowKey="id"
+      bordered
+      size="middle"
       columns={columns}
       dataSource={data}
       loading={loading}

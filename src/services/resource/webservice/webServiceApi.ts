@@ -252,7 +252,7 @@ export const webServiceApi = {
     const response = await HttpRequest.post<PageResult<WebService>>({
       url: WebServiceAction.list,
       data: params,
-    });
+    }, {successMessageMode: 'none'});
     return response;
   },
 

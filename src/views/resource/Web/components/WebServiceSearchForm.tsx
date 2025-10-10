@@ -55,6 +55,7 @@ const WebServiceSearchForm: React.FC<WebServiceSearchFormProps> = memo(({ onSear
       <Form
         form={form}
         layout="horizontal"
+        labelCol={{ span: 4 }}
         onFinish={handleSearch}
       >
         <Row gutter={16}>
