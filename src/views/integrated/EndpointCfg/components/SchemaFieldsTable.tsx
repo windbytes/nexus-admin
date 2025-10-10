@@ -1,0 +1,363 @@
+import React, { useState, useCallback } from 'react';
+import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip } from 'antd';
+import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { COMPONENT_TYPE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
+
+const { TextArea } = Input;
+
+interface SchemaFieldsTableProps {
+  /** 数据源 */
+  fields: SchemaField[];
+  /** 是否禁用 */
+  disabled?: boolean;
+  /** 数据变更回调 */
+  onChange: (fields: SchemaField[]) => void;
+}
+
+/**
+ * Schema字段编辑表格组件（右下）
+ */
+const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled = false, onChange }) => {
+  const [editingKey, setEditingKey] = useState<string>('');
+  const [form] = Form.useForm();
+
+  /**
+   * 是否正在编辑
+   */
+  const isEditing = (record: SchemaField) => record.id === editingKey;
+
+  /**
+   * 开始编辑
+   */
+  const edit = (record: SchemaField) => {
+    form.setFieldsValue({ ...record });
+    setEditingKey(record.id || '');
+  };
+
+  /**
+   * 取消编辑
+   */
+  const cancel = () => {
+    setEditingKey('');
+  };
+
+  /**
+   * 保存编辑
+   */
+  const save = async (id: string) => {
+    try {
+      const row = await form.validateFields();
+      const newData = [...fields];
+      const index = newData.findIndex((item) => id === item.id);
+
+      if (index > -1) {
+        const item = newData[index];
+        newData.splice(index, 1, { ...item, ...row });
+        onChange(newData);
+        setEditingKey('');
+      }
+    } catch (errInfo) {
+      console.log('验证失败:', errInfo);
+    }
+  };
+
+  /**
+   * 新增字段
+   */
+  const handleAdd = useCallback(() => {
+    const newField: SchemaField = {
+      id: `temp_${Date.now()}`,
+      field: '',
+      label: '',
+      component: 'Input',
+      required: false,
+      sortOrder: fields.length + 1,
+    };
+    onChange([...fields, newField]);
+    setTimeout(() => {
+      edit(newField);
+    }, 100);
+  }, [fields, onChange]);
+
+  /**
+   * 删除字段
+   */
+  const handleDelete = useCallback(
+    (id: string) => {
+      const newData = fields.filter((item) => item.id !== id);
+      onChange(newData);
+    },
+    [fields, onChange]
+  );
+
+  /**
+   * 上移
+   */
+  const handleMoveUp = useCallback(
+    (index: number) => {
+      if (index === 0) return;
+      const newData = [...fields];
+      [newData[index - 1], newData[index]] = [newData[index], newData[index - 1]];
+      // 更新排序号
+      newData.forEach((item, idx) => {
+        item.sortOrder = idx + 1;
+      });
+      onChange(newData);
+    },
+    [fields, onChange]
+  );
+
+  /**
+   * 下移
+   */
+  const handleMoveDown = useCallback(
+    (index: number) => {
+      if (index === fields.length - 1) return;
+      const newData = [...fields];
+      [newData[index], newData[index + 1]] = [newData[index + 1], newData[index]];
+      // 更新排序号
+      newData.forEach((item, idx) => {
+        item.sortOrder = idx + 1;
+      });
+      onChange(newData);
+    },
+    [fields, onChange]
+  );
+
+  const columns = [
+    {
+      title: '序号',
+      width: 60,
+      align: 'center' as const,
+      render: (_: any, __: SchemaField, index: number) => index + 1,
+    },
+    {
+      title: '字段名',
+      dataIndex: 'field',
+      width: 150,
+      editable: true,
+      render: (text: string, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item
+              name="field"
+              style={{ margin: 0 }}
+              rules={[
+                { required: true, message: '请输入字段名' },
+                {
+                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
+                  message: '字段名必须以字母开头，只能包含字母、数字和下划线',
+                },
+              ]}
+            >
+              <Input placeholder="请输入字段名" />
+            </Form.Item>
+          );
+        }
+        return text;
+      },
+    },
+    {
+      title: '字段标签',
+      dataIndex: 'label',
+      width: 150,
+      editable: true,
+      render: (text: string, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item
+              name="label"
+              style={{ margin: 0 }}
+              rules={[{ required: true, message: '请输入字段标签' }]}
+            >
+              <Input placeholder="请输入字段标签" />
+            </Form.Item>
+          );
+        }
+        return text;
+      },
+    },
+    {
+      title: '组件类型',
+      dataIndex: 'component',
+      width: 150,
+      editable: true,
+      render: (text: string, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item
+              name="component"
+              style={{ margin: 0 }}
+              rules={[{ required: true, message: '请选择组件类型' }]}
+            >
+              <Select options={COMPONENT_TYPE_OPTIONS as any} placeholder="请选择组件类型" />
+            </Form.Item>
+          );
+        }
+        const option = COMPONENT_TYPE_OPTIONS.find((opt) => opt.value === text);
+        return option?.label || text;
+      },
+    },
+    {
+      title: '必填',
+      dataIndex: 'required',
+      width: 80,
+      align: 'center' as const,
+      editable: true,
+      render: (checked: boolean, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item name="required" valuePropName="checked" style={{ margin: 0 }}>
+              <Switch />
+            </Form.Item>
+          );
+        }
+        return <Switch checked={checked} disabled />;
+      },
+    },
+    {
+      title: '默认值',
+      dataIndex: 'defaultValue',
+      width: 120,
+      editable: true,
+      render: (text: any, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item name="defaultValue" style={{ margin: 0 }}>
+              <Input placeholder="默认值" />
+            </Form.Item>
+          );
+        }
+        return text || '-';
+      },
+    },
+    {
+      title: '说明',
+      dataIndex: 'description',
+      editable: true,
+      ellipsis: true,
+      render: (text: string, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item name="description" style={{ margin: 0 }}>
+              <TextArea placeholder="请输入说明" rows={1} />
+            </Form.Item>
+          );
+        }
+        return text || '-';
+      },
+    },
+    {
+      title: '操作',
+      width: 220,
+      align: 'center' as const,
+      fixed: 'right' as const,
+      render: (_: any, record: SchemaField, index: number) => {
+        const editable = isEditing(record);
+
+        if (editable) {
+          return (
+            <Space size="small">
+              <Button
+                type="link"
+                size="small"
+                icon={<SaveOutlined />}
+                onClick={() => save(record.id || '')}
+              >
+                保存
+              </Button>
+              <Button type="link" size="small" icon={<CloseOutlined />} onClick={cancel}>
+                取消
+              </Button>
+            </Space>
+          );
+        }
+
+        return (
+          <Space size="small">
+            <Tooltip title="编辑">
+              <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              disabled={disabled || editingKey !== ''}
+              onClick={() => edit(record)}
+            />
+            </Tooltip>
+
+            <Tooltip title="上移">
+              <Button
+              type="link"
+              size="small"
+              icon={<ArrowUpOutlined />}
+              disabled={disabled || index === 0 || editingKey !== ''}
+              onClick={() => handleMoveUp(index)}
+              />
+            </Tooltip>
+
+            <Tooltip title="下移">
+              <Button
+              type="link"
+              size="small"
+              icon={<ArrowDownOutlined />}
+              disabled={disabled || index === fields.length - 1 || editingKey !== ''}
+              onClick={() => handleMoveDown(index)}
+              />
+            </Tooltip>
+            <Popconfirm
+              title="确定要删除这个字段吗？"
+              onConfirm={() => handleDelete(record.id || '')}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Tooltip title="删除">
+                <Button
+                type="link"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                disabled={disabled || editingKey !== ''}
+                />
+              </Tooltip>
+            </Popconfirm>
+          </Space>
+        );
+      },
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-500">
+          共 {fields.length} 个字段配置
+        </div>
+        <Button
+          type="primary"
+          size="small"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+          disabled={disabled || editingKey !== ''}
+        >
+          添加字段
+        </Button>
+      </div>
+
+      <Form form={form} component={false}>
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={fields}
+          pagination={false}
+          size="small"
+          scroll={{ x: 1200, y: 400 }}
+          bordered
+        />
+      </Form>
+    </div>
+  );
+};
+
+export default React.memo(SchemaFieldsTable);
+
