@@ -269,36 +269,32 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EyeOutlined />}
+                icon={<EyeOutlined className="text-purple-500! hover:text-purple-600!"/>}
                 onClick={() => onView(record)}
-                className="text-purple-500 hover:text-purple-600"
               />
             </Tooltip>
             <Tooltip title="编辑">
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined />}
+                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!"/>}
                 onClick={() => onEdit(record)}
-                className="text-blue-500 hover:text-blue-600"
               />
             </Tooltip>
             <Tooltip title="导出">
               <Button
                 type="text"
                 size="small"
-                icon={<DownloadOutlined />}
+                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!"/>}
                 onClick={() => onExport(record)}
-                className="text-green-500 hover:text-green-600"
               />
             </Tooltip>
             <Tooltip title="删除">
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined />}
+                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!"/>}
                 onClick={() => onDelete(record)}
-                className="text-red-500 hover:text-red-600"
               />
             </Tooltip>
           </Space>

@@ -144,7 +144,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
         width={1200}
         styles={{
           body: {
-            maxHeight: '80vh',
+            maxHeight: '70vh',
             overflowY: 'auto',
             paddingRight: '8px',
           },
@@ -180,7 +180,8 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
         <Form
           form={form}
           disabled={isViewMode}
-          labelCol={{ span: 3 }}
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 18 }}
           initialValues={{
             status: true,
             inputType: 'manual',

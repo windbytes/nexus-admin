@@ -259,7 +259,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         width={1000}
         styles={{
           body: {
-            maxHeight: '80vh',
+            maxHeight: '70vh',
             overflowY: 'auto',
             paddingRight: '8px',
           },
