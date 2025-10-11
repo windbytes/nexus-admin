@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { COMPONENT_TYPE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 
 const { TextArea } = Input;
 
@@ -21,6 +21,7 @@ interface SchemaFieldsTableProps {
 const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled = false, onChange }) => {
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
+  const [isNewRecord, setIsNewRecord] = useState(false);
 
   /**
    * 是否正在编辑
@@ -30,16 +31,23 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 开始编辑
    */
-  const edit = (record: SchemaField) => {
+  const edit = (record: SchemaField, isNew = false) => {
     form.setFieldsValue({ ...record });
     setEditingKey(record.id || '');
+    setIsNewRecord(isNew);
   };
 
   /**
    * 取消编辑
    */
   const cancel = () => {
+    if (isNewRecord) {
+      // 如果是新增记录，删除该记录
+      const newData = fields.filter((item) => item.id !== editingKey);
+      onChange(newData);
+    }
     setEditingKey('');
+    setIsNewRecord(false);
   };
 
   /**
@@ -53,9 +61,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
 
       if (index > -1) {
         const item = newData[index];
-        newData.splice(index, 1, { ...item, ...row });
-        onChange(newData);
-        setEditingKey('');
+        if (item) {
+          // 如果是新增记录，生成新的ID
+          const newId = isNewRecord ? `field_${Date.now()}` : item.id;
+          newData.splice(index, 1, { ...item, ...row, id: newId });
+          onChange(newData);
+          setEditingKey('');
+          setIsNewRecord(false);
+        }
       }
     } catch (errInfo) {
       console.log('验证失败:', errInfo);
@@ -73,10 +86,11 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       component: 'Input',
       required: false,
       sortOrder: fields.length + 1,
+      mode: 'IN_OUT'
     };
     onChange([...fields, newField]);
     setTimeout(() => {
-      edit(newField);
+      edit(newField, true); // 标记为新增记录
     }, 100);
   }, [fields, onChange]);
 
@@ -98,12 +112,16 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     (index: number) => {
       if (index === 0) return;
       const newData = [...fields];
-      [newData[index - 1], newData[index]] = [newData[index], newData[index - 1]];
-      // 更新排序号
-      newData.forEach((item, idx) => {
-        item.sortOrder = idx + 1;
-      });
-      onChange(newData);
+      const item1 = newData[index - 1];
+      const item2 = newData[index];
+      if (item1 && item2) {
+        [newData[index - 1], newData[index]] = [item2, item1];
+        // 更新排序号
+        newData.forEach((item, idx) => {
+          item.sortOrder = idx + 1;
+        });
+        onChange(newData);
+      }
     },
     [fields, onChange]
   );
@@ -115,12 +133,16 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     (index: number) => {
       if (index === fields.length - 1) return;
       const newData = [...fields];
-      [newData[index], newData[index + 1]] = [newData[index + 1], newData[index]];
-      // 更新排序号
-      newData.forEach((item, idx) => {
-        item.sortOrder = idx + 1;
-      });
-      onChange(newData);
+      const item1 = newData[index];
+      const item2 = newData[index + 1];
+      if (item1 && item2) {
+        [newData[index], newData[index + 1]] = [item2, item1];
+        // 更新排序号
+        newData.forEach((item, idx) => {
+          item.sortOrder = idx + 1;
+        });
+        onChange(newData);
+      }
     },
     [fields, onChange]
   );
@@ -233,6 +255,22 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
+      title: '作用模式',
+      dataIndex: 'mode',
+      width: 120,
+      editable: true,
+      render: (text: string, record: SchemaField) => {
+        if (isEditing(record)) {
+          return (
+            <Form.Item name="mode" style={{ margin: 0 }}>
+              <Select options={MODE_OPTIONS as any} placeholder="请选择作用模式" />
+            </Form.Item>
+          );
+        }
+        return text || '-';
+      },
+    },
+    {
       title: '说明',
       dataIndex: 'description',
       editable: true,
@@ -282,7 +320,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
               size="small"
               icon={<EditOutlined />}
               disabled={disabled || editingKey !== ''}
-              onClick={() => edit(record)}
+              onClick={() => edit(record, false)} // 编辑现有记录
             />
             </Tooltip>
 
@@ -351,7 +389,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           dataSource={fields}
           pagination={false}
           size="small"
-          scroll={{ x: 1200, y: 400 }}
+          scroll={{ x: 1200, y: 'calc(100vh - 500px)' }}
           bordered
         />
       </Form>

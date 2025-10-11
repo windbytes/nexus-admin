@@ -5,7 +5,6 @@ import {
   DeleteOutlined,
   ExportOutlined,
   ImportOutlined,
-  SettingOutlined,
   AppstoreAddOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -34,16 +33,21 @@ const EndpointConfig: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   // 搜索关键词
   const [searchKeyword, setSearchKeyword] = useState('');
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
 
   /**
    * 查询端点类型列表
    */
   const { data: listData, isLoading: listLoading, refetch: refetchList } = useQuery({
-    queryKey: ['endpoint_config_list', searchKeyword],
+    queryKey: ['endpoint_config_list', searchKeyword, pagination.current, pagination.pageSize],
     queryFn: () =>
       endpointConfigService.getEndpointTypeList({
-        pageNum: 1,
-        pageSize: 1000,
+        pageNum: pagination.current,
+        pageSize: pagination.pageSize,
         typeName: searchKeyword || undefined,
       } as EndpointTypeSearchParams),
   });
@@ -239,6 +243,14 @@ const EndpointConfig: React.FC = () => {
    */
   const handleSearch = useCallback((value: string) => {
     setSearchKeyword(value);
+    setPagination(prev => ({ ...prev, current: 1 })); // 搜索时重置到第一页
+  }, []);
+
+  /**
+   * 分页变更
+   */
+  const handlePaginationChange = useCallback((page: number, pageSize: number) => {
+    setPagination({ current: page, pageSize });
   }, []);
 
   /**
@@ -257,13 +269,16 @@ const EndpointConfig: React.FC = () => {
   }, [detailData, isEditing, basicForm]);
 
   return (
-    <div className="h-full flex gap-4">
+    <div className="h-full flex gap-4 relative">
       {/* 左侧：端点类型列表 */}
       <Card 
         className="w-[320px] flex-shrink-0"
         styles={{
           body: {
             padding: '16px',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       >
@@ -274,6 +289,12 @@ const EndpointConfig: React.FC = () => {
           onSelect={handleSelectType}
           onAdd={handleAdd}
           onSearch={handleSearch}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: listData?.total || 0,
+            onChange: handlePaginationChange,
+          }}
         />
       </Card>
 
@@ -285,30 +306,25 @@ const EndpointConfig: React.FC = () => {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
+            paddingBottom: '80px', // 为固定按钮留出空间
           },
         }}
         loading={detailLoading}
       >
           {/* 基础信息 */}
-          <div>
-            <Divider orientation="left">
-              <SettingOutlined className="mr-2" />
-              基础信息
-            </Divider>
-            <EndpointTypeForm
-              form={basicForm}
-              {...(detailData && { initialValues: detailData })}
-              disabled={!isEditing}
-            />
-          </div>
+          <EndpointTypeForm
+            form={basicForm}
+            {...(detailData && { initialValues: detailData })}
+            disabled={!isEditing}
+          />
 
           {/* Schema配置 */}
-          <div className="flex-1 flex flex-col mt-4">
+          <div className="flex-1 flex flex-col min-h-0">
             <Divider orientation="left">
               <AppstoreAddOutlined className="mr-2" />
               Schema字段配置
             </Divider>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-hidden">
               <SchemaFieldsTable
                 fields={schemaFields}
                 disabled={!isEditing}
@@ -316,54 +332,54 @@ const EndpointConfig: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* 操作按钮 */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <Space className="w-full justify-end">
-              {!isEditing ? (
-                <>
-                  <Button
-                    icon={<SaveOutlined />}
-                    disabled={!selectedType}
-                    onClick={handleEdit}
-                  >
-                    编辑
-                  </Button>
-                  <Button
-                    icon={<ExportOutlined />}
-                    disabled={!selectedType}
-                    onClick={handleExport}
-                  >
-                    导出
-                  </Button>
-                  <Button icon={<ImportOutlined />} onClick={handleImport}>
-                    导入
-                  </Button>
-                  <Button
-                    icon={<DeleteOutlined />}
-                    danger
-                    disabled={!selectedType}
-                    onClick={handleDelete}
-                  >
-                    删除
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleCancel}>取消</Button>
-                  <Button
-                    type="primary"
-                    icon={<SaveOutlined />}
-                    loading={saveConfigMutation.isPending}
-                    onClick={handleSave}
-                  >
-                    保存
-                  </Button>
-                </>
-              )}
-            </Space>
-          </div>
         </Card>
+
+        {/* 固定操作按钮 */}
+        <div className="absolute bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+          <Space>
+            {!isEditing ? (
+              <>
+                <Button
+                  icon={<SaveOutlined />}
+                  disabled={!selectedType}
+                  onClick={handleEdit}
+                >
+                  编辑
+                </Button>
+                <Button
+                  icon={<ExportOutlined />}
+                  disabled={!selectedType}
+                  onClick={handleExport}
+                >
+                  导出
+                </Button>
+                <Button icon={<ImportOutlined />} onClick={handleImport}>
+                  导入
+                </Button>
+                <Button
+                  icon={<DeleteOutlined />}
+                  danger
+                  disabled={!selectedType}
+                  onClick={handleDelete}
+                >
+                  删除
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button onClick={handleCancel}>取消</Button>
+                <Button
+                  type="primary"
+                  icon={<SaveOutlined />}
+                  loading={saveConfigMutation.isPending}
+                  onClick={handleSave}
+                >
+                  保存
+                </Button>
+              </>
+            )}
+          </Space>
+        </div>
     </div>
   );
 };

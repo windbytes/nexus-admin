@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Switch, Row, Col } from 'antd';
+import { Form, Input, Switch, Row, Col, Select } from 'antd';
 import type { FormInstance } from 'antd';
-import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 
 const { TextArea } = Input;
 
@@ -36,6 +36,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
   return (
     <Form
       form={form}
+      className="flex-shrink-0"
       layout="horizontal"
       labelCol={{ span: 6 }}
       disabled={disabled}
@@ -45,7 +46,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
       }}
     >
       <Row gutter={16}>
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item
             name="typeName"
             label="类型名称"
@@ -55,7 +56,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item
             name="typeCode"
             label="类型编码"
@@ -74,35 +75,40 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item name="endpointType" label="端点类型">
             <Input placeholder="请输入端点类型标识" disabled={!!initialValues?.id} />
           </Form.Item>
         </Col>
+        <Col span={8}>
+          <Form.Item name="support_mode" label="支持模式">
+            <Select options={MODE_OPTIONS as any} placeholder="请选择支持模式" />
+          </Form.Item>
+        </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item name="icon" label="图标">
             <Input placeholder="请输入图标类名，如：icon-http" />
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item name="schemaVersion" label="Schema版本">
             <Input placeholder="请输入版本号，如：1.0.0" />
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Form.Item name="status" label="状态" valuePropName="checked">
             <Switch checkedChildren="启用" unCheckedChildren="禁用" />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item name="description" label="描述" labelCol={{ span: 3 }}>
+          <Form.Item name="description" label="描述" labelCol={{ span: 2 }}>
             <TextArea
               placeholder="请输入端点类型描述"
-              rows={3}
+              rows={2}
               showCount
               maxLength={500}
             />

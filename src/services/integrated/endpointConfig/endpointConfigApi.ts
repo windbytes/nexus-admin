@@ -16,6 +16,15 @@ export const COMPONENT_TYPE_OPTIONS = [
 ] as const;
 
 /**
+ * 作用模式选项
+ */
+export const MODE_OPTIONS = [
+  { value: 'IN_OUT', label: '输入输出' },
+  { value: 'IN', label: '输入' },
+  { value: 'OUT', label: '输出' },
+  { value: 'OUT_IN', label: '输出输入' },
+] as const;
+/**
  * Schema字段配置
  */
 export interface SchemaField {
@@ -39,6 +48,8 @@ export interface SchemaField {
   showCondition?: string;
   /** 排序号 */
   sortOrder?: number;
+  /** 作用模式 */
+  mode: string;
   /** 说明 */
   description?: string;
 }
@@ -57,6 +68,7 @@ export interface EndpointTypeConfig {
   typeCode: string;
   /** 图标 */
   icon?: string;
+  support_mode: string[];
   /** 描述 */
   description?: string;
   /** Schema版本 */
