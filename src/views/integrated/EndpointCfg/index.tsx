@@ -65,20 +65,7 @@ const EndpointConfig: React.FC = () => {
    * 保存端点类型配置 mutation
    */
   const saveConfigMutation = useMutation({
-    mutationFn: async () => {
-      const basicValues = await basicForm.validateFields();
-
-      // 验证Schema字段
-      if (schemaFields.length === 0) {
-        throw new Error('请至少添加一个Schema字段');
-      }
-
-      const data = {
-        ...basicValues,
-        id: selectedType?.id,
-        schemaFields,
-      };
-
+    mutationFn: async (data: any) => {
       if (selectedType?.id) {
         return endpointConfigService.updateEndpointType(data);
       }
@@ -175,9 +162,38 @@ const EndpointConfig: React.FC = () => {
   /**
    * 保存
    */
-  const handleSave = useCallback(() => {
-    saveConfigMutation.mutate();
-  }, [saveConfigMutation]);
+  const handleSave = useCallback(async () => {
+    try {
+      // 1. 验证基础信息表单
+      const basicValues = await basicForm.validateFields();
+      
+      // 2. 验证Schema字段
+      if (schemaFields.length === 0) {
+        message.error('请至少添加一个Schema字段');
+        return;
+      }
+
+      // 3. 验证通过，准备数据
+      const data = {
+        ...basicValues,
+        id: selectedType?.id,
+        schemaFields,
+      };
+
+      // 4. 调用保存方法
+      saveConfigMutation.mutate(data);
+    } catch (error: any) {
+      // 验证失败，聚焦到第一个错误字段
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorField = error.errorFields[0].name;
+        basicForm.scrollToField(firstErrorField, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        basicForm.focusField(error.errorFields[0].name);
+      }
+    }
+  }, [basicForm, schemaFields, selectedType, saveConfigMutation, message]);
 
   /**
    * 取消编辑
@@ -269,7 +285,7 @@ const EndpointConfig: React.FC = () => {
   }, [detailData, isEditing, basicForm]);
 
   return (
-    <div className="h-full flex gap-4 relative">
+    <div className="h-full flex gap-4">
       {/* 左侧：端点类型列表 */}
       <Card 
         className="w-[320px] flex-shrink-0"
@@ -306,11 +322,11 @@ const EndpointConfig: React.FC = () => {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            paddingBottom: '80px', // 为固定按钮留出空间
           },
         }}
         loading={detailLoading}
       >
+        <div className="flex-1 flex flex-col min-h-0">
           {/* 基础信息 */}
           <EndpointTypeForm
             form={basicForm}
@@ -332,54 +348,57 @@ const EndpointConfig: React.FC = () => {
               />
             </div>
           </div>
-        </Card>
-
-        {/* 固定操作按钮 */}
-        <div className="absolute bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <Space>
-            {!isEditing ? (
-              <>
-                <Button
-                  icon={<SaveOutlined />}
-                  disabled={!selectedType}
-                  onClick={handleEdit}
-                >
-                  编辑
-                </Button>
-                <Button
-                  icon={<ExportOutlined />}
-                  disabled={!selectedType}
-                  onClick={handleExport}
-                >
-                  导出
-                </Button>
-                <Button icon={<ImportOutlined />} onClick={handleImport}>
-                  导入
-                </Button>
-                <Button
-                  icon={<DeleteOutlined />}
-                  danger
-                  disabled={!selectedType}
-                  onClick={handleDelete}
-                >
-                  删除
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button onClick={handleCancel}>取消</Button>
-                <Button
-                  type="primary"
-                  icon={<SaveOutlined />}
-                  loading={saveConfigMutation.isPending}
-                  onClick={handleSave}
-                >
-                  保存
-                </Button>
-              </>
-            )}
-          </Space>
         </div>
+
+        {/* 底部操作按钮 */}
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="flex justify-end">
+            <Space>
+              {!isEditing ? (
+                <>
+                  <Button
+                    icon={<SaveOutlined />}
+                    disabled={!selectedType}
+                    onClick={handleEdit}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    icon={<ExportOutlined />}
+                    disabled={!selectedType}
+                    onClick={handleExport}
+                  >
+                    导出
+                  </Button>
+                  <Button icon={<ImportOutlined />} onClick={handleImport}>
+                    导入
+                  </Button>
+                  <Button
+                    icon={<DeleteOutlined />}
+                    danger
+                    disabled={!selectedType}
+                    onClick={handleDelete}
+                  >
+                    删除
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={handleCancel}>取消</Button>
+                  <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    loading={saveConfigMutation.isPending}
+                    onClick={handleSave}
+                  >
+                    保存
+                  </Button>
+                </>
+              )}
+            </Space>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

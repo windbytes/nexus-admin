@@ -620,7 +620,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           size="middle"
           hideAdd
           className="tab-bar-tabs"
-          style={{ margin: 0, flex: 1 }}
+          style={{ margin: 0, width: 'calc(100% - 43px)' }}
         />
 
         {/* 右侧功能区域 */}
