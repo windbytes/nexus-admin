@@ -70,14 +70,13 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
           >
             <Input
               placeholder="请输入类型编码，如：http"
-              disabled={!!initialValues?.id}
             />
           </Form.Item>
         </Col>
 
         <Col span={8}>
           <Form.Item name="endpointType" label="端点类型">
-            <Input placeholder="请输入端点类型标识" disabled={!!initialValues?.id} />
+            <Input placeholder="请输入端点类型标识" />
           </Form.Item>
         </Col>
         <Col span={8}>
