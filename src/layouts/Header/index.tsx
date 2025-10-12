@@ -12,7 +12,6 @@ import CollapseSwitch from './component/CollapseSwitch';
 import LanguageSwitch from './component/LanguageSwitch';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import HeaderMenu from './component/HeaderMenu';
-import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
 import './header.scss';
 import ActivityTabBar from '@/components/TabBar/ActivityTabBar';

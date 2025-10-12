@@ -1,9 +1,8 @@
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Tabs, Dropdown, Button, type TabsProps, type MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-import { Activity } from 'react';
 import { useTabStore, type TabItem } from '@/stores/tabStore';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
@@ -14,16 +13,10 @@ import './tabBar.scss';
 
 interface ActivityTabBarProps {
   className?: string;
-  children?: React.ReactNode;
 }
 
-interface CacheItem {
-  component: React.ReactElement;
-  scrollTop: number;
-  scrollLeft: number;
-}
 
-const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) => {
+const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -35,10 +28,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [contextMenuTabKey, setContextMenuTabKey] = useState<string>('');
-
-  // 缓存管理
-  const cacheRef = useRef<Map<string, CacheItem>>(new Map());
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // 使用 useShallow 优化状态选择，减少不必要的重渲染
   const {
@@ -102,75 +91,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
   // 初始化标记，避免重复初始化
   const isInitializedRef = useRef(false);
 
-  // 保存当前页面的滚动位置
-  const saveScrollPosition = (key: string) => {
-    if (containerRef.current) {
-      const scrollTop = containerRef.current.scrollTop;
-      const scrollLeft = containerRef.current.scrollLeft;
-
-      const cached = cacheRef.current.get(key);
-      if (cached) {
-        cached.scrollTop = scrollTop;
-        cached.scrollLeft = scrollLeft;
-      }
-    }
-  };
-
-  // 恢复页面的滚动位置
-  const restoreScrollPosition = (key: string) => {
-    const cached = cacheRef.current.get(key);
-    if (cached && containerRef.current) {
-      // 使用setTimeout确保DOM更新后再设置滚动位置
-      setTimeout(() => {
-        if (containerRef.current) {
-          containerRef.current.scrollTop = cached.scrollTop;
-          containerRef.current.scrollLeft = cached.scrollLeft;
-        }
-      }, 0);
-    }
-  };
-
-  // 清除指定key的缓存
-  const clearCache = useCallback((key: string) => {
-    if (cacheRef.current.has(key)) {
-      cacheRef.current.delete(key);
-    }
-  }, []);
-
-  // 清除所有缓存
-  const clearAllCache = useCallback(() => {
-    cacheRef.current.clear();
-  }, []);
-
-  // 智能清理缓存 - 当缓存数量过多时，清理最久未使用的缓存
-  const smartClearCache = useCallback(() => {
-    const maxCacheSize = 10; // 最大缓存数量
-    if (cacheRef.current.size > maxCacheSize) {
-      const cacheEntries = Array.from(cacheRef.current.entries());
-
-      // 只保留配置了keepalive的页面
-      const keepAliveTabs = tabs.filter((tab) => tab.route?.meta?.keepAlive === true);
-      const keepAliveKeys = keepAliveTabs.map((tab) => tab.key);
-
-      // 过滤出需要保留的缓存（当前活跃页面和最近使用的keepalive页面）
-      const keysToKeep = [
-        activeKey,
-        ...cacheEntries
-          .filter(([key]) => keepAliveKeys.includes(key))
-          .slice(-5)
-          .map(([key]) => key),
-      ];
-
-      const keysToRemove = cacheEntries
-        .map(([key]) => key)
-        .filter((key) => !keysToKeep.includes(key))
-        .slice(0, cacheRef.current.size - maxCacheSize);
-
-      for (const key of keysToRemove) {
-        clearCache(key);
-      }
-    }
-  }, [activeKey, clearCache, tabs]);
 
   // 页面刷新时的状态恢复逻辑
   React.useEffect(() => {
@@ -427,7 +347,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
           if (!userData.isLogin) {
             // 用户退出登录，清空所有tab
             resetTabs();
-            clearAllCache();
           }
         } catch (error) {
           // 解析失败，忽略
@@ -440,7 +359,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [resetTabs, clearAllCache]);
+  }, [resetTabs]);
 
   // 处理右键菜单显示
   const handleContextMenu = useCallback(
@@ -488,10 +407,8 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
       if (action === 'remove' && typeof e === 'string') {
         // 标记正在关闭tab
         isClosingTabRef.current = true;
-        const newActiveKey = removeTab(e);
-        // 清除对应的缓存
-        clearCache(e);
-        // 如果关闭的是当前激活的tab，需要跳转到新的激活tab
+      const newActiveKey = removeTab(e);
+      // 如果关闭的是当前激活的tab，需要跳转到新的激活tab
         if (e === activeKey && newActiveKey) {
           navigate(newActiveKey, { replace: true });
           // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
@@ -504,7 +421,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
         }
       }
     },
-    [removeTab, navigate, activeKey, clearCache],
+    [removeTab, navigate, activeKey],
   );
 
   // 统一的菜单配置函数
@@ -524,8 +441,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
             // 标记正在关闭tab
             isClosingTabRef.current = true;
             const newActiveKey = removeTab(tabKey);
-            // 清除对应的缓存
-            clearCache(tabKey);
             // 如果关闭的是当前激活的tab，需要跳转到新的激活tab
             if (tabKey === activeKey && newActiveKey) {
               navigate(newActiveKey, { replace: true });
@@ -557,8 +472,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
           icon: <span>🔄</span>,
           onClick: () => {
             reloadTab(tabKey);
-            // 重新加载时清除缓存
-            clearCache(tabKey);
           },
         },
         {
@@ -578,16 +491,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
             // 标记正在关闭tab
             isClosingTabRef.current = true;
             const newActiveKey = closeLeftTabs(tabKey, homePath);
-            // 清除被关闭的tab的缓存
-            const targetIndex = tabs.findIndex(tab => tab.key === tabKey);
-            if (targetIndex > 0) {
-              const leftTabs = tabs.slice(0, targetIndex);
-              leftTabs.forEach(leftTab => {
-                if (leftTab.key !== homePath) {
-                  clearCache(leftTab.key);
-                }
-              });
-            }
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
               navigate(newActiveKey, { replace: true });
@@ -609,16 +512,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
             // 标记正在关闭tab
             isClosingTabRef.current = true;
             const newActiveKey = closeRightTabs(tabKey, homePath);
-            // 清除被关闭的tab的缓存
-            const targetIndex = tabs.findIndex(tab => tab.key === tabKey);
-            if (targetIndex >= 0 && targetIndex < tabs.length - 1) {
-              const rightTabs = tabs.slice(targetIndex + 1);
-              rightTabs.forEach(rightTab => {
-                if (rightTab.key !== homePath) {
-                  clearCache(rightTab.key);
-                }
-              });
-            }
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
               navigate(newActiveKey, { replace: true });
@@ -640,12 +533,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
             // 标记正在关闭tab
             isClosingTabRef.current = true;
             const newActiveKey = closeOtherTabs(tabKey, homePath);
-            // 清除被关闭的tab的缓存
-            tabs.forEach(tab => {
-              if (tab.key !== tabKey && tab.key !== homePath) {
-                clearCache(tab.key);
-              }
-            });
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
               navigate(newActiveKey, { replace: true });
@@ -667,8 +554,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
             // 标记正在关闭tab
             isClosingTabRef.current = true;
             const newActiveKey = closeAllTabs(homePath);
-            // 清除所有缓存
-            clearAllCache();
             // 关闭所有tab后跳转到新的激活tab
             if (newActiveKey) {
               // 如果当前不在homePath，需要跳转到homePath
@@ -699,7 +584,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
         },
       ];
     },
-    [t, tabs, activeKey, removeTab, navigate, pinTab, unpinTab, reloadTab, closeLeftTabs, closeRightTabs, closeOtherTabs, closeAllTabs, homePath, pathname, clearCache, clearAllCache],
+    [t, tabs, activeKey, removeTab, navigate, pinTab, unpinTab, reloadTab, closeLeftTabs, closeRightTabs, closeOtherTabs, closeAllTabs, homePath, pathname],
   );
 
   // 构建tab items
@@ -720,78 +605,12 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
     }));
   }, [tabs, handleContextMenu]);
 
-  // 清理不存在的tab对应的缓存
-  useEffect(() => {
-    const tabKeys = tabs.map((tab) => tab.key);
-    const cacheKeys = Array.from(cacheRef.current.keys());
 
-    cacheKeys.forEach((key) => {
-      if (!tabKeys.includes(key)) {
-        // 当tab被关闭时，清除对应的缓存
-        clearCache(key);
-      }
-    });
-  }, [tabs, clearCache]);
-
-  // 暴露清除缓存的方法给外部使用
-  useEffect(() => {
-    // 将清除缓存的方法挂载到 window 对象上，方便调试和外部调用
-    (window as any).__activityTabBarClearCache = clearCache;
-    (window as any).__activityTabBarClearAllCache = clearAllCache;
-    (window as any).__activityTabBarSmartClearCache = smartClearCache;
-
-    return () => {
-      delete (window as any).__activityTabBarClearCache;
-      delete (window as any).__activityTabBarClearAllCache;
-      delete (window as any).__activityTabBarSmartClearCache;
-    };
-  }, [clearCache, clearAllCache, smartClearCache]);
 
   // 如果没有tabs，不渲染组件
   if (tabs.length === 0) {
     return null;
   }
-
-  // 渲染所有tab的内容，使用Activity组件控制显示/隐藏
-  const renderTabContents = () => {
-    return tabs.map((tab) => {
-      const isActive = tab.key === activeKey;
-      const shouldCache = tab.route?.meta?.keepAlive === true;
-
-      if (shouldCache) {
-        // 如果配置了keepalive，检查缓存中是否已有当前页面
-        let cached = cacheRef.current.get(tab.key);
-
-        if (!cached) {
-          // 如果没有缓存，创建新的缓存项
-          cached = {
-            component: children as React.ReactElement,
-            scrollTop: 0,
-            scrollLeft: 0,
-          };
-          cacheRef.current.set(tab.key, cached);
-        }
-
-        // 使用Activity组件控制显示/隐藏
-        return (
-          <Activity key={tab.key} mode={isActive ? 'visible' : 'hidden'}>
-            <div className="h-full relative flex flex-col p-4">
-              {cached.component}
-            </div>
-          </Activity>
-        );
-      } else {
-        // 如果没有配置keepalive，直接渲染组件
-        return (
-          <Activity key={tab.key} mode={isActive ? 'visible' : 'hidden'}>
-            <div className="h-full relative flex flex-col p-4">
-              {children}
-            </div>
-          </Activity>
-        );
-      }
-    });
-  };
 
   return (
     <div className={`tab-bar ${className || ''}`}>
@@ -835,11 +654,6 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className, children }) 
       >
         <div style={{ display: 'none' }} />
       </Dropdown>
-
-      {/* 使用Activity组件渲染tab内容 */}
-      <div ref={containerRef} className="tab-content-container">
-        {renderTabContents()}
-      </div>
     </div>
   );
 };

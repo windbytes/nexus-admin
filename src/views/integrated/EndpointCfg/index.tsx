@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Card, Divider, Space, Button, App, Form } from 'antd';
 import {
   SaveOutlined,
@@ -15,7 +15,7 @@ import type {
 } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import EndpointTypeList from './components/EndpointTypeList';
-import EndpointTypeForm from './components/EndpointTypeForm';
+import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
 import SchemaFieldsTable from './components/SchemaFieldsTable';
 
 /**
@@ -24,6 +24,7 @@ import SchemaFieldsTable from './components/SchemaFieldsTable';
 const EndpointConfig: React.FC = () => {
   const { modal, message } = App.useApp();
   const [basicForm] = Form.useForm();
+  const endpointTypeFormRef = useRef<EndpointTypeFormRef>(null);
 
   // 当前选中的端点类型
   const [selectedType, setSelectedType] = useState<EndpointTypeListItem | null>(null);
@@ -146,6 +147,11 @@ const EndpointConfig: React.FC = () => {
     setSchemaFields([]);
     basicForm.resetFields();
     setIsEditing(true);
+    
+    // 聚焦到类型名称输入框
+    setTimeout(() => {
+      endpointTypeFormRef.current?.focusTypeName();
+    }, 200);
   }, [isEditing, basicForm, message]);
 
   /**
@@ -157,6 +163,11 @@ const EndpointConfig: React.FC = () => {
       return;
     }
     setIsEditing(true);
+    
+    // 聚焦到类型名称输入框
+    setTimeout(() => {
+      endpointTypeFormRef.current?.focusTypeName();
+    }, 200);
   }, [selectedType, message]);
 
   /**
@@ -287,17 +298,7 @@ const EndpointConfig: React.FC = () => {
   return (
     <div className="h-full flex gap-4">
       {/* 左侧：端点类型列表 */}
-      <Card 
-        className="w-[320px] flex-shrink-0"
-        styles={{
-          body: {
-            padding: '16px',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-      >
+      <div className="w-[420px] flex-shrink-0">
         <EndpointTypeList
           data={listData?.records || []}
           loading={listLoading}
@@ -305,6 +306,10 @@ const EndpointConfig: React.FC = () => {
           onSelect={handleSelectType}
           onAdd={handleAdd}
           onSearch={handleSearch}
+          onBatchExport={(selectedIds) => {
+            message.info(`批量导出功能开发中，已选择 ${selectedIds.length} 条记录：${selectedIds.join(', ')}`);
+          }}
+          onImport={handleImport}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
@@ -312,7 +317,7 @@ const EndpointConfig: React.FC = () => {
             onChange: handlePaginationChange,
           }}
         />
-      </Card>
+      </div>
 
       {/* 右侧：配置详情 */}
       <Card
@@ -329,6 +334,7 @@ const EndpointConfig: React.FC = () => {
         <div className="flex-1 flex flex-col min-h-0">
           {/* 基础信息 */}
           <EndpointTypeForm
+            ref={endpointTypeFormRef}
             form={basicForm}
             {...(detailData && { initialValues: detailData })}
             disabled={!isEditing}
@@ -357,6 +363,8 @@ const EndpointConfig: React.FC = () => {
               {!isEditing ? (
                 <>
                   <Button
+                    color="orange"
+                    variant="outlined"
                     icon={<SaveOutlined />}
                     disabled={!selectedType}
                     onClick={handleEdit}

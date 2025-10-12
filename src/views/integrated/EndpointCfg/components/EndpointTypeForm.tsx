@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useImperativeHandle } from 'react';
 import { Form, Input, Switch, Row, Col, Select } from 'antd';
 import type { FormInstance } from 'antd';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -12,6 +12,13 @@ interface EndpointTypeFormProps {
   initialValues?: Partial<EndpointTypeConfig> | undefined;
   /** 是否禁用 */
   disabled?: boolean;
+  /** ref引用 */
+  ref?: React.Ref<EndpointTypeFormRef>;
+}
+
+export interface EndpointTypeFormRef {
+  /** 聚焦到类型名称输入框 */
+  focusTypeName: () => void;
 }
 
 /**
@@ -21,7 +28,23 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
   form,
   initialValues,
   disabled = false,
+  ref,
 }) => {
+  // 类型名称输入框的引用
+  const typeNameInputRef = useRef<any>(null);
+
+  // 暴露给父组件的方法
+  useImperativeHandle(ref, () => ({
+    focusTypeName: () => {
+      // 使用setTimeout确保DOM已渲染
+      setTimeout(() => {
+        if (typeNameInputRef.current) {
+          typeNameInputRef.current.focus();
+        }
+      }, 100);
+    },
+  }));
+
   /**
    * 初始化表单值
    */
@@ -52,7 +75,10 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
             label="类型名称"
             rules={[{ required: true, message: '请输入类型名称' }]}
           >
-            <Input placeholder="请输入类型名称，如：HTTP端点" />
+            <Input 
+              ref={typeNameInputRef}
+              placeholder="请输入类型名称，如：HTTP端点" 
+            />
           </Form.Item>
         </Col>
 
@@ -80,7 +106,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={8}>
-          <Form.Item name="support_mode" label="支持模式">
+          <Form.Item name="support_mode" label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
             <Select options={MODE_OPTIONS as any} placeholder="请选择支持模式" />
           </Form.Item>
         </Col>

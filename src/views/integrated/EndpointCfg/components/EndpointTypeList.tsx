@@ -1,6 +1,6 @@
-import React from 'react';
-import { Table, Tag, Button, Input } from 'antd';
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Table, Tag, Button, Input, Card, Space, Tooltip, message } from 'antd';
+import { PlusOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import type { EndpointTypeListItem } from '@/services/integrated/endpointConfig/endpointConfigApi';
 
@@ -17,6 +17,10 @@ interface EndpointTypeListProps {
   onAdd: () => void;
   /** 搜索回调 */
   onSearch: (value: string) => void;
+  /** 批量导出回调 */
+  onBatchExport?: (selectedIds: string[]) => void;
+  /** 导入回调 */
+  onImport?: () => void;
   /** 分页配置 */
   pagination?: {
     current: number;
@@ -36,13 +40,44 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
   onSelect,
   onAdd,
   onSearch,
+  onBatchExport,
+  onImport,
   pagination,
 }) => {
+  // 多选状态
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // 多选配置
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
+    getCheckboxProps: (record: EndpointTypeListItem) => ({
+      name: record.typeName,
+    }),
+  };
+
+  // 处理批量导出
+  const handleBatchExport = () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请先选择要导出的端点配置');
+      return;
+    }
+    
+    if (onBatchExport) {
+      onBatchExport(selectedRowKeys as string[]);
+    } else {
+      message.info(`导出功能开发中，已选择 ${selectedRowKeys.length} 条记录`);
+    }
+  };
+
   const columns: TableProps<EndpointTypeListItem>['columns'] = [
     {
       title: '类型名称',
       dataIndex: 'typeName',
       key: 'typeName',
+      width: 120,
       ellipsis: true,
       render: (text, record) => (
         <div className="flex items-center gap-2">
@@ -71,53 +106,76 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
   ];
 
   return (
-    <div className="flex flex-col h-full">
-      {/* 搜索区域 */}
-      <div className="flex-shrink-0 mb-4">
-        <div className="text-sm text-gray-600 mb-2">端点类型管理</div>
-        <Input
-          placeholder="搜索端点类型"
-          prefix={<SearchOutlined />}
-          allowClear
-          onChange={(e) => onSearch(e.target.value)}
-        />
-      </div>
+    <Card
+      className="h-full flex flex-col"
+      classNames={{ 
+        body: 'flex flex-col h-[calc(100%-58px)] py-0! px-4!', 
+        header: 'py-3! px-4!' 
+      }}
+      title={
+        <div className="flex justify-between">
+          <div>端点类型列表</div>
+          <Space>
+            <Tooltip title="新增端点配置">
+              <Button type="text" icon={<PlusOutlined />} onClick={onAdd} />
+            </Tooltip>
 
-      {/* 表格区域 */}
-      <div className="flex-1 overflow-hidden">
-        <Table<EndpointTypeListItem>
-          rowKey="id"
-          columns={columns}
-          dataSource={data}
-          loading={loading}
-          pagination={pagination ? {
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showSizeChanger: false,
-            showQuickJumper: false,
-            showTotal: (total) => `共 ${total} 条`,
-            onChange: pagination.onChange,
-          } : false}
-          size="middle"
-          bordered
-          scroll={{ y: 'calc(100vh - 300px)' }}
-          rowClassName={(record) =>
-            record.id === selectedId ? 'bg-blue-50 cursor-pointer' : 'cursor-pointer hover:bg-gray-50'
-          }
-          onRow={(record) => ({
-            onClick: () => onSelect(record),
-          })}
-        />
-      </div>
+            {onImport && (
+              <Tooltip title="导入端点配置">
+                <Button 
+                  type="text" 
+                  icon={<ImportOutlined className="text-blue-500!" />} 
+                  onClick={onImport}
+                />
+              </Tooltip>
+            )}
 
-      {/* 新增按钮 */}
-      <div className="flex-shrink-0 mt-4">
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-          新增
-        </Button>
-      </div>
-    </div>
+            <Tooltip title="导出端点配置">
+              <Button 
+                type="text" 
+                icon={<ExportOutlined className="text-orange-500!" />} 
+                onClick={handleBatchExport}
+                disabled={selectedRowKeys.length === 0}
+              />
+            </Tooltip>
+          </Space>
+        </div>
+      }
+    >
+      <Input.Search
+        placeholder="请输入端点类型名称"
+        allowClear
+        onChange={(e) => onSearch(e.target.value)}
+        enterButton
+        className="my-2"
+      />
+      <Table<EndpointTypeListItem>
+        rowKey="id"
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={pagination ? {
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: false,
+          showQuickJumper: false,
+          showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+          onChange: pagination.onChange,
+        } : false}
+        size="middle"
+        bordered
+        className="flex-1 overflow-auto my-2!"
+        scroll={{ y: 'calc(100vh - 300px)', x: 'max-content' }}
+        rowClassName={(record) =>
+          record.id === selectedId ? 'bg-blue-50 cursor-pointer' : 'cursor-pointer hover:bg-gray-50'
+        }
+        onRow={(record) => ({
+          onClick: () => onSelect(record),
+        })}
+      />
+    </Card>
   );
 };
 
