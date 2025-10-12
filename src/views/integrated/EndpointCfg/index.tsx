@@ -73,13 +73,9 @@ const EndpointConfig: React.FC = () => {
       return endpointConfigService.addEndpointType(data);
     },
     onSuccess: () => {
-      message.success('保存成功！');
       setIsEditing(false);
       refetchList();
-    },
-    onError: (error: any) => {
-      message.error(`保存失败：${error.message}`);
-    },
+    }
   });
 
   /**
