@@ -40,7 +40,9 @@ export interface SchemaField {
   required?: boolean;
   /** 默认值 */
   defaultValue?: any;
-  /** 组件属性(JSON字符串) */
+  /** 组件属性配置 */
+  properties?: any;
+  /** 组件属性(JSON字符串) - 兼容旧版本 */
   componentProps?: string;
   /** 验证规则(JSON字符串) */
   rules?: string;
@@ -179,7 +181,7 @@ export const endpointConfigService = {
   async getEndpointTypeDetail(id: string): Promise<EndpointTypeConfig> {
     const response = await HttpRequest.get<EndpointTypeConfig>({
       url: `${EndpointConfigAction.detail}/${id}`,
-    });
+    }, { successMessageMode: 'none' });
     return response;
   },
 

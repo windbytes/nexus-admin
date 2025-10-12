@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import ComponentConfigModal from './ComponentConfigModal';
 
 const { TextArea } = Input;
 
@@ -22,6 +23,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
+  
+  // 组件配置弹窗状态
+  const [configModalVisible, setConfigModalVisible] = useState(false);
+  const [configModalData, setConfigModalData] = useState<{
+    componentType: string;
+    properties: any;
+    fieldId: string;
+  }>({ componentType: '', properties: {}, fieldId: '' });
 
   /**
    * 是否正在编辑
@@ -146,6 +155,31 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     },
     [fields, onChange]
   );
+
+  /**
+   * 打开组件配置弹窗
+   */
+  const handleOpenConfig = useCallback((record: SchemaField) => {
+    setConfigModalData({
+      componentType: record.component,
+      properties: record.properties || {},
+      fieldId: record.id || '',
+    });
+    setConfigModalVisible(true);
+  }, []);
+
+  /**
+   * 保存组件配置
+   */
+  const handleSaveConfig = useCallback((properties: any) => {
+    const newData = fields.map(field => {
+      if (field.id === configModalData.fieldId) {
+        return { ...field, properties };
+      }
+      return field;
+    });
+    onChange(newData);
+  }, [fields, onChange, configModalData.fieldId]);
 
   const columns = [
     {
@@ -287,6 +321,30 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
+      title: '属性配置',
+      width: 100,
+      align: 'center' as const,
+      render: (_: any, record: SchemaField) => {
+        const hasProperties = record.properties && Object.keys(record.properties).length > 0;
+        return (
+          <Tooltip title="配置组件属性">
+            <Button
+              type="link"
+              size="small"
+              icon={<SettingOutlined />}
+              onClick={() => handleOpenConfig(record)}
+              style={{ 
+                color: hasProperties ? '#1890ff' : '#999',
+                fontWeight: hasProperties ? 'bold' : 'normal'
+              }}
+            >
+              {hasProperties ? '已配置' : '配置'}
+            </Button>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: '操作',
       width: 220,
       align: 'center' as const,
@@ -389,10 +447,19 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           dataSource={fields}
           pagination={false}
           size="small"
-          scroll={{ x: 1200, y: 'calc(100vh - 500px)' }}
+          scroll={{ x: 1300, y: 'calc(100vh - 500px)' }}
           bordered
         />
       </Form>
+
+      {/* 组件配置弹窗 */}
+      <ComponentConfigModal
+        open={configModalVisible}
+        onCancel={() => setConfigModalVisible(false)}
+        onOk={handleSaveConfig}
+        componentType={configModalData.componentType}
+        currentProperties={configModalData.properties}
+      />
     </div>
   );
 };
