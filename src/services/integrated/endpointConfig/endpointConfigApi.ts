@@ -19,10 +19,10 @@ export const COMPONENT_TYPE_OPTIONS = [
  * 作用模式选项
  */
 export const MODE_OPTIONS = [
-  { value: 'IN_OUT', label: '输入输出' },
-  { value: 'IN', label: '输入' },
-  { value: 'OUT', label: '输出' },
-  { value: 'OUT_IN', label: '输出输入' },
+  { value: 'IN_OUT', label: 'IN_OUT' },
+  { value: 'IN', label: 'IN' },
+  { value: 'OUT', label: 'OUT' },
+  { value: 'OUT_IN', label: 'OUT_IN' },
 ] as const;
 /**
  * Schema字段配置

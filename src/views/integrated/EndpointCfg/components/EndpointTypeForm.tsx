@@ -107,7 +107,12 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
         </Col>
         <Col span={8}>
           <Form.Item name="support_mode" label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
-            <Select options={MODE_OPTIONS as any} placeholder="请选择支持模式" />
+            <Select 
+              mode="multiple"
+              options={MODE_OPTIONS as any} 
+              placeholder="请选择支持模式" 
+              maxTagCount="responsive"
+            />
           </Form.Item>
         </Col>
 

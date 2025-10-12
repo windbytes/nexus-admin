@@ -321,7 +321,7 @@ const EndpointConfig: React.FC = () => {
 
       {/* 右侧：配置详情 */}
       <Card
-        className="flex-1"
+        className="flex-1 shrink-0"
         styles={{
           body: {
             height: '100%',
