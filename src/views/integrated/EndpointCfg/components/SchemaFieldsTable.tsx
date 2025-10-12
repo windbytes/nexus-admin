@@ -160,13 +160,20 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 打开组件配置弹窗
    */
   const handleOpenConfig = useCallback((record: SchemaField) => {
+    // 如果当前正在编辑这一行，优先使用表单中的组件类型
+    let componentType = record.component;
+    if (isEditing(record)) {
+      const formValues = form.getFieldsValue();
+      componentType = formValues.component || record.component;
+    }
+    
     setConfigModalData({
-      componentType: record.component,
+      componentType,
       properties: record.properties || {},
       fieldId: record.id || '',
     });
     setConfigModalVisible(true);
-  }, []);
+  }, [form]);
 
   /**
    * 保存组件配置
@@ -256,7 +263,43 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '必填',
+      title: '属性配置',
+      width: 100,
+      align: 'center' as const,
+      render: (_: any, record: SchemaField) => {
+        const hasProperties = record.properties && Object.keys(record.properties).length > 0;
+        
+        // 获取当前组件类型（编辑状态下从表单获取）
+        let currentComponentType = record.component;
+        if (isEditing(record)) {
+          const formValues = form.getFieldsValue();
+          currentComponentType = formValues.component || record.component;
+        }
+        
+        const tooltipTitle = isEditing(record) 
+          ? `配置组件属性 (当前: ${currentComponentType})` 
+          : '配置组件属性';
+        
+        return (
+          <Tooltip title={tooltipTitle}>
+            <Button
+              type="link"
+              size="small"
+              icon={<SettingOutlined />}
+              onClick={() => handleOpenConfig(record)}
+              style={{ 
+                color: hasProperties ? '#1890ff' : '#999',
+                fontWeight: hasProperties ? 'bold' : 'normal'
+              }}
+            >
+              {hasProperties ? '已配置' : '配置'}
+            </Button>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: '是否必填',
       dataIndex: 'required',
       width: 80,
       align: 'center' as const,
@@ -318,30 +361,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           );
         }
         return text || '-';
-      },
-    },
-    {
-      title: '属性配置',
-      width: 100,
-      align: 'center' as const,
-      render: (_: any, record: SchemaField) => {
-        const hasProperties = record.properties && Object.keys(record.properties).length > 0;
-        return (
-          <Tooltip title="配置组件属性">
-            <Button
-              type="link"
-              size="small"
-              icon={<SettingOutlined />}
-              onClick={() => handleOpenConfig(record)}
-              style={{ 
-                color: hasProperties ? '#1890ff' : '#999',
-                fontWeight: hasProperties ? 'bold' : 'normal'
-              }}
-            >
-              {hasProperties ? '已配置' : '配置'}
-            </Button>
-          </Tooltip>
-        );
       },
     },
     {

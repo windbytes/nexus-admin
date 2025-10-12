@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Input, Switch, Button, Space, Tag, Modal, Radio } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Form, Input, Switch, Button, Radio, Row, Col } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ComponentConfigProps } from './index';
 
 /**
@@ -11,8 +11,6 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
   const [options, setOptions] = useState<Array<{ label: string; value: string }>>(
     value.options || []
   );
-  const [optionModalVisible, setOptionModalVisible] = useState(false);
-  const [editingOption, setEditingOption] = useState<{ label: string; value: string } | null>(null);
 
   // 处理配置变更
   const handleChange = (changedValues: any) => {
@@ -33,39 +31,20 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
 
   // 添加选项
   const handleAddOption = () => {
-    setEditingOption({ label: '', value: '' });
-    setOptionModalVisible(true);
+    const newOption = { label: '', value: '' };
+    setOptions(prev => [...prev, newOption]);
   };
 
-  // 编辑选项
-  const handleEditOption = (option: { label: string; value: string }) => {
-    setEditingOption(option);
-    setOptionModalVisible(true);
+  // 更新选项
+  const handleUpdateOption = (index: number, field: 'label' | 'value', newValue: string) => {
+    setOptions(prev => prev.map((option, i) => 
+      i === index ? { ...option, [field]: newValue } : option
+    ));
   };
 
   // 删除选项
-  const handleDeleteOption = (value: string) => {
-    setOptions(prev => prev.filter(option => option.value !== value));
-  };
-
-  // 保存选项
-  const handleSaveOption = () => {
-    if (!editingOption?.label || !editingOption?.value) return;
-
-    const isEdit = options.some(option => option.value === editingOption.value);
-    
-    if (isEdit) {
-      setOptions(prev => 
-        prev.map(option => 
-          option.value === editingOption.value ? editingOption : option
-        )
-      );
-    } else {
-      setOptions(prev => [...prev, editingOption]);
-    }
-
-    setOptionModalVisible(false);
-    setEditingOption(null);
+  const handleDeleteOption = (index: number) => {
+    setOptions(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -101,83 +80,77 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
       </Form>
 
       <div style={{ marginTop: 16 }}>
-        <div style={{ marginBottom: 8, fontWeight: 500 }}>选项配置</div>
+        <div style={{ marginBottom: 12, fontWeight: 500, fontSize: '14px' }}>选项配置</div>
+        
+        {/* 选项列表 */}
+        {options.map((option, index) => (
+          <div 
+            key={index}
+            style={{ 
+              padding: '12px',
+              marginBottom: 8,
+              border: '1px solid #d9d9d9',
+              borderRadius: 6,
+              backgroundColor: '#fafafa'
+            }}
+          >
+            <Row gutter={12}>
+              <Col span={10}>
+                <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>显示文本</div>
+                <Input
+                  value={option.label}
+                  onChange={(e) => handleUpdateOption(index, 'label', e.target.value)}
+                  placeholder="请输入显示文本"
+                  size="small"
+                />
+              </Col>
+              <Col span={10}>
+                <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>选项值</div>
+                <Input
+                  value={option.value}
+                  onChange={(e) => handleUpdateOption(index, 'value', e.target.value)}
+                  placeholder="请输入选项值"
+                  size="small"
+                />
+              </Col>
+              <Col span={4}>
+                <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>操作</div>
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleDeleteOption(index)}
+                  style={{ width: '100%' }}
+                />
+              </Col>
+            </Row>
+          </div>
+        ))}
+
+        {/* 添加选项按钮 */}
         <Button 
           type="dashed" 
           icon={<PlusOutlined />} 
           onClick={handleAddOption}
-          style={{ width: '100%' }}
+          style={{ width: '100%', marginTop: 8 }}
+          size="small"
         >
           添加选项
         </Button>
-        
-        <div style={{ marginTop: 8 }}>
-          {options.map((option) => (
-            <div 
-              key={option.value} 
-              style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                padding: '8px 12px',
-                marginBottom: 4,
-                border: '1px solid #d9d9d9',
-                borderRadius: 4,
-                backgroundColor: '#fafafa'
-              }}
-            >
-              <Space>
-                <Tag color="blue">{option.label}</Tag>
-                <span style={{ color: '#666' }}>{option.value}</span>
-              </Space>
-              <Space>
-                <Button 
-                  type="link" 
-                  size="small" 
-                  onClick={() => handleEditOption(option)}
-                >
-                  编辑
-                </Button>
-                <Button 
-                  type="link" 
-                  size="small" 
-                  danger
-                  onClick={() => handleDeleteOption(option.value)}
-                >
-                  删除
-                </Button>
-              </Space>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <Modal
-        title={editingOption && options.some(opt => opt.value === editingOption.value) ? "编辑选项" : "添加选项"}
-        open={optionModalVisible}
-        onOk={handleSaveOption}
-        onCancel={() => {
-          setOptionModalVisible(false);
-          setEditingOption(null);
-        }}
-      >
-        <Form layout="vertical">
-          <Form.Item label="显示文本" required>
-            <Input
-              value={editingOption?.label}
-              onChange={(e) => setEditingOption(prev => ({ ...prev!, label: e.target.value }))}
-              placeholder="请输入显示文本"
-            />
-          </Form.Item>
-          <Form.Item label="选项值" required>
-            <Input
-              value={editingOption?.value}
-              onChange={(e) => setEditingOption(prev => ({ ...prev!, value: e.target.value }))}
-              placeholder="请输入选项值"
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+        {options.length === 0 && (
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#999', 
+            fontSize: '12px', 
+            marginTop: 8,
+            padding: '16px'
+          }}>
+            暂无选项，点击上方按钮添加选项
+          </div>
+        )}
+      </div>
     </div>
   );
 };

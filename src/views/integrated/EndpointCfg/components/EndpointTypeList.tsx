@@ -56,6 +56,8 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
     getCheckboxProps: (record: EndpointTypeListItem) => ({
       name: record.typeName,
     }),
+    // 使用主题色的选中样式
+    selectedRowClassName: 'ant-table-row-selected',
   };
 
   // 处理批量导出
@@ -169,7 +171,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         className="flex-1 overflow-auto my-2!"
         scroll={{ y: 'calc(100vh - 300px)', x: 'max-content' }}
         rowClassName={(record) =>
-          record.id === selectedId ? 'bg-blue-50 cursor-pointer' : 'cursor-pointer hover:bg-gray-50'
+          record.id === selectedId ? 'ant-table-row-selected cursor-pointer' : 'cursor-pointer hover:bg-gray-50'
         }
         onRow={(record) => ({
           onClick: () => onSelect(record),
