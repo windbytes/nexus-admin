@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip } from 'antd';
+import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -188,18 +188,20 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     onChange(newData);
   }, [fields, onChange, configModalData.fieldId]);
 
-  const columns = [
+  /**
+   * 表格列配置
+   */
+  const columns: TableProps<SchemaField>['columns'] = [
     {
       title: '序号',
       width: 60,
-      align: 'center' as const,
+      align: 'center',
       render: (_: any, __: SchemaField, index: number) => index + 1,
     },
     {
       title: '字段名',
       dataIndex: 'field',
       width: 150,
-      editable: true,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -225,7 +227,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: '字段标签',
       dataIndex: 'label',
       width: 150,
-      editable: true,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -245,7 +246,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: '组件类型',
       dataIndex: 'component',
       width: 150,
-      editable: true,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -265,7 +265,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     {
       title: '属性配置',
       width: 100,
-      align: 'center' as const,
+      align: 'center',
       render: (_: any, record: SchemaField) => {
         const hasProperties = record.properties && Object.keys(record.properties).length > 0;
         
@@ -302,8 +302,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: '是否必填',
       dataIndex: 'required',
       width: 80,
-      align: 'center' as const,
-      editable: true,
+      align: 'center' ,
       render: (checked: boolean, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -319,7 +318,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: '默认值',
       dataIndex: 'defaultValue',
       width: 120,
-      editable: true,
       render: (text: any, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -335,7 +333,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: '作用模式',
       dataIndex: 'mode',
       width: 120,
-      editable: true,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -350,7 +347,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     {
       title: '说明',
       dataIndex: 'description',
-      editable: true,
       ellipsis: true,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
@@ -366,8 +362,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     {
       title: '操作',
       width: 220,
-      align: 'center' as const,
-      fixed: 'right' as const,
+      align: 'center',
+      fixed: 'right',
       render: (_: any, record: SchemaField, index: number) => {
         const editable = isEditing(record);
 

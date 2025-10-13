@@ -294,30 +294,28 @@ const EndpointConfig: React.FC = () => {
   return (
     <div className="h-full flex gap-4">
       {/* 左侧：端点类型列表 */}
-      <div className="w-[420px] flex-shrink-0">
-        <EndpointTypeList
-          data={listData?.records || []}
-          loading={listLoading}
-          {...(selectedType?.id && { selectedId: selectedType.id })}
-          onSelect={handleSelectType}
-          onAdd={handleAdd}
-          onSearch={handleSearch}
-          onBatchExport={(selectedIds) => {
-            message.info(`批量导出功能开发中，已选择 ${selectedIds.length} 条记录：${selectedIds.join(', ')}`);
-          }}
-          onImport={handleImport}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: listData?.total || 0,
-            onChange: handlePaginationChange,
-          }}
-        />
-      </div>
+      <EndpointTypeList
+        data={listData?.records || []}
+        loading={listLoading}
+        {...(selectedType?.id && { selectedId: selectedType.id })}
+        onSelect={handleSelectType}
+        onAdd={handleAdd}
+        onSearch={handleSearch}
+        onBatchExport={(selectedIds) => {
+          message.info(`批量导出功能开发中，已选择 ${selectedIds.length} 条记录：${selectedIds.join(', ')}`);
+        }}
+        onImport={handleImport}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: listData?.total || 0,
+          onChange: handlePaginationChange,
+        }}
+      />
 
       {/* 右侧：配置详情 */}
       <Card
-        className="flex-1 shrink-0"
+        className="flex-1 min-w-0"
         styles={{
           body: {
             height: '100%',
@@ -327,33 +325,31 @@ const EndpointConfig: React.FC = () => {
         }}
         loading={detailLoading}
       >
-        <div className="flex-1 flex flex-col min-h-0">
           {/* 基础信息 */}
-          <EndpointTypeForm
-            ref={endpointTypeFormRef}
-            form={basicForm}
-            {...(detailData && { initialValues: detailData })}
-            disabled={!isEditing}
-          />
+        <EndpointTypeForm
+          ref={endpointTypeFormRef}
+          form={basicForm}
+          {...(detailData && { initialValues: detailData })}
+          disabled={!isEditing}
+        />
 
-          {/* Schema配置 */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <Divider orientation="left">
-              <AppstoreAddOutlined className="mr-2" />
-              Schema字段配置
-            </Divider>
-            <div className="flex-1 overflow-hidden">
-              <SchemaFieldsTable
-                fields={schemaFields}
-                disabled={!isEditing}
-                onChange={handleSchemaFieldsChange}
-              />
-            </div>
+        {/* Schema配置 */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <Divider orientation="left">
+            <AppstoreAddOutlined className="mr-2" />
+            Schema字段配置
+          </Divider>
+          <div className="flex-1 overflow-hidden">
+            <SchemaFieldsTable
+              fields={schemaFields}
+              disabled={!isEditing}
+              onChange={handleSchemaFieldsChange}
+            />
           </div>
         </div>
 
         {/* 底部操作按钮 */}
-        <div className="border-t border-gray-200 pt-4 mt-4">
+        <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-end">
             <Space>
               {!isEditing ? (
