@@ -92,7 +92,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
       title: '字段数',
       dataIndex: 'fieldCount',
       key: 'fieldCount',
-      width: 80,
+      width: 60,
       align: 'center',
     },
     {
@@ -109,7 +109,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
 
   return (
     <Card
-      className="h-full flex flex-col w-[420px] flex-shrink-0"
+      className="h-full flex flex-col w-[360px] flex-shrink-0"
       classNames={{ 
         body: 'flex flex-col h-[calc(100%-58px)] py-0! px-4!', 
         header: 'py-3! px-4!' 

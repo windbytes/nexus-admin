@@ -219,7 +219,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     {
       title: '字段名',
       dataIndex: 'field',
-      width: 150,
+      width: 80,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -379,7 +379,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     },
     {
       title: '操作',
-      width: 220,
+      width: 180,
       align: 'center',
       fixed: 'right',
       render: (_: any, record: SchemaField, index: number) => {
