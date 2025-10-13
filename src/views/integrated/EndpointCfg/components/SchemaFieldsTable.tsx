@@ -482,7 +482,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           dataSource={fields}
           pagination={false}
           size="small"
-          scroll={{ x: 1300, y: 'calc(100vh - 500px)' }}
+          scroll={{ x: 'max-content', y: 'calc(100vh - 500px)' }}
           bordered
         />
       </Form>
