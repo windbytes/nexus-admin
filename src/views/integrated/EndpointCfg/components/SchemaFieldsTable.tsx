@@ -180,7 +180,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const handleOpenConfig = useCallback((record: SchemaField) => {
     // 如果当前正在编辑这一行，优先使用表单中的组件类型
     let componentType = record.component;
-    if (isEditing(record)) {
+    // 直接判断 record.id === editingKey，避免闭包问题
+    if (record.id === editingKey) {
       const formValues = form.getFieldsValue();
       componentType = formValues.component || record.component;
     }
@@ -191,7 +192,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       fieldId: record.id || '',
     });
     setConfigModalVisible(true);
-  }, [form]);
+  }, [form, editingKey]);
 
   /**
    * 保存组件配置
