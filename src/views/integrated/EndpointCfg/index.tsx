@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Card, Divider, Space, Button, App, Form } from 'antd';
 import {
   SaveOutlined,
@@ -7,7 +7,7 @@ import {
   ImportOutlined,
   AppstoreAddOutlined,
 } from '@ant-design/icons';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
 import type {
   EndpointTypeListItem,
   SchemaField,
@@ -16,7 +16,7 @@ import type {
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import EndpointTypeList from './components/EndpointTypeList';
 import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
-import SchemaFieldsTable from './components/SchemaFieldsTable';
+import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
 
 /**
  * 端点配置维护主页面
@@ -25,6 +25,7 @@ const EndpointConfig: React.FC = () => {
   const { modal, message } = App.useApp();
   const [basicForm] = Form.useForm();
   const endpointTypeFormRef = useRef<EndpointTypeFormRef>(null);
+  const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
 
   // 当前选中的端点类型
   const [selectedType, setSelectedType] = useState<EndpointTypeListItem | null>(null);
@@ -55,11 +56,13 @@ const EndpointConfig: React.FC = () => {
 
   /**
    * 查询端点类型详情
+   * 使用 placeholderData 保持之前的数据，避免切换时闪动
    */
   const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ['endpoint_config_detail', selectedType?.id],
     queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
     enabled: !!selectedType?.id && !isEditing,
+    placeholderData: keepPreviousData, // 保持之前的数据，避免闪动
   });
 
   /**
@@ -207,6 +210,9 @@ const EndpointConfig: React.FC = () => {
    */
   const handleCancel = useCallback(() => {
     setIsEditing(false);
+    // 取消 Schema 表格的编辑状态
+    schemaFieldsTableRef.current?.cancelEdit();
+    
     if (selectedType?.id) {
       // 重新加载数据
       basicForm.setFieldsValue(detailData);
@@ -284,12 +290,16 @@ const EndpointConfig: React.FC = () => {
   }, []);
 
   // 当详情数据加载完成时，更新表单和字段
+  // 只在 selectedType.id 变化且不在编辑模式时更新
   React.useEffect(() => {
-    if (detailData && !isEditing) {
+    if (detailData && !isEditing && selectedType?.id === detailData.id) {
       basicForm.setFieldsValue(detailData);
       setSchemaFields(detailData.schemaFields || []);
     }
-  }, [detailData, isEditing, basicForm]);
+  }, [selectedType?.id, detailData?.id, isEditing]);
+
+  // 使用 useMemo 缓存 schemaFields，避免引用变化导致子组件重渲染
+  const memoizedSchemaFields = useMemo(() => schemaFields, [schemaFields]);
 
   return (
     <div className="h-full flex gap-4">
@@ -323,7 +333,7 @@ const EndpointConfig: React.FC = () => {
             flexDirection: 'column',
           },
         }}
-        loading={detailLoading}
+        loading={detailLoading && !detailData}
       >
           {/* 基础信息 */}
         <EndpointTypeForm
@@ -341,7 +351,9 @@ const EndpointConfig: React.FC = () => {
           </Divider>
           <div className="flex-1 overflow-hidden">
             <SchemaFieldsTable
-              fields={schemaFields}
+              ref={schemaFieldsTableRef}
+              key={selectedType?.id || 'new'}
+              fields={memoizedSchemaFields}
               disabled={!isEditing}
               onChange={handleSchemaFieldsChange}
             />

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useImperativeHandle } from 'react';
 import { Form, Input, Switch, Row, Col, Select } from 'antd';
 import type { FormInstance } from 'antd';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 
 const { TextArea } = Input;
 
@@ -101,8 +102,8 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
         </Col>
 
         <Col span={8}>
-          <Form.Item name="endpointType" label="端点类型">
-            <Input placeholder="请输入端点类型标识" />
+          <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
+            <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
           </Form.Item>
         </Col>
         <Col span={8}>

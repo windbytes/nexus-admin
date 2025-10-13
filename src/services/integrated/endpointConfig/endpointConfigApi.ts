@@ -24,6 +24,7 @@ export const MODE_OPTIONS = [
   { value: 'OUT', label: 'OUT' },
   { value: 'OUT_IN', label: 'OUT_IN' },
 ] as const;
+
 /**
  * Schema字段配置
  */
@@ -41,9 +42,7 @@ export interface SchemaField {
   /** 默认值 */
   defaultValue?: any;
   /** 组件属性配置 */
-  properties?: any;
-  /** 组件属性(JSON字符串) - 兼容旧版本 */
-  componentProps?: string;
+  properties: Record<string, any>;
   /** 验证规则(JSON字符串) */
   rules?: string;
   /** 显示条件(JS表达式) */

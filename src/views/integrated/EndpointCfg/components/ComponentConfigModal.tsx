@@ -105,14 +105,18 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       open={open}
       onCancel={onCancel}
       onOk={handleOk}
-      width={600}
+      width={1000}
       okText="确定"
       cancelText="取消"
       destroyOnHidden
+      styles={{
+        body: {
+          maxHeight: '60vh',
+          overflow: 'auto',
+        },
+      }}
     >
-      <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
-        {getComponentConfig()}
-      </div>
+      {getComponentConfig()}
     </Modal>
   );
 };

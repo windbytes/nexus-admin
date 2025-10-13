@@ -29,12 +29,12 @@ export const ENDPOINT_CATEGORIES = [
  * 端点类型选项
  */
 export const ENDPOINT_TYPE_OPTIONS = [
-  { value: 'http', label: 'HTTP端点' },
-  { value: 'database', label: '数据库端点' },
-  { value: 'webservice', label: 'WebService端点' },
-  { value: 'file', label: '文件端点' },
-  { value: 'timer', label: '定时器端点' },
-  { value: 'mq', label: 'MQ端点' },
+  { value: 'http', label: 'HTTP/Web服务' },
+  { value: 'database', label: '数据库/数据存储' },
+  { value: 'webservice', label: 'WebService/Web服务' },
+  { value: 'file', label: '文件与系统/IO' },
+  { value: 'timer', label: '定时器/调度' },
+  { value: 'mq', label: '消息中间件/队列' },
 ] as const;
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useImperativeHandle } from 'react';
 import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -7,6 +7,11 @@ import ComponentConfigModal from './ComponentConfigModal';
 
 const { TextArea } = Input;
 
+export interface SchemaFieldsTableRef {
+  /** 取消编辑 */
+  cancelEdit: () => void;
+}
+
 interface SchemaFieldsTableProps {
   /** 数据源 */
   fields: SchemaField[];
@@ -14,12 +19,16 @@ interface SchemaFieldsTableProps {
   disabled?: boolean;
   /** 数据变更回调 */
   onChange: (fields: SchemaField[]) => void;
+  /** ref 引用 (React 19 支持直接作为 prop) */
+  ref?: React.Ref<SchemaFieldsTableRef>;
 }
 
 /**
  * Schema字段编辑表格组件（右下）
+ * 使用 React.memo 避免不必要的重渲染
+ * React 19 支持函数组件直接接收 ref prop
  */
-const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled = false, onChange }) => {
+const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled = false, onChange, ref }) => {
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -49,7 +58,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 取消编辑
    */
-  const cancel = () => {
+  const cancel = useCallback(() => {
     if (isNewRecord) {
       // 如果是新增记录，删除该记录
       const newData = fields.filter((item) => item.id !== editingKey);
@@ -57,7 +66,15 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     }
     setEditingKey('');
     setIsNewRecord(false);
-  };
+  }, [isNewRecord, fields, editingKey, onChange]);
+
+  /**
+   * 暴露给父组件的方法
+   * React 19 支持直接使用 useImperativeHandle
+   */
+  useImperativeHandle(ref, () => ({
+    cancelEdit: cancel,
+  }), [cancel]);
 
   /**
    * 保存编辑
@@ -95,7 +112,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       component: 'Input',
       required: false,
       sortOrder: fields.length + 1,
-      mode: 'IN_OUT'
+      mode: 'IN_OUT',
+      properties: {},
     };
     onChange([...fields, newField]);
     setTimeout(() => {
@@ -479,5 +497,13 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   );
 };
 
-export default React.memo(SchemaFieldsTable);
+// 使用 React.memo 进行深度比较优化
+export default React.memo(SchemaFieldsTable, (prevProps, nextProps) => {
+  // 只在 fields 引用、disabled 状态或 onChange 回调真正改变时才重新渲染
+  return (
+    prevProps.fields === nextProps.fields &&
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.onChange === nextProps.onChange
+  );
+});
 
