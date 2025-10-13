@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, InputNumber, Switch } from 'antd';
+import { Col, Form, InputNumber, Row, Switch } from 'antd';
 import type { ComponentConfigProps } from './index';
 
 /**
@@ -22,8 +22,10 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
   return (
     <Form
       form={form}
-      layout="vertical"
+      layout="horizontal"
       onValuesChange={handleChange}
+      labelCol={{ span: 10 }}
+      wrapperCol={{ span: 14 }}
       initialValues={{
         min: undefined,
         max: undefined,
@@ -35,7 +37,9 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
         allowClear: true,
       }}
     >
-      <Form.Item
+      <Row gutter={16}>
+        <Col span={8}>
+        <Form.Item
         name="min"
         label="最小值"
         tooltip="输入的最小值"
@@ -45,8 +49,10 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
           style={{ width: '100%' }}
         />
       </Form.Item>
-
-      <Form.Item
+        </Col>
+      
+        <Col span={8}>
+        <Form.Item
         name="max"
         label="最大值"
         tooltip="输入的最大值"
@@ -56,7 +62,20 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
           style={{ width: '100%' }}
         />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
+        <Form.Item
+        name="max"
+        label="最大值"
+        tooltip="输入的最大值"
+      >
+        <InputNumber 
+          placeholder="请输入最大值"
+          style={{ width: '100%' }}
+        />
+      </Form.Item>
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="step"
         label="步长"
@@ -69,7 +88,8 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
           style={{ width: '100%' }}
         />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="precision"
         label="精度"
@@ -82,7 +102,8 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
           style={{ width: '100%' }}
         />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="placeholder"
         label="占位符"
@@ -93,7 +114,8 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
           style={{ width: '100%' }}
         />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="allowClear"
         label="允许清除"
@@ -102,7 +124,8 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
       >
         <Switch />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="disabled"
         label="禁用状态"
@@ -111,7 +134,8 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
       >
         <Switch />
       </Form.Item>
-
+        </Col>
+        <Col span={8}>
       <Form.Item
         name="readOnly"
         label="只读状态"
@@ -120,7 +144,10 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
       >
         <Switch />
       </Form.Item>
+        </Col>
+      </Row>
     </Form>
+      
   );
 };
 
