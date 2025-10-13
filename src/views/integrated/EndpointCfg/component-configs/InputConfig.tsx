@@ -36,7 +36,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
       }}
     >
       <Row gutter={16}>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="placeholder"
             label="占位符"
@@ -46,7 +46,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="maxLength"
             label="最大长度"
@@ -60,7 +60,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
             />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="addonAfter"
             label="后置标签"
@@ -69,7 +69,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
             <Input placeholder="请输入后置标签" />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="addonBefore"
             label="前置标签"
@@ -78,7 +78,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
             <Input placeholder="请输入前置标签" />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="prefix"
             label="前缀"
@@ -87,7 +87,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
             <Input placeholder="请输入前缀" />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="suffix"
             label="后缀"
@@ -96,7 +96,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
             <Input placeholder="请输入后缀" />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="defaultValue"
             label="默认值"
@@ -106,7 +106,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="id"
             label="ID"
@@ -116,7 +116,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="showCount"
             label="显示字符数"
@@ -127,7 +127,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="allowClear"
             label="允许清除"
@@ -138,7 +138,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="disabled"
             label="禁用状态"
@@ -149,7 +149,7 @@ const InputConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item
             name="readOnly"
             label="只读状态"

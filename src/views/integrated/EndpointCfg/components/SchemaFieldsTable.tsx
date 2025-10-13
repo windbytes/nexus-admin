@@ -304,6 +304,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
               type="link"
               size="small"
               icon={<SettingOutlined />}
+              disabled={(!isEditing(record))}
               onClick={() => handleOpenConfig(record)}
               style={{ 
                 color: hasProperties ? '#1890ff' : '#999',
