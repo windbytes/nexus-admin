@@ -45,6 +45,7 @@ const JSONConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =>
           validateOnChange: true,     // 实时验证
           allowEmpty: false,          // 是否允许空值
           defaultExpanded: true,      // 表单模式：默认展开
+          enableAddDelete: true,     // 是否允许添加/删除
         }}
       >
         {/* 编辑模式选择 */}
