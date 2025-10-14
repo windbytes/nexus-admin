@@ -40,6 +40,8 @@ const EndpointConfig: React.FC = () => {
     current: 1,
     pageSize: 10,
   });
+  // 标记是否已初始化（用于首次加载自动选中第一条）
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   /**
    * 查询端点类型列表
@@ -58,7 +60,7 @@ const EndpointConfig: React.FC = () => {
    * 查询端点类型详情
    * 使用 placeholderData 保持之前的数据，避免切换时闪动
    */
-  const { data: detailData, isLoading: detailLoading } = useQuery({
+  const { data: detailData, isLoading: detailLoading, refetch: refetchDetail } = useQuery({
     queryKey: ['endpoint_config_detail', selectedType?.id],
     queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
     enabled: !!selectedType?.id && !isEditing,
@@ -75,9 +77,50 @@ const EndpointConfig: React.FC = () => {
       }
       return endpointConfigService.addEndpointType(data);
     },
-    onSuccess: () => {
+    onSuccess: (savedData) => {
       setIsEditing(false);
+      
+      // 如果是新增，更新选中的类型
+      if (!selectedType?.id && savedData) {
+        const newSelectedType: EndpointTypeListItem = {
+          id: savedData.id,
+          endpointType: savedData.endpointType,
+          typeName: savedData.typeName,
+          typeCode: savedData.typeCode,
+          schemaVersion: savedData.schemaVersion,
+          fieldCount: savedData.schemaFields?.length || 0,
+          status: savedData.status,
+        };
+        
+        if (savedData.icon) {
+          newSelectedType.icon = savedData.icon;
+        }
+        if (savedData.description) {
+          newSelectedType.description = savedData.description;
+        }
+        if (savedData.createTime) {
+          newSelectedType.createTime = savedData.createTime;
+        }
+        if (savedData.updateTime) {
+          newSelectedType.updateTime = savedData.updateTime;
+        }
+        
+        setSelectedType(newSelectedType);
+      }
+      
+      // 刷新列表
       refetchList();
+      
+      // 重新查询详情数据以获取后端返回的真实ID
+      // 使用 setTimeout 确保在 setIsEditing(false) 之后执行
+      setTimeout(() => {
+        if (selectedType?.id || savedData?.id) {
+          refetchDetail();
+        }
+      }, 100);
+    },
+    onError: (error: any) => {
+      message.error(`保存失败：${error.message || '未知错误'}`);
     }
   });
 
@@ -86,12 +129,22 @@ const EndpointConfig: React.FC = () => {
    */
   const deleteConfigMutation = useMutation({
     mutationFn: (id: string) => endpointConfigService.deleteEndpointType(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       message.success('删除成功！');
       setSelectedType(null);
       setSchemaFields([]);
       basicForm.resetFields();
-      refetchList();
+      
+      // 刷新列表
+      const updatedList = await refetchList();
+      
+      // 删除后，如果列表还有数据，自动选中第一条
+      if (updatedList.data && updatedList.data.records && updatedList.data.records.length > 0) {
+        const firstRecord = updatedList.data.records[0];
+        if (firstRecord) {
+          setSelectedType(firstRecord);
+        }
+      }
     },
     onError: (error: any) => {
       message.error(`删除失败：${error.message}`);
@@ -296,10 +349,24 @@ const EndpointConfig: React.FC = () => {
       basicForm.setFieldsValue(detailData);
       setSchemaFields(detailData.schemaFields || []);
     }
-  }, [selectedType?.id, detailData?.id, isEditing]);
+  }, [selectedType?.id, detailData, isEditing]);
 
   // 使用 useMemo 缓存 schemaFields，避免引用变化导致子组件重渲染
   const memoizedSchemaFields = useMemo(() => schemaFields, [schemaFields]);
+
+  /**
+   * 首次加载列表数据后，自动选中第一条记录
+   */
+  React.useEffect(() => {
+    // 只在第一次加载且有数据时执行
+    if (!hasInitialized && listData && listData.records && listData.records.length > 0 && !selectedType) {
+      const firstRecord = listData.records[0];
+      if (firstRecord) {
+        setSelectedType(firstRecord);
+        setHasInitialized(true);
+      }
+    }
+  }, [listData, hasInitialized, selectedType]);
 
   return (
     <div className="h-full flex gap-4">
