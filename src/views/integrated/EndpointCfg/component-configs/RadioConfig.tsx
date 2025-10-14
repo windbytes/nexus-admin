@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Switch, Button, Radio, Row, Col } from 'antd';
+import { Form, Input, Switch, Button, Radio, Row, Col, App } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ComponentConfigProps } from './index';
 
@@ -7,6 +7,7 @@ import type { ComponentConfigProps } from './index';
  * 单选框组件配置
  */
 const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) => {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [options, setOptions] = useState<Array<{ label: string; value: string }>>(
     value.options || []
@@ -31,6 +32,38 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
 
   // 添加选项
   const handleAddOption = () => {
+    // 验证：如果已经有选项，检查最后一个选项是否完整
+    if (options.length > 0) {
+      const lastOption = options[options.length - 1];
+      const hasEmptyLabel = !lastOption?.label || lastOption.label.trim() === '';
+      const hasEmptyValue = !lastOption?.value || lastOption.value.trim() === '';
+      
+      if (hasEmptyLabel && hasEmptyValue) {
+        message.warning({
+          content: '请先填写上一个选项的显示文本和选项值后再添加新选项',
+          duration: 3,
+        });
+        return;
+      }
+      
+      if (hasEmptyLabel) {
+        message.warning({
+          content: '请先填写上一个选项的显示文本后再添加新选项',
+          duration: 3,
+        });
+        return;
+      }
+      
+      if (hasEmptyValue) {
+        message.warning({
+          content: '请先填写上一个选项的选项值后再添加新选项',
+          duration: 3,
+        });
+        return;
+      }
+    }
+    
+    // 验证通过，添加新选项
     const newOption = { label: '', value: '' };
     setOptions(prev => [...prev, newOption]);
   };

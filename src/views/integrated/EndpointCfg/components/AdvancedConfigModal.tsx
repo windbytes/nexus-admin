@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Space, Card, message, Tooltip, Radio, Switch, Select } from 'antd';
+import { Form, Input, Button, Space, Card, Tooltip, Radio, Switch, Select, App } from 'antd';
 import { PlusOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { CodeEditor } from '@/components/CodeEditor';
 import DragModal from '@/components/modal/DragModal';
@@ -63,6 +63,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
   currentShowCondition = '',
   fieldLabel = '字段',
 }) => {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const [rulesMode, setRulesMode] = useState<'visual' | 'json'>('visual');
   const [rulesJson, setRulesJson] = useState<string>('');

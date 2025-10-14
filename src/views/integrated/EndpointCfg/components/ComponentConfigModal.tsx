@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Modal } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import {
   InputConfig,
@@ -11,6 +10,7 @@ import {
   SwitchConfig,
   type ComponentConfigProps,
 } from '../component-configs';
+import DragModal from '@/components/modal/DragModal';
 
 interface ComponentConfigModalProps {
   /** 是否显示弹窗 */
@@ -95,11 +95,12 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
   };
 
   return (
-    <Modal
+    <DragModal
+      centered
       title={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SettingOutlined />
-          {getComponentTypeName(componentType)}属性配置
+          {getComponentTypeName(componentType)} - 属性配置
         </div>
       }
       open={open}
@@ -117,7 +118,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       }}
     >
       {getComponentConfig()}
-    </Modal>
+    </DragModal>
   );
 };
 
