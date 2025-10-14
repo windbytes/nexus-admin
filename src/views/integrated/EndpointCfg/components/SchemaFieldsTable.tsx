@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useImperativeHandle } from 'react';
-import { Table, Button, Input, Select, Switch, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
+import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import ComponentConfigModal from './ComponentConfigModal';
+import AdvancedConfigModal from './AdvancedConfigModal';
 
 const { TextArea } = Input;
 
@@ -40,6 +41,15 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     properties: any;
     fieldId: string;
   }>({ componentType: '', properties: {}, fieldId: '' });
+
+  // 高级配置弹窗状态
+  const [advancedModalVisible, setAdvancedModalVisible] = useState(false);
+  const [advancedModalData, setAdvancedModalData] = useState<{
+    fieldId: string;
+    fieldLabel: string;
+    rules?: string;
+    showCondition?: string;
+  }>({ fieldId: '', fieldLabel: '' });
 
   /**
    * 是否正在编辑
@@ -110,7 +120,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       field: '',
       label: '',
       component: 'Input',
-      required: false,
       sortOrder: fields.length + 1,
       mode: 'IN_OUT',
       properties: {},
@@ -208,6 +217,63 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   }, [fields, onChange, configModalData.fieldId]);
 
   /**
+   * 打开高级配置弹窗
+   */
+  const handleOpenAdvancedConfig = useCallback((record: SchemaField) => {
+    // 如果正在编辑，从表单获取最新的label
+    let fieldLabel = record.label;
+    if (record.id === editingKey) {
+      const formValues = form.getFieldsValue();
+      fieldLabel = formValues.label || record.label;
+    }
+
+    const modalData: {
+      fieldId: string;
+      fieldLabel: string;
+      rules?: string;
+      showCondition?: string;
+    } = {
+      fieldId: record.id || '',
+      fieldLabel: fieldLabel || '字段',
+    };
+    
+    if (record.rules) {
+      modalData.rules = record.rules;
+    }
+    if (record.showCondition) {
+      modalData.showCondition = record.showCondition;
+    }
+
+    setAdvancedModalData(modalData);
+    setAdvancedModalVisible(true);
+  }, [form, editingKey]);
+
+  /**
+   * 保存高级配置
+   */
+  const handleSaveAdvancedConfig = useCallback((config: { rules?: string; showCondition?: string }) => {
+    const newData = fields.map(field => {
+      if (field.id === advancedModalData.fieldId) {
+        const updatedField: SchemaField = { ...field };
+        if (config.rules) {
+          updatedField.rules = config.rules;
+        } else {
+          delete updatedField.rules;
+        }
+        if (config.showCondition) {
+          updatedField.showCondition = config.showCondition;
+        } else {
+          delete updatedField.showCondition;
+        }
+        return updatedField;
+      }
+      return field;
+    });
+    onChange(newData);
+    setAdvancedModalVisible(false);
+  }, [fields, onChange, advancedModalData.fieldId]);
+
+  /**
    * 表格列配置
    */
   const columns: TableProps<SchemaField>['columns'] = [
@@ -282,7 +348,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '属性配置',
+      title: '组件属性',
       width: 100,
       align: 'center',
       render: (_: any, record: SchemaField) => {
@@ -319,19 +385,40 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '是否必填',
-      dataIndex: 'required',
-      width: 80,
-      align: 'center' ,
-      render: (checked: boolean, record: SchemaField) => {
-        if (isEditing(record)) {
-          return (
-            <Form.Item name="required" valuePropName="checked" style={{ margin: 0 }}>
-              <Switch />
-            </Form.Item>
-          );
+      title: '验证与显示',
+      width: 100,
+      align: 'center',
+      render: (_: any, record: SchemaField) => {
+        const hasRules = record.rules && record.rules.trim().length > 0;
+        const hasCondition = record.showCondition && record.showCondition.trim().length > 0;
+        const hasAdvancedConfig = hasRules || hasCondition;
+        
+        let tooltipTitle = '配置验证规则和显示条件';
+        if (hasRules && hasCondition) {
+          tooltipTitle = '已配置验证规则和显示条件';
+        } else if (hasRules) {
+          tooltipTitle = '已配置验证规则';
+        } else if (hasCondition) {
+          tooltipTitle = '已配置显示条件';
         }
-        return <Switch checked={checked} disabled />;
+        
+        return (
+          <Tooltip title={tooltipTitle}>
+            <Button
+              type="link"
+              size="small"
+              icon={<ToolOutlined />}
+              disabled={(!isEditing(record))}
+              onClick={() => handleOpenAdvancedConfig(record)}
+              style={{ 
+                color: hasAdvancedConfig ? '#52c41a' : '#999',
+                fontWeight: hasAdvancedConfig ? 'bold' : 'normal'
+              }}
+            >
+              {hasAdvancedConfig ? '已配置' : '配置'}
+            </Button>
+          </Tooltip>
+        );
       },
     },
     {
@@ -494,6 +581,16 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         onOk={handleSaveConfig}
         componentType={configModalData.componentType}
         currentProperties={configModalData.properties}
+      />
+
+      {/* 高级配置弹窗 */}
+      <AdvancedConfigModal
+        open={advancedModalVisible}
+        onCancel={() => setAdvancedModalVisible(false)}
+        onOk={handleSaveAdvancedConfig}
+        {...(advancedModalData.rules && { currentRules: advancedModalData.rules })}
+        {...(advancedModalData.showCondition && { currentShowCondition: advancedModalData.showCondition })}
+        fieldLabel={advancedModalData.fieldLabel}
       />
     </div>
   );
