@@ -7,7 +7,7 @@ import {
   ImportOutlined,
   AppstoreAddOutlined,
 } from '@ant-design/icons';
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
   EndpointTypeListItem,
   SchemaField,
@@ -64,7 +64,6 @@ const EndpointConfig: React.FC = () => {
     queryKey: ['endpoint_config_detail', selectedType?.id],
     queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
     enabled: !!selectedType?.id && !isEditing,
-    placeholderData: keepPreviousData, // 保持之前的数据，避免闪动
   });
 
   /**
@@ -113,11 +112,11 @@ const EndpointConfig: React.FC = () => {
       
       // 重新查询详情数据以获取后端返回的真实ID
       // 使用 setTimeout 确保在 setIsEditing(false) 之后执行
-      setTimeout(() => {
-        if (selectedType?.id || savedData?.id) {
-          refetchDetail();
-        }
-      }, 100);
+      // setTimeout(() => {
+      //   if (selectedType?.id || savedData?.id) {
+      //     refetchDetail();
+      //   }
+      // }, 100);
     },
     onError: (error: any) => {
       message.error(`保存失败：${error.message || '未知错误'}`);
@@ -416,15 +415,13 @@ const EndpointConfig: React.FC = () => {
             <AppstoreAddOutlined className="mr-2" />
             Schema字段配置
           </Divider>
-          <div className="flex-1 overflow-hidden">
-            <SchemaFieldsTable
-              ref={schemaFieldsTableRef}
-              key={selectedType?.id || 'new'}
-              fields={memoizedSchemaFields}
-              disabled={!isEditing}
-              onChange={handleSchemaFieldsChange}
-            />
-          </div>
+          <SchemaFieldsTable
+            ref={schemaFieldsTableRef}
+            key={selectedType?.id || 'new'}
+            fields={memoizedSchemaFields}
+            disabled={!isEditing}
+            onChange={handleSchemaFieldsChange}
+          />
         </div>
 
         {/* 底部操作按钮 */}

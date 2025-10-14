@@ -546,7 +546,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   ];
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex-1 flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           共 {fields.length} 个字段配置
@@ -569,7 +569,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           dataSource={fields}
           pagination={false}
           size="small"
-          scroll={{ x: 'max-content', y: 'calc(100vh - 500px)' }}
+          scroll={{ x: 'max-content', y: 'calc(100vh - 600px)' }}
           bordered
         />
       </Form>

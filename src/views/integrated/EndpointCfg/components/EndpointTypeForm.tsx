@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useImperativeHandle, useMemo } from 'react';
-import { Form, Input, Switch, Row, Col, Select } from 'antd';
+import { Form, Input, Switch, Row, Col, Select, ConfigProvider } from 'antd';
 import type { FormInstance } from 'antd';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
@@ -108,102 +108,110 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
   }, [initialValues, form]);
 
   return (
-    <Form
-      form={form}
-      className="flex-shrink-0"
-      layout="horizontal"
-      labelCol={responsiveLabelCol}
-      wrapperCol={responsiveWrapperCol}
-      disabled={disabled}
-      initialValues={{
-        status: true,
-        schemaVersion: '1.0.0',
-      }}
-    >
-      <Row gutter={16}>
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item
-            name="typeName"
-            label="类型名称"
-            rules={[{ required: true, message: '请输入类型名称' }]}
-          >
-            <Input 
-              ref={typeNameInputRef}
-              placeholder="请输入类型名称，如：HTTP端点" 
-            />
-          </Form.Item>
-        </Col>
+    <ConfigProvider theme={{
+      components: {
+        Form: {
+          itemMarginBottom: 16
+        }
+      }
+    }}>
+      <Form
+        form={form}
+        className="flex-shrink-0"
+        layout="horizontal"
+        labelCol={responsiveLabelCol}
+        wrapperCol={responsiveWrapperCol}
+        disabled={disabled}
+        initialValues={{
+          status: true,
+          schemaVersion: '1.0.0',
+        }}
+      >
+        <Row gutter={16}>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item
+              name="typeName"
+              label="类型名称"
+              rules={[{ required: true, message: '请输入类型名称' }]}
+            >
+              <Input
+                ref={typeNameInputRef}
+                placeholder="请输入类型名称，如：HTTP端点"
+              />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item
-            name="typeCode"
-            label="类型编码"
-            rules={[
-              { required: true, message: '请输入类型编码' },
-              {
-                pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
-                message: '编码必须以字母开头，只能包含字母、数字和下划线',
-              },
-            ]}
-          >
-            <Input
-              placeholder="请输入类型编码，如：http"
-            />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item
+              name="typeCode"
+              label="类型编码"
+              rules={[
+                { required: true, message: '请输入类型编码' },
+                {
+                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
+                  message: '编码必须以字母开头，只能包含字母、数字和下划线',
+                },
+              ]}
+            >
+              <Input
+                placeholder="请输入类型编码，如：http"
+              />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
-            <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
+              <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item name="supportMode" label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
-            <Select 
-              mode="multiple"
-              options={MODE_OPTIONS as any} 
-              placeholder="请选择支持模式" 
-              maxTagCount="responsive"
-            />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item name="supportMode" label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
+              <Select
+                mode="multiple"
+                options={MODE_OPTIONS as any}
+                placeholder="请选择支持模式"
+                maxTagCount="responsive"
+              />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item name="icon" label="图标">
-            <Input placeholder="请输入图标类名，如：icon-http" />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item name="icon" label="图标">
+              <Input placeholder="请输入图标类名，如：icon-http" />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item name="schemaVersion" label="Schema版本">
-            <Input placeholder="请输入版本号，如：1.0.0" />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item name="schemaVersion" label="Schema版本">
+              <Input placeholder="请输入版本号，如：1.0.0" />
+            </Form.Item>
+          </Col>
 
-        <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-          <Form.Item name="status" label="状态" valuePropName="checked">
-            <Switch checkedChildren="启用" unCheckedChildren="禁用" />
-          </Form.Item>
-        </Col>
+          <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
+            <Form.Item name="status" label="状态" valuePropName="checked">
+              <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+            </Form.Item>
+          </Col>
 
-        <Col span={24}>
-          <Form.Item 
-            name="description" 
-            label="描述" 
-            labelCol={descriptionLabelCol}
-            wrapperCol={descriptionWrapperCol}
-          >
-            <TextArea
-              placeholder="请输入端点类型描述"
-              rows={2}
-              showCount
-              maxLength={500}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-    </Form>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="描述"
+              labelCol={descriptionLabelCol}
+              wrapperCol={descriptionWrapperCol}
+            >
+              <TextArea
+                placeholder="请输入端点类型描述"
+                rows={2}
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </ConfigProvider>
   );
 };
 
