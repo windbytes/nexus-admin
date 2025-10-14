@@ -286,7 +286,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     {
       title: '字段名',
       dataIndex: 'field',
-      width: 80,
+      width: 120,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (

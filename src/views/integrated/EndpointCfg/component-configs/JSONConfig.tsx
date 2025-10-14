@@ -31,7 +31,9 @@ const JSONConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =>
 
       <Form
         form={form}
-        layout="vertical"
+        layout="horizontal"
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
         onValuesChange={handleChange}
         initialValues={{
           editorMode: 'form',        // 默认表单模式
