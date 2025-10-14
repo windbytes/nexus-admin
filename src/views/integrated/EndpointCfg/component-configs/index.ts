@@ -6,6 +6,7 @@ export { default as DatePickerConfig } from './DatePickerConfig';
 export { default as TextAreaConfig } from './TextAreaConfig';
 export { default as RadioConfig } from './RadioConfig';
 export { default as SwitchConfig } from './SwitchConfig';
+export { default as JSONConfig } from './JSONConfig';
 
 // 组件配置类型定义
 export interface ComponentConfigProps {

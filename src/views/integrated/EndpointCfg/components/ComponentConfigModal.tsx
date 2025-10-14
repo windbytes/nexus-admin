@@ -8,6 +8,7 @@ import {
   TextAreaConfig,
   RadioConfig,
   SwitchConfig,
+  JSONConfig,
   type ComponentConfigProps,
 } from '../component-configs';
 import DragModal from '@/components/modal/DragModal';
@@ -68,6 +69,8 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
         return <RadioConfig {...configProps} />;
       case 'Switch':
         return <SwitchConfig {...configProps} />;
+      case 'JSON':
+        return <JSONConfig {...configProps} />;
       default:
         return <div>该组件类型暂不支持配置</div>;
     }
@@ -90,6 +93,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       TextArea: '文本域',
       Radio: '单选框',
       Switch: '开关',
+      JSON: 'JSON编辑器',
     };
     return typeMap[type] || type;
   };

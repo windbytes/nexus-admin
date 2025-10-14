@@ -9,6 +9,7 @@ export const COMPONENT_TYPE_OPTIONS = [
   { value: 'InputPassword', label: '密码输入框' },
   { value: 'InputNumber', label: '数字输入框' },
   { value: 'TextArea', label: '文本域' },
+  { value: 'JSON', label: 'JSON编辑器' },
   { value: 'Select', label: '下拉选择' },
   { value: 'Radio', label: '单选框' },
   { value: 'Switch', label: '开关' },
