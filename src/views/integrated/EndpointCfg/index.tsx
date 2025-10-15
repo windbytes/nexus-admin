@@ -6,17 +6,20 @@ import {
   ExportOutlined,
   ImportOutlined,
   AppstoreAddOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
   EndpointTypeListItem,
   SchemaField,
   EndpointTypeSearchParams,
+  EndpointTypeConfig,
 } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import EndpointTypeList from './components/EndpointTypeList';
 import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
 import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
+import PreviewModal from './preview/PreviewModal';
 
 /**
  * 端点配置维护主页面
@@ -42,6 +45,8 @@ const EndpointConfig: React.FC = () => {
   });
   // 标记是否已初始化（用于首次加载自动选中第一条）
   const [hasInitialized, setHasInitialized] = useState(false);
+  // 预览弹窗状态
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   /**
    * 查询端点类型列表
@@ -60,7 +65,7 @@ const EndpointConfig: React.FC = () => {
    * 查询端点类型详情
    * 使用 placeholderData 保持之前的数据，避免切换时闪动
    */
-  const { data: detailData, isLoading: detailLoading, refetch: refetchDetail } = useQuery({
+  const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ['endpoint_config_detail', selectedType?.id],
     queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
     enabled: !!selectedType?.id && !isEditing,
@@ -78,7 +83,7 @@ const EndpointConfig: React.FC = () => {
     },
     onSuccess: (savedData) => {
       setIsEditing(false);
-      
+
       // 如果是新增，更新选中的类型
       if (!selectedType?.id && savedData) {
         const newSelectedType: EndpointTypeListItem = {
@@ -90,7 +95,7 @@ const EndpointConfig: React.FC = () => {
           fieldCount: savedData.schemaFields?.length || 0,
           status: savedData.status,
         };
-        
+
         if (savedData.icon) {
           newSelectedType.icon = savedData.icon;
         }
@@ -103,13 +108,13 @@ const EndpointConfig: React.FC = () => {
         if (savedData.updateTime) {
           newSelectedType.updateTime = savedData.updateTime;
         }
-        
+
         setSelectedType(newSelectedType);
       }
-      
+
       // 刷新列表
       refetchList();
-      
+
       // 重新查询详情数据以获取后端返回的真实ID
       // 使用 setTimeout 确保在 setIsEditing(false) 之后执行
       // setTimeout(() => {
@@ -117,9 +122,6 @@ const EndpointConfig: React.FC = () => {
       //     refetchDetail();
       //   }
       // }, 100);
-    },
-    onError: (error: any) => {
-      message.error(`保存失败：${error.message || '未知错误'}`);
     }
   });
 
@@ -133,10 +135,10 @@ const EndpointConfig: React.FC = () => {
       setSelectedType(null);
       setSchemaFields([]);
       basicForm.resetFields();
-      
+
       // 刷新列表
       const updatedList = await refetchList();
-      
+
       // 删除后，如果列表还有数据，自动选中第一条
       if (updatedList.data && updatedList.data.records && updatedList.data.records.length > 0) {
         const firstRecord = updatedList.data.records[0];
@@ -198,12 +200,72 @@ const EndpointConfig: React.FC = () => {
     setSchemaFields([]);
     basicForm.resetFields();
     setIsEditing(true);
-    
+
     // 聚焦到类型名称输入框
     setTimeout(() => {
       endpointTypeFormRef.current?.focusTypeName();
     }, 200);
   }, [isEditing, basicForm, message]);
+
+  /**
+   * 预览
+   */
+  const handlePreview = useCallback(async () => {
+    try {
+      // 如果正在编辑模式，先验证表单
+      if (isEditing) {
+        const basicValues = await basicForm.validateFields();
+        
+        // 验证是否有字段
+        if (schemaFields.length === 0) {
+          message.warning('请至少添加一个Schema字段后再预览');
+          return;
+        }
+
+        // 构建预览数据
+        const previewConfig: EndpointTypeConfig = {
+          id: selectedType?.id || 'preview',
+          endpointType: basicValues.endpointType,
+          typeName: basicValues.typeName,
+          typeCode: basicValues.typeCode,
+          icon: basicValues.icon,
+          supportMode: basicValues.supportMode || [],
+          description: basicValues.description,
+          schemaVersion: basicValues.schemaVersion,
+          schemaFields: schemaFields,
+          status: basicValues.status ?? true,
+        };
+
+        // 临时将预览配置存储到 selectedType 中
+        setSelectedType(previewConfig as any);
+        setPreviewVisible(true);
+      } else {
+        // 查看模式，直接使用当前数据预览
+        if (!selectedType) {
+          message.warning('请先选择或新增一个端点类型');
+          return;
+        }
+
+        if (!detailData?.schemaFields || detailData.schemaFields.length === 0) {
+          message.warning('当前端点类型暂无字段配置');
+          return;
+        }
+
+        setPreviewVisible(true);
+      }
+    } catch (error: any) {
+      // 验证失败，聚焦到第一个错误字段
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorField = error.errorFields[0].name;
+        basicForm.scrollToField(firstErrorField, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        basicForm.focusField(error.errorFields[0].name);
+      }
+      message.error('请先完善基础信息');
+    }
+  }, [isEditing, basicForm, schemaFields, selectedType, detailData, message]);
 
   /**
    * 开始编辑
@@ -214,7 +276,7 @@ const EndpointConfig: React.FC = () => {
       return;
     }
     setIsEditing(true);
-    
+
     // 聚焦到类型名称输入框
     setTimeout(() => {
       endpointTypeFormRef.current?.focusTypeName();
@@ -228,7 +290,7 @@ const EndpointConfig: React.FC = () => {
     try {
       // 1. 验证基础信息表单
       const basicValues = await basicForm.validateFields();
-      
+
       // 2. 验证Schema字段
       if (schemaFields.length === 0) {
         message.error('请至少添加一个Schema字段');
@@ -264,7 +326,7 @@ const EndpointConfig: React.FC = () => {
     setIsEditing(false);
     // 取消 Schema 表格的编辑状态
     schemaFieldsTableRef.current?.cancelEdit();
-    
+
     if (selectedType?.id) {
       // 重新加载数据
       basicForm.setFieldsValue(detailData);
@@ -367,6 +429,31 @@ const EndpointConfig: React.FC = () => {
     }
   }, [listData, hasInitialized, selectedType]);
 
+  /**
+   * 获取预览配置数据
+   */
+  const getPreviewConfig = useCallback((): EndpointTypeConfig | null => {
+    if (isEditing) {
+      // 编辑模式，使用当前表单数据
+      const formValues = basicForm.getFieldsValue();
+      return {
+        id: selectedType?.id || 'preview',
+        endpointType: formValues.endpointType,
+        typeName: formValues.typeName,
+        typeCode: formValues.typeCode,
+        icon: formValues.icon,
+        supportMode: formValues.supportMode || [],
+        description: formValues.description,
+        schemaVersion: formValues.schemaVersion,
+        schemaFields: schemaFields,
+        status: formValues.status ?? true,
+      } as EndpointTypeConfig;
+    } else {
+      // 查看模式，使用详情数据
+      return detailData || null;
+    }
+  }, [isEditing, basicForm, selectedType, schemaFields, detailData]);
+
   return (
     <div className="h-full flex gap-4">
       {/* 左侧：端点类型列表 */}
@@ -401,7 +488,7 @@ const EndpointConfig: React.FC = () => {
         }}
         loading={detailLoading && !detailData}
       >
-          {/* 基础信息 */}
+        {/* 基础信息 */}
         <EndpointTypeForm
           ref={endpointTypeFormRef}
           form={basicForm}
@@ -428,6 +515,9 @@ const EndpointConfig: React.FC = () => {
         <div className="border-t border-gray-200 pt-4">
           <div className="flex justify-end">
             <Space>
+              <Button color='cyan' variant='outlined' icon={<EyeOutlined />} onClick={handlePreview}>
+                预览
+              </Button>
               {!isEditing ? (
                 <>
                   <Button
@@ -475,6 +565,13 @@ const EndpointConfig: React.FC = () => {
           </div>
         </div>
       </Card>
+
+      {/* 预览弹窗 */}
+      <PreviewModal
+        visible={previewVisible}
+        config={getPreviewConfig()}
+        onClose={() => setPreviewVisible(false)}
+      />
     </div>
   );
 };

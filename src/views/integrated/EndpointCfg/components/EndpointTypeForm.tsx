@@ -166,7 +166,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
           </Col>
 
           <Col xs={24} sm={24} md={12} lg={8} xl={8} xxl={8}>
-            <Form.Item name="supportMode" label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
+            <Form.Item name="supportMode" tooltip={<span>• IN、IN_OUT用于暴露入口给其他地方调用 <br/> • OUT、OUT_IN用于调用其他地方的入口</span>} label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
               <Select
                 mode="multiple"
                 options={MODE_OPTIONS as any}

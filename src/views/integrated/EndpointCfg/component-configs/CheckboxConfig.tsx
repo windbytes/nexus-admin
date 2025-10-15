@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Input, Switch, Button, Radio, Row, Col, App } from 'antd';
+import { Form, Input, Switch, Button, Row, Col, App } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ComponentConfigProps } from './index';
 
 /**
- * 单选框组件配置
+ * 复选框组件配置
  */
-const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) => {
+const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [options, setOptions] = useState<Array<{ label: string; value: string }>>(
@@ -88,25 +88,13 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
         onValuesChange={handleChange}
         initialValues={{
           disabled: false,
-          optionType: 'default',
         }}
       >
-        <Form.Item
-          name="optionType"
-          label="选项样式"
-          tooltip="单选框选项样式"
-        >
-          <Radio.Group>
-            <Radio value="default">默认</Radio>
-            <Radio value="button">按钮</Radio>
-          </Radio.Group>
-        </Form.Item>
-
         <Form.Item
           name="disabled"
           label="禁用状态"
           valuePropName="checked"
-          tooltip="是否禁用单选框组"
+          tooltip="是否禁用复选框组"
         >
           <Switch />
         </Form.Item>
@@ -184,4 +172,4 @@ const RadioConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =
   );
 };
 
-export default RadioConfig;
+export default CheckboxConfig;

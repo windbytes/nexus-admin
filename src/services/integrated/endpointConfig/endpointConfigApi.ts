@@ -12,6 +12,7 @@ export const COMPONENT_TYPE_OPTIONS = [
   { value: 'JSON', label: 'JSON编辑器' },
   { value: 'Select', label: '下拉选择' },
   { value: 'Radio', label: '单选框' },
+  { value: 'Checkbox', label: '复选框' },
   { value: 'Switch', label: '开关' },
   { value: 'DatePicker', label: '日期选择器' },
 ] as const;
@@ -49,7 +50,7 @@ export interface SchemaField {
   /** 排序号 */
   sortOrder?: number;
   /** 作用模式 */
-  mode: string;
+  mode: string[];
   /** 说明 */
   description?: string;
 }
@@ -68,7 +69,8 @@ export interface EndpointTypeConfig {
   typeCode: string;
   /** 图标 */
   icon?: string;
-  support_mode: string[];
+  /** 支持模式 */
+  supportMode: string[];
   /** 描述 */
   description?: string;
   /** Schema版本 */

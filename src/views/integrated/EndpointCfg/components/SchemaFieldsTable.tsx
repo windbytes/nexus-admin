@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useImperativeHandle } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import ComponentConfigModal from './ComponentConfigModal';
@@ -33,7 +33,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
-  
+
   // 组件配置弹窗状态
   const [configModalVisible, setConfigModalVisible] = useState(false);
   const [configModalData, setConfigModalData] = useState<{
@@ -121,7 +121,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       label: '',
       component: 'Input',
       sortOrder: fields.length + 1,
-      mode: 'IN_OUT',
+      mode: ['IN_OUT'],
       properties: {},
     };
     onChange([...fields, newField]);
@@ -194,7 +194,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       const formValues = form.getFieldsValue();
       componentType = formValues.component || record.component;
     }
-    
+
     setConfigModalData({
       componentType,
       properties: record.properties || {},
@@ -236,7 +236,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       fieldId: record.id || '',
       fieldLabel: fieldLabel || '字段',
     };
-    
+
     if (record.rules) {
       modalData.rules = record.rules;
     }
@@ -284,7 +284,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       render: (_: any, __: SchemaField, index: number) => index + 1,
     },
     {
-      title: '字段名',
+      title: '字段',
       dataIndex: 'field',
       width: 120,
       render: (text: string, record: SchemaField) => {
@@ -309,7 +309,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '字段标签',
+      title: '标签',
       dataIndex: 'label',
       width: 150,
       render: (text: string, record: SchemaField) => {
@@ -353,18 +353,18 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       align: 'center',
       render: (_: any, record: SchemaField) => {
         const hasProperties = record.properties && Object.keys(record.properties).length > 0;
-        
+
         // 获取当前组件类型（编辑状态下从表单获取）
         let currentComponentType = record.component;
         if (isEditing(record)) {
           const formValues = form.getFieldsValue();
           currentComponentType = formValues.component || record.component;
         }
-        
-        const tooltipTitle = isEditing(record) 
-          ? `配置组件属性 (当前: ${currentComponentType})` 
+
+        const tooltipTitle = isEditing(record)
+          ? `配置组件属性 (当前: ${currentComponentType})`
           : '配置组件属性';
-        
+
         return (
           <Tooltip title={tooltipTitle}>
             <Button
@@ -373,7 +373,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
               icon={<SettingOutlined />}
               disabled={(!isEditing(record))}
               onClick={() => handleOpenConfig(record)}
-              style={{ 
+              style={{
                 color: hasProperties ? '#1890ff' : '#999',
                 fontWeight: hasProperties ? 'bold' : 'normal'
               }}
@@ -392,7 +392,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         const hasRules = record.rules && record.rules.trim().length > 0;
         const hasCondition = record.showCondition && record.showCondition.trim().length > 0;
         const hasAdvancedConfig = hasRules || hasCondition;
-        
+
         let tooltipTitle = '配置验证规则和显示条件';
         if (hasRules && hasCondition) {
           tooltipTitle = '已配置验证规则和显示条件';
@@ -401,7 +401,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         } else if (hasCondition) {
           tooltipTitle = '已配置显示条件';
         }
-        
+
         return (
           <Tooltip title={tooltipTitle}>
             <Button
@@ -410,7 +410,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
               icon={<ToolOutlined />}
               disabled={(!isEditing(record))}
               onClick={() => handleOpenAdvancedConfig(record)}
-              style={{ 
+              style={{
                 color: hasAdvancedConfig ? '#52c41a' : '#999',
                 fontWeight: hasAdvancedConfig ? 'bold' : 'normal'
               }}
@@ -437,14 +437,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '作用模式',
+      title: (<div>作用模式<Tooltip title={<span>• IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口</span>}><QuestionCircleOutlined className='ml-1 cursor-help' /></Tooltip></div>),
       dataIndex: 'mode',
       width: 120,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
             <Form.Item name="mode" style={{ margin: 0 }}>
-              <Select options={MODE_OPTIONS as any} placeholder="请选择作用模式" />
+              <Select mode='multiple' options={MODE_OPTIONS as any} placeholder="请选择作用模式" />
             </Form.Item>
           );
         }
@@ -452,7 +452,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '说明',
+      title: <div>说明<Tooltip title="用于显示模块的说明信息"><QuestionCircleOutlined className='ml-1 cursor-help' /></Tooltip></div>,
       dataIndex: 'description',
       ellipsis: true,
       render: (text: string, record: SchemaField) => {
@@ -496,31 +496,31 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           <Space size="small">
             <Tooltip title="编辑">
               <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              disabled={disabled || editingKey !== ''}
-              onClick={() => edit(record, false)} // 编辑现有记录
-            />
+                type="link"
+                size="small"
+                icon={<EditOutlined />}
+                disabled={disabled || editingKey !== ''}
+                onClick={() => edit(record, false)} // 编辑现有记录
+              />
             </Tooltip>
 
             <Tooltip title="上移">
               <Button
-              type="link"
-              size="small"
-              icon={<ArrowUpOutlined />}
-              disabled={disabled || index === 0 || editingKey !== ''}
-              onClick={() => handleMoveUp(index)}
+                type="link"
+                size="small"
+                icon={<ArrowUpOutlined />}
+                disabled={disabled || index === 0 || editingKey !== ''}
+                onClick={() => handleMoveUp(index)}
               />
             </Tooltip>
 
             <Tooltip title="下移">
               <Button
-              type="link"
-              size="small"
-              icon={<ArrowDownOutlined />}
-              disabled={disabled || index === fields.length - 1 || editingKey !== ''}
-              onClick={() => handleMoveDown(index)}
+                type="link"
+                size="small"
+                icon={<ArrowDownOutlined />}
+                disabled={disabled || index === fields.length - 1 || editingKey !== ''}
+                onClick={() => handleMoveDown(index)}
               />
             </Tooltip>
             <Popconfirm
@@ -531,11 +531,11 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
             >
               <Tooltip title="删除">
                 <Button
-                type="link"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                disabled={disabled || editingKey !== ''}
+                  type="link"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  disabled={disabled || editingKey !== ''}
                 />
               </Tooltip>
             </Popconfirm>

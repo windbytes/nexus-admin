@@ -5,6 +5,7 @@ export { default as SelectConfig } from './SelectConfig';
 export { default as DatePickerConfig } from './DatePickerConfig';
 export { default as TextAreaConfig } from './TextAreaConfig';
 export { default as RadioConfig } from './RadioConfig';
+export { default as CheckboxConfig } from './CheckboxConfig';
 export { default as SwitchConfig } from './SwitchConfig';
 export { default as JSONConfig } from './JSONConfig';
 

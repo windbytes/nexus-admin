@@ -237,7 +237,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       if (!isFunctionFormat) {
         return { 
           valid: false, 
-          error: '函数模式下，应使用 function(values) {...} 或 (values) => {...} 格式' 
+          error: '函数模式下，应使用 function(formValues) {...} 或 (formValues) => {...} 格式' 
         };
       }
       
@@ -364,11 +364,11 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
    */
   const getConditionPlaceholder = () => {
     if (conditionType === 'expression') {
-      return 'values.type === "database" && values.protocol === "mysql"';
+      return 'formValues.type === "database" && formValues.protocol === "mysql"';
     }
-    return `function(values) {
+    return `function(formValues) {
   // 在这里编写判断逻辑
-  return values.type === "custom";
+  return formValues.type === "custom";
 }`;
   };
 
@@ -617,11 +617,11 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
           <div className="text-sm text-gray-500 mb-2">
             {conditionType === 'expression' ? (
               <>
-                输入JavaScript表达式，用于控制字段显示。可以使用<code>values</code>对象访问表单值。
+                输入JavaScript表达式，用于控制字段显示。可以使用<code>formValues</code>对象访问表单值。
               </>
             ) : (
               <>
-                输入返回<code>boolean</code>的函数，用于控制字段显示。参数<code>values</code>为表单值对象。
+                输入返回<code>boolean</code>的函数，用于控制字段显示。参数<code>formValues</code>为表单值对象。
               </>
             )}
           </div>
@@ -642,7 +642,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                     if (conditionType === 'function') {
                       const trimmed = value.trim();
                       if (!trimmed.startsWith('function') && !(trimmed.startsWith('(') && trimmed.includes('=>'))) {
-                        return Promise.reject(new Error('函数格式不正确，应为 function(values) {...} 或 (values) => {...}'));
+                        return Promise.reject(new Error('函数格式不正确，应为 function(formValues) {...} 或 (formValues) => {...}'));
                       }
                     }
                     return Promise.resolve();
@@ -665,23 +665,23 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
             {conditionType === 'expression' ? (
               <>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>常用示例：</div>
-                <div>• <code>values.fieldName === 'someValue'</code> - 当某字段等于特定值时显示</div>
-                <div>• <code>values.enabled === true</code> - 当某开关打开时显示</div>
-                <div>• <code>values.type === 'A' || values.type === 'B'</code> - 多条件判断</div>
+                <div>• <code>formValues.fieldName === 'someValue'</code> - 当某字段等于特定值时显示</div>
+                <div>• <code>formValues.enabled === true</code> - 当某开关打开时显示</div>
+                <div>• <code>formValues.type === 'A' || formValues.type === 'B'</code> - 多条件判断</div>
               </>
             ) : (
               <>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>函数示例：</div>
                 <pre style={{ margin: 0, padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontSize: '11px' }}>
                   {`// 标准函数
-function(values) {
-  return values.type === 'database' && values.enabled;
+function(formValues) {
+  return formValues.type === 'database' && formValues.enabled;
 }
 
 // 箭头函数
-(values) => {
-  const isValid = values.count > 10;
-  return isValid && values.status === 'active';
+(formValues) => {
+  const isValid = formValues.count > 10;
+  return isValid && formValues.status === 'active';
 }`}
                 </pre>
               </>
