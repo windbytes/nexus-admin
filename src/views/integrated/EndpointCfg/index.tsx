@@ -1,187 +1,553 @@
-import {
-  AppstoreAddOutlined,
-  CloseOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SaveOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
-import { Button, Card, Col, Divider, Form, Input, type InputRef, Row, Space } from 'antd';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import TextArea from 'antd/es/input/TextArea';
-import EndpointConfigTable from './EndpointConfigTable';
-import EndpointTypeTree from './EndpointTypeTree';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useCallback, useRef, useMemo, lazy } from 'react';
+import { Card, App, Form } from 'antd';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import type {
+  EndpointTypeListItem,
+  SchemaField,
+  EndpointTypeSearchParams,
+  EndpointTypeConfig,
+} from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import EndpointTypeList from './components/EndpointTypeList';
+import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
+import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
+import ActionButtons from './components/ActionButtons';
+
+// 懒加载预览弹窗组件
+const PreviewModal = lazy(() => import('./preview/PreviewModal'));
+
+// 性能优化：预加载 PreviewModal
+// 在空闲时预加载，避免首次点击预览时的延迟
+if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+  requestIdleCallback(() => {
+    import('./preview/PreviewModal');
+  });
+}
 
 /**
- * 端点配置模块
+ * 端点配置维护主页面
  */
 const EndpointConfig: React.FC = () => {
-  // 当前编辑状态
-  const [action, setAction] = useState<string>('view');
+  const { modal, message } = App.useApp();
+  const [basicForm] = Form.useForm();
+  const endpointTypeFormRef = useRef<EndpointTypeFormRef>(null);
+  const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
 
-  // 当前选中的分类数据
-  const [selectCategory, setSelectCategory] = useState<Record<string, any> | null>(null);
-  // 名称框
-  const nameRef = useRef<InputRef>(null);
-  const { t } = useTranslation();
+  // 当前选中的端点类型
+  const [selectedType, setSelectedType] = useState<EndpointTypeListItem | null>(null);
+  // 当前的Schema字段
+  const [schemaFields, setSchemaFields] = useState<SchemaField[]>([]);
+  // 编辑模式
+  const [isEditing, setIsEditing] = useState(false);
+  // 搜索关键词
+  const [searchKeyword, setSearchKeyword] = useState('');
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+  // 预览弹窗状态
+  const [previewVisible, setPreviewVisible] = useState(false);
+  // 用于标记是否已自动选中第一条记录
+  const autoSelectedRef = useRef(false);
 
-  useEffect(() => {
-    if (action !== 'view' && nameRef.current) {
-      nameRef.current.focus();
+  // 查询参数缓存
+  const queryParams = useMemo(
+    () => ({
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      typeName: searchKeyword || undefined,
+    } as EndpointTypeSearchParams),
+    [pagination.current, pagination.pageSize, searchKeyword]
+  );
+
+  /**
+   * 查询端点类型列表
+   */
+  const { data: listData, isLoading: listLoading, refetch: refetchList } = useQuery({
+    queryKey: ['endpoint_config_list', queryParams],
+    queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
+    staleTime: 30000, // 30秒内数据视为新鲜，减少不必要的请求
+  });
+
+  /**
+   * 查询端点类型详情
+   * 使用 staleTime 减少不必要的请求
+   */
+  const { data: detailData, isLoading: detailLoading } = useQuery({
+    queryKey: ['endpoint_config_detail', selectedType?.id],
+    queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
+    enabled: !!selectedType?.id && !isEditing,
+    staleTime: 30000, // 30秒内数据视为新鲜
+  });
+
+  /**
+   * 保存端点类型配置 mutation
+   */
+  const saveConfigMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (selectedType?.id) {
+        return endpointConfigService.updateEndpointType(data);
+      }
+      return endpointConfigService.addEndpointType(data);
+    },
+    onSuccess: (savedData) => {
+      setIsEditing(false);
+
+      // 如果是新增，更新选中的类型
+      if (!selectedType?.id && savedData) {
+        const newSelectedType: EndpointTypeListItem = {
+          id: savedData.id,
+          endpointType: savedData.endpointType,
+          typeName: savedData.typeName,
+          typeCode: savedData.typeCode,
+          schemaVersion: savedData.schemaVersion,
+          fieldCount: savedData.schemaFields?.length || 0,
+          status: savedData.status,
+        };
+
+        if (savedData.icon) {
+          newSelectedType.icon = savedData.icon;
+        }
+        if (savedData.description) {
+          newSelectedType.description = savedData.description;
+        }
+        if (savedData.createTime) {
+          newSelectedType.createTime = savedData.createTime;
+        }
+        if (savedData.updateTime) {
+          newSelectedType.updateTime = savedData.updateTime;
+        }
+
+        setSelectedType(newSelectedType);
+      }
+
+      // 刷新列表
+      refetchList();
+
+      // 重新查询详情数据以获取后端返回的真实ID
+      // 使用 setTimeout 确保在 setIsEditing(false) 之后执行
+      // setTimeout(() => {
+      //   if (selectedType?.id || savedData?.id) {
+      //     refetchDetail();
+      //   }
+      // }, 100);
     }
-  }, [action]);
+  });
 
   /**
-   * 树节点选中事件
-   * @param info 树节点信息
+   * 删除端点类型 mutation
    */
-  const onSelectTree = (info: any) => {
-    // 查询配置数据
-    console.log(info);
-    // 假设是后台查询到的配置数据
-    setSelectCategory(info);
-  };
+  const deleteConfigMutation = useMutation({
+    mutationFn: (id: string) => endpointConfigService.deleteEndpointType(id),
+    onSuccess: async () => {
+      message.success('删除成功！');
+      setSelectedType(null);
+      setSchemaFields([]);
+      basicForm.resetFields();
+
+      // 刷新列表
+      const updatedList = await refetchList();
+
+      // 删除后，如果列表还有数据，自动选中第一条
+      if (updatedList.data && updatedList.data.records && updatedList.data.records.length > 0) {
+        const firstRecord = updatedList.data.records[0];
+        if (firstRecord) {
+          setSelectedType(firstRecord);
+        }
+      }
+    },
+    onError: (error: any) => {
+      message.error(`删除失败：${error.message}`);
+    },
+  });
 
   /**
-   * 配置数据发生变更
-   * @param data 配置数据
+   * 导出Schema mutation
    */
-  const onConfigDataChange = (data: any[]) => {};
+  const exportSchemaMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      endpointConfigService.exportSchema(id, name),
+    onSuccess: () => {
+      message.success('导出成功！');
+    },
+    onError: (error: any) => {
+      message.error(`导出失败：${error.message}`);
+    },
+  });
 
   /**
-   * 保存数据
+   * 选择端点类型
    */
-  const saveData = () => {
-    // 先进行数据校验，校验通过再进行保存
-  };
+  const handleSelectType = useCallback(
+    (record: EndpointTypeListItem) => {
+      if (isEditing) {
+        modal.confirm({
+          title: '提示',
+          content: '当前正在编辑，切换会丢失未保存的数据，是否继续？',
+          onOk: () => {
+            setSelectedType(record);
+            setIsEditing(false);
+          },
+        });
+      } else {
+        setSelectedType(record);
+      }
+    },
+    [isEditing, modal]
+  );
 
   /**
-   * 删除数据
+   * 新增端点类型 - 使用 useCallback 避免子组件重渲染
    */
-  const deleteData = () => {};
+  const handleAdd = useCallback(() => {
+    if (isEditing) {
+      message.warning('请先保存或取消当前编辑');
+      return;
+    }
+
+    setSelectedType(null);
+    setSchemaFields([]);
+    basicForm.resetFields();
+    setIsEditing(true);
+
+    // 聚焦到类型名称输入框
+    setTimeout(() => {
+      endpointTypeFormRef.current?.focusTypeName();
+    }, 200);
+  }, [isEditing, basicForm, message]);
 
   /**
-   * 新增数据
+   * 预览 - 使用 useCallback 避免子组件重渲染
    */
-  const addData = () => {
-    // 首先清空所有选项
-    // 然后设置action
-  };
+  const handlePreview = useCallback(async () => {
+    try {
+      // 如果正在编辑模式，先验证表单
+      if (isEditing) {
+        const basicValues = await basicForm.validateFields();
+        
+        // 验证是否有字段
+        if (schemaFields.length === 0) {
+          message.warning('请至少添加一个Schema字段后再预览');
+          return;
+        }
+
+        // 构建预览数据
+        const previewConfig: EndpointTypeConfig = {
+          id: selectedType?.id || 'preview',
+          endpointType: basicValues.endpointType,
+          typeName: basicValues.typeName,
+          typeCode: basicValues.typeCode,
+          icon: basicValues.icon,
+          supportMode: basicValues.supportMode || [],
+          description: basicValues.description,
+          schemaVersion: basicValues.schemaVersion,
+          schemaFields: schemaFields,
+          status: basicValues.status ?? true,
+        };
+
+        // 临时将预览配置存储到 selectedType 中
+        setSelectedType(previewConfig as any);
+        setPreviewVisible(true);
+      } else {
+        // 查看模式，直接使用当前数据预览
+        if (!selectedType) {
+          message.warning('请先选择或新增一个端点类型');
+          return;
+        }
+
+        if (!detailData?.schemaFields || detailData.schemaFields.length === 0) {
+          message.warning('当前端点类型暂无字段配置');
+          return;
+        }
+
+        setPreviewVisible(true);
+      }
+    } catch (error: any) {
+      // 验证失败，聚焦到第一个错误字段
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorField = error.errorFields[0].name;
+        basicForm.scrollToField(firstErrorField, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        basicForm.focusField(error.errorFields[0].name);
+      }
+      message.error('请先完善基础信息');
+    }
+  }, [isEditing, selectedType, detailData, schemaFields, basicForm, message]);
+
+  /**
+   * 开始编辑 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleEdit = useCallback(() => {
+    if (!selectedType) {
+      message.warning('请先选择一个端点类型');
+      return;
+    }
+    setIsEditing(true);
+
+    // 聚焦到类型名称输入框
+    setTimeout(() => {
+      endpointTypeFormRef.current?.focusTypeName();
+    }, 200);
+  }, [selectedType, message]);
+
+  /**
+   * 保存 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleSave = useCallback(async () => {
+    try {
+      // 1. 验证基础信息表单
+      const basicValues = await basicForm.validateFields();
+
+      // 2. 获取最新的 Schema 字段数据（包括正在编辑的行）
+      const latestFields = await schemaFieldsTableRef.current?.getCurrentFields();
+      
+      if (latestFields === null) {
+        // 验证失败
+        message.error('请先完善表格中正在编辑的字段信息');
+        return;
+      }
+
+      if (!latestFields || latestFields.length === 0) {
+        message.error('请至少添加一个Schema字段');
+        return;
+      }
+
+      // 3. 如果有正在编辑的行，先保存它（更新状态和清除编辑状态）
+      if (schemaFieldsTableRef.current?.isEditing()) {
+        await schemaFieldsTableRef.current.saveCurrentEdit();
+      }
+
+      // 4. 验证通过，准备数据（使用最新获取的字段数据）
+      const data = {
+        ...basicValues,
+        id: selectedType?.id,
+        schemaFields: latestFields,
+      };
+
+      // 5. 调用保存方法
+      saveConfigMutation.mutate(data);
+    } catch (error: any) {
+      // 验证失败，聚焦到第一个错误字段
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorField = error.errorFields[0].name;
+        basicForm.scrollToField(firstErrorField, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        basicForm.focusField(error.errorFields[0].name);
+      }
+    }
+  }, [selectedType, schemaFieldsTableRef, basicForm, saveConfigMutation]);
+
+  /**
+   * 取消编辑 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleCancel = useCallback(() => {
+    setIsEditing(false);
+    // 取消 Schema 表格的编辑状态
+    schemaFieldsTableRef.current?.cancelEdit();
+
+    if (selectedType?.id) {
+      // 重新加载数据
+      basicForm.setFieldsValue(detailData);
+      setSchemaFields(detailData?.schemaFields || []);
+    } else {
+      setSelectedType(null);
+      setSchemaFields([]);
+      basicForm.resetFields();
+    }
+  }, [selectedType, detailData, basicForm]);
+
+  /**
+   * 删除 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleDelete = useCallback(() => {
+    if (!selectedType?.id) {
+      message.warning('请先选择一个端点类型');
+      return;
+    }
+
+    modal.confirm({
+      title: '确认删除',
+      content: `确定要删除端点类型"${selectedType.typeName}"吗？此操作不可恢复。`,
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => {
+        deleteConfigMutation.mutate(selectedType.id);
+      },
+    });
+  }, [selectedType, message, modal, deleteConfigMutation]);
+
+  /**
+   * 导出 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleExport = useCallback(() => {
+    if (!selectedType?.id) {
+      message.warning('请先选择一个端点类型');
+      return;
+    }
+
+    exportSchemaMutation.mutate({
+      id: selectedType.id,
+      name: selectedType.typeName,
+    });
+  }, [selectedType, message, exportSchemaMutation]);
+
+  /**
+   * 导入 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleImport = useCallback(() => {
+    message.info('导入功能开发中...');
+  }, [message]);
+
+  /**
+   * 搜索 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleSearch = useCallback((value: string) => {
+    setSearchKeyword(value);
+    setPagination(prev => ({ ...prev, current: 1 })); // 搜索时重置到第一页
+  }, []);
+
+  /**
+   * 分页变更 - 使用 useCallback 避免子组件重渲染
+   */
+  const handlePaginationChange = useCallback((page: number, pageSize: number) => {
+    setPagination({ current: page, pageSize });
+  }, []);
+
+  /**
+   * Schema字段变更 - 使用 useCallback 避免子组件重渲染
+   */
+  const handleSchemaFieldsChange = useCallback((fields: SchemaField[]) => {
+    setSchemaFields(fields);
+  }, []);
+
+  // 当详情数据加载完成时，更新表单和字段
+  // 只在 selectedType.id 变化且不在编辑模式时更新
+  React.useEffect(() => {
+    if (detailData && !isEditing && selectedType?.id === detailData.id) {
+      basicForm.setFieldsValue(detailData);
+      setSchemaFields(detailData.schemaFields || []);
+    }
+  }, [selectedType?.id, detailData, isEditing, basicForm]);
+
+  // 使用 useMemo 缓存 schemaFields，避免引用变化导致子组件重渲染
+  const memoizedSchemaFields = useMemo(() => schemaFields, [schemaFields]);
+
+  /**
+   * 首次加载列表数据后，自动选中第一条记录
+   */
+  React.useEffect(() => {
+    // 只在第一次加载且有数据时执行
+    if (!autoSelectedRef.current && listData?.records?.[0] && !selectedType) {
+      setSelectedType(listData.records[0]);
+      autoSelectedRef.current = true;
+    }
+  }, [listData, selectedType]);
+
+  /**
+   * 获取预览配置数据 - 使用 useCallback 优化
+   */
+  const getPreviewConfig = useCallback((): EndpointTypeConfig | null => {
+    if (isEditing) {
+      // 编辑模式，使用当前表单数据
+      const formValues = basicForm.getFieldsValue();
+      return {
+        id: selectedType?.id || 'preview',
+        endpointType: formValues.endpointType,
+        typeName: formValues.typeName,
+        typeCode: formValues.typeCode,
+        icon: formValues.icon,
+        supportMode: formValues.supportMode || [],
+        description: formValues.description,
+        schemaVersion: formValues.schemaVersion,
+        schemaFields: schemaFields,
+        status: formValues.status ?? true,
+      } as EndpointTypeConfig;
+    } else {
+      // 查看模式，使用详情数据
+      return detailData || null;
+    }
+  }, [isEditing, selectedType, detailData, schemaFields, basicForm]);
 
   return (
-    <Row gutter={8} style={{ height: '100%' }}>
-      <Col span={6}>
-        {/* 左边端点分类 */}
-        <EndpointTypeTree onSelect={onSelectTree} />
-      </Col>
-      <Col span={18}>
-        {/* 右边端点列表 */}
-        <Card
-          style={{ flex: 1, minWidth: 0, height: '100%' }}
-          styles={{
-            body: {
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-            },
-          }}
-        >
-          <Row style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-            <Col
-              span={24}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: 0,
-              }}
-            >
-              <Divider orientation="left">
-                <SettingOutlined style={{ marginRight: '8px' }} />
-                基础信息
-              </Divider>
-              <Form labelCol={{ span: 6 }} disabled={action === 'view'}>
-                <Row gutter={24} style={{ margin: '0' }}>
-                  <Col span={8}>
-                    <Form.Item name="configName" label="名称">
-                      <Input placeholder="请输入配置名称" ref={nameRef} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item name="icon" label="图标">
-                      <Input />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item name="supportedMode" label="支持模式">
-                      <Input placeholder="请输入类型名称" />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item name="description" label="描述">
-                      <TextArea placeholder="描述性信息" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Form>
-              <Divider orientation="left">
-                <AppstoreAddOutlined style={{ marginRight: '8px' }} />
-                端点配置
-              </Divider>
-              {/* 端点配置表格 */}
-              <EndpointConfigTable
-                configData={selectCategory}
-                action={action}
-                onConfigDataChange={onConfigDataChange}
-              />
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24} style={{ textAlign: 'right' }}>
-              <Divider style={{ margin: '8px 0 12px 0' }} />
-              <Space>
-                <Button
-                  icon={<PlusOutlined />}
-                  disabled={selectCategory === null || selectCategory.node.type === 'config'}
-                  type="primary"
-                  onClick={() => setAction('add')}
-                >
-                  {t('common.operation.add')}
-                </Button>
-                <Button
-                  icon={<EditOutlined />}
-                  disabled={selectCategory === null || selectCategory.node.type !== 'config'}
-                  onClick={() => setAction('modify')}
-                >
-                  {t('common.operation.edit')}
-                </Button>
-                <Button
-                  icon={<SaveOutlined />}
-                  type="primary"
-                  disabled={action === 'view'}
-                  onClick={() => setAction('view')}
-                >
-                  {t('common.operation.save')}
-                </Button>
-                <Button icon={<CloseOutlined />} disabled={action === 'view'} onClick={() => setAction('view')}>
-                  {t('common.operation.cancel')}
-                </Button>
-                <Button
-                  icon={<DeleteOutlined />}
-                  danger
-                  disabled={selectCategory === null || selectCategory.node.type !== 'config'}
-                  onClick={() => {}}
-                >
-                  {t('common.operation.delete')}
-                </Button>
-              </Space>
-            </Col>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+    <div className="h-full flex gap-4">
+      {/* 左侧：端点类型列表 */}
+      <EndpointTypeList
+        data={listData?.records || []}
+        loading={listLoading}
+        {...(selectedType?.id && { selectedId: selectedType.id })}
+        onSelect={handleSelectType}
+        onAdd={handleAdd}
+        onSearch={handleSearch}
+        onBatchExport={(selectedIds) => {
+          message.info(`批量导出功能开发中，已选择 ${selectedIds.length} 条记录：${selectedIds.join(', ')}`);
+        }}
+        onImport={handleImport}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: listData?.total || 0,
+          onChange: handlePaginationChange,
+        }}
+      />
+
+      {/* 右侧：配置详情 */}
+      <Card
+        className="flex-1 min-w-0"
+        styles={{
+          body: {
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+        loading={detailLoading && !detailData}
+      >
+        {/* 基础信息 */}
+        <EndpointTypeForm
+          ref={endpointTypeFormRef}
+          form={basicForm}
+          {...(detailData && { initialValues: detailData })}
+          disabled={!isEditing}
+        />
+
+        {/* Schema配置 */}
+        <SchemaFieldsTable
+          ref={schemaFieldsTableRef}
+          key={selectedType?.id || 'new'}
+          fields={memoizedSchemaFields}
+          disabled={!isEditing}
+          onChange={handleSchemaFieldsChange}
+        />
+
+        {/* 底部操作按钮 */}
+        <ActionButtons
+          isEditing={isEditing}
+          hasSelected={!!selectedType}
+          saveLoading={saveConfigMutation.isPending}
+          onPreview={handlePreview}
+          onEdit={handleEdit}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+          onExport={handleExport}
+          onImport={handleImport}
+        />
+      </Card>
+
+      {/* 预览弹窗 */}
+      <PreviewModal
+        visible={previewVisible}
+        config={getPreviewConfig()}
+        onClose={() => setPreviewVisible(false)}
+      />
+    </div>
   );
 };
+
 export default EndpointConfig;

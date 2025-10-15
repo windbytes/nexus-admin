@@ -1,4 +1,4 @@
-import { Card, Select, Table, Space, Tag } from 'antd';
+import { Card, Table, Space, Tag } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useMemo, memo } from 'react';
 import type React from 'react';
@@ -128,7 +128,8 @@ const MultipleRoleSelector: React.FC<MultipleRoleSelectorProps> = memo(({
               dataSource={selectedRoleData}
               rowKey="roleCode"
               pagination={false}
-              size="small"
+              size="middle"
+              bordered
               scroll={{ y: tableHeight }}
             />
           </div>

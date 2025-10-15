@@ -152,4 +152,25 @@ export class RAxios {
   patch<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'PATCH' }, options);
   }
+
+  /**
+   * 封装post下载文件请求
+   * 用于后端返回ResponseEntity的文件下载场景
+   * @param config
+   * @param options
+   */
+  postDownload<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    return this.request(
+      { 
+        ...config, 
+        method: 'POST',
+        responseType: 'blob'
+      }, 
+      { 
+        ...options,
+        isTransformResponse: false,
+        isReturnNativeResponse: false
+      }
+    );
+  }
 }

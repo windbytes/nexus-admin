@@ -67,7 +67,8 @@ const ButtonPermissionTable: React.FC<ButtonPermissionTableProps> = memo(({
       loading={loading}
       rowKey="id"
       pagination={false}
-      size="small"
+      size="middle"
+      bordered
       scroll={{ y: 300 }}
       locale={{
         emptyText: '暂无按钮权限',

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { useTagStore } from '@/stores/useTagStore.ts';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tagsService } from '@/services/common/tags/tagsApi';
 import TagItemEditor from './tag-item-editor';
 
@@ -17,18 +17,22 @@ type TagManagementModalProps = {
  * 标签管理弹窗
  */
 const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) => {
-  const { setShowTagManagementModal, tagList, setTagList } = useTagStore();
+  // 只订阅需要的 store 方法，不订阅 tagList 避免重复渲染
+  const { setShowTagManagementModal, setTagList } = useTagStore();
   const { t } = useTranslation();
   const { notification } = App.useApp();
+  const queryClient = useQueryClient();
 
-  // 查询标签列表
-  useQuery({
-    queryKey: ['tag_management_list'],
+  // 查询标签列表 - 使用 useQuery 返回的 data 作为数据源
+  const { data: tagList = [] } = useQuery({
+    queryKey: ['tag_management_list', type],
     queryFn: async () => {
       const res = await tagsService.getTagsList(type);
+      // 更新 store 供其他组件使用，但本组件不订阅
       setTagList(res);
       return res;
     },
+    enabled: show, // 只在弹窗显示时查询
   });
 
   const [pending, setPending] = useState<boolean>(false);
@@ -53,8 +57,13 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
       setPending(false);
     },
     onSuccess: (res) => {
-      setTagList([res, ...tagList]);
+      const newTagList = [res, ...tagList];
+      // 更新 store 供其他组件使用
+      setTagList(newTagList);
+      // 更新 react-query 缓存，保持数据一致性
+      queryClient.setQueryData(['tag_management_list', type], newTagList);
       setName('');
+      setPending(false);
       notification.success({
         message: t('common.createSuccess'),
       });

@@ -61,7 +61,8 @@ const InterfacePermissionTable: React.FC<InterfacePermissionTableProps> = memo((
       loading={loading}
       rowKey="id"
       pagination={false}
-      size="small"
+      size="middle"
+      bordered
       scroll={{ y: 300 }}
       locale={{
         emptyText: '暂无接口权限',

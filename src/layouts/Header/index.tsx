@@ -12,9 +12,9 @@ import CollapseSwitch from './component/CollapseSwitch';
 import LanguageSwitch from './component/LanguageSwitch';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import HeaderMenu from './component/HeaderMenu';
-import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
 import './header.scss';
+import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
 
 const Setting = React.lazy(() => import('./component/Setting'));
 
@@ -104,7 +104,7 @@ const Header = () => {
 
           {/* 第二行：TabBar区域 */}
           <div className="header-tab-row">
-            <TabBar />
+            <ActivityTabBar />
           </div>
         </Layout.Header>
       ) : (

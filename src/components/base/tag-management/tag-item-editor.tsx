@@ -8,6 +8,7 @@ import { useTagStore } from '@/stores/useTagStore';
 import { tagsService } from '@/services/common/tags/tagsApi';
 import classNames from '@/utils/classnames';
 import type { Tag } from './constant';
+import { useQueryClient } from '@tanstack/react-query';
 
 type TagItemEditorProps = {
   tag: Tag;
@@ -18,7 +19,9 @@ type TagItemEditorProps = {
  */
 const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
   const { t } = useTranslation();
-  const { tagList, setTagList } = useTagStore();
+  // 只订阅 setTagList 方法，不订阅 tagList 避免重复渲染
+  const { setTagList } = useTagStore();
+  const queryClient = useQueryClient();
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(tag.name);
@@ -28,12 +31,50 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
   /**
    * 编辑标签
    */
-  const editTag = async (tagID: string, name: string) => {};
+  const editTag = async (tagID: string, newName: string) => {
+    if (!newName || newName === tag.name || pending) {
+      setIsEditing(false);
+      return;
+    }
+    setPending(true);
+    try {
+      await tagsService.updateTag({ id: tagID, name: newName });
+      // 更新 react-query 缓存
+      queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
+      setIsEditing(false);
+      notification.success({
+        message: t('common.updateSuccess'),
+      });
+    } catch (err: any) {
+      notification.error({
+        message: t('common.updateFailed') + err.message,
+      });
+    } finally {
+      setPending(false);
+    }
+  };
 
   /**
    * 移除标签
    */
-  const removeTag = async (tagID: string) => {};
+  const removeTag = async (tagID: string) => {
+    if (pending) return;
+    setPending(true);
+    try {
+      await tagsService.deleteTag(tagID);
+      // 更新 react-query 缓存
+      queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
+      notification.success({
+        message: t('common.deleteSuccess'),
+      });
+    } catch (err: any) {
+      notification.error({
+        message: t('common.deleteFailed') + err.message,
+      });
+    } finally {
+      setPending(false);
+    }
+  };
 
   /**
    * 确认是否删除

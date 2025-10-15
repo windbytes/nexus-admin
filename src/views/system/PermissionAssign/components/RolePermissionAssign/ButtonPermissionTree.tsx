@@ -157,6 +157,7 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
       rowSelection={rowSelection}
       pagination={false}
       bordered
+      size="middle"
       scroll={{ x: 'max-content', y: 'calc(100vh - 536px)' }}
       expandable={{
         defaultExpandAllRows: true,

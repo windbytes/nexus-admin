@@ -67,6 +67,8 @@ export interface CodeEditorProps {
   className?: string;
   /** 样式 */
   style?: React.CSSProperties;
+  /** ref 引用（React 19 新特性：直接作为 prop） */
+  ref?: React.Ref<CodeEditorRef>;
 }
 
 // 编辑器实例引用

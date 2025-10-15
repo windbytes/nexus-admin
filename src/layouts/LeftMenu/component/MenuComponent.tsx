@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState, useMemo } from 'react';
+import { memo, useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -44,57 +44,58 @@ const MenuComponent = () => {
   const [menuList, setMenuList] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  
+  // 【优化】缓存上一次的语言，避免不必要的菜单重新生成
+  const prevLanguageRef = useRef(i18n.language);
 
-  const getItem = (
-    label: any,
-    key?: React.Key | null,
-    icon?: React.ReactNode,
-    children?: MenuItem[],
-    type?: 'group',
-  ): MenuItem => {
-    return {
-      key,
-      icon,
-      children,
-      label: t(label),
-      type,
-    } as MenuItem;
-  };
+  // 【优化】将 getItem 移到 useMemo 外部，避免重复创建
+  const getItem = useCallback(
+    (
+      label: any,
+      key?: React.Key | null,
+      icon?: React.ReactNode,
+      children?: MenuItem[],
+      type?: 'group',
+    ): MenuItem => {
+      return {
+        key,
+        icon,
+        children,
+        label: t(label),
+        type,
+      } as MenuItem;
+    },
+    [t]
+  );
 
-  const deepLoopFloat = useCallback((menuList: RouteItem[], newArr: MenuItem[] = []) => {
-    for (const item of menuList) {
-      if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
-        continue;
+  // 【优化】使用 useMemo 缓存菜单构建函数，只在 t 变化时重新创建
+  const deepLoopFloat = useMemo(
+    () => (menuList: RouteItem[], newArr: MenuItem[] = []): MenuItem[] => {
+      for (const item of menuList) {
+        if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
+          continue;
+        }
+        if (!item?.children?.length) {
+          newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
+          continue;
+        }
+        newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
       }
-      if (!item?.children?.length) {
-        newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
-        continue;
-      }
-      newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
-    }
-    return newArr;
-  }, []);
+      return newArr;
+    },
+    [getItem]
+  );
 
-  const clickMenu: MenuProps['onClick'] = ({ key }: { key: string }) => {
-    // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
-    navigate(key, { replace: true });
-  };
+  // 【优化】使用 useCallback 避免每次渲染都创建新函数
+  const clickMenu: MenuProps['onClick'] = useCallback(
+    ({ key }: { key: string }) => {
+      // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
+      navigate(key, { replace: true });
+    },
+    [navigate]
+  );
 
-  useEffect(() => {
-    const openKey = getOpenKeys(pathname, menus);
-    const route = searchRoute(pathname, menus);
-    if (route && Object.keys(route).length) {
-      if (dynamicTitle) {
-        const title = route.meta?.title;
-        if (title) document.title = `Nexus - ${t(title)}`;
-      }
-      // 非折叠状态下，设置打开的 key
-      !collapsed && setOpenKeys(openKey);
-    }
-  }, [pathname, collapsed, menus, dynamicTitle, t]);
-
-  // 监听tab切换，同步更新左侧菜单选中状态
-  // 使用useMemo优化，避免不必要的重复渲染
+  // 【优化】监听tab切换，同步更新左侧菜单选中状态
   const currentSelectedKeys = useMemo(() => {
     // 如果activeKey与当前pathname不同，说明是通过tab切换触发的
     // 此时使用activeKey作为选中项
@@ -105,21 +106,25 @@ const MenuComponent = () => {
     return [pathname];
   }, [activeKey, pathname]);
 
-  // 使用useMemo优化openKeys的计算
+  // 【优化】使用useMemo优化openKeys的计算
   const currentOpenKeys = useMemo(() => {
     const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
     return getOpenKeys(targetPath, menus);
   }, [activeKey, pathname, menus]);
 
-  const onOpenChange = (openKeys: string[]) => {
-    if (!accordion) return setOpenKeys(openKeys);
-    if (openKeys.length < 1) return setOpenKeys(openKeys);
-    const latestOpenKey = openKeys[openKeys.length - 1];
-    if (latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
-    setOpenKeys([latestOpenKey]);
-  };
+  // 【优化】使用 useCallback 优化
+  const onOpenChange = useCallback(
+    (openKeys: string[]) => {
+      if (!accordion) return setOpenKeys(openKeys);
+      if (openKeys.length < 1) return setOpenKeys(openKeys);
+      const latestOpenKey = openKeys[openKeys.length - 1];
+      if (latestOpenKey && openKeys[0] && latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
+      if (latestOpenKey) setOpenKeys([latestOpenKey]);
+    },
+    [accordion]
+  );
 
-  // 智能合并用户手动操作和自动同步的openKeys
+  // 【优化】智能合并用户手动操作和自动同步的openKeys
   const mergedOpenKeys = useMemo(() => {
     // 如果用户手动操作过菜单，优先使用用户的操作
     if (openKeys.length > 0) {
@@ -129,20 +134,46 @@ const MenuComponent = () => {
     return currentOpenKeys;
   }, [openKeys, currentOpenKeys]);
 
-  // 只在初始化时设置openKeys，避免覆盖用户操作
+  // 【优化】合并 pathname 和标题更新逻辑
   useEffect(() => {
-    if (!collapsed && openKeys.length === 0) {
-      setOpenKeys(currentOpenKeys);
+    const route = searchRoute(pathname, menus);
+    if (route && Object.keys(route).length) {
+      // 更新标题
+      if (dynamicTitle) {
+        const title = route.meta?.title;
+        if (title) document.title = `Nexus - ${t(title)}`;
+      }
+      // 非折叠状态下，设置打开的 key
+      if (!collapsed) {
+        const openKey = getOpenKeys(pathname, menus);
+        setOpenKeys(openKey);
+      }
     }
-  }, [currentOpenKeys, collapsed, openKeys.length]);
+  }, [pathname, collapsed, menus, dynamicTitle, t]);
 
+  // 【优化】只在菜单数据或语言真正变化时重新生成菜单列表
   useEffect(() => {
-    if (!menus || menus.length === 0) return;
+    if (!menus || menus.length === 0) {
+      setMenuList([]);
+      return;
+    }
+
+    // 检查语言是否真的变化了
+    const languageChanged = prevLanguageRef.current !== i18n.language;
+    if (languageChanged) {
+      prevLanguageRef.current = i18n.language;
+    }
+
     setLoading(true);
-    const menu = deepLoopFloat(menus, []);
-    setMenuList(menu);
-    setLoading(false);
-  }, [menus, t, i18n.language, deepLoopFloat]);
+    // 使用 requestIdleCallback 或 setTimeout 将菜单构建推迟到空闲时
+    const timeoutId = setTimeout(() => {
+      const menu = deepLoopFloat(menus, []);
+      setMenuList(menu);
+      setLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [menus, i18n.language, deepLoopFloat]);
 
   return (
     <Spin
