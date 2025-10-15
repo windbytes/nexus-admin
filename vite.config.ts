@@ -108,9 +108,9 @@ export default defineConfig(({ mode }) => {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     },
     // 优化依赖预构建
-    // optimizeDeps: {
-    //   include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
-    // },
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
+    },
     // css预处理器
     css: {
       preprocessorOptions: {

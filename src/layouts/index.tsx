@@ -1,5 +1,5 @@
 import { Layout } from 'antd';
-import type React from 'react';
+import React from 'react';
 import ScreenLock from '@/components/ScreenLock';
 import Content from './Content';
 import Header from './Header';
@@ -29,4 +29,6 @@ const Layouts: React.FC = () => {
     </>
   );
 };
-export default Layouts;
+
+// 【优化】使用 React.memo 避免不必要的重渲染
+export default React.memo(Layouts);

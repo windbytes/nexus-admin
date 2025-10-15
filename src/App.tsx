@@ -17,14 +17,14 @@ const App: React.FC = () => {
   const { setMenus } = useMenuStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const { role = '', isLogin } = useUserStore();
+  const { roleId = '', isLogin } = useUserStore();
   const { notification, message, modal } = AntdApp.useApp();
 
   // 使用 TanStack Query 获取菜单数据
   const { isLoading, refetch } = useQuery({
     queryKey: ['menuData'],
     queryFn: async () => {
-      const menu = await commonService.getMenuListByRoleId(role);
+      const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       return menu;
     },
