@@ -688,7 +688,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           <Table
             rowKey="id"
             columns={columns}
-            dataSource={fields}
+            dataSource={fieldsRef.current}
             pagination={false}
             size="small"
             scroll={{ x: 'max-content', y: 'calc(100vh - 546px)' }}
