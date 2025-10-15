@@ -192,7 +192,7 @@ const EndpointConfig: React.FC = () => {
   /**
    * 新增端点类型
    */
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (isEditing) {
       message.warning('请先保存或取消当前编辑');
       return;
@@ -207,12 +207,12 @@ const EndpointConfig: React.FC = () => {
     setTimeout(() => {
       endpointTypeFormRef.current?.focusTypeName();
     }, 200);
-  }, [isEditing, basicForm, message]);
+  };
 
   /**
    * 预览
    */
-  const handlePreview = useCallback(async () => {
+  const handlePreview = async () => {
     try {
       // 如果正在编辑模式，先验证表单
       if (isEditing) {
@@ -267,12 +267,12 @@ const EndpointConfig: React.FC = () => {
       }
       message.error('请先完善基础信息');
     }
-  }, [isEditing, basicForm, schemaFields, selectedType, detailData, message]);
+  };
 
   /**
    * 开始编辑
    */
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     if (!selectedType) {
       message.warning('请先选择一个端点类型');
       return;
@@ -283,12 +283,12 @@ const EndpointConfig: React.FC = () => {
     setTimeout(() => {
       endpointTypeFormRef.current?.focusTypeName();
     }, 200);
-  }, [selectedType, message]);
+  };
 
   /**
    * 保存
    */
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     try {
       // 1. 验证基础信息表单
       const basicValues = await basicForm.validateFields();
@@ -332,12 +332,12 @@ const EndpointConfig: React.FC = () => {
         basicForm.focusField(error.errorFields[0].name);
       }
     }
-  }, [basicForm, selectedType, saveConfigMutation, message]);
+  };
 
   /**
    * 取消编辑
    */
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     setIsEditing(false);
     // 取消 Schema 表格的编辑状态
     schemaFieldsTableRef.current?.cancelEdit();
@@ -351,12 +351,12 @@ const EndpointConfig: React.FC = () => {
       setSchemaFields([]);
       basicForm.resetFields();
     }
-  }, [selectedType, detailData, basicForm]);
+  };
 
   /**
    * 删除
    */
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     if (!selectedType?.id) {
       message.warning('请先选择一个端点类型');
       return;
@@ -372,12 +372,12 @@ const EndpointConfig: React.FC = () => {
         deleteConfigMutation.mutate(selectedType.id);
       },
     });
-  }, [selectedType, modal, deleteConfigMutation, message]);
+  };
 
   /**
    * 导出
    */
-  const handleExport = useCallback(() => {
+  const handleExport = () => {
     if (!selectedType?.id) {
       message.warning('请先选择一个端点类型');
       return;
@@ -387,36 +387,36 @@ const EndpointConfig: React.FC = () => {
       id: selectedType.id,
       name: selectedType.typeName,
     });
-  }, [selectedType, exportSchemaMutation, message]);
+  };
 
   /**
    * 导入
    */
-  const handleImport = useCallback(() => {
+  const handleImport = () => {
     message.info('导入功能开发中...');
-  }, [message]);
+  };
 
   /**
    * 搜索
    */
-  const handleSearch = useCallback((value: string) => {
+  const handleSearch = (value: string) => {
     setSearchKeyword(value);
     setPagination(prev => ({ ...prev, current: 1 })); // 搜索时重置到第一页
-  }, []);
+  };
 
   /**
    * 分页变更
    */
-  const handlePaginationChange = useCallback((page: number, pageSize: number) => {
+  const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize });
-  }, []);
+  };
 
   /**
    * Schema字段变更
    */
-  const handleSchemaFieldsChange = useCallback((fields: SchemaField[]) => {
+  const handleSchemaFieldsChange = (fields: SchemaField[]) => {
     setSchemaFields(fields);
-  }, []);
+  };
 
   // 当详情数据加载完成时，更新表单和字段
   // 只在 selectedType.id 变化且不在编辑模式时更新
@@ -444,7 +444,7 @@ const EndpointConfig: React.FC = () => {
   /**
    * 获取预览配置数据
    */
-  const getPreviewConfig = useCallback((): EndpointTypeConfig | null => {
+  const getPreviewConfig = (): EndpointTypeConfig | null => {
     if (isEditing) {
       // 编辑模式，使用当前表单数据
       const formValues = basicForm.getFieldsValue();
@@ -464,7 +464,7 @@ const EndpointConfig: React.FC = () => {
       // 查看模式，使用详情数据
       return detailData || null;
     }
-  }, [isEditing, basicForm, selectedType, schemaFields, detailData]);
+  };
 
   return (
     <div className="h-full flex gap-4">
@@ -542,4 +542,4 @@ const EndpointConfig: React.FC = () => {
   );
 };
 
-export default React.memo(EndpointConfig);
+export default EndpointConfig;

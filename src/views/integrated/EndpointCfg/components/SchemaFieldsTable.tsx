@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useImperativeHandle, lazy } from 'react';
+import React, { useState, useImperativeHandle, lazy } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -79,7 +79,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 取消编辑
    */
-  const cancel = useCallback(() => {
+  const cancel = () => {
     if (isNewRecord) {
       // 如果是新增记录，删除该记录
       const newData = fields.filter((item) => item.id !== editingKey);
@@ -87,13 +87,13 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     }
     setEditingKey('');
     setIsNewRecord(false);
-  }, [isNewRecord, fields, editingKey, onChange]);
+  };
 
   /**
    * 保存当前正在编辑的行
    * 返回是否保存成功
    */
-  const saveCurrentEdit = useCallback(async (): Promise<boolean> => {
+  const saveCurrentEdit = async (): Promise<boolean> => {
     if (!editingKey) {
       return true; // 没有正在编辑的行，返回成功
     }
@@ -120,21 +120,21 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       console.log('表格行验证失败:', errInfo);
       return false;
     }
-  }, [editingKey, isNewRecord, form, fields, onChange]);
+  };
 
   /**
    * 检查是否有行正在编辑
    */
-  const checkIsEditing = useCallback((): boolean => {
+  const checkIsEditing = (): boolean => {
     return !!editingKey;
-  }, [editingKey]);
+  };
 
   /**
    * 获取当前最新的字段数据（包括正在编辑的行）
    * 如果有行正在编辑，会先验证并合并编辑的数据
    * 返回 null 表示验证失败
    */
-  const getCurrentFields = useCallback(async (): Promise<SchemaField[] | null> => {
+  const getCurrentFields = async (): Promise<SchemaField[] | null> => {
     // 如果没有正在编辑的行，直接返回当前字段数据
     if (!editingKey) {
       return fields;
@@ -161,7 +161,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       console.log('表格行验证失败:', errInfo);
       return null; // 验证失败返回 null
     }
-  }, [editingKey, isNewRecord, form, fields]);
+  };
 
   /**
    * 暴露给父组件的方法
@@ -202,7 +202,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 滚动到指定的表格行
    */
-  const scrollToRow = useCallback((rowId: string) => {
+  const scrollToRow = (rowId: string) => {
     // 等待 DOM 更新后再滚动
     setTimeout(() => {
       try {
@@ -225,12 +225,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         console.warn('滚动到新增行失败:', error);
       }
     }, 150); // 延迟等待表格渲染和编辑状态生效
-  }, []);
+  };
 
   /**
    * 新增字段
    */
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     const newField: SchemaField = {
       id: `field_${Date.now()}`,
       field: '',
@@ -247,24 +247,21 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       edit(newField, true); // 标记为新增记录
       scrollToRow(newField.id || ''); // 滚动到新增的行
     }, 100);
-  }, [fields, onChange, scrollToRow]);
+  };
 
   /**
    * 删除字段
    */
-  const handleDelete = useCallback(
-    (id: string) => {
+    const handleDelete = 
+      (id: string) => {
       const newData = fields.filter((item) => item.id !== id);
       onChange(newData);
-    },
-    [fields, onChange]
-  );
+    };
 
   /**
    * 上移
    */
-  const handleMoveUp = useCallback(
-    (index: number) => {
+  const handleMoveUp = (index: number) => {
       if (index === 0) return;
       const newData = [...fields];
       const item1 = newData[index - 1];
@@ -277,15 +274,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         });
         onChange(newData);
       }
-    },
-    [fields, onChange]
-  );
+    };
 
   /**
    * 下移
    */
-  const handleMoveDown = useCallback(
-    (index: number) => {
+  const handleMoveDown = (index: number) => {
       if (index === fields.length - 1) return;
       const newData = [...fields];
       const item1 = newData[index];
@@ -298,14 +292,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         });
         onChange(newData);
       }
-    },
-    [fields, onChange]
-  );
+    };
 
   /**
    * 打开组件配置弹窗
    */
-  const handleOpenConfig = useCallback((record: SchemaField) => {
+  const handleOpenConfig = (record: SchemaField) => {
     // 如果当前正在编辑这一行，优先使用表单中的组件类型
     let componentType = record.component;
     // 直接判断 record.id === editingKey，避免闭包问题
@@ -320,12 +312,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       fieldId: record.id || '',
     });
     setConfigModalVisible(true);
-  }, [form, editingKey]);
+  };
 
   /**
    * 保存组件配置
    */
-  const handleSaveConfig = useCallback((properties: any) => {
+  const handleSaveConfig = (properties: any) => {
     const newData = fields.map(field => {
       if (field.id === configModalData.fieldId) {
         return { ...field, properties };
@@ -333,12 +325,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       return field;
     });
     onChange(newData);
-  }, [fields, onChange, configModalData.fieldId]);
+  };
 
   /**
    * 打开高级配置弹窗
    */
-  const handleOpenAdvancedConfig = useCallback((record: SchemaField) => {
+  const handleOpenAdvancedConfig = (record: SchemaField) => {
     // 如果正在编辑，从表单获取最新的label
     let fieldLabel = record.label;
     if (record.id === editingKey) {
@@ -365,12 +357,12 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
 
     setAdvancedModalData(modalData);
     setAdvancedModalVisible(true);
-  }, [form, editingKey]);
+  };
 
   /**
    * 保存高级配置
    */
-  const handleSaveAdvancedConfig = useCallback((config: { rules?: string; showCondition?: string }) => {
+  const handleSaveAdvancedConfig = (config: { rules?: string; showCondition?: string }) => {
     const newData = fields.map(field => {
       if (field.id === advancedModalData.fieldId) {
         const updatedField: SchemaField = { ...field };
@@ -390,7 +382,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     });
     onChange(newData);
     setAdvancedModalVisible(false);
-  }, [fields, onChange, advancedModalData.fieldId]);
+  };
 
   /**
    * 表格列配置 - 使用 useMemo 优化，避免每次渲染都重新创建

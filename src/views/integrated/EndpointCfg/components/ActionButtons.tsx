@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Button, Space } from 'antd';
 import {
   SaveOutlined,
@@ -33,9 +33,9 @@ interface ActionButtonsProps {
 
 /**
  * 操作按钮组件
- * 将按钮区域独立拆分，避免主组件重渲染时影响按钮区域
+ * 将按钮区域独立拆分，使代码结构更清晰
  */
-const ActionButtons: React.FC<ActionButtonsProps> = memo(({
+const ActionButtons: React.FC<ActionButtonsProps> = ({
   isEditing,
   hasSelected,
   saveLoading = false,
@@ -101,9 +101,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       </div>
     </div>
   );
-});
-
-ActionButtons.displayName = 'ActionButtons';
+};
 
 export default ActionButtons;
 
