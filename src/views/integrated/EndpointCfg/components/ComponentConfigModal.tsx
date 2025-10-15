@@ -113,7 +113,6 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       width={1000}
       okText="确定"
       cancelText="取消"
-      destroyOnHidden
       styles={{
         body: {
           maxHeight: '60vh',

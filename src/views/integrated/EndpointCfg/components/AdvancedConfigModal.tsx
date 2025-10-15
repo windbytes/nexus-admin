@@ -387,7 +387,6 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       onCancel={handleCancel}
       onOk={handleOk}
       width={800}
-      destroyOnHidden
       styles={{
         body: {
           maxHeight: '70vh',

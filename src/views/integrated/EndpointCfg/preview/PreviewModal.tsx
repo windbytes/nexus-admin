@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, memo } from 'react';
 import { Modal, Form, Tabs, Button, Space, Divider, App, Badge, Empty } from 'antd';
 import { 
   EyeOutlined, 
@@ -23,6 +23,7 @@ interface PreviewModalProps {
  * 预览弹窗组件
  * 根据端点配置生成预览表单
  * 支持多种作用模式的切换预览
+ * 使用 memo 因为组件被懒加载
  */
 const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClose }) => {
   const { message } = App.useApp();
@@ -33,7 +34,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
   /**
    * 获取表单数据并返回
    */
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     try {
       const values = await form.validateFields();
       
@@ -58,22 +59,15 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
       message.error('请完善表单信息');
       console.error('表单验证失败:', error);
     }
-  }, [form, message]);
+  };
 
   /**
    * 重置表单
    */
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     form.resetFields();
     message.info('表单已重置');
-  }, [form, message]);
-
-  /**
-   * 切换预览模式
-   */
-  const handleViewModeChange = useCallback((mode: 'form' | 'json') => {
-    setViewMode(mode);
-  }, []);
+  };
 
   /**
    * 渲染配置的 JSON 视图
@@ -120,10 +114,10 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
   /**
    * 根据模式获取对应的字段数量
    */
-  const getFieldCountByMode = useCallback((mode: string) => {
+  const getFieldCountByMode = (mode: string) => {
     if (!config?.schemaFields) return 0;
     return config.schemaFields.filter(field => !field.mode || field.mode.includes(mode)).length;
-  }, [config]);
+  };
 
   /**
    * 生成 Tab 项
@@ -170,17 +164,17 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
         ),
       };
     });
-  }, [config, form, getFieldCountByMode]);
+  }, [config, form]);
 
   /**
    * 弹窗关闭后重置状态
    */
-  const handleModalClose = useCallback(() => {
+  const handleModalClose = () => {
     form.resetFields();
     setActiveTab('IN');
     setViewMode('form');
     onClose();
-  }, [form, onClose]);
+  };
 
   if (!config) {
     return null;
@@ -214,7 +208,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
             <Button
               type={viewMode === 'form' ? 'primary' : 'default'}
               size="small"
-              onClick={() => handleViewModeChange('form')}
+              onClick={() => setViewMode('form')}
               icon={<FileTextOutlined />}
             >
               表单视图
@@ -222,7 +216,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
             <Button
               type={viewMode === 'json' ? 'primary' : 'default'}
               size="small"
-              onClick={() => handleViewModeChange('json')}
+              onClick={() => setViewMode('json')}
               icon={<CodeOutlined />}
             >
               JSON视图

@@ -1,5 +1,5 @@
-import React, { memo, useState, useCallback } from 'react';
-import { Form, Row, Col } from 'antd';
+import React, { memo, useState } from 'react';
+import { Form } from 'antd';
 import type { FormInstance } from 'antd';
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -48,9 +48,9 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
   /**
    * 表单值变化回调
    */
-  const handleValuesChange = useCallback((_changedValues: any, allValues: any) => {
+  const handleValuesChange = (_changedValues: any, allValues: any) => {
     setFormValues(allValues);
-  }, []);
+  };
 
   /**
    * 根据作用模式过滤字段
@@ -78,19 +78,6 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
     });
   }, [filteredFields]);
 
-  /**
-   * 根据组件类型计算字段的响应式列宽
-   */
-  const getFieldColSpan = (component: string) => {
-    // TextArea 和 JSON 编辑器占满一整行
-    if (component === 'TextArea' || component === 'JSON') {
-      return { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 };
-    }
-    
-    // 其他组件在大屏显示 2 列，中小屏显示 1 列
-    return { xs: 24, sm: 24, md: 24, lg: 12, xl: 12, xxl: 12 };
-  };
-
   if (sortedFields.length === 0) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -113,13 +100,24 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
         onValuesChange={handleValuesChange}
         autoComplete="off"
       >
-        <Row gutter={[16, 0]}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gap: '0 16px'
+        }}>
           {sortedFields.map((field) => (
-            <Col key={field.id || field.field} {...getFieldColSpan(field.component)}>
+            <div 
+              key={field.id || field.field}
+              style={{
+                gridColumn: (field.component === 'TextArea' || field.component === 'JSON') 
+                  ? '1 / -1' 
+                  : 'auto'
+              }}
+            >
               <PreviewFormField field={field} formValues={formValues} />
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
       </Form>
 
       <style>{`
