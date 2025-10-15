@@ -11,6 +11,12 @@ const { TextArea } = Input;
 export interface SchemaFieldsTableRef {
   /** 取消编辑 */
   cancelEdit: () => void;
+  /** 保存当前编辑的行（如果有） */
+  saveCurrentEdit: () => Promise<boolean>;
+  /** 检查是否有行正在编辑 */
+  isEditing: () => boolean;
+  /** 获取当前最新的字段数据（包括正在编辑的行） */
+  getCurrentFields: () => Promise<SchemaField[] | null>;
 }
 
 interface SchemaFieldsTableProps {
@@ -79,12 +85,89 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   }, [isNewRecord, fields, editingKey, onChange]);
 
   /**
+   * 保存当前正在编辑的行
+   * 返回是否保存成功
+   */
+  const saveCurrentEdit = useCallback(async (): Promise<boolean> => {
+    if (!editingKey) {
+      return true; // 没有正在编辑的行，返回成功
+    }
+    
+    try {
+      const row = await form.validateFields();
+      const newData = [...fields];
+      const index = newData.findIndex((item) => editingKey === item.id);
+
+      if (index > -1) {
+        const item = newData[index];
+        if (item) {
+          // 如果是新增记录，生成新的ID
+          const newId = isNewRecord ? `field_${Date.now()}` : item.id;
+          newData.splice(index, 1, { ...item, ...row, id: newId });
+          onChange(newData);
+          setEditingKey('');
+          setIsNewRecord(false);
+          return true;
+        }
+      }
+      return false;
+    } catch (errInfo) {
+      console.log('表格行验证失败:', errInfo);
+      return false;
+    }
+  }, [editingKey, isNewRecord, form, fields, onChange]);
+
+  /**
+   * 检查是否有行正在编辑
+   */
+  const checkIsEditing = useCallback((): boolean => {
+    return !!editingKey;
+  }, [editingKey]);
+
+  /**
+   * 获取当前最新的字段数据（包括正在编辑的行）
+   * 如果有行正在编辑，会先验证并合并编辑的数据
+   * 返回 null 表示验证失败
+   */
+  const getCurrentFields = useCallback(async (): Promise<SchemaField[] | null> => {
+    // 如果没有正在编辑的行，直接返回当前字段数据
+    if (!editingKey) {
+      return fields;
+    }
+
+    // 如果有正在编辑的行，先验证表单
+    try {
+      const row = await form.validateFields();
+      const newData = [...fields];
+      const index = newData.findIndex((item) => editingKey === item.id);
+
+      if (index > -1) {
+        const item = newData[index];
+        if (item) {
+          // 如果是新增记录，生成新的ID
+          const newId = isNewRecord ? `field_${Date.now()}` : item.id;
+          // 返回合并后的数据（不修改状态）
+          newData.splice(index, 1, { ...item, ...row, id: newId });
+          return newData;
+        }
+      }
+      return null;
+    } catch (errInfo) {
+      console.log('表格行验证失败:', errInfo);
+      return null; // 验证失败返回 null
+    }
+  }, [editingKey, isNewRecord, form, fields]);
+
+  /**
    * 暴露给父组件的方法
    * React 19 支持直接使用 useImperativeHandle
    */
   useImperativeHandle(ref, () => ({
     cancelEdit: cancel,
-  }), [cancel]);
+    saveCurrentEdit,
+    isEditing: checkIsEditing,
+    getCurrentFields,
+  }), [cancel, saveCurrentEdit, checkIsEditing, getCurrentFields]);
 
   /**
    * 保存编辑
