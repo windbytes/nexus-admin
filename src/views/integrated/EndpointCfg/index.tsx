@@ -301,7 +301,16 @@ const EndpointConfig: React.FC = () => {
       // 1. 验证基础信息表单
       const basicValues = await basicForm.validateFields();
 
-      // 2. 获取最新的 Schema 字段数据（包括正在编辑的行）
+      // 2. 如果有正在编辑的行，先保存它（更新状态和清除编辑状态）
+      if (schemaFieldsTableRef.current?.isEditing()) {
+        const saveResult = await schemaFieldsTableRef.current.saveCurrentEdit();
+        if (!saveResult) {
+          message.error('请先完善表格中正在编辑的字段信息');
+          return;
+        }
+      }
+
+      // 3. 获取最新的 Schema 字段数据（包括正在编辑的行）
       const latestFields = await schemaFieldsTableRef.current?.getCurrentFields();
       
       if (latestFields === null) {
@@ -313,11 +322,6 @@ const EndpointConfig: React.FC = () => {
       if (!latestFields || latestFields.length === 0) {
         message.error('请至少添加一个Schema字段');
         return;
-      }
-
-      // 3. 如果有正在编辑的行，先保存它（更新状态和清除编辑状态）
-      if (schemaFieldsTableRef.current?.isEditing()) {
-        await schemaFieldsTableRef.current.saveCurrentEdit();
       }
 
       // 4. 验证通过，准备数据（使用最新获取的字段数据）
@@ -340,7 +344,7 @@ const EndpointConfig: React.FC = () => {
         basicForm.focusField(error.errorFields[0].name);
       }
     }
-  }, [selectedType, schemaFieldsTableRef, basicForm, saveConfigMutation]);
+  }, [selectedType, schemaFieldsTableRef, basicForm, saveConfigMutation, message]);
 
   /**
    * 取消编辑 - 使用 useCallback 避免子组件重渲染

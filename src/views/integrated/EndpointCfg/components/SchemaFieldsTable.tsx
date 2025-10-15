@@ -44,6 +44,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   
   // 表格容器的 ref，用于滚动操作
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // 使用 useRef 存储最新的 fields 数据，避免闭包陷阱
+  const fieldsRef = React.useRef<SchemaField[]>(fields);
+  
+  // 当 fields 更新时，同步更新 ref
+  React.useEffect(() => {
+    fieldsRef.current = fields;
+  }, [fields]);
 
   // 组件配置弹窗状态
   const [configModalVisible, setConfigModalVisible] = useState(false);
@@ -82,7 +90,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const cancel = () => {
     if (isNewRecord) {
       // 如果是新增记录，删除该记录
-      const newData = fields.filter((item) => item.id !== editingKey);
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = fieldsRef.current.filter((item) => item.id !== editingKey);
       onChange(newData);
     }
     setEditingKey('');
@@ -100,7 +109,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     
     try {
       const row = await form.validateFields();
-      const newData = [...fields];
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = [...fieldsRef.current];
       const index = newData.findIndex((item) => editingKey === item.id);
 
       if (index > -1) {
@@ -137,13 +147,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const getCurrentFields = async (): Promise<SchemaField[] | null> => {
     // 如果没有正在编辑的行，直接返回当前字段数据
     if (!editingKey) {
-      return fields;
+      return fieldsRef.current;
     }
 
     // 如果有正在编辑的行，先验证表单
     try {
       const row = await form.validateFields();
-      const newData = [...fields];
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = [...fieldsRef.current];
       const index = newData.findIndex((item) => editingKey === item.id);
 
       if (index > -1) {
@@ -180,7 +191,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const save = async (id: string) => {
     try {
       const row = await form.validateFields();
-      const newData = [...fields];
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = [...fieldsRef.current];
       const index = newData.findIndex((item) => id === item.id);
 
       if (index > -1) {
@@ -231,16 +243,17 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 新增字段
    */
   const handleAdd = () => {
+    // 使用 ref 中的最新数据，避免闭包陷阱
     const newField: SchemaField = {
       id: `field_${Date.now()}`,
       field: '',
       label: '',
       component: 'Input',
-      sortOrder: fields.length + 1,
+      sortOrder: fieldsRef.current.length + 1,
       mode: ['IN_OUT'],
       properties: {},
     };
-    onChange([...fields, newField]);
+    onChange([...fieldsRef.current, newField]);
     
     // 进入编辑模式并滚动到新增的行
     setTimeout(() => {
@@ -254,7 +267,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    */
     const handleDelete = 
       (id: string) => {
-      const newData = fields.filter((item) => item.id !== id);
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = fieldsRef.current.filter((item) => item.id !== id);
       onChange(newData);
     };
 
@@ -263,7 +277,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    */
   const handleMoveUp = (index: number) => {
       if (index === 0) return;
-      const newData = [...fields];
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      const newData = [...fieldsRef.current];
       const item1 = newData[index - 1];
       const item2 = newData[index];
       if (item1 && item2) {
@@ -280,8 +295,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 下移
    */
   const handleMoveDown = (index: number) => {
-      if (index === fields.length - 1) return;
-      const newData = [...fields];
+      // 使用 ref 中的最新数据，避免闭包陷阱
+      if (index === fieldsRef.current.length - 1) return;
+      const newData = [...fieldsRef.current];
       const item1 = newData[index];
       const item2 = newData[index + 1];
       if (item1 && item2) {
@@ -318,7 +334,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 保存组件配置
    */
   const handleSaveConfig = (properties: any) => {
-    const newData = fields.map(field => {
+    // 使用 ref 中的最新数据，避免闭包陷阱
+    const newData = fieldsRef.current.map(field => {
       if (field.id === configModalData.fieldId) {
         return { ...field, properties };
       }
@@ -363,7 +380,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 保存高级配置
    */
   const handleSaveAdvancedConfig = (config: { rules?: string; showCondition?: string }) => {
-    const newData = fields.map(field => {
+    // 使用 ref 中的最新数据，避免闭包陷阱
+    const newData = fieldsRef.current.map(field => {
       if (field.id === advancedModalData.fieldId) {
         const updatedField: SchemaField = { ...field };
         if (config.rules) {
