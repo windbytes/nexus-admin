@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { Card, Divider, Space, Button, App, Form } from 'antd';
+import { Card, Space, Button, App, Form } from 'antd';
 import {
   SaveOutlined,
   DeleteOutlined,
   ExportOutlined,
   ImportOutlined,
-  AppstoreAddOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -510,19 +509,13 @@ const EndpointConfig: React.FC = () => {
         />
 
         {/* Schema配置 */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <Divider orientation="left">
-            <AppstoreAddOutlined className="mr-2" />
-            Schema字段配置
-          </Divider>
-          <SchemaFieldsTable
-            ref={schemaFieldsTableRef}
-            key={selectedType?.id || 'new'}
-            fields={memoizedSchemaFields}
-            disabled={!isEditing}
-            onChange={handleSchemaFieldsChange}
-          />
-        </div>
+        <SchemaFieldsTable
+          ref={schemaFieldsTableRef}
+          key={selectedType?.id || 'new'}
+          fields={memoizedSchemaFields}
+          disabled={!isEditing}
+          onChange={handleSchemaFieldsChange}
+        />
 
         {/* 底部操作按钮 */}
         <div className="border-t border-gray-200 pt-4">

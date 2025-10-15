@@ -39,6 +39,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
+  
+  // 表格容器的 ref，用于滚动操作
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
   // 组件配置弹窗状态
   const [configModalVisible, setConfigModalVisible] = useState(false);
@@ -195,11 +198,39 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   };
 
   /**
+   * 滚动到指定的表格行
+   */
+  const scrollToRow = useCallback((rowId: string) => {
+    // 等待 DOM 更新后再滚动
+    setTimeout(() => {
+      try {
+        // 查找新增的行元素
+        const tableContainer = tableContainerRef.current;
+        if (!tableContainer) return;
+
+        // 找到对应的 tr 元素（使用 data-row-key 属性）
+        const rowElement = tableContainer.querySelector(`tr[data-row-key="${rowId}"]`);
+        
+        if (rowElement) {
+          // 使用 scrollIntoView 滚动到该行
+          rowElement.scrollIntoView({
+            behavior: 'smooth',  // 平滑滚动
+            block: 'center',     // 滚动到视口中央
+            inline: 'nearest'    // 水平方向最近位置
+          });
+        }
+      } catch (error) {
+        console.warn('滚动到新增行失败:', error);
+      }
+    }, 150); // 延迟等待表格渲染和编辑状态生效
+  }, []);
+
+  /**
    * 新增字段
    */
   const handleAdd = useCallback(() => {
     const newField: SchemaField = {
-      id: `temp_${Date.now()}`,
+      id: `field_${Date.now()}`,
       field: '',
       label: '',
       component: 'Input',
@@ -208,10 +239,13 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       properties: {},
     };
     onChange([...fields, newField]);
+    
+    // 进入编辑模式并滚动到新增的行
     setTimeout(() => {
       edit(newField, true); // 标记为新增记录
+      scrollToRow(newField.id || ''); // 滚动到新增的行
     }, 100);
-  }, [fields, onChange]);
+  }, [fields, onChange, scrollToRow]);
 
   /**
    * 删除字段
@@ -614,7 +648,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   ];
 
   return (
-    <div className="flex-1 flex flex-col gap-2">
+    <div className="flex-1 flex flex-col min-h-0 gap-2 mt-4">
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
           共 {fields.length} 个字段配置
@@ -631,15 +665,17 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       </div>
 
       <Form form={form} component={false}>
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={fields}
-          pagination={false}
-          size="small"
-          scroll={{ x: 'max-content', y: 'calc(100vh - 600px)' }}
-          bordered
-        />
+        <div ref={tableContainerRef}>
+          <Table
+            rowKey="id"
+            columns={columns}
+            dataSource={fields}
+            pagination={false}
+            size="small"
+            scroll={{ x: 'max-content', y: 'calc(100vh - 570px)' }}
+            bordered
+          />
+        </div>
       </Form>
 
       {/* 组件配置弹窗 */}
