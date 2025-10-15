@@ -21,7 +21,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 ### 前端技术栈
 
-- **React 19.1.9** - 现代化的用户界面框架
+- **React 19** - 现代化的用户界面框架
 - **Ant Design 5.x** - 企业级 UI 组件库
 - **Vite** - 快速的前端构建工具
 - **TypeScript** - 类型安全的 JavaScript 超集
@@ -33,10 +33,13 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 ### 后端技术栈
 
-- **Spring Boot 3.4.5** - 企业级 Java 应用框架
+- **Spring Boot 3.x** - 企业级 Java 应用框架
 - **JDK 21** - 最新的 Java 开发工具包
 - **MyBatis-Flex** - 灵活的 ORM 框架
 - **Apache Camel** - 企业集成模式框架
+- **Sa-token**   -- 权限校验
+- **Redis**   -- 缓存实现与分布式锁
+
 
 ### 开发工具
 
@@ -344,6 +347,7 @@ rsync -av dist/ user@server:/var/www/nexus-admin/
 - [ ] 微服务架构升级
 - [ ] 云原生部署支持
 - [ ] AI 辅助集成配置
+- [ ] MQ实现消息削峰
 - [ ] 多租户支持
 - [ ] 国际化支持
 

@@ -183,6 +183,15 @@ const InputNumberConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChang
             <Input placeholder="请输入前缀" />
           </Form.Item>
         </Col>
+        <Col span={6}>
+          <Form.Item
+            name="suffix"
+            label="后缀"
+            tooltip="后缀内容"
+          >
+            <Input placeholder="请输入后缀" />
+          </Form.Item>
+        </Col>
 
         <Col span={6}>
           <Form.Item

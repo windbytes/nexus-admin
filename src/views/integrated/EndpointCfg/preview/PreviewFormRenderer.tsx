@@ -35,8 +35,8 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
     
     fields.forEach(field => {
       // 如果字段有默认值且初始值中没有该字段，则使用默认值
-      if (field.defaultValue !== undefined && merged[field.field] === undefined) {
-        merged[field.field] = field.defaultValue;
+      if (field.properties?.['defaultValue'] !== undefined && merged[field.field] === undefined) {
+        merged[field.field] = field.properties?.['defaultValue'];
       }
     });
     

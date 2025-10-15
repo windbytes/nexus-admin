@@ -85,27 +85,28 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
    * 根据组件类型渲染表单控件
    */
   const renderFormControl = () => {
-    const { component, properties = {}, defaultValue } = field;
+    const { component, properties = {} } = field;
+    const { value, defaultValue, ...rest } = properties;
 
     switch (component) {
       case 'Input':
         return (
           <Input
-            {...properties}
+            {...rest}
           />
         );
 
       case 'InputPassword':
         return (
           <Password
-            {...properties}
+            {...rest}
           />
         );
 
       case 'InputNumber':
         return (
           <InputNumber
-            {...properties}
+            {...rest}
             className="w-full"
           />
         );
@@ -113,7 +114,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       case 'TextArea':
         return (
           <TextArea
-            {...properties}
+            {...rest}
           />
         );
 
@@ -121,11 +122,11 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
         return (
           <CodeEditor
             language="json"
-            height={properties['height']}
-            value={defaultValue ? JSON.stringify(defaultValue, null, 2) : '{}'}
+            height={rest['height']}
+            value={value ? JSON.stringify(value, null, 2) : '{}'}
             options={{
-              readOnly: properties['disabled'],
-              ...properties['options'],
+              readOnly: rest['disabled'],
+              ...rest['options'],
             }}
           />
         );
@@ -133,7 +134,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       case 'Select':
         return (
           <Select
-            {...properties}
+            {...rest}
             filterOption={(input, option) =>
               ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
             }
@@ -143,28 +144,28 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       case 'Radio':
         return (
           <Radio.Group
-            {...properties}
+            {...rest}
           />
         );
 
       case 'Checkbox':
         return (
           <Checkbox.Group
-            {...properties}
+            {...rest}
           />
         );
 
       case 'Switch':
         return (
           <Switch
-            {...properties}
+            {...rest}
           />
         );
 
       case 'DatePicker':
         return (
           <DatePicker
-            {...properties}
+            {...rest}
             className="w-full"
           />
         );

@@ -39,8 +39,6 @@ export interface SchemaField {
   label: string;
   /** 组件类型 */
   component: string;
-  /** 默认值 */
-  defaultValue?: any;
   /** 组件属性配置 */
   properties: Record<string, any>;
   /** 验证规则(JSON字符串) */
