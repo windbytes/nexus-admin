@@ -34,8 +34,9 @@ interface ActionButtonsProps {
 /**
  * 操作按钮组件
  * 将按钮区域独立拆分，使代码结构更清晰
+ * 使用 React.memo 优化，避免父组件重渲染时的不必要渲染
  */
-const ActionButtons: React.FC<ActionButtonsProps> = ({
+const ActionButtons: React.FC<ActionButtonsProps> = React.memo(({
   isEditing,
   hasSelected,
   saveLoading = false,
@@ -101,7 +102,9 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ActionButtons.displayName = 'ActionButtons';
 
 export default ActionButtons;
 

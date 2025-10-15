@@ -21,7 +21,7 @@ interface PreviewFormRendererProps {
  * 根据字段配置动态渲染整个表单
  * 使用 memo 避免不必要的重渲染
  */
-const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
+const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
   form,
   fields,
   mode,
@@ -46,37 +46,35 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
   const [formValues, setFormValues] = useState<Record<string, any>>(mergedInitialValues);
 
   /**
-   * 表单值变化回调
+   * 表单值变化回调 - 使用 useCallback 优化
    */
-  const handleValuesChange = (_changedValues: any, allValues: any) => {
+  const handleValuesChange = React.useCallback((_changedValues: any, allValues: any) => {
     setFormValues(allValues);
-  };
+  }, []);
 
   /**
-   * 根据作用模式过滤字段
-   */
-  const filteredFields = React.useMemo(() => {
-    if (!mode) return fields;
-    
-    return fields.filter(field => {
-      // 如果字段没有指定 mode，则在所有模式下都显示
-      if (!field.mode) return true;
-      
-      // 检查字段的 mode 是否匹配当前模式
-      return field.mode.includes(mode);
-    });
-  }, [fields, mode]);
-
-  /**
-   * 按排序号排序字段
+   * 根据作用模式过滤并排序字段
+   * 合并过滤和排序操作，减少一次遍历
    */
   const sortedFields = React.useMemo(() => {
-    return [...filteredFields].sort((a, b) => {
+    // 先过滤
+    let filtered = fields;
+    if (mode) {
+      filtered = fields.filter(field => {
+        // 如果字段没有指定 mode，则在所有模式下都显示
+        if (!field.mode) return true;
+        // 检查字段的 mode 是否匹配当前模式
+        return field.mode.includes(mode);
+      });
+    }
+    
+    // 再排序
+    return [...filtered].sort((a, b) => {
       const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
       const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
       return orderA - orderB;
     });
-  }, [filteredFields]);
+  }, [fields, mode]);
 
   if (sortedFields.length === 0) {
     return (
@@ -136,9 +134,18 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
       `}</style>
     </div>
   );
-});
+};
 
 PreviewFormRenderer.displayName = 'PreviewFormRenderer';
 
-export default PreviewFormRenderer;
+// 使用 memo 优化，添加深度比较
+export default memo(PreviewFormRenderer, (prevProps, nextProps) => {
+  // 只有当关键属性真正改变时才重新渲染
+  return (
+    prevProps.form === nextProps.form &&
+    prevProps.fields === nextProps.fields &&
+    prevProps.mode === nextProps.mode &&
+    prevProps.initialValues === nextProps.initialValues
+  );
+});
 

@@ -19,13 +19,11 @@ interface PreviewFormFieldProps {
  */
 const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formValues = {} }) => {
   /**
-   * 检查字段是否应该显示
-   * 支持两种形式：
-   * 1. JS 表达式：formValues.needAuth === true
-   * 2. 函数字符串：function(formValues) { return formValues.needAuth; } 或 (formValues) => formValues.needAuth
+   * 创建并缓存显示条件函数
+   * 只有当 field.showCondition 改变时才重新创建
    */
-  const shouldShow = React.useMemo(() => {
-    if (!field.showCondition) return true;
+  const conditionFunc = React.useMemo(() => {
+    if (!field.showCondition) return null;
     
     try {
       const condition = field.showCondition.trim();
@@ -38,10 +36,10 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
         // 例如：function(formValues) { return formValues.needAuth; }
         // 或者：(formValues) => formValues.needAuth
         try {
-          // 使用 eval 执行函数字符串并调用
+          // 使用 eval 执行函数字符串并调用（仅在创建时执行一次）
           const func = eval(`(${condition})`);
           if (typeof func === 'function') {
-            return Boolean(func(formValues));
+            return func;
           }
         } catch (evalError) {
           console.warn(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行:`, evalError);
@@ -50,15 +48,30 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       
       // 方式2：作为 JS 表达式执行（默认方式）
       // 例如：formValues.needAuth === true
-      const func = new Function('formValues', `return ${condition}`);
-      return Boolean(func(formValues));
+      // 使用 new Function 替代 eval，安全性更好且性能更优（仅创建一次）
+      return new Function('formValues', `return ${condition}`);
       
     } catch (error) {
-      console.warn(`字段 ${field.field} 的显示条件执行失败:`, error);
+      console.warn(`字段 ${field.field} 的显示条件创建失败:`, error);
       console.warn('showCondition:', field.showCondition);
+      return null; // 创建失败返回 null
+    }
+  }, [field.showCondition, field.field]);
+
+  /**
+   * 检查字段是否应该显示
+   * 将函数创建和函数执行分离，优化性能
+   */
+  const shouldShow = React.useMemo(() => {
+    if (!conditionFunc) return true; // 没有条件或条件创建失败时默认显示
+    
+    try {
+      return Boolean(conditionFunc(formValues));
+    } catch (error) {
+      console.warn(`字段 ${field.field} 的显示条件执行失败:`, error);
       return true; // 执行失败时默认显示
     }
-  }, [field.showCondition, field.field, formValues]);
+  }, [conditionFunc, formValues, field.field]);
 
   /**
    * 解析验证规则

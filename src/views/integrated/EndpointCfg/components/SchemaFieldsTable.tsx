@@ -386,6 +386,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
 
   /**
    * 表格列配置 - 使用 useMemo 优化，避免每次渲染都重新创建
+   * 减少依赖项，只保留真正会影响列配置的关键依赖
    */
   const columns: TableProps<SchemaField>['columns'] = React.useMemo(() => [
     {
@@ -641,17 +642,10 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
   ], [
-    editingKey,
-    disabled,
-    form,
-    fields.length,
-    cancel,
-    save,
-    handleMoveUp,
-    handleMoveDown,
-    handleDelete,
-    handleOpenConfig,
-    handleOpenAdvancedConfig,
+    // 只保留真正影响列配置的关键依赖
+    editingKey,  // 影响编辑状态显示
+    disabled,    // 影响按钮禁用状态
+    fields.length, // 影响上下移动按钮的禁用状态
   ]);
 
   return (
