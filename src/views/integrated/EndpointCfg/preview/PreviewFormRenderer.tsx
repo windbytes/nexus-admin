@@ -108,7 +108,7 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = memo(({
     <div className="preview-form-renderer">
       <Form
         form={form}
-        layout="vertical"
+        layout="horizontal"
         initialValues={mergedInitialValues}
         onValuesChange={handleValuesChange}
         autoComplete="off"

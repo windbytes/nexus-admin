@@ -505,21 +505,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       },
     },
     {
-      title: '默认值',
-      dataIndex: 'defaultValue',
-      width: 120,
-      render: (text: any, record: SchemaField) => {
-        if (isEditing(record)) {
-          return (
-            <Form.Item name="defaultValue" style={{ margin: 0 }}>
-              <Input placeholder="默认值" />
-            </Form.Item>
-          );
-        }
-        return text || '-';
-      },
-    },
-    {
       title: (<div>作用模式<Tooltip title={<span>• IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口</span>}><QuestionCircleOutlined className='ml-1 cursor-help' /></Tooltip></div>),
       dataIndex: 'mode',
       width: 120,
