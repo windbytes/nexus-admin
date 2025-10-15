@@ -542,7 +542,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: (<div>作用模式<Tooltip title={<span>• IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口</span>}><QuestionCircleOutlined className='ml-1 cursor-help' /></Tooltip></div>),
       dataIndex: 'mode',
       width: 120,
-      render: (text: string, record: SchemaField) => {
+      render: (text: string[], record: SchemaField) => {
         if (isEditing(record)) {
           return (
             <Form.Item name="mode" style={{ margin: 0 }}>
@@ -550,7 +550,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
             </Form.Item>
           );
         }
-        return text || '-';
+        return text.join('|') || '-';
       },
     },
     {
@@ -664,7 +664,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         </Button>
       </div>
 
-      <Form form={form} component={false}>
+      <Form form={form} component={false} autoComplete="off">
         <div ref={tableContainerRef}>
           <Table
             rowKey="id"
