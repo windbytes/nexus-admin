@@ -271,7 +271,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
         }
       }
     }
-  }, [menus, homePath, findRouteByPath, tabs, activeKey, addTab, setTabs]);
+  }, [menus, homePath, tabs, activeKey]);
 
   // 处理路径变化时的tab管理逻辑（仅在初始化完成后执行）
   React.useEffect(() => {
@@ -335,7 +335,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
         setActiveKey(pathname);
       }
     }
-  }, [pathname, tabs, homePath, findRouteByPath, setActiveKey, navigate, menus]);
+  }, [pathname, tabs, homePath, menus]);
 
   // 监听用户退出登录事件（不监听页面刷新）
   React.useEffect(() => {
@@ -359,7 +359,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [resetTabs]);
+  }, []);
 
   // 处理右键菜单显示
   const handleContextMenu = useCallback(
@@ -398,7 +398,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
       // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
       navigate(key, { replace: true });
     },
-    [setActiveKey, navigate],
+    [],
   );
 
   // 处理tab关闭
@@ -421,7 +421,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
         }
       }
     },
-    [removeTab, navigate, activeKey],
+    [],
   );
 
   // 统一的菜单配置函数
@@ -584,7 +584,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
         },
       ];
     },
-    [t, tabs, activeKey, removeTab, navigate, pinTab, unpinTab, reloadTab, closeLeftTabs, closeRightTabs, closeOtherTabs, closeAllTabs, homePath, pathname],
+    [],
   );
 
   // 构建tab items
@@ -603,7 +603,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
       closable: tab.closable && tabs.length > 1, // 只有一个tab时不显示关闭按钮
       children: null, // 内容由Activity组件渲染
     }));
-  }, [tabs, handleContextMenu]);
+  }, []);
 
 
 

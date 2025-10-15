@@ -61,7 +61,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
   };
 
   // 处理批量导出
-  const handleBatchExport = () => {
+  const handleBatchExport = React.useCallback(() => {
     if (selectedRowKeys.length === 0) {
       message.warning('请先选择要导出的端点配置');
       return;
@@ -72,9 +72,10 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
     } else {
       message.info(`导出功能开发中，已选择 ${selectedRowKeys.length} 条记录`);
     }
-  };
+  }, [selectedRowKeys, onBatchExport]);
 
-  const columns: TableProps<EndpointTypeListItem>['columns'] = [
+  // 使用 useMemo 优化 columns 配置
+  const columns: TableProps<EndpointTypeListItem>['columns'] = React.useMemo(() => [
     {
       title: '类型名称',
       dataIndex: 'typeName',
@@ -105,7 +106,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         <Tag color={status ? 'green' : 'red'}>{status ? '启用' : '禁用'}</Tag>
       ),
     },
-  ];
+  ], []);
 
   return (
     <Card
@@ -147,7 +148,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
       <Input.Search
         placeholder="请输入端点类型名称"
         allowClear
-        onChange={(e) => onSearch(e.target.value)}
+        onSearch={onSearch}
         enterButton
         className="my-2"
       />

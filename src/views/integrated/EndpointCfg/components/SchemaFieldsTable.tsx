@@ -1,10 +1,12 @@
-import React, { useState, useCallback, useImperativeHandle } from 'react';
+import React, { useState, useCallback, useImperativeHandle, lazy } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import ComponentConfigModal from './ComponentConfigModal';
-import AdvancedConfigModal from './AdvancedConfigModal';
+
+const ComponentConfigModal = lazy(() => import('./ComponentConfigModal'));
+const AdvancedConfigModal = lazy(() => import('./AdvancedConfigModal'));
+
 
 const { TextArea } = Input;
 
@@ -391,9 +393,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   }, [fields, onChange, advancedModalData.fieldId]);
 
   /**
-   * 表格列配置
+   * 表格列配置 - 使用 useMemo 优化，避免每次渲染都重新创建
    */
-  const columns: TableProps<SchemaField>['columns'] = [
+  const columns: TableProps<SchemaField>['columns'] = React.useMemo(() => [
     {
       title: '序号',
       width: 60,
@@ -557,6 +559,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       title: <div>说明<Tooltip title="用于显示模块的说明信息"><QuestionCircleOutlined className='ml-1 cursor-help' /></Tooltip></div>,
       dataIndex: 'description',
       ellipsis: true,
+      width: 180,
       render: (text: string, record: SchemaField) => {
         if (isEditing(record)) {
           return (
@@ -645,7 +648,19 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
         );
       },
     },
-  ];
+  ], [
+    editingKey,
+    disabled,
+    form,
+    fields.length,
+    cancel,
+    save,
+    handleMoveUp,
+    handleMoveDown,
+    handleDelete,
+    handleOpenConfig,
+    handleOpenAdvancedConfig,
+  ]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 gap-2 mt-4">
@@ -672,7 +687,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
             dataSource={fields}
             pagination={false}
             size="small"
-            scroll={{ x: 'max-content', y: 'calc(100vh - 570px)' }}
+            scroll={{ x: 'max-content', y: 'calc(100vh - 546px)' }}
             bordered
           />
         </div>

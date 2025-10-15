@@ -115,8 +115,8 @@ const MenuComponent = () => {
     if (!accordion) return setOpenKeys(openKeys);
     if (openKeys.length < 1) return setOpenKeys(openKeys);
     const latestOpenKey = openKeys[openKeys.length - 1];
-    if (latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
-    setOpenKeys([latestOpenKey]);
+    if (latestOpenKey && openKeys[0] && latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
+    if (latestOpenKey) setOpenKeys([latestOpenKey]);
   };
 
   // 智能合并用户手动操作和自动同步的openKeys

@@ -1,12 +1,5 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { Card, Space, Button, App, Form } from 'antd';
-import {
-  SaveOutlined,
-  DeleteOutlined,
-  ExportOutlined,
-  ImportOutlined,
-  EyeOutlined,
-} from '@ant-design/icons';
+import React, { useState, useCallback, useRef, useMemo, lazy } from 'react';
+import { Card, App, Form } from 'antd';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
   EndpointTypeListItem,
@@ -18,7 +11,10 @@ import { endpointConfigService } from '@/services/integrated/endpointConfig/endp
 import EndpointTypeList from './components/EndpointTypeList';
 import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
 import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
-import PreviewModal from './preview/PreviewModal';
+import ActionButtons from './components/ActionButtons';
+
+// 懒加载预览弹窗组件
+const PreviewModal = lazy(() => import('./preview/PreviewModal'));
 
 /**
  * 端点配置维护主页面
@@ -42,32 +38,39 @@ const EndpointConfig: React.FC = () => {
     current: 1,
     pageSize: 10,
   });
-  // 标记是否已初始化（用于首次加载自动选中第一条）
-  const [hasInitialized, setHasInitialized] = useState(false);
   // 预览弹窗状态
   const [previewVisible, setPreviewVisible] = useState(false);
+  // 用于标记是否已自动选中第一条记录
+  const autoSelectedRef = useRef(false);
+
+  // 查询参数缓存
+  const queryParams = useMemo(
+    () => ({
+      pageNum: pagination.current,
+      pageSize: pagination.pageSize,
+      typeName: searchKeyword || undefined,
+    } as EndpointTypeSearchParams),
+    [pagination.current, pagination.pageSize, searchKeyword]
+  );
 
   /**
    * 查询端点类型列表
    */
   const { data: listData, isLoading: listLoading, refetch: refetchList } = useQuery({
-    queryKey: ['endpoint_config_list', searchKeyword, pagination.current, pagination.pageSize],
-    queryFn: () =>
-      endpointConfigService.getEndpointTypeList({
-        pageNum: pagination.current,
-        pageSize: pagination.pageSize,
-        typeName: searchKeyword || undefined,
-      } as EndpointTypeSearchParams),
+    queryKey: ['endpoint_config_list', queryParams],
+    queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
+    staleTime: 30000, // 30秒内数据视为新鲜，减少不必要的请求
   });
 
   /**
    * 查询端点类型详情
-   * 使用 placeholderData 保持之前的数据，避免切换时闪动
+   * 使用 staleTime 减少不必要的请求
    */
   const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ['endpoint_config_detail', selectedType?.id],
     queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
     enabled: !!selectedType?.id && !isEditing,
+    staleTime: 30000, // 30秒内数据视为新鲜
   });
 
   /**
@@ -422,7 +425,7 @@ const EndpointConfig: React.FC = () => {
       basicForm.setFieldsValue(detailData);
       setSchemaFields(detailData.schemaFields || []);
     }
-  }, [selectedType?.id, detailData, isEditing]);
+  }, [selectedType?.id, detailData, isEditing, basicForm]);
 
   // 使用 useMemo 缓存 schemaFields，避免引用变化导致子组件重渲染
   const memoizedSchemaFields = useMemo(() => schemaFields, [schemaFields]);
@@ -432,14 +435,11 @@ const EndpointConfig: React.FC = () => {
    */
   React.useEffect(() => {
     // 只在第一次加载且有数据时执行
-    if (!hasInitialized && listData && listData.records && listData.records.length > 0 && !selectedType) {
-      const firstRecord = listData.records[0];
-      if (firstRecord) {
-        setSelectedType(firstRecord);
-        setHasInitialized(true);
-      }
+    if (!autoSelectedRef.current && listData?.records?.[0] && !selectedType) {
+      setSelectedType(listData.records[0]);
+      autoSelectedRef.current = true;
     }
-  }, [listData, hasInitialized, selectedType]);
+  }, [listData, selectedType]);
 
   /**
    * 获取预览配置数据
@@ -518,58 +518,18 @@ const EndpointConfig: React.FC = () => {
         />
 
         {/* 底部操作按钮 */}
-        <div className="border-t border-gray-200 pt-4">
-          <div className="flex justify-end">
-            <Space>
-              <Button color='cyan' variant='outlined' icon={<EyeOutlined />} onClick={handlePreview}>
-                预览
-              </Button>
-              {!isEditing ? (
-                <>
-                  <Button
-                    color="orange"
-                    variant="outlined"
-                    icon={<SaveOutlined />}
-                    disabled={!selectedType}
-                    onClick={handleEdit}
-                  >
-                    编辑
-                  </Button>
-                  <Button
-                    icon={<ExportOutlined />}
-                    disabled={!selectedType}
-                    onClick={handleExport}
-                  >
-                    导出
-                  </Button>
-                  <Button icon={<ImportOutlined />} onClick={handleImport}>
-                    导入
-                  </Button>
-                  <Button
-                    icon={<DeleteOutlined />}
-                    danger
-                    disabled={!selectedType}
-                    onClick={handleDelete}
-                  >
-                    删除
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleCancel}>取消</Button>
-                  <Button
-                    type="primary"
-                    icon={<SaveOutlined />}
-                    loading={saveConfigMutation.isPending}
-                    onClick={handleSave}
-                  >
-                    保存
-                  </Button>
-                </>
-              )}
-            </Space>
-          </div>
-        </div>
+        <ActionButtons
+          isEditing={isEditing}
+          hasSelected={!!selectedType}
+          saveLoading={saveConfigMutation.isPending}
+          onPreview={handlePreview}
+          onEdit={handleEdit}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+          onExport={handleExport}
+          onImport={handleImport}
+        />
       </Card>
 
       {/* 预览弹窗 */}
@@ -582,4 +542,4 @@ const EndpointConfig: React.FC = () => {
   );
 };
 
-export default EndpointConfig;
+export default React.memo(EndpointConfig);
