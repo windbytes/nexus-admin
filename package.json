@@ -21,7 +21,7 @@
     "@flowgram.ai/minimap-plugin": "^0.5.5",
     "@flowgram.ai/shortcuts-plugin": "^0.5.5",
     "@monaco-editor/react": "^4.7.0",
-    "@tanstack/react-query": "^5.90.3",
+    "@tanstack/react-query": "^5.90.5",
     "@zxcvbn-ts/core": "^3.0.4",
     "ahooks": "^3.9.5",
     "antd": "^5.27.5",

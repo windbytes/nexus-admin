@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, lazy } from 'react';
+import React, { useState, useImperativeHandle, lazy, useEffectEvent } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -44,14 +44,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   
   // 表格容器的 ref，用于滚动操作
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
-  
-  // 使用 useRef 存储最新的 fields 数据，避免闭包陷阱
-  const fieldsRef = React.useRef<SchemaField[]>(fields);
-  
-  // 当 fields 更新时，同步更新 ref
-  React.useEffect(() => {
-    fieldsRef.current = fields;
-  }, [fields]);
 
   // 组件配置弹窗状态
   const [configModalVisible, setConfigModalVisible] = useState(false);
@@ -70,6 +62,8 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     showCondition?: string;
   }>({ fieldId: '', fieldLabel: '' });
 
+  // useEffectEvent 让函数能够访问最新的 props 和 state，避免闭包陷阱
+
   /**
    * 是否正在编辑
    */
@@ -87,30 +81,30 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 取消编辑
    */
-  const cancel = () => {
+  const cancel = useEffectEvent(() => {
     if (isNewRecord) {
       // 如果是新增记录，删除该记录
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = fieldsRef.current.filter((item) => item.id !== editingKey);
+      // 使用 useEffectEvent 获取最新数据，避免闭包陷阱
+      const newData = fields.filter((item: SchemaField) => item.id !== editingKey);
       onChange(newData);
     }
     setEditingKey('');
     setIsNewRecord(false);
-  };
+  });
 
   /**
    * 保存当前正在编辑的行
    * 返回是否保存成功
    */
-  const saveCurrentEdit = async (): Promise<boolean> => {
+  const saveCurrentEdit = useEffectEvent(async (): Promise<boolean> => {
     if (!editingKey) {
       return true; // 没有正在编辑的行，返回成功
     }
     
     try {
       const row = await form.validateFields();
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = [...fieldsRef.current];
+      // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+      const newData = [...fields];
       const index = newData.findIndex((item) => editingKey === item.id);
 
       if (index > -1) {
@@ -130,7 +124,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       console.log('表格行验证失败:', errInfo);
       return false;
     }
-  };
+  });
 
   /**
    * 检查是否有行正在编辑
@@ -144,17 +138,17 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 如果有行正在编辑，会先验证并合并编辑的数据
    * 返回 null 表示验证失败
    */
-  const getCurrentFields = async (): Promise<SchemaField[] | null> => {
+  const getCurrentFields = useEffectEvent(async (): Promise<SchemaField[] | null> => {
     // 如果没有正在编辑的行，直接返回当前字段数据
     if (!editingKey) {
-      return fieldsRef.current;
+      return fields;
     }
 
     // 如果有正在编辑的行，先验证表单
     try {
       const row = await form.validateFields();
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = [...fieldsRef.current];
+      // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+      const newData = [...fields];
       const index = newData.findIndex((item) => editingKey === item.id);
 
       if (index > -1) {
@@ -172,7 +166,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       console.log('表格行验证失败:', errInfo);
       return null; // 验证失败返回 null
     }
-  };
+  });
 
   /**
    * 暴露给父组件的方法
@@ -188,11 +182,11 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 保存编辑
    */
-  const save = async (id: string) => {
+  const save = useEffectEvent(async (id: string) => {
     try {
       const row = await form.validateFields();
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = [...fieldsRef.current];
+      // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+      const newData = [...fields];
       const index = newData.findIndex((item) => id === item.id);
 
       if (index > -1) {
@@ -209,7 +203,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     } catch (errInfo) {
       console.log('验证失败:', errInfo);
     }
-  };
+  });
 
   /**
    * 滚动到指定的表格行
@@ -242,73 +236,72 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 新增字段
    */
-  const handleAdd = () => {
-    // 使用 ref 中的最新数据，避免闭包陷阱
+  const handleAdd = useEffectEvent(() => {
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
     const newField: SchemaField = {
       id: `field_${Date.now()}`,
       field: '',
       label: '',
       component: 'Input',
-      sortOrder: fieldsRef.current.length + 1,
+      sortOrder: fields.length + 1,
       mode: ['IN_OUT'],
       properties: {},
     };
-    onChange([...fieldsRef.current, newField]);
+    onChange([...fields, newField]);
     
     // 进入编辑模式并滚动到新增的行
     setTimeout(() => {
       edit(newField, true); // 标记为新增记录
       scrollToRow(newField.id || ''); // 滚动到新增的行
     }, 100);
-  };
+  });
 
   /**
    * 删除字段
    */
-    const handleDelete = 
-      (id: string) => {
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = fieldsRef.current.filter((item) => item.id !== id);
-      onChange(newData);
-    };
+  const handleDelete = useEffectEvent((id: string) => {
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+    const newData = fields.filter((item) => item.id !== id);
+    onChange(newData);
+  });
 
   /**
    * 上移
    */
-  const handleMoveUp = (index: number) => {
-      if (index === 0) return;
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      const newData = [...fieldsRef.current];
-      const item1 = newData[index - 1];
-      const item2 = newData[index];
-      if (item1 && item2) {
-        [newData[index - 1], newData[index]] = [item2, item1];
-        // 更新排序号
-        newData.forEach((item, idx) => {
-          item.sortOrder = idx + 1;
-        });
-        onChange(newData);
-      }
-    };
+  const handleMoveUp = useEffectEvent((index: number) => {
+    if (index === 0) return;
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+    const newData = [...fields];
+    const item1 = newData[index - 1];
+    const item2 = newData[index];
+    if (item1 && item2) {
+      [newData[index - 1], newData[index]] = [item2, item1];
+      // 更新排序号
+      newData.forEach((item, idx) => {
+        item.sortOrder = idx + 1;
+      });
+      onChange(newData);
+    }
+  });
 
   /**
    * 下移
    */
-  const handleMoveDown = (index: number) => {
-      // 使用 ref 中的最新数据，避免闭包陷阱
-      if (index === fieldsRef.current.length - 1) return;
-      const newData = [...fieldsRef.current];
-      const item1 = newData[index];
-      const item2 = newData[index + 1];
-      if (item1 && item2) {
-        [newData[index], newData[index + 1]] = [item2, item1];
-        // 更新排序号
-        newData.forEach((item, idx) => {
-          item.sortOrder = idx + 1;
-        });
-        onChange(newData);
-      }
-    };
+  const handleMoveDown = useEffectEvent((index: number) => {
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+    if (index === fields.length - 1) return;
+    const newData = [...fields];
+    const item1 = newData[index];
+    const item2 = newData[index + 1];
+    if (item1 && item2) {
+      [newData[index], newData[index + 1]] = [item2, item1];
+      // 更新排序号
+      newData.forEach((item, idx) => {
+        item.sortOrder = idx + 1;
+      });
+      onChange(newData);
+    }
+  });
 
   /**
    * 打开组件配置弹窗
@@ -333,16 +326,16 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 保存组件配置
    */
-  const handleSaveConfig = (properties: any) => {
-    // 使用 ref 中的最新数据，避免闭包陷阱
-    const newData = fieldsRef.current.map(field => {
+  const handleSaveConfig = useEffectEvent((properties: any) => {
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+    const newData = fields.map(field => {
       if (field.id === configModalData.fieldId) {
         return { ...field, properties };
       }
       return field;
     });
     onChange(newData);
-  };
+  });
 
   /**
    * 打开高级配置弹窗
@@ -379,9 +372,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   /**
    * 保存高级配置
    */
-  const handleSaveAdvancedConfig = (config: { rules?: string; showCondition?: string }) => {
-    // 使用 ref 中的最新数据，避免闭包陷阱
-    const newData = fieldsRef.current.map(field => {
+  const handleSaveAdvancedConfig = useEffectEvent((config: { rules?: string; showCondition?: string }) => {
+    // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
+    const newData = fields.map(field => {
       if (field.id === advancedModalData.fieldId) {
         const updatedField: SchemaField = { ...field };
         if (config.rules) {
@@ -400,7 +393,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
     });
     onChange(newData);
     setAdvancedModalVisible(false);
-  };
+  });
 
   /**
    * 表格列配置 - 使用 useMemo 优化，避免每次渲染都重新创建
@@ -688,7 +681,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
           <Table
             rowKey="id"
             columns={columns}
-            dataSource={fieldsRef.current}
+            dataSource={fields}
             pagination={false}
             size="small"
             scroll={{ x: 'max-content', y: 'calc(100vh - 546px)' }}
@@ -719,13 +712,5 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   );
 };
 
-// 使用 React.memo 进行深度比较优化
-export default React.memo(SchemaFieldsTable, (prevProps, nextProps) => {
-  // 只在 fields 引用、disabled 状态或 onChange 回调真正改变时才重新渲染
-  return (
-    prevProps.fields === nextProps.fields &&
-    prevProps.disabled === nextProps.disabled &&
-    prevProps.onChange === nextProps.onChange
-  );
-});
+export default SchemaFieldsTable;
 
