@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useImperativeHandle, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { Form, Input, Switch, Select, ConfigProvider } from 'antd';
 import type { FormInstance } from 'antd';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -9,17 +9,10 @@ const { TextArea } = Input;
 interface EndpointTypeFormProps {
   /** 表单实例 */
   form: FormInstance;
-  /** 初始值 */
-  initialValues?: Partial<EndpointTypeConfig> | undefined;
-  /** 是否禁用 */
-  disabled?: boolean;
-  /** ref引用 */
-  ref?: React.Ref<EndpointTypeFormRef>;
-}
-
-export interface EndpointTypeFormRef {
-  /** 聚焦到类型名称输入框 */
-  focusTypeName: () => void;
+  /** 选中的端点类型 */
+  selectedType: EndpointTypeConfig | null;
+  /** 是否处于编辑状态 */
+  isEditing?: boolean;
 }
 
 /**
@@ -27,25 +20,12 @@ export interface EndpointTypeFormRef {
  */
 const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
   form,
-  initialValues,
-  disabled = false,
-  ref,
+  selectedType,
+  isEditing = false,
 }) => {
-  console.log('端点类型表单组件渲染');
+  console.log('端点类型表单组件渲染', selectedType, isEditing);
   // 类型名称输入框的引用
   const typeNameInputRef = useRef<any>(null);
-
-  // 暴露给父组件的方法
-  useImperativeHandle(ref, () => ({
-    focusTypeName: () => {
-      // 使用setTimeout确保DOM已渲染
-      setTimeout(() => {
-        if (typeNameInputRef.current) {
-          typeNameInputRef.current.focus();
-        }
-      }, 100);
-    },
-  }));
 
   /**
    * 响应式 labelCol 配置
@@ -98,22 +78,22 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
   }), []);
 
   /**
-   * 初始化表单值 - 使用 useCallback 优化
+   * 当处于编辑状态时，聚焦到第一个输入框
    */
-  const initializeForm = useCallback(() => {
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
+  useEffect(() => {
+    if (selectedType) {
+      form.setFieldsValue(selectedType);
     } else {
       form.resetFields();
     }
-  }, [initialValues, form]);
-
-  /**
-   * 初始化表单值 - 只在 initialValues 变化时执行
-   */
-  useEffect(() => {
-    initializeForm();
-  }, [initializeForm]);
+    if (isEditing) {
+      setTimeout(() => {
+        if (typeNameInputRef.current) {
+          typeNameInputRef.current.focus();
+        }
+      }, 100);
+    }
+  }, [isEditing]);
 
   // 缓存 ConfigProvider 的 theme 配置
   const configProviderTheme = useMemo(() => ({
@@ -138,7 +118,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
         layout="horizontal"
         labelCol={responsiveLabelCol}
         wrapperCol={responsiveWrapperCol}
-        disabled={disabled}
+        disabled={!isEditing}
         initialValues={formInitialValues}
       >
         <div style={{
@@ -215,12 +195,6 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
         </Form.Item>
       </Form>
     </ConfigProvider>
-  );
-}, (prevProps, nextProps) => {
-  // 自定义比较函数，只有关键 props 变化时才重新渲染
-  return (
-    prevProps.disabled === nextProps.disabled &&
-    prevProps.initialValues === nextProps.initialValues
   );
 });
 

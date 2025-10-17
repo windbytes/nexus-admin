@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, lazy } from 'react';
+import React, { useState, useCallback, useRef, lazy } from 'react';
 import { Card, App, Form } from 'antd';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
@@ -8,7 +8,7 @@ import type {
 } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import EndpointTypeList from './components/EndpointTypeList';
-import EndpointTypeForm, { type EndpointTypeFormRef } from './components/EndpointTypeForm';
+import EndpointTypeForm from './components/EndpointTypeForm';
 import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
 import ActionButtons from './components/ActionButtons';
 
@@ -29,33 +29,21 @@ if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
 const EndpointConfig: React.FC = () => {
   const { modal, message } = App.useApp();
   const [basicForm] = Form.useForm();
-  const endpointTypeFormRef = useRef<EndpointTypeFormRef>(null);
   const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
 
   // 当前选中的端点类型
   const [selectedType, setSelectedType] = useState<EndpointTypeConfig | null>(null);
   // 编辑模式
   const [isEditing, setIsEditing] = useState(false);
-  // 搜索关键词
-  const [searchKeyword, setSearchKeyword] = useState('');
-  // 分页状态
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
   // 预览弹窗状态
   const [previewVisible, setPreviewVisible] = useState(false);
   // 用于标记是否已自动选中第一条记录
 
   // 查询参数缓存
-  const queryParams = useMemo(
-    () => ({
-      pageNum: pagination.current,
-      pageSize: pagination.pageSize,
-      typeName: searchKeyword || undefined,
-    } as EndpointTypeSearchParams),
-    [pagination.current, pagination.pageSize, searchKeyword]
-  );
+  const [queryParams, setQueryParams] = useState<EndpointTypeSearchParams>({
+    pageNum: 1,
+    pageSize: 10,
+  });
 
   /**
    * 查询端点类型列表和详情（合并查询）
@@ -65,13 +53,6 @@ const EndpointConfig: React.FC = () => {
     queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
   });
 
-  // 当前选中项的详情数据就是 selectedType
-  const detailData = selectedType;
-
-  // 详情数据加载状态：如果有选中项但缓存中没有数据，则认为正在加载
-  const detailLoading = useMemo(() => {
-    return !!selectedType?.id && !detailData && listLoading;
-  }, [selectedType?.id, detailData, listLoading]);
 
   /**
    * 保存端点类型配置 mutation
@@ -153,13 +134,7 @@ const EndpointConfig: React.FC = () => {
     }
 
     setSelectedType(null);
-    basicForm.resetFields();
     setIsEditing(true);
-
-    // 聚焦到类型名称输入框
-    setTimeout(() => {
-      endpointTypeFormRef.current?.focusTypeName();
-    }, 200);
   }, [isEditing, basicForm, message]);
 
   /**
@@ -202,7 +177,7 @@ const EndpointConfig: React.FC = () => {
           return;
         }
 
-        if (!detailData?.schemaFields || detailData.schemaFields.length === 0) {
+        if (!selectedType?.schemaFields || selectedType.schemaFields.length === 0) {
           message.warning('当前端点类型暂无字段配置');
           return;
         }
@@ -221,7 +196,7 @@ const EndpointConfig: React.FC = () => {
       }
       message.error('请先完善基础信息');
     }
-  }, [isEditing, selectedType, detailData, basicForm, message]);
+  }, [isEditing, selectedType, basicForm, message]);
 
   /**
    * 开始编辑 - 使用 useCallback 避免子组件重渲染
@@ -232,11 +207,6 @@ const EndpointConfig: React.FC = () => {
       return;
     }
     setIsEditing(true);
-
-    // 聚焦到类型名称输入框
-    setTimeout(() => {
-      endpointTypeFormRef.current?.focusTypeName();
-    }, 200);
   }, [selectedType, message]);
 
   /**
@@ -302,12 +272,12 @@ const EndpointConfig: React.FC = () => {
 
     if (selectedType?.id) {
       // 重新加载数据
-      basicForm.setFieldsValue(detailData);
+      basicForm.setFieldsValue(selectedType);
     } else {
       setSelectedType(null);
       basicForm.resetFields();
     }
-  }, [selectedType, detailData, basicForm]);
+  }, [selectedType, basicForm]);
 
   /**
    * 删除 - 使用 useCallback 避免子组件重渲染
@@ -356,15 +326,22 @@ const EndpointConfig: React.FC = () => {
    * 搜索 - 使用 useCallback 避免子组件重渲染
    */
   const handleSearch = useCallback((value: string) => {
-    setSearchKeyword(value);
-    setPagination(prev => ({ ...prev, current: 1 })); // 搜索时重置到第一页
+    setQueryParams({
+      ...queryParams,
+      typeName: value,
+      pageNum: 1,
+    });
   }, []);
 
   /**
    * 分页变更 - 使用 useCallback 避免子组件重渲染
    */
   const handlePaginationChange = useCallback((page: number, pageSize: number) => {
-    setPagination({ current: page, pageSize });
+    setQueryParams({
+      ...queryParams,
+      pageNum: page,
+      pageSize: pageSize,
+    });
   }, []);
 
   /**
@@ -374,24 +351,18 @@ const EndpointConfig: React.FC = () => {
     if (selectedType) {
       setSelectedType({ ...selectedType, schemaFields: fields });
     }
-  }, [selectedType]);
+  }, []);
 
 
   // 当详情数据加载完成时，更新表单
   // 只在 selectedType.id 变化且不在编辑模式时更新
   React.useEffect(() => {
-    if (detailData && !isEditing && selectedType?.id === detailData.id) {
-      basicForm.setFieldsValue(detailData);
+    if (selectedType && !isEditing && selectedType?.id === selectedType.id) {
+      basicForm.setFieldsValue(selectedType);
     }
-  }, [selectedType?.id, detailData, isEditing, basicForm]);
+  }, [selectedType?.id, selectedType, isEditing, basicForm]);
 
-  // 从 selectedType 中获取 schemaFields
-  const memoizedSchemaFields = useMemo(() => selectedType?.schemaFields || [], [selectedType?.schemaFields]);
 
-  // 缓存 initialValues，避免每次渲染都创建新对象
-  const memoizedInitialValues = useMemo(() => {
-    return detailData ? { ...detailData } : undefined;
-  }, [detailData]);
 
   /**
    * 首次加载列表数据后，自动选中第一条记录
@@ -424,9 +395,9 @@ const EndpointConfig: React.FC = () => {
       } as EndpointTypeConfig;
     } else {
       // 查看模式，使用详情数据
-      return detailData || null;
+      return selectedType || null;
     }
-  }, [isEditing, selectedType, detailData, basicForm]);
+  }, [isEditing, selectedType, basicForm]);
 
   return (
     <div className="h-full flex gap-4">
@@ -443,8 +414,8 @@ const EndpointConfig: React.FC = () => {
         }}
         onImport={handleImport}
         pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
+          current: queryParams.pageNum || 1,
+          pageSize: queryParams.pageSize || 10,
           total: configListData?.total || 0,
           onChange: handlePaginationChange,
         }}
@@ -460,21 +431,19 @@ const EndpointConfig: React.FC = () => {
             flexDirection: 'column',
           },
         }}
-        loading={detailLoading && !detailData}
+        loading={listLoading}
       >
         {/* 基础信息 */}
         <EndpointTypeForm
-          ref={endpointTypeFormRef}
           form={basicForm}
-          initialValues={memoizedInitialValues}
-          disabled={!isEditing}
+          selectedType={selectedType}
+          isEditing={isEditing}
         />
 
         {/* Schema配置 */}
         <SchemaFieldsTable
           ref={schemaFieldsTableRef}
-          key={selectedType?.id || 'new'}
-          fields={memoizedSchemaFields}
+          fields={selectedType?.schemaFields || []}
           disabled={!isEditing}
           onChange={handleSchemaFieldsChange}
         />

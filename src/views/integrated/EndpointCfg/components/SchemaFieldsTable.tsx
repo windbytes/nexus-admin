@@ -37,8 +37,9 @@ interface SchemaFieldsTableProps {
  * 使用 React.memo 避免不必要的重渲染
  * React 19 支持函数组件直接接收 ref prop
  */
-const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields, disabled = false, onChange, ref }) => {
-  console.log('字段表格组件渲染');
+const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields = [], disabled = false, onChange, ref }) => {
+  console.log('字段表格组件渲染', fields);
+  
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -62,8 +63,6 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields
     rules?: string;
     showCondition?: string;
   }>({ fieldId: '', fieldLabel: '' });
-
-  // useEffectEvent 让函数能够访问最新的 props 和 state，避免闭包陷阱
 
   /**
    * 是否正在编辑
@@ -290,7 +289,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields
    */
   const handleMoveDown = useEffectEvent((index: number) => {
     // useEffectEvent 让函数能够访问最新的 fields，避免闭包陷阱
-    if (index === fields.length - 1) return;
+        if (index === fields.length - 1) return;
     const newData = [...fields];
     const item1 = newData[index];
     const item2 = newData[index + 1];
@@ -657,7 +656,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields
     // 只保留真正影响列配置的关键依赖
     editingKey,  // 影响编辑状态显示
     disabled,    // 影响按钮禁用状态
-    fields.length, // 影响上下移动按钮的禁用状态
+      fields.length, // 影响上下移动按钮的禁用状态
   ]);
 
   return (
@@ -715,8 +714,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields
   // 自定义比较函数，只有关键 props 变化时才重新渲染
   return (
     prevProps.disabled === nextProps.disabled &&
-    prevProps.fields === nextProps.fields &&
-    prevProps.onChange === nextProps.onChange
+    prevProps.fields === nextProps.fields
   );
 });
 
