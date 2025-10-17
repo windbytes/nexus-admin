@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Table, Tag, Button, Input, Card, Space, Tooltip, message } from 'antd';
 import { PlusOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
-import type { EndpointTypeListItem } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 
 interface EndpointTypeListProps {
   /** 数据源 */
-  data: EndpointTypeListItem[];
+  data: EndpointTypeConfig[];
   /** 加载状态 */
   loading: boolean;
   /** 当前选中的ID */
   selectedId?: string | undefined;
   /** 选择变更回调 */
-  onSelect: (record: EndpointTypeListItem) => void;
+  onSelect: (record: EndpointTypeConfig) => void;
   /** 新增回调 */
   onAdd: () => void;
   /** 搜索回调 */
@@ -53,7 +53,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
     onChange: (selectedRowKeys: React.Key[]) => {
       setSelectedRowKeys(selectedRowKeys);
     },
-    getCheckboxProps: (record: EndpointTypeListItem) => ({
+    getCheckboxProps: (record: EndpointTypeConfig) => ({
       name: record.typeName,
     }),
     // 使用主题色的选中样式
@@ -75,7 +75,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
   }, [selectedRowKeys, onBatchExport]);
 
   // 使用 useMemo 优化 columns 配置
-  const columns: TableProps<EndpointTypeListItem>['columns'] = React.useMemo(() => [
+  const columns: TableProps<EndpointTypeConfig>['columns'] = React.useMemo(() => [
     {
       title: '类型名称',
       dataIndex: 'typeName',
@@ -91,10 +91,10 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
     },
     {
       title: '字段数',
-      dataIndex: 'fieldCount',
       key: 'fieldCount',
       width: 60,
       align: 'center',
+      render: (_, record) => record.schemaFields?.length || 0,
     },
     {
       title: '状态',
@@ -152,7 +152,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         enterButton
         className="my-2"
       />
-      <Table<EndpointTypeListItem>
+      <Table<EndpointTypeConfig>
         rowKey="id"
         columns={columns}
         dataSource={data}

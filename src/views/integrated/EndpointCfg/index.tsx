@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useMemo, lazy } from 'react';
 import { Card, App, Form } from 'antd';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
-  EndpointTypeListItem,
   SchemaField,
   EndpointTypeSearchParams,
   EndpointTypeConfig,
@@ -34,9 +33,7 @@ const EndpointConfig: React.FC = () => {
   const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
 
   // 当前选中的端点类型
-  const [selectedType, setSelectedType] = useState<EndpointTypeListItem | null>(null);
-  // 当前的Schema字段
-  const [schemaFields, setSchemaFields] = useState<SchemaField[]>([]);
+  const [selectedType, setSelectedType] = useState<EndpointTypeConfig | null>(null);
   // 编辑模式
   const [isEditing, setIsEditing] = useState(false);
   // 搜索关键词
@@ -49,7 +46,6 @@ const EndpointConfig: React.FC = () => {
   // 预览弹窗状态
   const [previewVisible, setPreviewVisible] = useState(false);
   // 用于标记是否已自动选中第一条记录
-  const autoSelectedRef = useRef(false);
 
   // 查询参数缓存
   const queryParams = useMemo(
@@ -62,24 +58,20 @@ const EndpointConfig: React.FC = () => {
   );
 
   /**
-   * 查询端点类型列表
+   * 查询端点类型列表和详情（合并查询）
    */
-  const { data: listData, isLoading: listLoading, refetch: refetchList } = useQuery({
+  const { data: configListData, isLoading: listLoading, refetch: refetchList } = useQuery({
     queryKey: ['endpoint_config_list', queryParams],
     queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
-    staleTime: 30000, // 30秒内数据视为新鲜，减少不必要的请求
   });
 
-  /**
-   * 查询端点类型详情
-   * 使用 staleTime 减少不必要的请求
-   */
-  const { data: detailData, isLoading: detailLoading } = useQuery({
-    queryKey: ['endpoint_config_detail', selectedType?.id],
-    queryFn: () => endpointConfigService.getEndpointTypeDetail(selectedType!.id),
-    enabled: !!selectedType?.id && !isEditing,
-    staleTime: 30000, // 30秒内数据视为新鲜
-  });
+  // 当前选中项的详情数据就是 selectedType
+  const detailData = selectedType;
+
+  // 详情数据加载状态：如果有选中项但缓存中没有数据，则认为正在加载
+  const detailLoading = useMemo(() => {
+    return !!selectedType?.id && !detailData && listLoading;
+  }, [selectedType?.id, detailData, listLoading]);
 
   /**
    * 保存端点类型配置 mutation
@@ -91,47 +83,10 @@ const EndpointConfig: React.FC = () => {
       }
       return endpointConfigService.addEndpointType(data);
     },
-    onSuccess: (savedData) => {
+    onSuccess: () => {
       setIsEditing(false);
-
-      // 如果是新增，更新选中的类型
-      if (!selectedType?.id && savedData) {
-        const newSelectedType: EndpointTypeListItem = {
-          id: savedData.id,
-          endpointType: savedData.endpointType,
-          typeName: savedData.typeName,
-          typeCode: savedData.typeCode,
-          schemaVersion: savedData.schemaVersion,
-          fieldCount: savedData.schemaFields?.length || 0,
-          status: savedData.status,
-        };
-
-        if (savedData.icon) {
-          newSelectedType.icon = savedData.icon;
-        }
-        if (savedData.description) {
-          newSelectedType.description = savedData.description;
-        }
-        if (savedData.createTime) {
-          newSelectedType.createTime = savedData.createTime;
-        }
-        if (savedData.updateTime) {
-          newSelectedType.updateTime = savedData.updateTime;
-        }
-
-        setSelectedType(newSelectedType);
-      }
-
       // 刷新列表
       refetchList();
-
-      // 重新查询详情数据以获取后端返回的真实ID
-      // 使用 setTimeout 确保在 setIsEditing(false) 之后执行
-      // setTimeout(() => {
-      //   if (selectedType?.id || savedData?.id) {
-      //     refetchDetail();
-      //   }
-      // }, 100);
     }
   });
 
@@ -141,21 +96,12 @@ const EndpointConfig: React.FC = () => {
   const deleteConfigMutation = useMutation({
     mutationFn: (id: string) => endpointConfigService.deleteEndpointType(id),
     onSuccess: async () => {
-      message.success('删除成功！');
+      
       setSelectedType(null);
-      setSchemaFields([]);
       basicForm.resetFields();
 
       // 刷新列表
-      const updatedList = await refetchList();
-
-      // 删除后，如果列表还有数据，自动选中第一条
-      if (updatedList.data && updatedList.data.records && updatedList.data.records.length > 0) {
-        const firstRecord = updatedList.data.records[0];
-        if (firstRecord) {
-          setSelectedType(firstRecord);
-        }
-      }
+      refetchList();
     },
     onError: (error: any) => {
       message.error(`删除失败：${error.message}`);
@@ -180,7 +126,7 @@ const EndpointConfig: React.FC = () => {
    * 选择端点类型
    */
   const handleSelectType = useCallback(
-    (record: EndpointTypeListItem) => {
+    (record: EndpointTypeConfig) => {
       if (isEditing) {
         modal.confirm({
           title: '提示',
@@ -207,7 +153,6 @@ const EndpointConfig: React.FC = () => {
     }
 
     setSelectedType(null);
-    setSchemaFields([]);
     basicForm.resetFields();
     setIsEditing(true);
 
@@ -226,8 +171,9 @@ const EndpointConfig: React.FC = () => {
       if (isEditing) {
         const basicValues = await basicForm.validateFields();
         
-        // 验证是否有字段
-        if (schemaFields.length === 0) {
+        // 获取最新的字段数据
+        const latestFields = await schemaFieldsTableRef.current?.getCurrentFields();
+        if (!latestFields || latestFields.length === 0) {
           message.warning('请至少添加一个Schema字段后再预览');
           return;
         }
@@ -242,7 +188,7 @@ const EndpointConfig: React.FC = () => {
           supportMode: basicValues.supportMode || [],
           description: basicValues.description,
           schemaVersion: basicValues.schemaVersion,
-          schemaFields: schemaFields,
+          schemaFields: latestFields,
           status: basicValues.status ?? true,
         };
 
@@ -275,7 +221,7 @@ const EndpointConfig: React.FC = () => {
       }
       message.error('请先完善基础信息');
     }
-  }, [isEditing, selectedType, detailData, schemaFields, basicForm, message]);
+  }, [isEditing, selectedType, detailData, basicForm, message]);
 
   /**
    * 开始编辑 - 使用 useCallback 避免子组件重渲染
@@ -357,10 +303,8 @@ const EndpointConfig: React.FC = () => {
     if (selectedType?.id) {
       // 重新加载数据
       basicForm.setFieldsValue(detailData);
-      setSchemaFields(detailData?.schemaFields || []);
     } else {
       setSelectedType(null);
-      setSchemaFields([]);
       basicForm.resetFields();
     }
   }, [selectedType, detailData, basicForm]);
@@ -424,34 +368,40 @@ const EndpointConfig: React.FC = () => {
   }, []);
 
   /**
-   * Schema字段变更 - 使用 useCallback 避免子组件重渲染
+   * Schema字段变更 - 直接更新 selectedType 中的 schemaFields
    */
   const handleSchemaFieldsChange = useCallback((fields: SchemaField[]) => {
-    setSchemaFields(fields);
-  }, []);
+    if (selectedType) {
+      setSelectedType({ ...selectedType, schemaFields: fields });
+    }
+  }, [selectedType]);
 
-  // 当详情数据加载完成时，更新表单和字段
+
+  // 当详情数据加载完成时，更新表单
   // 只在 selectedType.id 变化且不在编辑模式时更新
   React.useEffect(() => {
     if (detailData && !isEditing && selectedType?.id === detailData.id) {
       basicForm.setFieldsValue(detailData);
-      setSchemaFields(detailData.schemaFields || []);
     }
   }, [selectedType?.id, detailData, isEditing, basicForm]);
 
-  // 使用 useMemo 缓存 schemaFields，避免引用变化导致子组件重渲染
-  const memoizedSchemaFields = useMemo(() => schemaFields, [schemaFields]);
+  // 从 selectedType 中获取 schemaFields
+  const memoizedSchemaFields = useMemo(() => selectedType?.schemaFields || [], [selectedType?.schemaFields]);
+
+  // 缓存 initialValues，避免每次渲染都创建新对象
+  const memoizedInitialValues = useMemo(() => {
+    return detailData ? { ...detailData } : undefined;
+  }, [detailData]);
 
   /**
    * 首次加载列表数据后，自动选中第一条记录
    */
   React.useEffect(() => {
     // 只在第一次加载且有数据时执行
-    if (!autoSelectedRef.current && listData?.records?.[0] && !selectedType) {
-      setSelectedType(listData.records[0]);
-      autoSelectedRef.current = true;
+    if (configListData?.records?.[0] && !selectedType) {
+      setSelectedType(configListData.records[0]);
     }
-  }, [listData, selectedType]);
+  }, [configListData, selectedType]);
 
   /**
    * 获取预览配置数据 - 使用 useCallback 优化
@@ -469,20 +419,20 @@ const EndpointConfig: React.FC = () => {
         supportMode: formValues.supportMode || [],
         description: formValues.description,
         schemaVersion: formValues.schemaVersion,
-        schemaFields: schemaFields,
+        schemaFields: selectedType?.schemaFields || [],
         status: formValues.status ?? true,
       } as EndpointTypeConfig;
     } else {
       // 查看模式，使用详情数据
       return detailData || null;
     }
-  }, [isEditing, selectedType, detailData, schemaFields, basicForm]);
+  }, [isEditing, selectedType, detailData, basicForm]);
 
   return (
     <div className="h-full flex gap-4">
       {/* 左侧：端点类型列表 */}
       <EndpointTypeList
-        data={listData?.records || []}
+        data={configListData?.records || []}
         loading={listLoading}
         {...(selectedType?.id && { selectedId: selectedType.id })}
         onSelect={handleSelectType}
@@ -495,7 +445,7 @@ const EndpointConfig: React.FC = () => {
         pagination={{
           current: pagination.current,
           pageSize: pagination.pageSize,
-          total: listData?.total || 0,
+          total: configListData?.total || 0,
           onChange: handlePaginationChange,
         }}
       />
@@ -516,7 +466,7 @@ const EndpointConfig: React.FC = () => {
         <EndpointTypeForm
           ref={endpointTypeFormRef}
           form={basicForm}
-          {...(detailData && { initialValues: detailData })}
+          initialValues={memoizedInitialValues}
           disabled={!isEditing}
         />
 

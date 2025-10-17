@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, lazy, useEffectEvent } from 'react';
+import React, { useState, useImperativeHandle, lazy, useEffectEvent, useMemo, useCallback } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -37,7 +37,8 @@ interface SchemaFieldsTableProps {
  * 使用 React.memo 避免不必要的重渲染
  * React 19 支持函数组件直接接收 ref prop
  */
-const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled = false, onChange, ref }) => {
+const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields, disabled = false, onChange, ref }) => {
+  console.log('字段表格组件渲染');
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -304,9 +305,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   });
 
   /**
-   * 打开组件配置弹窗
+   * 打开组件配置弹窗 - 使用 useCallback 优化
    */
-  const handleOpenConfig = (record: SchemaField) => {
+  const handleOpenConfig = useCallback((record: SchemaField) => {
     // 如果当前正在编辑这一行，优先使用表单中的组件类型
     let componentType = record.component;
     // 直接判断 record.id === editingKey，避免闭包问题
@@ -321,7 +322,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       fieldId: record.id || '',
     });
     setConfigModalVisible(true);
-  };
+  }, [editingKey, form]);
 
   /**
    * 保存组件配置
@@ -338,9 +339,9 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
   });
 
   /**
-   * 打开高级配置弹窗
+   * 打开高级配置弹窗 - 使用 useCallback 优化
    */
-  const handleOpenAdvancedConfig = (record: SchemaField) => {
+  const handleOpenAdvancedConfig = useCallback((record: SchemaField) => {
     // 如果正在编辑，从表单获取最新的label
     let fieldLabel = record.label;
     if (record.id === editingKey) {
@@ -367,7 +368,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
 
     setAdvancedModalData(modalData);
     setAdvancedModalVisible(true);
-  };
+  }, [editingKey, form]);
 
   /**
    * 保存高级配置
@@ -399,7 +400,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
    * 表格列配置 - 使用 useMemo 优化，避免每次渲染都重新创建
    * 减少依赖项，只保留真正会影响列配置的关键依赖
    */
-  const columns: TableProps<SchemaField>['columns'] = React.useMemo(() => [
+  const columns: TableProps<SchemaField>['columns'] = useMemo(() => [
     {
       title: '序号',
       width: 60,
@@ -710,7 +711,14 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({ fields, disabled 
       />
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // 自定义比较函数，只有关键 props 变化时才重新渲染
+  return (
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.fields === nextProps.fields &&
+    prevProps.onChange === nextProps.onChange
+  );
+});
 
 export default SchemaFieldsTable;
 

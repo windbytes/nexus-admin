@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useImperativeHandle, useMemo } from 'react';
+import React, { useEffect, useRef, useImperativeHandle, useMemo, useCallback } from 'react';
 import { Form, Input, Switch, Select, ConfigProvider } from 'antd';
 import type { FormInstance } from 'antd';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -25,12 +25,13 @@ export interface EndpointTypeFormRef {
 /**
  * 端点类型基本信息表单组件（右上）
  */
-const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
+const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
   form,
   initialValues,
   disabled = false,
   ref,
 }) => {
+  console.log('端点类型表单组件渲染');
   // 类型名称输入框的引用
   const typeNameInputRef = useRef<any>(null);
 
@@ -97,9 +98,9 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
   }), []);
 
   /**
-   * 初始化表单值
+   * 初始化表单值 - 使用 useCallback 优化
    */
-  useEffect(() => {
+  const initializeForm = useCallback(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
     } else {
@@ -107,14 +108,30 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
     }
   }, [initialValues, form]);
 
-  return (
-    <ConfigProvider theme={{
-      components: {
-        Form: {
-          itemMarginBottom: 0
-        }
+  /**
+   * 初始化表单值 - 只在 initialValues 变化时执行
+   */
+  useEffect(() => {
+    initializeForm();
+  }, [initializeForm]);
+
+  // 缓存 ConfigProvider 的 theme 配置
+  const configProviderTheme = useMemo(() => ({
+    components: {
+      Form: {
+        itemMarginBottom: 0
       }
-    }}>
+    }
+  }), []);
+
+  // 缓存 Form 的 initialValues
+  const formInitialValues = useMemo(() => ({
+    status: true,
+    schemaVersion: '1.0.0',
+  }), []);
+
+  return (
+    <ConfigProvider theme={configProviderTheme}>
       <Form
         form={form}
         className="flex-shrink-0"
@@ -122,10 +139,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
         labelCol={responsiveLabelCol}
         wrapperCol={responsiveWrapperCol}
         disabled={disabled}
-        initialValues={{
-          status: true,
-          schemaVersion: '1.0.0',
-        }}
+        initialValues={formInitialValues}
       >
         <div style={{
           display: 'grid',
@@ -202,7 +216,13 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = ({
       </Form>
     </ConfigProvider>
   );
-};
+}, (prevProps, nextProps) => {
+  // 自定义比较函数，只有关键 props 变化时才重新渲染
+  return (
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.initialValues === nextProps.initialValues
+  );
+});
 
-export default React.memo(EndpointTypeForm);
+export default EndpointTypeForm;
 
