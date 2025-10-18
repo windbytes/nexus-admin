@@ -23,7 +23,14 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
   selectedType,
   isEditing = false,
 }) => {
-  console.log('端点类型表单组件渲染', selectedType, isEditing);
+  // 组件重新渲染时输出文字
+  useEffect(() => {
+    console.log('🔄 EndpointTypeForm 组件重新渲染了！', {
+      selectedType,
+      isEditing,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  });
   // 类型名称输入框的引用
   const typeNameInputRef = useRef<any>(null);
 

@@ -37,6 +37,8 @@ const EndpointConfig: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   // 预览弹窗状态
   const [previewVisible, setPreviewVisible] = useState(false);
+  // 保存之前选中的数据，用于取消编辑时恢复
+  const [previousSelectedType, setPreviousSelectedType] = useState<EndpointTypeConfig | null>(null);
   // 用于标记是否已自动选中第一条记录
 
   // 查询参数缓存
@@ -68,6 +70,8 @@ const EndpointConfig: React.FC = () => {
     },
     onSuccess: () => {
       setIsEditing(false);
+      // 清除之前保存的数据
+      setPreviousSelectedType(null);
       // 刷新列表
       refetchList();
     }
@@ -81,6 +85,7 @@ const EndpointConfig: React.FC = () => {
     onSuccess: async () => {
       
       setSelectedType(null);
+      setPreviousSelectedType(null); // 清除之前保存的数据
       basicForm.resetFields();
 
       // 刷新列表
@@ -135,9 +140,11 @@ const EndpointConfig: React.FC = () => {
       return;
     }
 
+    // 保存当前选中的数据，用于取消时恢复
+    setPreviousSelectedType(selectedType);
     setSelectedType(null);
     setIsEditing(true);
-  }, [isEditing, basicForm, message]);
+  }, [isEditing, selectedType, message]);
 
   /**
    * 预览 - 使用 useCallback 避免子组件重渲染
@@ -272,14 +279,20 @@ const EndpointConfig: React.FC = () => {
     // 取消 Schema 表格的编辑状态
     schemaFieldsTableRef.current?.cancelEdit();
 
-    if (selectedType?.id) {
-      // 重新加载数据
+    if (previousSelectedType) {
+      // 如果有之前选中的数据，恢复到之前的状态
+      setSelectedType(previousSelectedType);
+      basicForm.setFieldsValue(previousSelectedType);
+      setPreviousSelectedType(null); // 清除保存的之前数据
+    } else if (selectedType?.id) {
+      // 如果当前有选中的数据，重新加载数据
       basicForm.setFieldsValue(selectedType);
     } else {
+      // 如果都没有，清空表单
       setSelectedType(null);
       basicForm.resetFields();
     }
-  }, [selectedType, basicForm]);
+  }, [selectedType, previousSelectedType, basicForm]);
 
   /**
    * 删除 - 使用 useCallback 避免子组件重渲染
