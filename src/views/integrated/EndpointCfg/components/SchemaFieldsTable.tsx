@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, lazy, useEffectEvent, useMemo, useCallback } from 'react';
+import React, { useState, useImperativeHandle, lazy, useEffectEvent, useMemo, useCallback, useEffect } from 'react';
 import { Table, Button, Input, Select, Popconfirm, Space, Form, Tooltip, type TableProps } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseOutlined, ArrowUpOutlined, ArrowDownOutlined, SettingOutlined, ToolOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -38,8 +38,16 @@ interface SchemaFieldsTableProps {
  * React 19 支持函数组件直接接收 ref prop
  */
 const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = React.memo(({ fields = [], disabled = false, onChange, ref }) => {
-  console.log('字段表格组件渲染', fields);
   
+  // 组件重新渲染时输出文字
+  useEffect(() => {
+    console.log('🔄 SchemaFieldsTable 组件重新渲染了！', {
+      fieldsCount: fields.length,
+      disabled,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  });
+
   const [editingKey, setEditingKey] = useState<string>('');
   const [form] = Form.useForm();
   const [isNewRecord, setIsNewRecord] = useState(false);

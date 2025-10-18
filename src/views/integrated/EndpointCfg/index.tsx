@@ -44,6 +44,8 @@ const EndpointConfig: React.FC = () => {
     pageNum: 1,
     pageSize: 10,
   });
+  // 用于标记是否是第一次加载数据
+  const isFirstLoad = useRef(true);
 
   /**
    * 查询端点类型列表和详情（合并查询）
@@ -369,7 +371,8 @@ const EndpointConfig: React.FC = () => {
    */
   React.useEffect(() => {
     // 只在第一次加载且有数据时执行
-    if (configListData?.records?.[0] && !selectedType) {
+    if (configListData?.records?.[0] && !selectedType && isFirstLoad.current) {
+      isFirstLoad.current = false;
       setSelectedType(configListData.records[0]);
     }
   }, [configListData, selectedType]);
