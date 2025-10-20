@@ -40,7 +40,7 @@ export const defaultPreferences: Preferences = {
     settingShow: true,
   },
   footer: {
-    enable: true,
+    enable: false,
     fixed: false,
   },
   header: {

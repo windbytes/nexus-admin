@@ -30,6 +30,8 @@ const EndpointConfig: React.FC = () => {
   const { modal, message } = App.useApp();
   const [basicForm] = Form.useForm();
   const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
+  // 右下表格的编辑态字段数据，独立于 selectedType，避免在新增时（selectedType=null）无法保存变更
+  const [editingSchemaFields, setEditingSchemaFields] = useState<SchemaField[]>([]);
 
   // 当前选中的端点类型
   const [selectedType, setSelectedType] = useState<EndpointTypeConfig | null>(null);
@@ -122,10 +124,12 @@ const EndpointConfig: React.FC = () => {
           onOk: () => {
             setSelectedType(record);
             setIsEditing(false);
+            setEditingSchemaFields(record?.schemaFields || []);
           },
         });
       } else {
         setSelectedType(record);
+        setEditingSchemaFields(record?.schemaFields || []);
       }
     },
     [isEditing, modal]
@@ -144,6 +148,7 @@ const EndpointConfig: React.FC = () => {
     setPreviousSelectedType(selectedType);
     setSelectedType(null);
     setIsEditing(true);
+    setEditingSchemaFields([]);
   }, [isEditing, selectedType, message]);
 
   /**
@@ -283,14 +288,17 @@ const EndpointConfig: React.FC = () => {
       // 如果有之前选中的数据，恢复到之前的状态
       setSelectedType(previousSelectedType);
       basicForm.setFieldsValue(previousSelectedType);
+      setEditingSchemaFields(previousSelectedType.schemaFields || []);
       setPreviousSelectedType(null); // 清除保存的之前数据
     } else if (selectedType?.id) {
       // 如果当前有选中的数据，重新加载数据
       basicForm.setFieldsValue(selectedType);
+      setEditingSchemaFields(selectedType.schemaFields || []);
     } else {
       // 如果都没有，清空表单
       setSelectedType(null);
       basicForm.resetFields();
+      setEditingSchemaFields([]);
     }
   }, [selectedType, previousSelectedType, basicForm]);
 
@@ -363,10 +371,13 @@ const EndpointConfig: React.FC = () => {
    * Schema字段变更 - 直接更新 selectedType 中的 schemaFields
    */
   const handleSchemaFieldsChange = useCallback((fields: SchemaField[]) => {
+    // 始终更新本地编辑态字段，确保在新增（selectedType=null）时也能保留配置
+    setEditingSchemaFields(fields);
+    // 如果当前有选中项，也同步其 schemaFields（便于预览模式下直接使用）
     if (selectedType) {
       setSelectedType({ ...selectedType, schemaFields: fields });
     }
-  }, []);
+  }, [selectedType]);
 
 
   // 当详情数据加载完成时，更新表单
@@ -374,6 +385,7 @@ const EndpointConfig: React.FC = () => {
   React.useEffect(() => {
     if (selectedType && !isEditing && selectedType?.id === selectedType.id) {
       basicForm.setFieldsValue(selectedType);
+      setEditingSchemaFields(selectedType.schemaFields || []);
     }
   }, [selectedType?.id, selectedType, isEditing, basicForm]);
 
@@ -459,7 +471,7 @@ const EndpointConfig: React.FC = () => {
         {/* Schema配置 */}
         <SchemaFieldsTable
           ref={schemaFieldsTableRef}
-          fields={selectedType?.schemaFields || []}
+          fields={editingSchemaFields}
           disabled={!isEditing}
           onChange={handleSchemaFieldsChange}
         />

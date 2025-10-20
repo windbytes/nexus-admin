@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
-import { Form, Input, InputNumber, Select, Radio, Checkbox, Switch, DatePicker, App } from 'antd';
+import { Form, Input, InputNumber, Select, Radio, Checkbox, Switch, DatePicker, App} from 'antd';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import CodeEditor from '@/components/CodeEditor';
+import JSONDynamicForm from './JSONDynamicForm';
 
 const { TextArea, Password } = Input;
 
@@ -11,6 +12,8 @@ interface PreviewFormFieldProps {
   /** 表单值（用于动态显示条件判断） */
   formValues?: Record<string, any>;
 }
+
+
 
 /**
  * 预览表单字段组件
@@ -132,17 +135,35 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
         );
 
       case 'JSON':
-        return (
-          <CodeEditor
-            language="json"
-            height={rest['height']}
-            value={value ? JSON.stringify(value, null, 2) : '{}'}
-            options={{
-              readOnly: rest['disabled'],
-              ...rest['options'],
-            }}
-          />
-        );
+        const editorMode = rest['editorMode'] || 'editor'; // 默认为编辑器模式
+        
+        if (editorMode === 'form') {
+          // 表单模式：使用动态表单组件
+          return (
+            <JSONDynamicForm
+              properties={rest}
+            />
+          );
+        } else {
+          // 编辑器模式：使用 CodeEditor
+          return (
+            <CodeEditor
+              language="json"
+              height={rest['height'] || '300px'}
+              theme={rest['theme'] || 'vs'}
+              showLineNumbers={rest['showLineNumbers'] !== false}
+              showMinimap={rest['showMinimap'] === true}
+              value={value ? JSON.stringify(value, null, 2) : '{}'}
+              options={{
+                readOnly: rest['disabled'],
+                formatOnSave: rest['formatOnSave'] !== false,
+                validateOnChange: rest['validateOnChange'] !== false,
+                ...rest['options'],
+              }}
+              placeholder={rest['placeholder'] || '请输入JSON数据'}
+            />
+          );
+        }
 
       case 'Select':
         return (

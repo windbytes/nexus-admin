@@ -60,29 +60,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
     xxl: { span: 18 },
   }), []);
 
-  /**
-   * 描述字段的响应式 labelCol 配置（整行显示，label 占比更小）
-   */
-  const descriptionLabelCol = useMemo(() => ({
-    xs: { span: 24 },  // 手机竖屏，标签独占一行
-    sm: { span: 4 },   // 手机横屏/小平板
-    md: { span: 3 },   // 平板
-    lg: { span: 2 },   // 小屏笔记本
-    xl: { span: 2 },   // 普通笔记本
-    xxl: { span: 2 },  // 1920*1080 及以上
-  }), []);
-
-  /**
-   * 描述字段的响应式 wrapperCol 配置
-   */
-  const descriptionWrapperCol = useMemo(() => ({
-    xs: { span: 24 },
-    sm: { span: 20 },
-    md: { span: 21 },
-    lg: { span: 22 },
-    xl: { span: 22 },
-    xxl: { span: 22 },
-  }), []);
+  // 移除描述项的专属 label/wrapper 配置，改为使用表单全局的 labelCol/wrapperCol，保证与上方字段左对齐
 
   /**
    * 当处于编辑状态时，聚焦到第一个输入框
@@ -190,8 +168,8 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
         <Form.Item
           name="description"
           label="描述"
-          labelCol={descriptionLabelCol}
-          wrapperCol={descriptionWrapperCol}
+          labelCol={{ span: 2 }}
+          wrapperCol={{ span: 22 }}
         >
           <TextArea
             placeholder="请输入端点类型描述"

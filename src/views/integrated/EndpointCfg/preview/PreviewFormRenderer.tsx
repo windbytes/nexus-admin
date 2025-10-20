@@ -103,9 +103,9 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
           gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
           gap: '0 16px'
         }}>
-          {sortedFields.map((field) => (
+          {sortedFields.map((field: SchemaField) => (
             <div 
-              key={field.id || field.field}
+              key={field.field}
               style={{
                 gridColumn: (field.component === 'TextArea' || field.component === 'JSON') 
                   ? '1 / -1' 
