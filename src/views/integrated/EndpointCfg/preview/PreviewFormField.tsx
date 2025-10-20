@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Form, Input, InputNumber, Select, Radio, Checkbox, Switch, DatePicker } from 'antd';
+import { Form, Input, InputNumber, Select, Radio, Checkbox, Switch, DatePicker, App } from 'antd';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import CodeEditor from '@/components/CodeEditor';
 
@@ -18,6 +18,7 @@ interface PreviewFormFieldProps {
  * 使用 memo 避免不必要的重渲染
  */
 const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formValues = {} }) => {
+  const { message } = App.useApp();
   /**
    * 创建并缓存显示条件函数
    * 只有当 field.showCondition 改变时才重新创建
@@ -41,8 +42,8 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
           if (typeof func === 'function') {
             return func;
           }
-        } catch (evalError) {
-          console.warn(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行:`, evalError);
+        } catch (evalError: any) {
+          message.error(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行: ${evalError}`);
         }
       }
       
@@ -51,9 +52,8 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       // 使用 new Function 替代 eval，安全性更好且性能更优（仅创建一次）
       return new Function('formValues', `return ${condition}`);
       
-    } catch (error) {
-      console.warn(`字段 ${field.field} 的显示条件创建失败:`, error);
-      console.warn('showCondition:', field.showCondition);
+    } catch (error: any) {
+      message.error(`字段 ${field.field} 的显示条件创建失败: ${error}`);
       return null; // 创建失败返回 null
     }
   }, [field.showCondition, field.field]);
@@ -67,8 +67,8 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
     
     try {
       return Boolean(conditionFunc(formValues));
-    } catch (error) {
-      console.warn(`字段 ${field.field} 的显示条件执行失败:`, error);
+    } catch (error: any) {
+      message.error(`字段 ${field.field} 的显示条件执行失败: ${error}`);
       return true; // 执行失败时默认显示
     }
   }, [conditionFunc, formValues, field.field]);
@@ -86,8 +86,8 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
         if (Array.isArray(customRules)) {
           baseRules.push(...customRules);
         }
-      } catch (error) {
-        console.warn(`字段 ${field.field} 的规则解析失败:`, error);
+      } catch (error: any) {
+        message.error(`字段 ${field.field} 的规则解析失败: ${error}`);
       }
     }
 
