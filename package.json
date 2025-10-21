@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:prod": "vite build --mode production",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -46,7 +49,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.6",
+    "@eslint/js": "^9.15.0",
     "@iconify-icon/react": "^3.0.1",
     "@tailwindcss/vite": "^4.1.15",
     "@types/crypto-js": "^4.2.2",
@@ -56,9 +59,17 @@
     "@types/react-dom": "^19.2.2",
     "@types/react-is": "^19.2.0",
     "@types/react-resizable": "^3.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
     "@vitejs/plugin-react": "^5.0.4",
     "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-unused-imports": "^4.1.5",
     "globals": "^16.4.0",
+    "prettier": "^3.3.3",
     "sass-embedded": "^1.93.2",
     "styled-components": "^6.1.19",
     "tailwindcss": "^4.1.15",

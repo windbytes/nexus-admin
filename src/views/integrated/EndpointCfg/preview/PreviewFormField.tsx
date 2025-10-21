@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
-import { Form, Input, InputNumber, Select, Radio, Checkbox, Switch, DatePicker, App} from 'antd';
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import CodeEditor from '@/components/CodeEditor';
+import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
+import React, { memo } from 'react';
 import JSONDynamicForm from './JSONDynamicForm';
 
 const { TextArea, Password } = Input;
@@ -12,8 +12,6 @@ interface PreviewFormFieldProps {
   /** 表单值（用于动态显示条件判断） */
   formValues?: Record<string, any>;
 }
-
-
 
 /**
  * 预览表单字段组件
@@ -28,13 +26,13 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
    */
   const conditionFunc = React.useMemo(() => {
     if (!field.showCondition) return null;
-    
+
     try {
       const condition = field.showCondition.trim();
-      
+
       // 判断是否为函数字符串（包含 function 关键字或箭头函数 =>）
       const isFunctionString = condition.includes('function') || /^\s*\(.*\)\s*=>/.test(condition);
-      
+
       if (isFunctionString) {
         // 方式1：作为函数字符串执行
         // 例如：function(formValues) { return formValues.needAuth; }
@@ -49,12 +47,11 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
           message.error(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行: ${evalError}`);
         }
       }
-      
+
       // 方式2：作为 JS 表达式执行（默认方式）
       // 例如：formValues.needAuth === true
       // 使用 new Function 替代 eval，安全性更好且性能更优（仅创建一次）
       return new Function('formValues', `return ${condition}`);
-      
     } catch (error: any) {
       message.error(`字段 ${field.field} 的显示条件创建失败: ${error}`);
       return null; // 创建失败返回 null
@@ -67,7 +64,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
    */
   const shouldShow = React.useMemo(() => {
     if (!conditionFunc) return true; // 没有条件或条件创建失败时默认显示
-    
+
     try {
       return Boolean(conditionFunc(formValues));
     } catch (error: any) {
@@ -106,44 +103,23 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
 
     switch (component) {
       case 'Input':
-        return (
-          <Input
-            {...rest}
-          />
-        );
+        return <Input {...rest} />;
 
       case 'InputPassword':
-        return (
-          <Password
-            {...rest}
-          />
-        );
+        return <Password {...rest} />;
 
       case 'InputNumber':
-        return (
-          <InputNumber
-            {...rest}
-            className="w-full"
-          />
-        );
+        return <InputNumber {...rest} className="w-full" />;
 
       case 'TextArea':
-        return (
-          <TextArea
-            {...rest}
-          />
-        );
+        return <TextArea {...rest} />;
 
       case 'JSON':
         const editorMode = rest['editorMode'] || 'editor'; // 默认为编辑器模式
-        
+
         if (editorMode === 'form') {
           // 表单模式：使用动态表单组件
-          return (
-            <JSONDynamicForm
-              properties={rest}
-            />
-          );
+          return <JSONDynamicForm properties={rest} />;
         } else {
           // 编辑器模式：使用 CodeEditor
           return (
@@ -176,41 +152,19 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
         );
 
       case 'Radio':
-        return (
-          <Radio.Group
-            {...rest}
-          />
-        );
+        return <Radio.Group {...rest} />;
 
       case 'Checkbox':
-        return (
-          <Checkbox.Group
-            {...rest}
-          />
-        );
+        return <Checkbox.Group {...rest} />;
 
       case 'Switch':
-        return (
-          <Switch
-            {...rest}
-          />
-        );
+        return <Switch {...rest} />;
 
       case 'DatePicker':
-        return (
-          <DatePicker
-            {...rest}
-            className="w-full"
-          />
-        );
+        return <DatePicker {...rest} className="w-full" />;
 
       default:
-        return (
-          <Input
-            placeholder={`不支持的组件类型: ${component}`}
-            disabled
-          />
-        );
+        return <Input placeholder={`不支持的组件类型: ${component}`} disabled />;
     }
   };
 
@@ -234,4 +188,3 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
 PreviewFormField.displayName = 'PreviewFormField';
 
 export default PreviewFormField;
-
