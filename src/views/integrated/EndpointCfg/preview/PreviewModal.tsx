@@ -71,7 +71,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
 
     return (
       <div className="json-view-container">
-        <div className="bg-linear-gradient(to right, #007bff, #00bfff) p-4 rounded-lg mb-4 border border-blue-100">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 border border-blue-100">
           <h4 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
             <FileTextOutlined className="mr-2 text-blue-500" />
             端点配置信息
@@ -223,7 +223,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
       {viewMode === 'form' ? (
         <div className="preview-modal-content">
           {/* 配置信息展示 */}
-          <div className="bg-linear-gradient(to right, #007bff, #00bfff) p-4 rounded-lg mb-6 border border-blue-100 shadow-sm">
+          <div className="bg-linear-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-6 border border-blue-100 shadow-sm">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 mb-1">端点类型</span>

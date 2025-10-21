@@ -88,17 +88,12 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields,
       layout="horizontal"
       initialValues={mergedInitialValues}
       onValuesChange={handleValuesChange}
+      labelCol={{ span: 2 }}
+      wrapperCol={{ span: 22 }}
       autoComplete="off"
     >
       {sortedFields.map((field: SchemaField) => (
-        <div
-          key={field.field}
-          style={{
-            gridColumn: field.component === 'TextArea' || field.component === 'JSON' ? '1 / -1' : 'auto',
-          }}
-        >
-          <PreviewFormField field={field} formValues={formValues} />
-        </div>
+        <PreviewFormField key={field.field} field={field} formValues={formValues} />
       ))}
     </Form>
   );
