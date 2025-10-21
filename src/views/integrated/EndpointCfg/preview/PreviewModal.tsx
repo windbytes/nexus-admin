@@ -265,7 +265,6 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
                 size="large"
                 tabBarStyle={{
                   marginBottom: 24,
-                  borderBottom: '2px solid #f0f0f0',
                 }}
               />
             ) : (

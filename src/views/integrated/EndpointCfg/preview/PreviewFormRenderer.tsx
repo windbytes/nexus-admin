@@ -88,8 +88,8 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields,
       layout="horizontal"
       initialValues={mergedInitialValues}
       onValuesChange={handleValuesChange}
-      labelCol={{ span: 2 }}
-      wrapperCol={{ span: 22 }}
+      labelCol={{ span: 3 }}
+      wrapperCol={{ span: 19 }}
       autoComplete="off"
     >
       {sortedFields.map((field: SchemaField) => (
