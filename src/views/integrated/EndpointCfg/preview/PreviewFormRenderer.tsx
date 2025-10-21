@@ -90,7 +90,6 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
   }
 
   return (
-    <div className="preview-form-renderer">
       <Form
         form={form}
         layout="horizontal"
@@ -98,11 +97,6 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
         onValuesChange={handleValuesChange}
         autoComplete="off"
       >
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '0 16px'
-        }}>
           {sortedFields.map((field: SchemaField) => (
             <div 
               key={field.field}
@@ -115,24 +109,7 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
               <PreviewFormField field={field} formValues={formValues} />
             </div>
           ))}
-        </div>
       </Form>
-
-      <style>{`
-        .preview-form-renderer .ant-form-item {
-          margin-bottom: 20px;
-        }
-        
-        .preview-form-renderer .ant-form-item-label {
-          padding-bottom: 4px;
-        }
-        
-        .preview-form-renderer .ant-form-item-label > label {
-          font-weight: 500;
-          color: #262626;
-        }
-      `}</style>
-    </div>
   );
 };
 
