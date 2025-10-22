@@ -1,5 +1,5 @@
-import { HttpRequest } from '@/utils/request';
 import type { PageQueryParams } from '@/types/global';
+import { HttpRequest } from '@/utils/request';
 
 /**
  * 端点类型枚举
@@ -165,7 +165,7 @@ export interface Endpoint {
   description?: string;
   endpointType: EndpointType | string;
   category?: string;
-  config?: EndpointConfig;
+  config?: { [key: string]: any };
   status: boolean;
   tags?: string[];
   remark?: string;
@@ -327,7 +327,7 @@ export const endpointService = {
   async deleteEndpoint(id: string): Promise<boolean> {
     const response = await HttpRequest.post<boolean>({
       url: EndpointAction.delete,
-      data: { id },
+      params: { id },
     });
     return response;
   },
@@ -368,10 +368,7 @@ export const endpointService = {
   /**
    * 验证端点配置
    */
-  async validateConfig(
-    endpointType: string,
-    config: any
-  ): Promise<{ valid: boolean; errors?: string[] }> {
+  async validateConfig(endpointType: string, config: any): Promise<{ valid: boolean; errors?: string[] }> {
     const response = await HttpRequest.post<{ valid: boolean; errors?: string[] }>({
       url: EndpointAction.validateConfig,
       data: {
@@ -432,4 +429,3 @@ export const endpointService = {
     return response;
   },
 };
-

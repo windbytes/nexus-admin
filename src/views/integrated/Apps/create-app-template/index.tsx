@@ -1,24 +1,20 @@
 import DragModal from '@/components/modal/DragModal';
-import { Input, App } from 'antd';
-import type React from 'react';
-import { memo, useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { SearchOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { App, Input } from 'antd';
+import type React from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import CategorySidebar from './components/CategorySidebar';
 import TemplateGrid from './components/TemplateGrid';
 import TemplateTypeDropdown from './components/TemplateTypeDropdown';
 import { templateService } from './services';
-import type { AppTemplate, TemplateType, TemplateSearchParams } from './types';
 import './styles.css';
+import type { AppTemplate, TemplateSearchParams, TemplateType } from './types';
 
 /**
  * 应用模板创建弹窗
  */
-const AppTemplates: React.FC<AppsTemplateModelProps> = ({ 
-  open, 
-  onClose, 
-  onCreateFromBlank 
-}) => {
+const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreateFromBlank }) => {
   const { message } = App.useApp();
   // 状态管理
   const [selectedCategory, setSelectedCategory] = useState('recommended');
@@ -72,7 +68,7 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
     setSearchParams({
       pageNum: 1,
       pageSize: 20,
-      category: categoryId === 'recommended' ? undefined : categoryId,
+      category: categoryId === 'recommended' ? '' : categoryId,
     });
     setSearchKeyword('');
     setSelectedTypes([]);
@@ -81,9 +77,9 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   // 处理类型筛选变化
   const handleTypeChange = useCallback((types: TemplateType[]) => {
     setSelectedTypes(types);
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
-      types: types.length > 0 ? types : undefined,
+      types: types.length > 0 ? types : [],
       pageNum: 1,
     }));
   }, []);
@@ -91,9 +87,9 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   // 处理搜索
   const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
-      keyword: keyword || undefined,
+      keyword: keyword || '',
       pageNum: 1,
     }));
   }, []);
@@ -119,13 +115,15 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
       styles={{ body: { height: 'calc(95vh - 92px)', overflowY: 'auto' } }}
       width="95%"
       open={open}
-      title={<TemplateHeaders 
-        searchKeyword={searchKeyword}
-        selectedTypes={selectedTypes}
-        filterOptions={filterOptions}
-        onSearch={handleSearch}
-        onTypeChange={handleTypeChange}
-      />}
+      title={
+        <TemplateHeaders
+          searchKeyword={searchKeyword}
+          selectedTypes={selectedTypes}
+          filterOptions={filterOptions}
+          onSearch={handleSearch}
+          onTypeChange={handleTypeChange}
+        />
+      }
       onCancel={onClose}
     >
       <div className="relative flex h-full overflow-y-auto">
@@ -136,14 +134,10 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
           onCategorySelect={handleCategorySelect}
           onCreateBlank={handleCreateBlank}
         />
-        
+
         {/* 右侧模板展示 */}
         <div className="h-full flex-1 shrink-0 grow overflow-auto px-6">
-          <TemplateGrid
-            templates={currentTemplates}
-            loading={isLoading}
-            onTemplateSelect={handleTemplateSelect}
-          />
+          <TemplateGrid templates={currentTemplates} loading={isLoading} onTemplateSelect={handleTemplateSelect} />
         </div>
       </div>
     </DragModal>
@@ -155,12 +149,12 @@ export default memo(AppTemplates);
 /**
  * 弹窗头部组件
  */
-const TemplateHeaders: React.FC<TemplateHeadersProps> = ({ 
+const TemplateHeaders: React.FC<TemplateHeadersProps> = ({
   searchKeyword,
   selectedTypes,
   filterOptions,
-  onTypeChange, 
-  onSearch 
+  onTypeChange,
+  onSearch,
 }) => {
   return (
     <div className="flex justify-between items-center">
@@ -174,7 +168,7 @@ const TemplateHeaders: React.FC<TemplateHeadersProps> = ({
           placeholder="搜索所有模版..."
           prefix={<SearchOutlined className="text-gray-400" />}
           addonBefore={
-            <TemplateTypeDropdown 
+            <TemplateTypeDropdown
               selectedTypes={selectedTypes}
               onTypeChange={onTypeChange}
               filterOptions={filterOptions}
