@@ -71,7 +71,7 @@ const EndpointSearchForm: React.FC<EndpointSearchFormProps> = memo(({ onSearch, 
           </Form.Item>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end">
           <Space>
             <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
               重置
