@@ -1,27 +1,19 @@
-import React, { useState, useCallback, useRef, lazy } from 'react';
-import { Card, App, Form } from 'antd';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import type {
-  SchemaField,
-  EndpointTypeSearchParams,
   EndpointTypeConfig,
+  EndpointTypeSearchParams,
+  SchemaField,
 } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import EndpointTypeList from './components/EndpointTypeList';
-import EndpointTypeForm from './components/EndpointTypeForm';
-import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card, Form } from 'antd';
+import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import ActionButtons from './components/ActionButtons';
+import EndpointTypeForm from './components/EndpointTypeForm';
+import EndpointTypeList from './components/EndpointTypeList';
+import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
 
 // 懒加载预览弹窗组件
 const PreviewModal = lazy(() => import('./preview/PreviewModal'));
-
-// 性能优化：预加载 PreviewModal
-// 在空闲时预加载，避免首次点击预览时的延迟
-if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-  requestIdleCallback(() => {
-    import('./preview/PreviewModal');
-  });
-}
 
 /**
  * 端点配置维护主页面
@@ -54,11 +46,14 @@ const EndpointConfig: React.FC = () => {
   /**
    * 查询端点类型列表和详情（合并查询）
    */
-  const { data: configListData, isLoading: listLoading, refetch: refetchList } = useQuery({
+  const {
+    data: configListData,
+    isLoading: listLoading,
+    refetch: refetchList,
+  } = useQuery({
     queryKey: ['endpoint_config_list', queryParams],
     queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
   });
-
 
   /**
    * 保存端点类型配置 mutation
@@ -76,7 +71,7 @@ const EndpointConfig: React.FC = () => {
       setPreviousSelectedType(null);
       // 刷新列表
       refetchList();
-    }
+    },
   });
 
   /**
@@ -85,7 +80,6 @@ const EndpointConfig: React.FC = () => {
   const deleteConfigMutation = useMutation({
     mutationFn: (id: string) => endpointConfigService.deleteEndpointType(id),
     onSuccess: async () => {
-      
       setSelectedType(null);
       setPreviousSelectedType(null); // 清除之前保存的数据
       basicForm.resetFields();
@@ -102,8 +96,7 @@ const EndpointConfig: React.FC = () => {
    * 导出Schema mutation
    */
   const exportSchemaMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
-      endpointConfigService.exportSchema(id, name),
+    mutationFn: ({ id, name }: { id: string; name: string }) => endpointConfigService.exportSchema(id, name),
     onSuccess: () => {
       message.success('导出成功！');
     },
@@ -115,30 +108,27 @@ const EndpointConfig: React.FC = () => {
   /**
    * 选择端点类型
    */
-  const handleSelectType = useCallback(
-    (record: EndpointTypeConfig) => {
-      if (isEditing) {
-        modal.confirm({
-          title: '提示',
-          content: '当前正在编辑，切换会丢失未保存的数据，是否继续？',
-          onOk: () => {
-            setSelectedType(record);
-            setIsEditing(false);
-            setEditingSchemaFields(record?.schemaFields || []);
-          },
-        });
-      } else {
-        setSelectedType(record);
-        setEditingSchemaFields(record?.schemaFields || []);
-      }
-    },
-    [isEditing, modal]
-  );
+  const handleSelectType = (record: EndpointTypeConfig) => {
+    if (isEditing) {
+      modal.confirm({
+        title: '提示',
+        content: '当前正在编辑，切换会丢失未保存的数据，是否继续？',
+        onOk: () => {
+          setSelectedType(record);
+          setIsEditing(false);
+          setEditingSchemaFields(record?.schemaFields || []);
+        },
+      });
+    } else {
+      setSelectedType(record);
+      setEditingSchemaFields(record?.schemaFields || []);
+    }
+  };
 
   /**
-   * 新增端点类型 - 使用 useCallback 避免子组件重渲染
+   * 新增端点类型
    */
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (isEditing) {
       message.warning('请先保存或取消当前编辑');
       return;
@@ -149,17 +139,17 @@ const EndpointConfig: React.FC = () => {
     setSelectedType(null);
     setIsEditing(true);
     setEditingSchemaFields([]);
-  }, [isEditing, selectedType, message]);
+  };
 
   /**
-   * 预览 - 使用 useCallback 避免子组件重渲染
+   * 预览
    */
-  const handlePreview = useCallback(async () => {
+  const handlePreview = async () => {
     try {
       // 如果正在编辑模式，先验证表单
       if (isEditing) {
         const basicValues = await basicForm.validateFields();
-        
+
         // 获取最新的字段数据
         const latestFields = await schemaFieldsTableRef.current?.getCurrentFields();
         if (!latestFields || latestFields.length === 0) {
@@ -210,23 +200,23 @@ const EndpointConfig: React.FC = () => {
       }
       message.error('请先完善基础信息');
     }
-  }, [isEditing, selectedType, basicForm, message]);
+  };
 
   /**
-   * 开始编辑 - 使用 useCallback 避免子组件重渲染
+   * 开始编辑
    */
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     if (!selectedType) {
       message.warning('请先选择一个端点类型');
       return;
     }
     setIsEditing(true);
-  }, [selectedType, message]);
+  };
 
   /**
-   * 保存 - 使用 useCallback 避免子组件重渲染
+   * 保存
    */
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     try {
       // 1. 验证基础信息表单
       const basicValues = await basicForm.validateFields();
@@ -242,7 +232,7 @@ const EndpointConfig: React.FC = () => {
 
       // 3. 获取最新的 Schema 字段数据（包括正在编辑的行）
       const latestFields = await schemaFieldsTableRef.current?.getCurrentFields();
-      
+
       if (latestFields === null) {
         // 验证失败
         message.error('请先完善表格中正在编辑的字段信息');
@@ -274,12 +264,12 @@ const EndpointConfig: React.FC = () => {
         basicForm.focusField(error.errorFields[0].name);
       }
     }
-  }, [selectedType, schemaFieldsTableRef, basicForm, saveConfigMutation, message]);
+  };
 
   /**
-   * 取消编辑 - 使用 useCallback 避免子组件重渲染
+   * 取消编辑
    */
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     setIsEditing(false);
     // 取消 Schema 表格的编辑状态
     schemaFieldsTableRef.current?.cancelEdit();
@@ -300,12 +290,12 @@ const EndpointConfig: React.FC = () => {
       basicForm.resetFields();
       setEditingSchemaFields([]);
     }
-  }, [selectedType, previousSelectedType, basicForm]);
+  };
 
   /**
-   * 删除 - 使用 useCallback 避免子组件重渲染
+   * 删除
    */
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     if (!selectedType?.id) {
       message.warning('请先选择一个端点类型');
       return;
@@ -321,12 +311,12 @@ const EndpointConfig: React.FC = () => {
         deleteConfigMutation.mutate(selectedType.id);
       },
     });
-  }, [selectedType, message, modal, deleteConfigMutation]);
+  };
 
   /**
-   * 导出 - 使用 useCallback 避免子组件重渲染
+   * 导出
    */
-  const handleExport = useCallback(() => {
+  const handleExport = () => {
     if (!selectedType?.id) {
       message.warning('请先选择一个端点类型');
       return;
@@ -336,60 +326,60 @@ const EndpointConfig: React.FC = () => {
       id: selectedType.id,
       name: selectedType.typeName,
     });
-  }, [selectedType, message, exportSchemaMutation]);
+  };
 
   /**
-   * 导入 - 使用 useCallback 避免子组件重渲染
+   * 导入
    */
-  const handleImport = useCallback(() => {
+  const handleImport = () => {
     message.info('导入功能开发中...');
-  }, [message]);
+  };
 
   /**
-   * 搜索 - 使用 useCallback 避免子组件重渲染
+   * 搜索
    */
   const handleSearch = useCallback((value: string) => {
-    setQueryParams({
-      ...queryParams,
+    setQueryParams((prev) => ({
+      ...prev,
       typeName: value,
       pageNum: 1,
-    });
+    }));
   }, []);
 
   /**
-   * 分页变更 - 使用 useCallback 避免子组件重渲染
+   * 分页变更
    */
   const handlePaginationChange = useCallback((page: number, pageSize: number) => {
-    setQueryParams({
-      ...queryParams,
+    setQueryParams((prev) => ({
+      ...prev,
       pageNum: page,
       pageSize: pageSize,
-    });
+    }));
   }, []);
 
   /**
    * Schema字段变更 - 直接更新 selectedType 中的 schemaFields
    */
-  const handleSchemaFieldsChange = useCallback((fields: SchemaField[]) => {
+  const handleSchemaFieldsChange = (fields: SchemaField[]) => {
     // 始终更新本地编辑态字段，确保在新增（selectedType=null）时也能保留配置
     setEditingSchemaFields(fields);
     // 如果当前有选中项，也同步其 schemaFields（便于预览模式下直接使用）
-    if (selectedType) {
-      setSelectedType({ ...selectedType, schemaFields: fields });
-    }
-  }, [selectedType]);
-
+    setSelectedType((prev) => {
+      if (prev) {
+        return { ...prev, schemaFields: fields };
+      }
+      return null;
+    });
+  };
 
   // 当详情数据加载完成时，更新表单
   // 只在 selectedType.id 变化且不在编辑模式时更新
-  React.useEffect(() => {
-    if (selectedType && !isEditing && selectedType?.id === selectedType.id) {
+  useEffect(() => {
+    if (selectedType && selectedType.id && !isEditing) {
       basicForm.setFieldsValue(selectedType);
       setEditingSchemaFields(selectedType.schemaFields || []);
     }
-  }, [selectedType?.id, selectedType, isEditing, basicForm]);
-
-
+  }, [selectedType?.id, isEditing, basicForm]);
 
   /**
    * 首次加载列表数据后，自动选中第一条记录
@@ -403,9 +393,9 @@ const EndpointConfig: React.FC = () => {
   }, [configListData, selectedType]);
 
   /**
-   * 获取预览配置数据 - 使用 useCallback 优化
+   * 获取预览配置数据
    */
-  const getPreviewConfig = useCallback((): EndpointTypeConfig | null => {
+  const getPreviewConfig = (): EndpointTypeConfig | null => {
     if (isEditing) {
       // 编辑模式，使用当前表单数据
       const formValues = basicForm.getFieldsValue();
@@ -425,7 +415,7 @@ const EndpointConfig: React.FC = () => {
       // 查看模式，使用详情数据
       return selectedType || null;
     }
-  }, [isEditing, selectedType, basicForm]);
+  };
 
   return (
     <div className="h-full flex gap-4">
@@ -462,14 +452,11 @@ const EndpointConfig: React.FC = () => {
         loading={listLoading}
       >
         {/* 基础信息 */}
-        <EndpointTypeForm
-          form={basicForm}
-          selectedType={selectedType}
-          isEditing={isEditing}
-        />
+        <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
 
         {/* Schema配置 */}
         <SchemaFieldsTable
+          loading={listLoading}
           ref={schemaFieldsTableRef}
           fields={editingSchemaFields}
           disabled={!isEditing}
@@ -492,11 +479,9 @@ const EndpointConfig: React.FC = () => {
       </Card>
 
       {/* 预览弹窗 */}
-      <PreviewModal
-        visible={previewVisible}
-        config={getPreviewConfig()}
-        onClose={() => setPreviewVisible(false)}
-      />
+      {previewVisible && (
+        <PreviewModal visible={previewVisible} config={getPreviewConfig()} onClose={() => setPreviewVisible(false)} />
+      )}
     </div>
   );
 };

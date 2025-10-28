@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useMemo } from 'react';
-import { Form, Input, Switch, Select, ConfigProvider } from 'antd';
-import type { FormInstance } from 'antd';
-import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { FormInstance } from 'antd';
+import { ConfigProvider, Form, Input, Select, Switch } from 'antd';
+import React, { useEffect, useRef } from 'react';
 
 const { TextArea } = Input;
 
@@ -16,51 +16,37 @@ interface EndpointTypeFormProps {
 }
 
 /**
+ * 响应式 labelCol 配置
+ * 1920*1080 (xl/xxl) -> span: 6
+ * 其他分辨率动态调整
+ */
+const responsiveLabelCol = {
+  xs: { span: 24 }, // <576px 手机竖屏，标签独占一行
+  sm: { span: 8 }, // ≥576px 手机横屏/小平板
+  md: { span: 7 }, // ≥768px 平板
+  lg: { span: 6 }, // ≥992px 小屏笔记本
+  xl: { span: 8 }, // ≥1200px 普通笔记本
+  xxl: { span: 6 }, // ≥1600px 1920*1080 及以上
+};
+
+/**
+ * 响应式 wrapperCol 配置
+ */
+const responsiveWrapperCol = {
+  xs: { span: 24 },
+  sm: { span: 16 },
+  md: { span: 17 },
+  lg: { span: 18 },
+  xl: { span: 16 },
+  xxl: { span: 18 },
+};
+
+/**
  * 端点类型基本信息表单组件（右上）
  */
-const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
-  form,
-  selectedType,
-  isEditing = false,
-}) => {
-  // 组件重新渲染时输出文字
-  useEffect(() => {
-    console.log('🔄 EndpointTypeForm 组件重新渲染了！', {
-      selectedType,
-      isEditing,
-      timestamp: new Date().toLocaleTimeString()
-    });
-  });
+const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, selectedType, isEditing = false }) => {
   // 类型名称输入框的引用
   const typeNameInputRef = useRef<any>(null);
-
-  /**
-   * 响应式 labelCol 配置
-   * 1920*1080 (xl/xxl) -> span: 6
-   * 其他分辨率动态调整
-   */
-  const responsiveLabelCol = useMemo(() => ({
-    xs: { span: 24 },  // <576px 手机竖屏，标签独占一行
-    sm: { span: 8 },   // ≥576px 手机横屏/小平板
-    md: { span: 7 },   // ≥768px 平板
-    lg: { span: 6 },   // ≥992px 小屏笔记本
-    xl: { span: 8 },   // ≥1200px 普通笔记本
-    xxl: { span: 6 },  // ≥1600px 1920*1080 及以上
-  }), []);
-
-  /**
-   * 响应式 wrapperCol 配置
-   */
-  const responsiveWrapperCol = useMemo(() => ({
-    xs: { span: 24 },
-    sm: { span: 16 },
-    md: { span: 17 },
-    lg: { span: 18 },
-    xl: { span: 16 },
-    xxl: { span: 18 },
-  }), []);
-
-  // 移除描述项的专属 label/wrapper 配置，改为使用表单全局的 labelCol/wrapperCol，保证与上方字段左对齐
 
   /**
    * 当处于编辑状态时，聚焦到第一个输入框
@@ -80,47 +66,35 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
     }
   }, [isEditing]);
 
-  // 缓存 ConfigProvider 的 theme 配置
-  const configProviderTheme = useMemo(() => ({
-    components: {
-      Form: {
-        itemMarginBottom: 0
-      }
-    }
-  }), []);
-
-  // 缓存 Form 的 initialValues
-  const formInitialValues = useMemo(() => ({
-    status: true,
-    schemaVersion: '1.0.0',
-  }), []);
-
   return (
-    <ConfigProvider theme={configProviderTheme}>
+    <ConfigProvider
+      theme={{
+        components: {
+          Form: {
+            itemMarginBottom: 0,
+          },
+        },
+      }}
+    >
       <Form
         form={form}
-        className="flex-shrink-0"
+        className="shrink-0"
         layout="horizontal"
         labelCol={responsiveLabelCol}
         wrapperCol={responsiveWrapperCol}
         disabled={!isEditing}
-        initialValues={formInitialValues}
+        initialValues={{ status: true, schemaVersion: '1.0.0' }}
       >
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '16px',
-          marginBottom: '16px'
-        }}>
-          <Form.Item
-            name="typeName"
-            label="类型名称"
-            rules={[{ required: true, message: '请输入类型名称' }]}
-          >
-            <Input
-              ref={typeNameInputRef}
-              placeholder="请输入类型名称，如：HTTP端点"
-            />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '16px',
+            marginBottom: '16px',
+          }}
+        >
+          <Form.Item name="typeName" label="类型名称" rules={[{ required: true, message: '请输入类型名称' }]}>
+            <Input ref={typeNameInputRef} placeholder="请输入类型名称，如：HTTP端点" />
           </Form.Item>
 
           <Form.Item
@@ -134,16 +108,23 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
               },
             ]}
           >
-            <Input
-              placeholder="请输入类型编码，如：http"
-            />
+            <Input placeholder="请输入类型编码，如：http" />
           </Form.Item>
 
           <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
             <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
           </Form.Item>
 
-          <Form.Item name="supportMode" tooltip={<span>• IN、IN_OUT用于暴露入口给其他地方调用 <br/> • OUT、OUT_IN用于调用其他地方的入口</span>} label="支持模式" rules={[{ required: true, message: '请选择支持模式' }]}>
+          <Form.Item
+            name="supportMode"
+            tooltip={
+              <span>
+                • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
+              </span>
+            }
+            label="支持模式"
+            rules={[{ required: true, message: '请选择支持模式' }]}
+          >
             <Select
               mode="multiple"
               options={MODE_OPTIONS as any}
@@ -165,18 +146,8 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
           </Form.Item>
         </div>
 
-        <Form.Item
-          name="description"
-          label="描述"
-          labelCol={{ span: 2 }}
-          wrapperCol={{ span: 22 }}
-        >
-          <TextArea
-            placeholder="请输入端点类型描述"
-            rows={2}
-            showCount
-            maxLength={500}
-          />
+        <Form.Item name="description" label="描述" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+          <TextArea placeholder="请输入端点类型描述" rows={2} showCount maxLength={500} />
         </Form.Item>
       </Form>
     </ConfigProvider>
@@ -184,4 +155,3 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({
 });
 
 export default EndpointTypeForm;
-
