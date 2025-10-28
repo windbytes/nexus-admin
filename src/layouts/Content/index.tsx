@@ -1,12 +1,11 @@
-import { Layout, Skeleton } from "antd";
-import React from "react";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { Outlet, useLocation } from "react-router";
-import AuthRouter from "@/router/AuthRouter";
-import { ErrorFallback } from "@/router/ErrorBoundary";
-import ActivityKeepAlive from "@/components/KeepAlive/ActivityKeepAlive";
-import { useRouteChangeMonitor } from "@/hooks/useRouteChangeMonitor";
+import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
+import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
+import AuthRouter from '@/router/AuthRouter';
+import { ErrorFallback } from '@/router/ErrorBoundary';
+import { Layout, Skeleton } from 'antd';
+import React, { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Outlet, useLocation } from 'react-router';
 
 /**
  * 中间主内容区域
@@ -15,7 +14,7 @@ import { useRouteChangeMonitor } from "@/hooks/useRouteChangeMonitor";
 const Content: React.FC = () => {
   // 错误边界加key的目的是为了每次路由切换的时候都重新渲染错误边界，避免切换到新的路由的时候不会重新渲染
   const location = useLocation();
-  
+
   // 【性能监控】监控路由切换性能
   useRouteChangeMonitor({
     enabled: true, // 可以通过环境变量控制
@@ -23,9 +22,7 @@ const Content: React.FC = () => {
   });
 
   return (
-    <Layout.Content
-      className="overflow-x-hidden overflow-y-auto"
-    >
+    <Layout.Content className="overflow-x-hidden overflow-y-auto">
       <Suspense fallback={<Skeleton />}>
         <ErrorBoundary key={location.pathname} fallback={<ErrorFallback />}>
           <AuthRouter>
@@ -39,5 +36,4 @@ const Content: React.FC = () => {
   );
 };
 
-// 【优化】使用 React.memo 避免不必要的重渲染
-export default React.memo(Content);
+export default Content;

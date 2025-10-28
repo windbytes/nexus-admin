@@ -1,10 +1,10 @@
+import ScreenLock from '@/components/ScreenLock';
 import { Layout } from 'antd';
 import React from 'react';
-import ScreenLock from '@/components/ScreenLock';
 import Content from './Content';
+import Footer from './Footer';
 import Header from './Header';
 import LeftMenu from './LeftMenu';
-import Footer from './Footer';
 
 /**
  * 系统整体布局
@@ -30,5 +30,4 @@ const Layouts: React.FC = () => {
   );
 };
 
-// 【优化】使用 React.memo 避免不必要的重渲染
-export default React.memo(Layouts);
+export default Layouts;
