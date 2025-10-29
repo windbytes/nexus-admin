@@ -12,8 +12,8 @@ import {
   SettingOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Input, Popconfirm, Select, Space, Table, Tooltip, type TableProps } from 'antd';
-import React, { lazy, useEffectEvent, useImperativeHandle, useMemo, useState } from 'react';
+import { Button, Form, Input, Popconfirm, Select, Skeleton, Space, Table, Tooltip, type TableProps } from 'antd';
+import React, { lazy, Suspense, useEffectEvent, useImperativeHandle, useMemo, useState } from 'react';
 
 const ComponentConfigModal = lazy(() => import('./ComponentConfigModal'));
 const AdvancedConfigModal = lazy(() => import('./AdvancedConfigModal'));
@@ -688,34 +688,36 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">共 {fields.length} 个字段配置</div>
       </div>
-      <Form form={form} component={false} autoComplete="off">
-        <div ref={tableContainerRef}>
-          <Table
-            loading={loading}
-            rowKey="id"
-            columns={columns}
-            dataSource={fields}
-            pagination={false}
-            size="small"
-            scroll={{ x: 'max-content', y: 'calc(100vh - 598px)' }}
-            bordered
-            footer={() => {
-              return (
-                <Button
-                  color="primary"
-                  variant="dashed"
-                  disabled={disabled || editingKey !== ''}
-                  icon={<PlusOutlined />}
-                  onClick={handleAdd}
-                  style={{ width: '100%' }}
-                >
-                  添加字段
-                </Button>
-              );
-            }}
-          />
-        </div>
-      </Form>
+      <Suspense fallback={<Skeleton />}>
+        <Form form={form} component={false} autoComplete="off">
+          <div ref={tableContainerRef}>
+            <Table
+              loading={loading}
+              rowKey="id"
+              columns={columns}
+              dataSource={fields}
+              pagination={false}
+              size="small"
+              scroll={{ x: 'max-content', y: 'calc(100vh - 598px)' }}
+              bordered
+              footer={() => {
+                return (
+                  <Button
+                    color="primary"
+                    variant="dashed"
+                    disabled={disabled || editingKey !== ''}
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    style={{ width: '100%' }}
+                  >
+                    添加字段
+                  </Button>
+                );
+              }}
+            />
+          </div>
+        </Form>
+      </Suspense>
 
       {/* 组件配置弹窗 */}
       <ComponentConfigModal

@@ -1,8 +1,8 @@
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import type { FormInstance } from 'antd';
-import { ConfigProvider, Form, Input, Select, Switch } from 'antd';
-import React, { useEffect, useRef } from 'react';
+import { ConfigProvider, Form, Input, Select, Skeleton, Switch } from 'antd';
+import React, { Suspense, useEffect, useRef } from 'react';
 
 const { TextArea } = Input;
 
@@ -76,80 +76,82 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
         },
       }}
     >
-      <Form
-        form={form}
-        className="shrink-0"
-        layout="horizontal"
-        labelCol={responsiveLabelCol}
-        wrapperCol={responsiveWrapperCol}
-        disabled={!isEditing}
-        initialValues={{ status: true, schemaVersion: '1.0.0' }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '16px',
-            marginBottom: '16px',
-          }}
+      <Suspense fallback={<Skeleton />}>
+        <Form
+          form={form}
+          className="shrink-0"
+          layout="horizontal"
+          labelCol={responsiveLabelCol}
+          wrapperCol={responsiveWrapperCol}
+          disabled={!isEditing}
+          initialValues={{ status: true, schemaVersion: '1.0.0' }}
         >
-          <Form.Item name="typeName" label="类型名称" rules={[{ required: true, message: '请输入类型名称' }]}>
-            <Input ref={typeNameInputRef} placeholder="请输入类型名称，如：HTTP端点" />
-          </Form.Item>
-
-          <Form.Item
-            name="typeCode"
-            label="类型编码"
-            rules={[
-              { required: true, message: '请输入类型编码' },
-              {
-                pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
-                message: '编码必须以字母开头，只能包含字母、数字和下划线',
-              },
-            ]}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '16px',
+              marginBottom: '16px',
+            }}
           >
-            <Input placeholder="请输入类型编码，如：http" />
-          </Form.Item>
+            <Form.Item name="typeName" label="类型名称" rules={[{ required: true, message: '请输入类型名称' }]}>
+              <Input ref={typeNameInputRef} placeholder="请输入类型名称，如：HTTP端点" />
+            </Form.Item>
 
-          <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
-            <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
-          </Form.Item>
+            <Form.Item
+              name="typeCode"
+              label="类型编码"
+              rules={[
+                { required: true, message: '请输入类型编码' },
+                {
+                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
+                  message: '编码必须以字母开头，只能包含字母、数字和下划线',
+                },
+              ]}
+            >
+              <Input placeholder="请输入类型编码，如：http" />
+            </Form.Item>
 
-          <Form.Item
-            name="supportMode"
-            tooltip={
-              <span>
-                • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
-              </span>
-            }
-            label="支持模式"
-            rules={[{ required: true, message: '请选择支持模式' }]}
-          >
-            <Select
-              mode="multiple"
-              options={MODE_OPTIONS as any}
-              placeholder="请选择支持模式"
-              maxTagCount="responsive"
-            />
-          </Form.Item>
+            <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
+              <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
+            </Form.Item>
 
-          <Form.Item name="icon" label="图标">
-            <Input placeholder="请输入图标类名，如：icon-http" />
-          </Form.Item>
+            <Form.Item
+              name="supportMode"
+              tooltip={
+                <span>
+                  • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
+                </span>
+              }
+              label="支持模式"
+              rules={[{ required: true, message: '请选择支持模式' }]}
+            >
+              <Select
+                mode="multiple"
+                options={MODE_OPTIONS as any}
+                placeholder="请选择支持模式"
+                maxTagCount="responsive"
+              />
+            </Form.Item>
 
-          <Form.Item name="schemaVersion" label="Schema版本">
-            <Input placeholder="请输入版本号，如：1.0.0" />
-          </Form.Item>
+            <Form.Item name="icon" label="图标">
+              <Input placeholder="请输入图标类名，如：icon-http" />
+            </Form.Item>
 
-          <Form.Item name="status" label="状态" valuePropName="checked">
-            <Switch checkedChildren="启用" unCheckedChildren="禁用" />
-          </Form.Item>
-        </div>
+            <Form.Item name="schemaVersion" label="Schema版本">
+              <Input placeholder="请输入版本号，如：1.0.0" />
+            </Form.Item>
 
-        <Form.Item name="description" label="描述" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
-          <TextArea placeholder="请输入端点类型描述" rows={2} showCount maxLength={500} />
-        </Form.Item>
-      </Form>
+            <Form.Item name="status" label="状态" valuePropName="checked">
+              <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="description" label="描述" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
+            <TextArea placeholder="请输入端点类型描述" rows={2} showCount maxLength={500} />
+          </Form.Item>
+        </Form>
+      </Suspense>
     </ConfigProvider>
   );
 });

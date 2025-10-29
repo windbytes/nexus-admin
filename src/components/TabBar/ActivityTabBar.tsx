@@ -237,6 +237,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
           addTab(currentTabItem, { insertAt: 'tail', activate: true });
         });
       } else if (pathname !== homePath) {
+        debugger;
         navigate(homePath, { replace: true });
       }
     }
