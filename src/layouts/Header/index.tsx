@@ -1,20 +1,20 @@
 import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
-import React, { useState, Suspense, memo, useCallback } from 'react';
+import React, { Suspense, memo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
-import FullScreen from './component/FullScreen';
-import MessageBox from './component/MessageBox';
-import UserDropdown from './component/UserDropdown';
-import SearchMenuModal from './component/SearchMenuModal';
-import CollapseSwitch from './component/CollapseSwitch';
-import LanguageSwitch from './component/LanguageSwitch';
-import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
-import HeaderMenu from './component/HeaderMenu';
-import { usePreferencesStore } from '@/stores/store';
-import './header.scss';
 import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
+import { usePreferencesStore } from '@/stores/store';
+import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
+import CollapseSwitch from './component/CollapseSwitch';
+import FullScreen from './component/FullScreen';
+import HeaderMenu from './component/HeaderMenu';
+import LanguageSwitch from './component/LanguageSwitch';
+import MessageBox from './component/MessageBox';
+import SearchMenuModal from './component/SearchMenuModal';
+import UserDropdown from './component/UserDropdown';
+import './header.scss';
 
 const Setting = React.lazy(() => import('./component/Setting'));
 
@@ -23,16 +23,17 @@ const Setting = React.lazy(() => import('./component/Setting'));
  */
 const Header = () => {
   const [openSetting, setOpenSetting] = useState<boolean>(false);
-  
+
   // 使用 useShallow 优化选择器，避免不必要的重渲染
-  const { updatePreferences, headerEnable, widgetConfig } = usePreferencesStore(
+  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
     useShallow((state) => ({
       updatePreferences: state.updatePreferences,
       headerEnable: state.preferences.header.enable,
+      tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
     }))
   );
-  
+
   const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
   const { t } = useTranslation();
 
@@ -103,9 +104,11 @@ const Header = () => {
           </div>
 
           {/* 第二行：TabBar区域 */}
-          <div className="header-tab-row">
-            <ActivityTabBar />
-          </div>
+          {tabbarEnable && (
+            <div className="header-tab-row">
+              <ActivityTabBar />
+            </div>
+          )}
         </Layout.Header>
       ) : (
         <FloatButton

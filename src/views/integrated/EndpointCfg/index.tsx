@@ -479,9 +479,7 @@ const EndpointConfig: React.FC = () => {
       </Card>
 
       {/* 预览弹窗 */}
-      {previewVisible && (
-        <PreviewModal visible={previewVisible} config={getPreviewConfig()} onClose={() => setPreviewVisible(false)} />
-      )}
+      <PreviewModal visible={previewVisible} config={getPreviewConfig()} onClose={() => setPreviewVisible(false)} />
     </div>
   );
 };

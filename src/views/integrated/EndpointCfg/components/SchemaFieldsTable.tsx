@@ -718,27 +718,23 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
       </Form>
 
       {/* 组件配置弹窗 */}
-      {configModalVisible && (
-        <ComponentConfigModal
-          open={configModalVisible}
-          onCancel={() => setConfigModalVisible(false)}
-          onOk={handleSaveConfig}
-          componentType={configModalData.componentType}
-          currentProperties={configModalData.properties}
-        />
-      )}
+      <ComponentConfigModal
+        open={configModalVisible}
+        onCancel={() => setConfigModalVisible(false)}
+        onOk={handleSaveConfig}
+        componentType={configModalData.componentType}
+        currentProperties={configModalData.properties}
+      />
 
       {/* 高级配置弹窗 */}
-      {advancedModalVisible && (
-        <AdvancedConfigModal
-          open={advancedModalVisible}
-          onCancel={() => setAdvancedModalVisible(false)}
-          onOk={handleSaveAdvancedConfig}
-          {...(advancedModalData.rules && { currentRules: advancedModalData.rules })}
-          {...(advancedModalData.showCondition && { currentShowCondition: advancedModalData.showCondition })}
-          fieldLabel={advancedModalData.fieldLabel}
-        />
-      )}
+      <AdvancedConfigModal
+        open={advancedModalVisible}
+        onCancel={() => setAdvancedModalVisible(false)}
+        onOk={handleSaveAdvancedConfig}
+        {...(advancedModalData.rules && { currentRules: advancedModalData.rules })}
+        {...(advancedModalData.showCondition && { currentShowCondition: advancedModalData.showCondition })}
+        fieldLabel={advancedModalData.fieldLabel}
+      />
     </div>
   );
 };
