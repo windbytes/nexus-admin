@@ -12,17 +12,15 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react({
-        // 只在生产环境下启用 React 编译器优化
-        babel: isProduction
-          ? {
-              plugins: [['babel-plugin-react-compiler']],
-            }
-          : undefined,
+        // 启用 React 编译器优化
+        babel: {
+          plugins: [['babel-plugin-react-compiler']],
+        },
       }),
       tailwindcss(),
       viteCompression({
         verbose: true,
-        disable: false,
+        disable: isProduction,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
