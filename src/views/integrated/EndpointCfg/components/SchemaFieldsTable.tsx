@@ -516,7 +516,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
         },
       },
       {
-        title: '验证与显示',
+        title: '校验/显示',
         width: 100,
         align: 'center',
         render: (_: any, record: SchemaField) => {
@@ -555,7 +555,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
       {
         title: (
           <div>
-            作用模式
+            模式
             <Tooltip
               title={
                 <span>
@@ -605,7 +605,7 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
       },
       {
         title: '操作',
-        width: 180,
+        width: 120,
         align: 'center',
         fixed: 'right',
         render: (_: any, record: SchemaField, index: number) => {

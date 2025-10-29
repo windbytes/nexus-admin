@@ -1,8 +1,12 @@
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { usePreferencesStore } from '@/stores/store';
 import type { FormInstance } from 'antd';
 import { ConfigProvider, Form, Input, Select, Skeleton, Switch } from 'antd';
+import enUS from 'antd/locale/en_US';
+import zhCN from 'antd/locale/zh_CN';
 import React, { Suspense, useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/shallow';
 
 const { TextArea } = Input;
 
@@ -47,6 +51,11 @@ const responsiveWrapperCol = {
 const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, selectedType, isEditing = false }) => {
   // 类型名称输入框的引用
   const typeNameInputRef = useRef<any>(null);
+  const { locale } = usePreferencesStore(
+    useShallow((state) => ({
+      locale: state.preferences.app.locale,
+    }))
+  );
 
   /**
    * 当处于编辑状态时，聚焦到第一个输入框
@@ -75,6 +84,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
           },
         },
       }}
+      locale={locale === 'zh-CN' ? zhCN : enUS}
     >
       <Suspense fallback={<Skeleton />}>
         <Form
@@ -94,13 +104,13 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
               marginBottom: '16px',
             }}
           >
-            <Form.Item name="typeName" label="类型名称" rules={[{ required: true, message: '请输入类型名称' }]}>
+            <Form.Item name="typeName" label="名称" rules={[{ required: true, message: '请输入类型名称' }]}>
               <Input ref={typeNameInputRef} placeholder="请输入类型名称，如：HTTP端点" />
             </Form.Item>
 
             <Form.Item
               name="typeCode"
-              label="类型编码"
+              label="编码"
               rules={[
                 { required: true, message: '请输入类型编码' },
                 {
@@ -112,7 +122,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
               <Input placeholder="请输入类型编码，如：http" />
             </Form.Item>
 
-            <Form.Item name="endpointType" label="端点分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
+            <Form.Item name="endpointType" label="分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
               <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
             </Form.Item>
 
@@ -123,7 +133,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
                   • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
                 </span>
               }
-              label="支持模式"
+              label="模式"
               rules={[{ required: true, message: '请选择支持模式' }]}
             >
               <Select
@@ -138,7 +148,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
               <Input placeholder="请输入图标类名，如：icon-http" />
             </Form.Item>
 
-            <Form.Item name="schemaVersion" label="Schema版本">
+            <Form.Item name="schemaVersion" label="版本">
               <Input placeholder="请输入版本号，如：1.0.0" />
             </Form.Item>
 
