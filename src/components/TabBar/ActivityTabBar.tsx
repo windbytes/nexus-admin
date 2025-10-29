@@ -236,10 +236,11 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
         startTransition(() => {
           addTab(currentTabItem, { insertAt: 'tail', activate: true });
         });
-      } else if (pathname !== homePath) {
-        debugger;
-        navigate(homePath, { replace: true });
       }
+      // 可能遇到子路由
+      // else if (pathname !== homePath) {
+      //   navigate(homePath, { replace: true });
+      // }
     }
 
     // tabs 为空时跳转
