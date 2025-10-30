@@ -1,10 +1,10 @@
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_CATEGORIES } from '@/services/integrated/endpoint/endpointApi';
 import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { useQuery } from '@tanstack/react-query';
 import { Divider, Form, Input, Modal, Select, Switch } from 'antd';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SchemaFormFieldRenderer from './SchemaFormFieldRenderer';
 
 const { TextArea } = Input;
@@ -42,8 +42,9 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   const [selectedEndpointTypeConfig, setSelectedEndpointTypeConfig] = useState<EndpointTypeConfig | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
 
-  // 监听端点类型变化
+  // 监听端点类型和模式变化
   const endpointTypeName = Form.useWatch('endpointType', form);
+  const selectedMode = Form.useWatch('mode', form);
 
   /**
    * 获取所有启用的端点类型配置列表
@@ -62,7 +63,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   });
 
   /**
-   * 端点类型选项
+   * 端点类型选项 - 使用 useMemo 缓存
    */
   const endpointTypeOptions = useMemo(() => {
     if (!endpointTypeListModule?.records) return [];
@@ -74,7 +75,18 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   }, [endpointTypeListModule]);
 
   /**
+   * 模式选项 - 根据选择的端点类型的 supportMode 动态生成
+   */
+  const modeOptions = useMemo(() => {
+    if (!selectedEndpointTypeConfig?.supportMode) return [];
+
+    // 从 MODE_OPTIONS 中过滤出 supportMode 支持的选项
+    return MODE_OPTIONS.filter((option) => selectedEndpointTypeConfig.supportMode.includes(option.value));
+  }, [selectedEndpointTypeConfig]);
+
+  /**
    * 根据选择的类型名称查找对应的配置
+   * 当端点类型改变时，清空 mode 字段
    */
   useEffect(() => {
     if (!endpointTypeName || !endpointTypeListModule?.records) {
@@ -86,30 +98,43 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
 
     if (config) {
       setSelectedEndpointTypeConfig(config);
+      // 类型改变时，清空 model 字段
+      form.setFieldValue('mode', undefined);
     } else {
       setSelectedEndpointTypeConfig(null);
     }
-  }, [endpointTypeName, endpointTypeListModule]);
+  }, [endpointTypeName, endpointTypeListModule, form]);
 
   /**
-   * 获取Schema字段列表（用于提交和渲染）
+   * 获取Schema字段列表（根据选择的 mode 过滤并排序）
+   * 性能优化：使用 useMemo 缓存，只有当配置或 mode 改变时才重新计算
    */
   const getSchemaFields = useMemo(() => {
-    if (!selectedEndpointTypeConfig?.schemaFields) return [];
-    // 按照sortOrder排序
-    return [...selectedEndpointTypeConfig.schemaFields].sort((a, b) => {
+    if (!selectedEndpointTypeConfig?.schemaFields || !selectedMode) return [];
+
+    // 过滤出包含选择模式的字段
+    const filteredFields = selectedEndpointTypeConfig.schemaFields.filter((field) => {
+      // 如果字段没有 mode 配置，则默认显示
+      if (!field.mode || field.mode.length === 0) return true;
+      // 检查字段的 mode 是否包含当前选择的 mode
+      return field.mode.includes(selectedMode);
+    });
+
+    // 按照 sortOrder 排序
+    return filteredFields.sort((a, b) => {
       const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
       const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
       return orderA - orderB;
     });
-  }, [selectedEndpointTypeConfig]);
+  }, [selectedEndpointTypeConfig, selectedMode]);
 
   /**
    * 监听表单值变化，用于字段显示条件判断
+   * 性能优化：使用 useCallback 避免重复创建函数
    */
-  const handleValuesChange = (_changedValues: any, allValues: any) => {
+  const handleValuesChange = useCallback((_changedValues: any, allValues: any) => {
     setFormValues(allValues);
-  };
+  }, []);
 
   /**
    * 初始化表单值
@@ -143,14 +168,24 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   }, [open, initialValues, endpointTypeListModule, selectedEndpointTypeConfig]);
 
   /**
-   * 处理确定
+   * 处理确定 - 优化：使用 useCallback 缓存
    */
-  const handleOk = async () => {
+  const handleOk = useCallback(async () => {
     try {
       const values = await form.validateFields();
 
-      // 获取所有基础字段名
-      const baseFieldNames = ['name', 'code', 'description', 'endpointType', 'category', 'status', 'tags', 'remark'];
+      // 获取所有基础字段名（包括 model，对应后端的 mode 字段）
+      const baseFieldNames = [
+        'name',
+        'code',
+        'description',
+        'endpointType',
+        'category',
+        'mode',
+        'status',
+        'tags',
+        'remark',
+      ];
 
       // 获取配置字段名（从schemaFields中提取）
       const configFieldNames = getSchemaFields.map((field) => field.field);
@@ -178,7 +213,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     } catch (error) {
       console.error('表单验证失败:', error);
     }
-  };
+  }, [form, getSchemaFields, initialValues?.id, onOk]);
 
   return (
     <Modal
@@ -189,7 +224,13 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       confirmLoading={loading}
       width={900}
       maskClosable={false}
-      destroyOnClose
+      centered
+      styles={{
+        body: {
+          maxHeight: '70vh',
+          overflowY: 'auto',
+        },
+      }}
     >
       <Form
         form={form}
@@ -201,7 +242,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         onValuesChange={handleValuesChange}
       >
         {/* 基础信息区域 */}
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="flex flex-col gap-0">
           <Form.Item name="name" label="端点名称" rules={[{ required: true, message: '请输入端点名称' }]}>
             <Input placeholder="请输入端点名称" />
           </Form.Item>
@@ -220,12 +261,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
             <Input placeholder="请输入端点编码" disabled={!!initialValues?.id} />
           </Form.Item>
 
-          <Form.Item
-            name="endpointType"
-            label="端点类型"
-            rules={[{ required: true, message: '请选择端点类型' }]}
-            className="col-span-2"
-          >
+          <Form.Item name="endpointType" label="端点类型" rules={[{ required: true, message: '请选择端点类型' }]}>
             <Select
               placeholder="请选择端点类型"
               disabled={!!initialValues?.id || typeListLoading}
@@ -233,6 +269,21 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
               options={endpointTypeOptions}
               showSearch
               filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            />
+          </Form.Item>
+
+          {/* 模式选择 - 一直显示，但只有选择了端点类型后才有选项 */}
+          <Form.Item
+            name="mode"
+            label="端点模式"
+            rules={[{ required: true, message: '请选择端点模式' }]}
+            tooltip="端点的工作模式：IN（入站）、OUT（出站）、IN_OUT（双向）、OUT_IN（先出后入）"
+          >
+            <Select
+              placeholder={endpointTypeName ? '请选择端点模式' : '请先选择端点类型'}
+              options={modeOptions}
+              disabled={!endpointTypeName || modeOptions.length === 0}
+              notFoundContent={endpointTypeName ? '该端点类型暂无可用模式' : '请先选择端点类型'}
             />
           </Form.Item>
 
@@ -244,34 +295,34 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
             <Switch checkedChildren="启用" unCheckedChildren="禁用" />
           </Form.Item>
 
-          <Form.Item name="description" label="端点描述" className="col-span-2">
+          <Form.Item name="description" label="端点描述">
             <TextArea placeholder="请输入端点描述" rows={3} />
           </Form.Item>
 
-          <Form.Item name="tags" label="标签" className="col-span-2">
+          <Form.Item name="tags" label="标签">
             <Select mode="tags" placeholder="请输入标签，回车添加" style={{ width: '100%' }} />
           </Form.Item>
 
-          <Form.Item name="remark" label="备注" className="col-span-2">
+          <Form.Item name="remark" label="备注">
             <TextArea placeholder="请输入备注信息" rows={4} />
           </Form.Item>
         </div>
 
-        {/* 配置信息区域 - 只有选择了类型才显示 */}
-        {endpointTypeName && selectedEndpointTypeConfig && (
+        {/* 配置信息区域 - 只有选择了端点类型和模式后才显示 */}
+        {endpointTypeName && selectedMode && selectedEndpointTypeConfig && (
           <>
             <Divider orientation="left" plain>
               配置信息
             </Divider>
-            <div className="min-h-[300px] max-h-[500px] overflow-y-auto border border-gray-200 rounded p-4">
+            <div className="border border-gray-200 rounded p-4">
               {getSchemaFields.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-4">
+                <div className="flex flex-col gap-0">
                   {getSchemaFields.map((field: SchemaField) => (
                     <SchemaFormFieldRenderer key={field.field} field={field} formValues={formValues} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 text-gray-400">该端点类型暂无配置项</div>
+                <div className="text-center py-20 text-gray-400">当前端点类型在【{selectedMode}】模式下暂无配置项</div>
               )}
             </div>
           </>

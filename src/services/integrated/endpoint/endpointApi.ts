@@ -164,7 +164,8 @@ export interface Endpoint {
   code: string;
   description?: string;
   endpointType: EndpointType | string;
-  category?: string;
+  category: string;
+  mode: string; // 模式
   config?: { [key: string]: any };
   status: boolean;
   tags?: string[];
