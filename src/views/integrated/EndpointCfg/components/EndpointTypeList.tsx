@@ -47,20 +47,32 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
   // 多选状态
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // 多选配置
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-    getCheckboxProps: (record: EndpointTypeConfig) => ({
+  // 多选变更回调 - 使用 useCallback 优化
+  const handleRowSelectionChange = React.useCallback((keys: React.Key[]) => {
+    setSelectedRowKeys(keys);
+  }, []);
+
+  // 获取 checkbox props - 使用 useCallback 优化
+  const getCheckboxProps = React.useCallback(
+    (record: EndpointTypeConfig) => ({
       name: record.typeName,
     }),
-    // 使用主题色的选中样式
-    selectedRowClassName: 'ant-table-row-selected',
-  };
+    []
+  );
 
-  // 处理批量导出
+  // 多选配置 - 使用 useMemo 缓存
+  const rowSelection = React.useMemo(
+    () => ({
+      selectedRowKeys,
+      onChange: handleRowSelectionChange,
+      getCheckboxProps,
+      // 使用主题色的选中样式
+      selectedRowClassName: 'ant-table-row-selected',
+    }),
+    [selectedRowKeys, handleRowSelectionChange, getCheckboxProps]
+  );
+
+  // 处理批量导出 - 使用 useCallback 优化
   const handleBatchExport = React.useCallback(() => {
     if (selectedRowKeys.length === 0) {
       message.warning('请先选择要导出的端点配置');
@@ -73,6 +85,22 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
       message.info(`导出功能开发中，已选择 ${selectedRowKeys.length} 条记录`);
     }
   }, [selectedRowKeys, onBatchExport]);
+
+  // 获取行 className - 使用 useCallback 优化
+  const getRowClassName = React.useCallback(
+    (record: EndpointTypeConfig) => {
+      return record.id === selectedId ? 'ant-table-row-selected cursor-pointer' : 'cursor-pointer hover:bg-gray-50';
+    },
+    [selectedId]
+  );
+
+  // 获取行事件 - 使用 useCallback 优化
+  const getRowProps = React.useCallback(
+    (record: EndpointTypeConfig) => ({
+      onClick: () => onSelect(record),
+    }),
+    [onSelect]
+  );
 
   // 使用 useMemo 优化 columns 配置
   const columns: TableProps<EndpointTypeConfig>['columns'] = React.useMemo(
@@ -166,12 +194,8 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         bordered
         className="flex-1 overflow-auto my-2!"
         scroll={{ y: 'calc(100vh - 300px)', x: 'max-content' }}
-        rowClassName={(record) =>
-          record.id === selectedId ? 'ant-table-row-selected cursor-pointer' : 'cursor-pointer hover:bg-gray-50'
-        }
-        onRow={(record) => ({
-          onClick: () => onSelect(record),
-        })}
+        rowClassName={getRowClassName}
+        onRow={getRowProps}
       />
     </Card>
   );

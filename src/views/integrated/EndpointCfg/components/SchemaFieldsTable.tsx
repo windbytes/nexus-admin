@@ -49,7 +49,7 @@ interface SchemaFieldsTableProps {
  * 使用 React.memo 避免不必要的重渲染
  * React 19 支持函数组件直接接收 ref prop
  */
-const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
+const SchemaFieldsTableComponent: React.FC<SchemaFieldsTableProps> = ({
   fields = [],
   disabled = false,
   loading = false,
@@ -720,25 +720,49 @@ const SchemaFieldsTable: React.FC<SchemaFieldsTableProps> = ({
       </Suspense>
 
       {/* 组件配置弹窗 */}
-      <ComponentConfigModal
-        open={configModalVisible}
-        onCancel={() => setConfigModalVisible(false)}
-        onOk={handleSaveConfig}
-        componentType={configModalData.componentType}
-        currentProperties={configModalData.properties}
-      />
+      {configModalVisible && (
+        <Suspense fallback={<Skeleton active />}>
+          <ComponentConfigModal
+            open={configModalVisible}
+            onCancel={() => setConfigModalVisible(false)}
+            onOk={handleSaveConfig}
+            componentType={configModalData.componentType}
+            currentProperties={configModalData.properties}
+          />
+        </Suspense>
+      )}
 
       {/* 高级配置弹窗 */}
-      <AdvancedConfigModal
-        open={advancedModalVisible}
-        onCancel={() => setAdvancedModalVisible(false)}
-        onOk={handleSaveAdvancedConfig}
-        {...(advancedModalData.rules && { currentRules: advancedModalData.rules })}
-        {...(advancedModalData.showCondition && { currentShowCondition: advancedModalData.showCondition })}
-        fieldLabel={advancedModalData.fieldLabel}
-      />
+      {advancedModalVisible && (
+        <Suspense fallback={<Skeleton active />}>
+          <AdvancedConfigModal
+            open={advancedModalVisible}
+            onCancel={() => setAdvancedModalVisible(false)}
+            onOk={handleSaveAdvancedConfig}
+            {...(advancedModalData.rules && { currentRules: advancedModalData.rules })}
+            {...(advancedModalData.showCondition && { currentShowCondition: advancedModalData.showCondition })}
+            fieldLabel={advancedModalData.fieldLabel}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
+
+/**
+ * 使用 React.memo 包裹组件，避免父组件重渲染时的不必要渲染
+ * 只有当 props 真正改变时才会重新渲染
+ */
+const SchemaFieldsTable = React.memo(SchemaFieldsTableComponent, (prevProps, nextProps) => {
+  // 自定义比较函数，优化性能
+  return (
+    prevProps.fields === nextProps.fields &&
+    prevProps.disabled === nextProps.disabled &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.onChange === nextProps.onChange
+  );
+});
+
+SchemaFieldsTable.displayName = 'SchemaFieldsTable';
 
 export default SchemaFieldsTable;

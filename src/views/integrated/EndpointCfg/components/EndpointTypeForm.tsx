@@ -10,17 +10,8 @@ import { useShallow } from 'zustand/shallow';
 
 const { TextArea } = Input;
 
-interface EndpointTypeFormProps {
-  /** 表单实例 */
-  form: FormInstance;
-  /** 选中的端点类型 */
-  selectedType: EndpointTypeConfig | null;
-  /** 是否处于编辑状态 */
-  isEditing?: boolean;
-}
-
 /**
- * 响应式 labelCol 配置
+ * 响应式 labelCol 配置 - 移到组件外部，避免每次渲染都创建新对象
  * 1920*1080 (xl/xxl) -> span: 6
  * 其他分辨率动态调整
  */
@@ -34,7 +25,7 @@ const responsiveLabelCol = {
 };
 
 /**
- * 响应式 wrapperCol 配置
+ * 响应式 wrapperCol 配置 - 移到组件外部，避免每次渲染都创建新对象
  */
 const responsiveWrapperCol = {
   xs: { span: 24 },
@@ -44,6 +35,31 @@ const responsiveWrapperCol = {
   xl: { span: 16 },
   xxl: { span: 18 },
 };
+
+/**
+ * Form 的 theme 配置 - 移到组件外部
+ */
+const formTheme = {
+  components: {
+    Form: {
+      itemMarginBottom: 0,
+    },
+  },
+};
+
+/**
+ * Form 的初始值配置 - 移到组件外部
+ */
+const formInitialValues = { status: true, schemaVersion: '1.0.0' };
+
+interface EndpointTypeFormProps {
+  /** 表单实例 */
+  form: FormInstance;
+  /** 选中的端点类型 */
+  selectedType: EndpointTypeConfig | null;
+  /** 是否处于编辑状态 */
+  isEditing?: boolean;
+}
 
 /**
  * 端点类型基本信息表单组件（右上）
@@ -76,16 +92,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
   }, [isEditing]);
 
   return (
-    <ConfigProvider
-      theme={{
-        components: {
-          Form: {
-            itemMarginBottom: 0,
-          },
-        },
-      }}
-      locale={locale === 'zh-CN' ? zhCN : enUS}
-    >
+    <ConfigProvider theme={formTheme} locale={locale === 'zh-CN' ? zhCN : enUS}>
       <Suspense fallback={<Skeleton />}>
         <Form
           form={form}
@@ -94,7 +101,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
           labelCol={responsiveLabelCol}
           wrapperCol={responsiveWrapperCol}
           disabled={!isEditing}
-          initialValues={{ status: true, schemaVersion: '1.0.0' }}
+          initialValues={formInitialValues}
         >
           <div
             style={{
