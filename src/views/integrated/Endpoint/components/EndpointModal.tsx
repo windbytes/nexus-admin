@@ -3,7 +3,7 @@ import { ENDPOINT_CATEGORIES } from '@/services/integrated/endpoint/endpointApi'
 import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { useQuery } from '@tanstack/react-query';
-import { Divider, Form, Input, Modal, Select, Switch } from 'antd';
+import { Divider, Form, Input, Modal, Select } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SchemaFormFieldRenderer from './SchemaFormFieldRenderer';
 
@@ -234,11 +234,10 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     >
       <Form
         form={form}
-        layout="vertical"
+        layout="horizontal"
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 20 }}
         disabled={isViewMode || false}
-        initialValues={{
-          status: true,
-        }}
         onValuesChange={handleValuesChange}
       >
         {/* 基础信息区域 */}
@@ -291,16 +290,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
             <Select placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES as any} />
           </Form.Item>
 
-          <Form.Item name="status" label="启用状态" valuePropName="checked">
-            <Switch checkedChildren="启用" unCheckedChildren="禁用" />
-          </Form.Item>
-
           <Form.Item name="description" label="端点描述">
             <TextArea placeholder="请输入端点描述" rows={3} />
-          </Form.Item>
-
-          <Form.Item name="tags" label="标签">
-            <Select mode="tags" placeholder="请输入标签，回车添加" style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item name="remark" label="备注">

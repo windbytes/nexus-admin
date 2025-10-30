@@ -161,7 +161,6 @@ export type EndpointConfig =
 export interface Endpoint {
   id: string;
   name: string;
-  code: string;
   description?: string;
   endpointType: EndpointType | string;
   category: string;
@@ -181,7 +180,6 @@ export interface Endpoint {
  */
 export interface EndpointSearchParams extends PageQueryParams {
   name?: string;
-  code?: string;
   endpointType?: string;
   category?: string;
   status?: boolean;
@@ -193,7 +191,6 @@ export interface EndpointSearchParams extends PageQueryParams {
 export interface EndpointFormData {
   id?: string;
   name: string;
-  code: string;
   description?: string;
   endpointType: string;
   category?: string;
