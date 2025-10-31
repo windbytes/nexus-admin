@@ -1,22 +1,25 @@
-import { memo, useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { Empty, Menu, Spin, type MenuProps } from 'antd';
-import { useLocation, useNavigate } from 'react-router';
-import { useTranslation } from 'react-i18next';
-import { Icon } from '@iconify-icon/react';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { getOpenKeys, searchRoute } from '@/utils/utils';
-import type { RouteItem } from '@/types/route';
+import { Icon } from '@iconify-icon/react';
+import { Empty, Menu, Spin, type MenuProps } from 'antd';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
-import { useTabStore } from '@/stores/tabStore';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 /**
  * 菜单组件
- * @returns
+ * 性能优化：
+ * 1. 使用 React 19 的 useTransition 优化路由切换
+ * 2. 添加导航加载状态，提供即时反馈
+ * 3. 优化菜单构建性能
  */
-const MenuComponent = () => {
+const MenuComponent = memo(() => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -28,7 +31,7 @@ const MenuComponent = () => {
       accordion: state.preferences.navigation.accordion,
       dynamicTitle: state.preferences.app.dynamicTitle,
       collapsed: state.preferences.sidebar.collapsed,
-    })),
+    }))
   );
   const mode = usePreferencesStore((state) => {
     let mode = state.preferences.theme.mode;
@@ -44,19 +47,16 @@ const MenuComponent = () => {
   const [menuList, setMenuList] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
-  
+
+  // 【优化】使用 React 19 的 useTransition 处理路由切换
+  const [isPending, startTransition] = useTransition();
+
   // 【优化】缓存上一次的语言，避免不必要的菜单重新生成
   const prevLanguageRef = useRef(i18n.language);
 
   // 【优化】将 getItem 移到 useMemo 外部，避免重复创建
   const getItem = useCallback(
-    (
-      label: any,
-      key?: React.Key | null,
-      icon?: React.ReactNode,
-      children?: MenuItem[],
-      type?: 'group',
-    ): MenuItem => {
+    (label: any, key?: React.Key | null, icon?: React.ReactNode, children?: MenuItem[], type?: 'group'): MenuItem => {
       return {
         key,
         icon,
@@ -68,45 +68,46 @@ const MenuComponent = () => {
     [t]
   );
 
-  // 【优化】使用 useMemo 缓存菜单构建函数，只在 t 变化时重新创建
+  // 【优化】使用 useMemo 缓存菜单构建函数
   const deepLoopFloat = useMemo(
-    () => (menuList: RouteItem[], newArr: MenuItem[] = []): MenuItem[] => {
-      for (const item of menuList) {
-        if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
-          continue;
+    () =>
+      (menuList: RouteItem[], newArr: MenuItem[] = []): MenuItem[] => {
+        for (const item of menuList) {
+          if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
+            continue;
+          }
+          if (!item?.children?.length) {
+            newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
+            continue;
+          }
+          newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
         }
-        if (!item?.children?.length) {
-          newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
-          continue;
-        }
-        newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
-      }
-      return newArr;
-    },
+        return newArr;
+      },
     [getItem]
   );
 
-  // 【优化】使用 useCallback 避免每次渲染都创建新函数
+  // 【核心优化】使用 startTransition 优化菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(
     ({ key }: { key: string }) => {
-      // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
-      navigate(key, { replace: true });
+      // 使用 startTransition 将路由切换标记为低优先级更新
+      // 这样可以让菜单的视觉反馈（高亮、loading 等）先响应
+      startTransition(() => {
+        navigate(key, { replace: true });
+      });
     },
     [navigate]
   );
 
-  // 【优化】监听tab切换，同步更新左侧菜单选中状态
+  // 【优化】监听 tab 切换，同步更新左侧菜单选中状态
   const currentSelectedKeys = useMemo(() => {
-    // 如果activeKey与当前pathname不同，说明是通过tab切换触发的
-    // 此时使用activeKey作为选中项
     if (activeKey && activeKey !== pathname) {
       return [activeKey];
     }
-    // 否则使用当前pathname，避免不必要的状态更新
     return [pathname];
   }, [activeKey, pathname]);
 
-  // 【优化】使用useMemo优化openKeys的计算
+  // 【优化】使用 useMemo 优化 openKeys 的计算
   const currentOpenKeys = useMemo(() => {
     const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
     return getOpenKeys(targetPath, menus);
@@ -124,13 +125,11 @@ const MenuComponent = () => {
     [accordion]
   );
 
-  // 【优化】智能合并用户手动操作和自动同步的openKeys
+  // 【优化】智能合并用户手动操作和自动同步的 openKeys
   const mergedOpenKeys = useMemo(() => {
-    // 如果用户手动操作过菜单，优先使用用户的操作
     if (openKeys.length > 0) {
       return openKeys;
     }
-    // 否则使用自动计算的openKeys
     return currentOpenKeys;
   }, [openKeys, currentOpenKeys]);
 
@@ -165,7 +164,7 @@ const MenuComponent = () => {
     }
 
     setLoading(true);
-    // 使用 requestIdleCallback 或 setTimeout 将菜单构建推迟到空闲时
+    // 使用 setTimeout 将菜单构建推迟到空闲时
     const timeoutId = setTimeout(() => {
       const menu = deepLoopFloat(menus, []);
       setMenuList(menu);
@@ -179,8 +178,8 @@ const MenuComponent = () => {
     <Spin
       wrapperClassName="side-menu"
       indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-      spinning={loading}
-      tip="加载中"
+      spinning={loading || isPending}
+      tip={isPending ? '加载中...' : '加载菜单'}
     >
       {menuList.length > 0 ? (
         <Menu
@@ -205,6 +204,8 @@ const MenuComponent = () => {
       )}
     </Spin>
   );
-};
+});
 
-export default memo(MenuComponent);
+MenuComponent.displayName = 'MenuComponent';
+
+export default MenuComponent;
