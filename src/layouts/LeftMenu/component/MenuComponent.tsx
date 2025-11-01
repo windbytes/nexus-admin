@@ -4,10 +4,10 @@ import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { getOpenKeys, searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify-icon/react';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
 import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -93,7 +93,7 @@ const MenuComponent = memo(() => {
       // 使用 startTransition 将路由切换标记为低优先级更新
       // 这样可以让菜单的视觉反馈（高亮、loading 等）先响应
       startTransition(() => {
-        navigate(key, { replace: true });
+        navigate({ to: key, replace: true });
       });
     },
     [navigate]

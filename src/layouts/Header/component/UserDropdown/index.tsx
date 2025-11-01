@@ -2,7 +2,7 @@ import { App, Avatar, Divider, Dropdown, theme, type MenuProps, message } from "
 import { memo, type ReactNode, useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate } from "@tanstack/react-router";
 import {
   ExclamationCircleOutlined,
   FileMarkdownOutlined,

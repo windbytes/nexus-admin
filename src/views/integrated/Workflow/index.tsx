@@ -1,7 +1,7 @@
 import { LeftOutlined } from "@ant-design/icons";
 import { Button, Card } from "antd";
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 
 import WorkflowEditor from "@/components/workflow";
 import { usePreferencesStore } from "@/stores/store";
@@ -23,7 +23,7 @@ const Workflow: React.FC = () => {
   const navigate = useNavigate();
 
   const redirectApps = () => {
-    navigate("/integrated/apps");
+    navigate({ to: "/integrated/apps" });
   };
 
   useEffect(() => {

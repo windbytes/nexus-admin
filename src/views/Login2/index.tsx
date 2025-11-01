@@ -5,7 +5,7 @@ import logo from '@/assets/images/icon-512.png';
 import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
 import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
-import { useNavigate } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
 import { HttpCodeEnum } from '@/enums/httpEnum';
@@ -143,7 +143,7 @@ const Login: React.FC = () => {
       });
 
       // 跳转到首页
-      navigate(homePath);
+      navigate({ to: homePath });
     } catch (error) {
       console.error('角色选择失败:', error);
       antdUtils.message?.error('角色选择失败');
@@ -260,7 +260,7 @@ const Login: React.FC = () => {
    * 切换到另一个登录界面
    */
   const switchLoginStyle = () => {
-    navigate('/login');
+    navigate({ to: '/login' });
   };
 
   return (

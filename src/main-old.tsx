@@ -1,15 +1,14 @@
-import '@/styles/global.scss';
-import '@ant-design/v5-patch-for-react-19';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
+import '@/styles/global.scss'; // 引入 Sass 文件
+import { BrowserRouter } from 'react-router';
 import GlobalConfigProvider from './GlobalConfigProvider';
 import './index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@ant-design/v5-patch-for-react-19';
 import { initI18n } from './locales/i18next-config';
 
 const container = document.getElementById('root');
-
 if (container) {
-  // 创建 QueryClient 实例
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -24,14 +23,14 @@ if (container) {
       },
     },
   });
-
-  // 初始化国际化
   initI18n().then(() => {
     const root = createRoot(container);
     root.render(
-      <QueryClientProvider client={queryClient}>
-        <GlobalConfigProvider />
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <GlobalConfigProvider />
+        </QueryClientProvider>
+      </BrowserRouter>,
     );
   });
 } else {

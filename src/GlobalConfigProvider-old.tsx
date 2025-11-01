@@ -1,32 +1,26 @@
-import { App as AntdApp, ConfigProvider } from 'antd';
-import enUS from 'antd/locale/en_US';
-import zhCN from 'antd/locale/zh_CN';
-import dayjs from 'dayjs';
-import 'dayjs/locale/en';
-import 'dayjs/locale/zh-cn';
+import { ConfigProvider, App as AntdApp } from 'antd';
 import type React from 'react';
-import { useShallow } from 'zustand/shallow';
 import App from './App';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
+import 'dayjs/locale/zh-cn';
+import 'dayjs/locale/en';
+import dayjs from 'dayjs';
 import { usePreferencesStore } from './stores/store';
-
+import { useShallow } from 'zustand/shallow';
 /**
- * 全局配置组件
- * 使用 TanStack Router 版本
- * 配置 Antd 的主题、国际化等全局设置
+ * 全局配置组件（为了将antd的ConfigProvider和App嵌套，不然App中的antdUtil中的组件无法使用全局配置）
  */
 const GlobalConfigProvider: React.FC = () => {
-  // 只订阅需要的状态，避免不必要的重渲染
-  // useShallow 用于避免返回对象的引用变化导致重渲染
+  // 只订阅需要的状态，避免不必要的重渲染,useShallow用在订阅返回对象上的，避免返回对象的引用变化导致重渲染
   const { colorPrimary, locale } = usePreferencesStore(
     useShallow((state) => ({
       colorPrimary: state.preferences.theme.colorPrimary,
       locale: state.preferences.app.locale,
-    }))
+    })),
   );
 
-  // 设置 dayjs 的语言
   dayjs.locale(locale === 'zh-CN' ? 'zh-cn' : 'en');
-
   return (
     <ConfigProvider
       theme={{
@@ -34,7 +28,7 @@ const GlobalConfigProvider: React.FC = () => {
         token: {
           colorPrimary: colorPrimary,
           controlHeight: 36,
-          borderRadius: 8,
+          borderRadius: 8
         },
         components: {
           Layout: {

@@ -1,55 +1,59 @@
-import { Router } from '@/router';
-import { commonService } from '@/services/common';
-import { antdUtils } from '@/utils/antdUtil';
-import { Icon } from '@iconify-icon/react';
-import { useQuery } from '@tanstack/react-query';
-import { App as AntdApp, Spin } from 'antd';
+import { Spin, App as AntdApp, Skeleton } from 'antd';
 import type React from 'react';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { Icon } from '@iconify-icon/react';
+import { Router } from '@/router/router';
+import { antdUtils } from '@/utils/antdUtil';
 import { useMenuStore } from './stores/store';
+import { useQuery } from '@tanstack/react-query';
+import { commonService } from '@/services/common';
 import { useUserStore } from './stores/userStore';
 
 /**
  * 主应用
- * 使用 TanStack Router
  */
 const App: React.FC = () => {
   const { setMenus } = useMenuStore();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { roleId = '', isLogin } = useUserStore();
   const { notification, message, modal } = AntdApp.useApp();
 
   // 使用 TanStack Query 获取菜单数据
   const { isLoading, refetch } = useQuery({
-    queryKey: ['menuData', roleId],
+    queryKey: ['menuData'],
     queryFn: async () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       return menu;
     },
-    enabled: false, // 初始不自动执行
+    enabled: false,
   });
 
   useEffect(() => {
-    // 设置 antd 工具实例
     antdUtils.setMessageInstance(message);
     antdUtils.setNotificationInstance(notification);
     antdUtils.setModalInstance(modal);
 
-    // 如果已登录，加载菜单数据
-    if (isLogin && roleId) {
+    if (!isLogin || location.pathname === '/login') {
+      navigate('/login');
+    } else {
+      // 查询菜单数据
       refetch();
     }
-  }, [isLogin, roleId]);
+  }, []);
 
   return (
     <>
       {isLoading ? (
         <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" fullscreen />
       ) : (
-        <Router />
+        <Suspense fallback={<Skeleton />}>
+          <Router />
+        </Suspense>
       )}
     </>
   );
 };
-
 export default App;

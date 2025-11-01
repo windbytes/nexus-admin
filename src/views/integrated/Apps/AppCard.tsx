@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import clsx from '@/utils/classnames';
@@ -39,7 +39,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate(`/integrated/app/${id}/workflow`);
+    navigate({ to: `/integrated/app/${id}/workflow` });
   };
 
   return (

@@ -1,8 +1,8 @@
+import { MyIcon } from '@/components/MyIcon/index';
+import { LazyLoad } from '@/router-old/lazyLoad';
+import type { RouteItem, RouteObject } from '@/types/route';
 import * as Icons from '@ant-design/icons';
 import React from 'react';
-import { MyIcon } from '@/components/MyIcon/index';
-import { LazyLoad } from '@/router/lazyLoad';
-import type { RouteItem, RouteObject } from '@/types/route';
 import { isObject } from './is';
 
 /**
@@ -121,7 +121,7 @@ export const addIcon = (name: string | undefined | null) => {
  */
 export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
   const openKeys: string[] = [];
-  
+
   /**
    * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
    * @param menuList 菜单列表
@@ -135,14 +135,14 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
       if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
         continue;
       }
-      
+
       // 如果找到目标路径
       if (menu.path === targetPath) {
         // 将当前路径的所有父级路径添加到 openKeys
         openKeys.push(...parentPaths);
         return true;
       }
-      
+
       // 如果有子菜单，递归查找
       if (menu.children && menu.children.length > 0) {
         const currentParentPaths = [...parentPaths, menu.path];
@@ -150,7 +150,7 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
           return true;
         }
       }
-      
+
       // 如果有子路由，也递归查找
       if (menu.childrenRoute && menu.childrenRoute.length > 0) {
         const currentParentPaths = [...parentPaths, menu.path];
@@ -161,10 +161,10 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
     }
     return false;
   };
-  
+
   // 在菜单中查找目标路径
   findMenuPath(menus, path);
-  
+
   return openKeys;
 };
 

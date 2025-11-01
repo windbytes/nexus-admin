@@ -1,27 +1,23 @@
 import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
-import { ErrorFallback } from '@/router-old/ErrorBoundary';
+import AuthRouter from '@/router/AuthRouter';
+import { ErrorFallback } from '@/router/ErrorBoundary';
 import { Icon } from '@iconify-icon/react';
-import { useRouterState } from '@tanstack/react-router';
 import { Layout, Spin } from 'antd';
-import { memo, Suspense, useMemo, type ReactNode } from 'react';
+import { memo, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { Outlet, useLocation } from 'react-router';
 
 /**
  * 中间主内容区域
- * TanStack Router 版本
  * 性能优化：
  * 1. 使用 memo 避免不必要的重渲染
  * 2. ErrorBoundary 使用 pathname 作为 key，确保路由切换时重置错误状态
  * 3. 使用更明显的加载指示器（Spin 替代 Skeleton）
  * 4. 添加全屏加载样式，提升用户体验
  */
-interface ContentProps {
-  children?: ReactNode;
-}
-
-const Content = memo(({ children }: ContentProps) => {
-  const location = useRouterState({ select: (s) => s.location });
+const Content = memo(() => {
+  const location = useLocation();
 
   // 【性能监控】监控路由切换性能
   useRouteChangeMonitor({
@@ -65,7 +61,11 @@ const Content = memo(({ children }: ContentProps) => {
     >
       <Suspense fallback={loadingFallback}>
         <ErrorBoundary key={location.pathname} fallback={errorFallback}>
-          <ActivityKeepAlive>{children}</ActivityKeepAlive>
+          <AuthRouter>
+            <ActivityKeepAlive>
+              <Outlet />
+            </ActivityKeepAlive>
+          </AuthRouter>
         </ErrorBoundary>
       </Suspense>
     </Layout.Content>
