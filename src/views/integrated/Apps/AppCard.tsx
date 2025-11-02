@@ -46,13 +46,13 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
     <>
       <div
         onClick={(e) => redirectWorkflow(e)}
-        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer bg-[#fcfcfd] border-[#fff] flex-col rounded-xl border-[1px] border-solid shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
+        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer bg-[#fcfcfd] border-white flex-col rounded-xl border border-solid shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
       >
         <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
           {/* icon */}
           <div className="relative shrink-0">icon</div>
           {/* 应用名称 */}
-          <div className="w-0 grow py-[1px]">
+          <div className="w-0 grow py">
             <div className="flex items-center text-sm font-semibold leading-5 text-[#354052]">
               <div className="truncate" title="工作流测试">
                 {name}
@@ -90,7 +90,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                 <div
                   className={clsx(
                     'mr-[41px] w-full grow group-hover:mr-0! group-hover:block!',
-                    tags.length ? '!block' : '!hidden'
+                    tags.length ? 'block!' : 'hidden!'
                   )}
                 >
                   {/* 标签过滤器 */}
@@ -157,7 +157,9 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           onCancel={() => {
             setShowEditModal(false);
           }}
-          onConfirm={() => {}}
+          onConfirm={() => {
+            return Promise.resolve();
+          }}
         />
       )}
       {/* 复制框 */}
@@ -172,7 +174,9 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           onCancel={() => {
             setShowDuplicateModal(false);
           }}
-          onConfirm={() => {}}
+          onConfirm={() => {
+            return Promise.resolve();
+          }}
         />
       )}
       {/* 切换应用类型弹窗 */}
@@ -196,5 +200,5 @@ export interface AppCardProps {
    * 刷新应用列表
    * @returns
    */
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
