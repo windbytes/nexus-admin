@@ -59,8 +59,6 @@ const Content = memo(({ children }: ContentProps) => {
       className="overflow-x-hidden overflow-y-auto"
       style={{
         position: 'relative',
-        // 添加最小高度，确保加载指示器居中显示
-        minHeight: 'calc(100vh - 64px)',
       }}
     >
       <Suspense fallback={loadingFallback}>
