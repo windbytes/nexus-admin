@@ -23,11 +23,8 @@ class RouteTreeManager {
     // 获取扁平化的路由配置
     const flatRoutes = generateDynamicRoutes(menus);
 
-    console.log('📋 菜单数据:', menus);
-    console.log('🔧 扁平化后的路由配置:', flatRoutes);
-
     // 为每个路由创建 route 对象
-    flatRoutes.forEach((routeConfig, index) => {
+    flatRoutes.forEach((routeConfig) => {
       try {
         const route = createRoute({
           getParentRoute: () => authenticatedRoute,
@@ -53,13 +50,10 @@ class RouteTreeManager {
         });
 
         this.dynamicRoutes.set(routeConfig.path, route);
-        console.log(`✅ 路由 ${index + 1}/${flatRoutes.length} 创建成功: ${routeConfig.path}`);
       } catch (error) {
         console.error(`❌ 路由创建失败: ${routeConfig.path}`, error);
       }
     });
-
-    console.log('✨ 总共生成了', this.dynamicRoutes.size, '个动态路由');
     return Array.from(this.dynamicRoutes.values());
   }
 

@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/shallow';
 
 import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
 import { usePreferencesStore } from '@/stores/store';
+import { lazy } from 'react';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import CollapseSwitch from './component/CollapseSwitch';
 import FullScreen from './component/FullScreen';
@@ -15,7 +16,6 @@ import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
 import UserDropdown from './component/UserDropdown';
 import './header.scss';
-import { lazy } from 'react';
 
 const Setting = lazy(() => import('./component/Setting'));
 
@@ -53,7 +53,7 @@ const Header = memo(() => {
       headerEnable: state.preferences.header.enable,
       tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
-    })),
+    }))
   );
 
   const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
@@ -132,7 +132,7 @@ const Header = memo(() => {
               </Badge>
               {/* 通知 */}
               {notification && (
-                <Dropdown placement="bottom" dropdownRender={() => messageBoxContent}>
+                <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
                   <Badge count={5}>
                     <BellOutlined style={iconStyles} />
                   </Badge>

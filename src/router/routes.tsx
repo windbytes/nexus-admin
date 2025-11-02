@@ -1,9 +1,9 @@
-import { createRootRoute, createRoute, redirect, Outlet } from '@tanstack/react-router';
-import { lazy, Suspense } from 'react';
-import { Skeleton, Layout } from 'antd';
-import { useUserStore } from '@/stores/userStore';
-import { usePreferencesStore } from '@/stores/store';
 import RouteLoadingBar from '@/components/RouteLoadingBar';
+import { usePreferencesStore } from '@/stores/store';
+import { useUserStore } from '@/stores/userStore';
+import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
+import { Layout, Skeleton } from 'antd';
+import { lazy, Suspense } from 'react';
 
 // 懒加载组件
 const LoginComponent = lazy(() => import('@/views/Login'));
@@ -43,18 +43,18 @@ export const authenticatedRoute = createRoute({
           <Suspense fallback={<Skeleton active />}>
             <LeftMenu />
           </Suspense>
-          
+
           <Layout>
             <Suspense fallback={<Skeleton active />}>
               <Header />
             </Suspense>
-            
+
             <Suspense fallback={<Skeleton active />}>
               <Content>
                 <Outlet />
               </Content>
             </Suspense>
-            
+
             <Suspense fallback={<Skeleton active />}>
               <Footer />
             </Suspense>
@@ -71,7 +71,7 @@ export const authenticatedRoute = createRoute({
   },
   beforeLoad: async ({ location }) => {
     const { isLogin } = useUserStore.getState();
-    
+
     if (!isLogin) {
       throw redirect({
         to: '/login',
@@ -92,7 +92,7 @@ export const loginRoute = createRoute({
   component: LoginComponent,
   beforeLoad: async () => {
     const { isLogin, homePath } = useUserStore.getState();
-    
+
     if (isLogin) {
       throw redirect({
         to: homePath,
@@ -110,7 +110,7 @@ export const login2Route = createRoute({
   component: Login2Component,
   beforeLoad: async () => {
     const { isLogin, homePath } = useUserStore.getState();
-    
+
     if (isLogin) {
       throw redirect({
         to: homePath,
@@ -127,7 +127,7 @@ export const indexRoute = createRoute({
   path: '/',
   beforeLoad: async () => {
     const { isLogin, homePath } = useUserStore.getState();
-    
+
     throw redirect({
       to: isLogin ? homePath : '/login',
     });
@@ -164,12 +164,4 @@ export const serverErrorRoute = createRoute({
 /**
  * 基础路由配置（不包含动态路由）
  */
-export const baseRoutes = [
-  indexRoute,
-  loginRoute,
-  login2Route,
-  notFoundRoute,
-  forbiddenRoute,
-  serverErrorRoute,
-];
-
+export const baseRoutes = [indexRoute, loginRoute, login2Route, notFoundRoute, forbiddenRoute, serverErrorRoute];

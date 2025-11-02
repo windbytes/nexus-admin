@@ -4,6 +4,8 @@ import type { TableProps } from 'antd';
 import { Button, Card, Input, Space, Table, Tag, Tooltip, message } from 'antd';
 import React, { useState } from 'react';
 
+const { Search } = Input;
+
 interface EndpointTypeListProps {
   /** 数据源 */
   data: EndpointTypeConfig[];
@@ -170,7 +172,9 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         </div>
       }
     >
-      <Input.Search placeholder="请输入端点类型名称" allowClear onSearch={onSearch} enterButton className="my-2" />
+      <Space.Compact>
+        <Search placeholder="请输入端点类型名称" allowClear onSearch={onSearch} enterButton="Search" className="my-2" />
+      </Space.Compact>
       <Table<EndpointTypeConfig>
         rowKey="id"
         columns={columns}

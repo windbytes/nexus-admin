@@ -105,7 +105,7 @@ const RouteLoadingBar = memo(() => {
           '0%': '#108ee9',
           '100%': '#87d068',
         }}
-        strokeWidth={3}
+        size={3}
         status="active"
       />
     </div>

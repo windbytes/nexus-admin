@@ -35,12 +35,6 @@ export function Router() {
       dynamicRoutes = routeTreeManager.generateRoutes(menus);
 
       console.log('📋 生成的动态路由数量:', dynamicRoutes.length);
-      console.log(
-        '🔗 动态路由路径:',
-        dynamicRoutes.map((r: any) => r.path || r.id)
-      );
-    } else {
-      console.log('⚠️ 没有菜单数据，只加载基础路由（登录、错误页等）');
     }
 
     // 创建路由树（即使没有动态路由，也要创建基础路由）
