@@ -1,28 +1,35 @@
+import { useMenuStore } from '@/stores/store';
+import { useTabStore, type TabItem } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
+import type { RouteItem } from '@/types/route';
+import { getIcon } from '@/utils/optimized-icons';
+import { DownOutlined } from '@ant-design/icons';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { Button, Dropdown, Tabs, type MenuProps, type TabsProps } from 'antd';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Tabs, Dropdown, Button, type TabsProps, type MenuProps } from 'antd';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-import { useTabStore, type TabItem } from '@/stores/tabStore';
-import { useMenuStore } from '@/stores/store';
-import { useUserStore } from '@/stores/userStore';
-import { getIcon } from '@/utils/optimized-icons';
-import type { RouteItem } from '@/types/route';
-import { DownOutlined } from '@ant-design/icons';
 import './tabBar.scss';
 
 interface TabBarProps {
   className?: string;
 }
 
+/**
+ * 标签栏组件
+ * 负责显示和管理页面标签
+ * 与路由系统紧密结合，确保标签状态与实际路由一致
+ * @param className - 类名
+ * @returns 标签栏组件
+ */
 const TabBar: React.FC<TabBarProps> = ({ className }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
 
   // 使用ref来跟踪是否正在关闭tab，避免useEffect重复执行
   const isClosingTabRef = useRef(false);
-  
+
   // 用于右键菜单的状态管理
   const [contextMenuVisible, setContextMenuVisible] = React.useState(false);
   const [contextMenuPosition, setContextMenuPosition] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -62,7 +69,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
       setTabs: state.setTabs,
     }))
   );
-  
+
   const { menus } = useMenuStore(useShallow((state) => ({ menus: state.menus })));
   const { homePath } = useUserStore(useShallow((state) => ({ homePath: state.homePath })));
 
@@ -84,7 +91,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
 
       return searchRoute(menus, path);
     },
-    [menus],
+    [menus]
   );
 
   // 初始化标记，避免重复初始化
@@ -95,7 +102,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     // 只有在有菜单数据且有homePath且未初始化时才执行
     if (!isInitializedRef.current && menus.length > 0 && homePath) {
       isInitializedRef.current = true;
-      
+
       // 如果当前没有tabs，说明是首次加载，需要初始化
       if (tabs.length === 0) {
         // 首先创建homePath的tab（第一个位置）
@@ -135,18 +142,16 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           setActiveKey(homePath);
         } else {
           // 如果当前路径无效且不是homePath，跳转到homePath
-          navigate(homePath, { replace: true });
+          navigate({ to: homePath, replace: true });
         }
       } else {
         // 页面刷新时，tabs已经存在，需要确保状态正确
         // 1. 确保homePath的tab存在且不可关闭
-        const homeTab = tabs.find(tab => tab.key === homePath);
+        const homeTab = tabs.find((tab) => tab.key === homePath);
         if (homeTab) {
           // 确保homePath的tab不可关闭
           if (homeTab.closable) {
-            const updatedTabs = tabs.map(tab => 
-              tab.key === homePath ? { ...tab, closable: false } : tab
-            );
+            const updatedTabs = tabs.map((tab) => (tab.key === homePath ? { ...tab, closable: false } : tab));
             setTabs(updatedTabs, activeKey);
           }
         } else {
@@ -166,7 +171,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         }
 
         // 2. 确保当前路径对应的tab存在并激活
-        const currentTab = tabs.find(tab => tab.key === pathname);
+        const currentTab = tabs.find((tab) => tab.key === pathname);
         if (!currentTab && pathname !== homePath) {
           const currentRoute = findRouteByPath(pathname);
           if (currentRoute?.path) {
@@ -189,11 +194,11 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         }
 
         // 3. 确保homePath的tab在第一个位置
-        const homeTabIndex = tabs.findIndex(tab => tab.key === homePath);
+        const homeTabIndex = tabs.findIndex((tab) => tab.key === homePath);
         if (homeTabIndex > 0) {
           const homeTab = tabs[homeTabIndex];
           if (homeTab) {
-            const otherTabs = tabs.filter(tab => tab.key !== homePath);
+            const otherTabs = tabs.filter((tab) => tab.key !== homePath);
             const newTabs = [homeTab, ...otherTabs];
             setTabs(newTabs, activeKey);
           }
@@ -208,11 +213,11 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     if (isClosingTabRef.current) {
       return;
     }
-    
+
     // 只有在初始化完成后才处理路径变化
     if (isInitializedRef.current && menus.length > 0 && homePath && tabs.length > 0) {
       // 确保当前路径对应的tab被激活
-      const currentTab = tabs.find(tab => tab.key === pathname);
+      const currentTab = tabs.find((tab) => tab.key === pathname);
       if (currentTab && activeKey !== pathname) {
         setActiveKey(pathname);
       } else if (!currentTab && pathname !== homePath) {
@@ -271,7 +276,6 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     }
   }, [menus, homePath, findRouteByPath, tabs, activeKey, addTab, setTabs]);
 
-
   // 处理路径变化时的tab管理逻辑（仅在初始化完成后执行）
   React.useEffect(() => {
     // 如果正在关闭tab，跳过执行
@@ -288,7 +292,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     // 如果当前没有tabs，说明是关闭所有tabs后的情况，需要跳转到首页
     if (tabs.length === 0) {
       if (homePath && pathname !== homePath) {
-        navigate(homePath, { replace: true });
+        navigate({ to: homePath, replace: true });
       }
       return;
     }
@@ -361,17 +365,14 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
   }, [resetTabs]);
 
   // 处理右键菜单显示
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent, tabKey: string) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      setContextMenuTabKey(tabKey);
-      setContextMenuPosition({ x: e.clientX, y: e.clientY });
-      setContextMenuVisible(true);
-    },
-    []
-  );
+  const handleContextMenu = useCallback((e: React.MouseEvent, tabKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setContextMenuTabKey(tabKey);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setContextMenuVisible(true);
+  }, []);
 
   // 处理右键菜单隐藏
   const handleContextMenuClose = useCallback(() => {
@@ -386,18 +387,20 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
       if (e?.target) {
         const target = e.target as HTMLElement;
         // 检查点击的元素是否在Dropdown菜单内部
-        if (target.closest('.ant-dropdown-menu') || 
-            target.closest('.ant-dropdown-menu-item') ||
-            target.closest('[role="menuitem"]')) {
+        if (
+          target.closest('.ant-dropdown-menu') ||
+          target.closest('.ant-dropdown-menu-item') ||
+          target.closest('[role="menuitem"]')
+        ) {
           return; // 阻止tab切换
         }
       }
-      
+
       setActiveKey(key);
       // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
       navigate({ to: key, replace: true });
     },
-    [setActiveKey, navigate],
+    [setActiveKey, navigate]
   );
 
   // 处理tab关闭
@@ -420,15 +423,15 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         }
       }
     },
-    [removeTab, navigate, activeKey],
+    [removeTab, navigate, activeKey]
   );
 
   // 统一的菜单配置函数
   const getMenuItems = useCallback(
     (targetTabKey?: string): MenuProps['items'] => {
       const tabKey = targetTabKey || activeKey;
-      const targetTab = tabs.find(tab => tab.key === tabKey);
-      
+      const targetTab = tabs.find((tab) => tab.key === tabKey);
+
       if (!tabKey || !targetTab) return [];
 
       return [
@@ -581,7 +584,22 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         },
       ];
     },
-    [t, tabs, activeKey, removeTab, navigate, pinTab, unpinTab, reloadTab, closeLeftTabs, closeRightTabs, closeOtherTabs, closeAllTabs, homePath, pathname],
+    [
+      t,
+      tabs,
+      activeKey,
+      removeTab,
+      navigate,
+      pinTab,
+      unpinTab,
+      reloadTab,
+      closeLeftTabs,
+      closeRightTabs,
+      closeOtherTabs,
+      closeAllTabs,
+      homePath,
+      pathname,
+    ]
   );
 
   // 构建tab items
@@ -589,10 +607,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     return tabs.map((tab) => ({
       key: tab.key,
       label: (
-        <div 
-          className="flex items-center gap-1 tab-label"
-          onContextMenu={(e) => handleContextMenu(e, tab.key)}
-        >
+        <div className="flex items-center gap-1 tab-label" onContextMenu={(e) => handleContextMenu(e, tab.key)}>
           <span className="mr-0.5">{tab.icon && getIcon(tab.icon)}</span>
           <span>{t(tab.label)}</span>
         </div>

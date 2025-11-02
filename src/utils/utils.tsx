@@ -1,41 +1,8 @@
 import { MyIcon } from '@/components/MyIcon/index';
-import { LazyLoad } from '@/router-old/lazyLoad';
-import type { RouteItem, RouteObject } from '@/types/route';
+import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
 import React from 'react';
 import { isObject } from './is';
-
-/**
- * @description 使用递归处理路由菜单，生成一维数组，做菜单权限判断
- * @param {Array} routerList 所有菜单列表
- * @param newArr
- * @return array
- */
-export function handleRouter(routerList: RouteItem[], newArr: RouteObject[] = []) {
-  if (!routerList) return newArr;
-  for (const item of routerList) {
-    const menu: RouteObject = {
-      handle: {
-        menuKey: item.id,
-      },
-    };
-    if (typeof item === 'object' && item.path && item.route) {
-      menu.path = item.path;
-      menu.component = LazyLoad(item.component).type;
-      // 这里要添加id
-      newArr.push(menu);
-    }
-    if (item.children?.length) {
-      menu.children = [];
-      handleRouter(item.children, newArr);
-    }
-    if (item.childrenRoute?.length) {
-      menu.children = [];
-      handleRouter(item.childrenRoute, newArr);
-    }
-  }
-  return newArr;
-}
 
 /**
  * Add the object as a parameter to the URL

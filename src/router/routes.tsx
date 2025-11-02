@@ -135,11 +135,21 @@ export const indexRoute = createRoute({
 });
 
 /**
- * 404 路由
+ * 404 路由 - 显式访问 /404
  */
 export const notFoundRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/404',
+  component: NotFoundComponent,
+});
+
+/**
+ * Catch-all 路由 - 捕获所有未匹配的认证路由
+ * 这个路由会在布局内显示 404，而不是替换整个页面
+ */
+export const catchAllRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '$',
   component: NotFoundComponent,
 });
 
@@ -163,5 +173,14 @@ export const serverErrorRoute = createRoute({
 
 /**
  * 基础路由配置（不包含动态路由）
+ * 注意：catchAllRoute 必须最后添加，以确保它不会覆盖其他路由
  */
-export const baseRoutes = [indexRoute, loginRoute, login2Route, notFoundRoute, forbiddenRoute, serverErrorRoute];
+export const baseRoutes = [
+  indexRoute,
+  loginRoute,
+  login2Route,
+  notFoundRoute,
+  forbiddenRoute,
+  serverErrorRoute,
+  catchAllRoute, // 必须放在最后
+];

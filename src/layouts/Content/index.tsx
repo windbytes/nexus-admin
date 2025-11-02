@@ -1,6 +1,6 @@
 import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
-import { ErrorFallback } from '@/router-old/ErrorBoundary';
+import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { Icon } from '@iconify-icon/react';
 import { useRouterState } from '@tanstack/react-router';
 import { Layout, Spin } from 'antd';

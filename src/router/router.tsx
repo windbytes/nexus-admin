@@ -33,8 +33,8 @@ export function Router() {
 
     if (menus && menus.length > 0) {
       dynamicRoutes = routeTreeManager.generateRoutes(menus);
-
-      console.log('📋 生成的动态路由数量:', dynamicRoutes.length);
+    } else {
+      console.log('⚠️ 没有菜单数据，只加载基础路由');
     }
 
     // 创建路由树（即使没有动态路由，也要创建基础路由）
@@ -52,15 +52,6 @@ export function Router() {
           <pre>{error.message}</pre>
         </div>
       ),
-      // 404 处理
-      defaultNotFoundComponent: () => {
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>404 - 页面未找到</h2>
-            <p>请检查路由配置和菜单数据</p>
-          </div>
-        );
-      },
     });
 
     setRouterInstance(router);

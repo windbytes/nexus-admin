@@ -1,17 +1,17 @@
 import { Router } from '@/router';
 import { commonService } from '@/services/common';
+import { useMenuStore } from '@/stores/store';
+import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
 import { Icon } from '@iconify-icon/react';
 import { useQuery } from '@tanstack/react-query';
 import { App as AntdApp, Spin } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
-import { useMenuStore } from './stores/store';
-import { useUserStore } from './stores/userStore';
 
 /**
  * 主应用
- * 使用 TanStack Router
+ * 负责菜单数据加载和路由渲染
  */
 const App: React.FC = () => {
   const { setMenus } = useMenuStore();

@@ -4,11 +4,12 @@ import { lazy } from 'react';
 /**
  * 动态导入组件
  * @param componentPath 组件路径（相对于 views 目录）
- * @returns 懒加载的组件
+ * @returns 懒加载的组件函数（不是 JSX 元素）
  */
 export function lazyLoadComponent(moduleName: string) {
   const viteModule = import.meta.glob('../**/*.tsx');
-  //组件地址
+
+  // 组件地址
   let URL = '';
   if (moduleName === 'layouts') {
     URL = `../layouts/index.tsx`;
@@ -17,8 +18,14 @@ export function lazyLoadComponent(moduleName: string) {
   } else {
     URL = `../views/${moduleName}/index.tsx`;
   }
-  const Module = lazy((viteModule[`${URL}`] as any) ?? (() => import('@/views/error/404')));
-  return <Module />;
+
+  // 检查组件是否存在
+  if (!viteModule[URL]) {
+    console.error(`❌ 组件未找到: ${URL}`);
+    return lazy(() => import('@/views/error/404'));
+  }
+  // 返回 lazy 组件函数，不是 JSX 元素
+  return lazy(viteModule[URL] as any);
 }
 
 /**
@@ -65,9 +72,12 @@ export function flattenRoutes(
       // TanStack Router 的子路由路径应该是相对路径（不带父路径前缀）
       const normalizedPath = normalizeRoutePath(route.path);
 
+      // 加载组件（返回的是 lazy 组件函数）
+      const component = lazyLoadComponent(route.component);
+
       result.push({
         path: normalizedPath,
-        component: lazyLoadComponent(route.component).type,
+        component: component, // 直接使用组件函数，不需要 .type
         menuKey: route.id,
         meta: route.meta,
       });
