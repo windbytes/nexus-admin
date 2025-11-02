@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router';
+import { useRouterState } from '@tanstack/react-router';
 
 interface RouteChangeMetrics {
   from: string;
@@ -28,9 +28,9 @@ export const useRouteChangeMonitor = (options?: {
     threshold = 300, // 默认300ms作为警告阈值
   } = options || {};
 
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const startTimeRef = useRef<number>(Date.now());
-  const prevPathnameRef = useRef<string>(location.pathname);
+  const prevPathnameRef = useRef<string>(pathname);
 
   useEffect(() => {
     if (!enabled) return;
@@ -39,10 +39,10 @@ export const useRouteChangeMonitor = (options?: {
     const duration = currentTime - startTimeRef.current;
     
     // 只有当路径真正改变时才记录
-    if (prevPathnameRef.current !== location.pathname) {
+    if (prevPathnameRef.current !== pathname) {
       const metric: RouteChangeMetrics = {
         from: prevPathnameRef.current,
-        to: location.pathname,
+        to: pathname,
         duration,
         timestamp: currentTime,
       };
@@ -58,11 +58,11 @@ export const useRouteChangeMonitor = (options?: {
         : 'color: #52c41a;';
       
       console.groupCollapsed(
-        `%c[路由性能] ${prevPathnameRef.current} → ${location.pathname}`,
+        `%c[路由性能] ${prevPathnameRef.current} → ${pathname}`,
         logStyle
       );
       console.log(`⏱️  切换耗时: ${duration}ms`);
-      console.log(`📍 目标路由: ${location.pathname}`);
+      console.log(`📍 目标路由: ${pathname}`);
       console.log(`🕐 时间戳: ${new Date(currentTime).toLocaleTimeString()}`);
       
       if (duration > threshold) {
@@ -79,15 +79,15 @@ export const useRouteChangeMonitor = (options?: {
       console.groupEnd();
 
       // 更新引用
-      prevPathnameRef.current = location.pathname;
+      prevPathnameRef.current = pathname;
     }
 
     // 为下次路由切换重置开始时间
     startTimeRef.current = Date.now();
-  }, [location.pathname, enabled, onMetric, threshold]);
+  }, [pathname, enabled, onMetric, threshold]);
 
   return {
-    currentPath: location.pathname,
+    currentPath: pathname,
     previousPath: prevPathnameRef.current,
   };
 };

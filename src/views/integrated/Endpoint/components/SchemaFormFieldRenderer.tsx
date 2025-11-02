@@ -2,11 +2,11 @@ import CodeEditor from '@/components/CodeEditor';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
 import React, { memo } from 'react';
-import JSONDynamicForm from './JSONDynamicForm';
+import JSONDynamicForm from '../../EndpointCfg/preview/JSONDynamicForm';
 
 const { TextArea, Password } = Input;
 
-interface PreviewFormFieldProps {
+interface SchemaFormFieldRendererProps {
   /** 字段配置 */
   field: SchemaField;
   /** 表单值（用于动态显示条件判断） */
@@ -14,11 +14,11 @@ interface PreviewFormFieldProps {
 }
 
 /**
- * 预览表单字段组件
+ * Schema表单字段渲染组件
  * 根据字段配置动态渲染对应的表单组件
  * 使用 memo 避免不必要的重渲染
  */
-const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formValues = {} }) => {
+const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ field, formValues = {} }) => {
   const { message } = App.useApp();
   /**
    * 创建并缓存显示条件函数
@@ -185,6 +185,6 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
   );
 });
 
-PreviewFormField.displayName = 'PreviewFormField';
+SchemaFormFieldRenderer.displayName = 'SchemaFormFieldRenderer';
 
-export default PreviewFormField;
+export default SchemaFormFieldRenderer;

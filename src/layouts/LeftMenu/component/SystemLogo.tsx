@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { Image } from 'antd';
-import { Link } from 'react-router';
 import logo from '@/assets/images/icon-192.png';
 import { usePreferencesStore } from '@/stores/store';
+import { Link } from '@tanstack/react-router';
+import { Image } from 'antd';
+import { memo } from 'react';
 
 /**
  * 系统logo - 协调系统主题的卡片风格
@@ -17,13 +17,7 @@ const SystemLogo = () => {
           <div className="logo-card-content">
             <div className="logo-container">
               <div className="logo-background">
-                <Image
-                  width={32}
-                  height={32}
-                  className="logo-image"
-                  src={logo}
-                  preview={false}
-                />
+                <Image width={32} height={32} className="logo-image" src={logo} preview={false} />
               </div>
             </div>
             <span className="system-name" style={{ color: colorPrimary }}>

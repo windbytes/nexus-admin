@@ -1,5 +1,5 @@
-import { HttpRequest } from '@/utils/request';
 import type { PageQueryParams } from '@/types/global';
+import { HttpRequest } from '@/utils/request';
 
 /**
  * 端点类型枚举
@@ -161,11 +161,11 @@ export type EndpointConfig =
 export interface Endpoint {
   id: string;
   name: string;
-  code: string;
   description?: string;
   endpointType: EndpointType | string;
-  category?: string;
-  config?: EndpointConfig;
+  category: string;
+  mode: string; // 模式
+  config?: { [key: string]: any };
   status: boolean;
   tags?: string[];
   remark?: string;
@@ -180,7 +180,6 @@ export interface Endpoint {
  */
 export interface EndpointSearchParams extends PageQueryParams {
   name?: string;
-  code?: string;
   endpointType?: string;
   category?: string;
   status?: boolean;
@@ -192,7 +191,6 @@ export interface EndpointSearchParams extends PageQueryParams {
 export interface EndpointFormData {
   id?: string;
   name: string;
-  code: string;
   description?: string;
   endpointType: string;
   category?: string;
@@ -327,7 +325,7 @@ export const endpointService = {
   async deleteEndpoint(id: string): Promise<boolean> {
     const response = await HttpRequest.post<boolean>({
       url: EndpointAction.delete,
-      data: { id },
+      params: { id },
     });
     return response;
   },
@@ -368,10 +366,7 @@ export const endpointService = {
   /**
    * 验证端点配置
    */
-  async validateConfig(
-    endpointType: string,
-    config: any
-  ): Promise<{ valid: boolean; errors?: string[] }> {
+  async validateConfig(endpointType: string, config: any): Promise<{ valid: boolean; errors?: string[] }> {
     const response = await HttpRequest.post<{ valid: boolean; errors?: string[] }>({
       url: EndpointAction.validateConfig,
       data: {
@@ -432,4 +427,3 @@ export const endpointService = {
     return response;
   },
 };
-

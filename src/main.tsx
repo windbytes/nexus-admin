@@ -1,14 +1,73 @@
-import { createRoot } from 'react-dom/client';
-import '@/styles/global.scss'; // 引入 Sass 文件
-import { BrowserRouter } from 'react-router';
-import GlobalConfigProvider from './GlobalConfigProvider';
-import './index.css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@/styles/global.scss';
 import '@ant-design/v5-patch-for-react-19';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { App as AntdApp, ConfigProvider } from 'antd';
+import enUS from 'antd/locale/en_US';
+import zhCN from 'antd/locale/zh_CN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en';
+import 'dayjs/locale/zh-cn';
+import { createRoot } from 'react-dom/client';
+import { useShallow } from 'zustand/shallow';
+import App from './App';
+import './index.css';
 import { initI18n } from './locales/i18next-config';
+import { usePreferencesStore } from './stores/store';
+
+/**
+ * 全局配置提供者组件
+ * 提供 Antd 主题和国际化配置
+ */
+const GlobalProvider: React.FC = () => {
+  // 只订阅需要的状态，避免不必要的重渲染
+  const { colorPrimary, locale } = usePreferencesStore(
+    useShallow((state) => ({
+      colorPrimary: state.preferences.theme.colorPrimary,
+      locale: state.preferences.app.locale,
+    }))
+  );
+
+  // 设置 dayjs 的语言
+  dayjs.locale(locale === 'zh-CN' ? 'zh-cn' : 'en');
+
+  return (
+    <ConfigProvider
+      theme={{
+        cssVar: true,
+        token: {
+          colorPrimary: colorPrimary,
+          controlHeight: 36,
+          borderRadius: 8,
+        },
+        components: {
+          Layout: {
+            headerPadding: '0 16px 0 0',
+            headerHeight: '50px',
+            headerBg: '#fff',
+          },
+          Tree: {
+            directoryNodeSelectedBg: '#e6f4ff',
+            indentSize: 12,
+            directoryNodeSelectedColor: 'rgba(0, 0, 0, 0.88)',
+          },
+          Menu: {
+            itemColor: '#29343D',
+          },
+        },
+      }}
+      locale={locale === 'zh-CN' ? zhCN : enUS}
+    >
+      <AntdApp style={{ height: '100%' }}>
+        <App />
+      </AntdApp>
+    </ConfigProvider>
+  );
+};
 
 const container = document.getElementById('root');
+
 if (container) {
+  // 创建 QueryClient 实例
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -23,14 +82,14 @@ if (container) {
       },
     },
   });
+
+  // 初始化国际化
   initI18n().then(() => {
     const root = createRoot(container);
     root.render(
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <GlobalConfigProvider />
-        </QueryClientProvider>
-      </BrowserRouter>,
+      <QueryClientProvider client={queryClient}>
+        <GlobalProvider />
+      </QueryClientProvider>
     );
   });
 } else {

@@ -1,26 +1,26 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
-import viteCompression from 'vite-plugin-compression';
+import react from '@vitejs/plugin-react';
 import path from 'path';
+import { defineConfig } from 'vite';
+import viteCompression from 'vite-plugin-compression';
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
-  
+
   return {
     plugins: [
       react({
-        // 只在生产环境下启用 React 编译器优化
-        babel: isProduction ? {
+        // 启用 React 编译器优化
+        babel: {
           plugins: [['babel-plugin-react-compiler']],
-        } : undefined,
+        },
       }),
       tailwindcss(),
       viteCompression({
         verbose: true,
-        disable: false,
+        disable: isProduction,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
@@ -32,8 +32,9 @@ export default defineConfig(({ mode }) => {
     // 配置分包
     build: {
       sourcemap: false,
-      // 压缩css代码
-      cssCodeSplit: true,
+      // css代码分割
+      cssCodeSplit: isProduction,
+      cssTarget: 'chrome80',
       // 只在生产环境下启用terser代码压缩
       ...(isProduction && {
         minify: 'terser',

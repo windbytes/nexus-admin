@@ -1,58 +1,111 @@
 import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
-import React, { useState, Suspense, memo, useCallback } from 'react';
+import { memo, Suspense, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
-import FullScreen from './component/FullScreen';
-import MessageBox from './component/MessageBox';
-import UserDropdown from './component/UserDropdown';
-import SearchMenuModal from './component/SearchMenuModal';
-import CollapseSwitch from './component/CollapseSwitch';
-import LanguageSwitch from './component/LanguageSwitch';
-import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
-import HeaderMenu from './component/HeaderMenu';
-import { usePreferencesStore } from '@/stores/store';
-import './header.scss';
 import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
+import { usePreferencesStore } from '@/stores/store';
+import { lazy } from 'react';
+import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
+import CollapseSwitch from './component/CollapseSwitch';
+import FullScreen from './component/FullScreen';
+import HeaderMenu from './component/HeaderMenu';
+import LanguageSwitch from './component/LanguageSwitch';
+import MessageBox from './component/MessageBox';
+import SearchMenuModal from './component/SearchMenuModal';
+import UserDropdown from './component/UserDropdown';
+import './header.scss';
 
-const Setting = React.lazy(() => import('./component/Setting'));
+const Setting = lazy(() => import('./component/Setting'));
+
+// 提取静态样式对象，避免每次渲染都创建新对象
+const headerStyles = {
+  borderBottom: '1px solid #e9edf0',
+  padding: 0,
+} as const;
+
+const iconStyles = {
+  cursor: 'pointer',
+  fontSize: '18px',
+} as const;
+
+const floatButtonStyles = {
+  right: 24,
+  bottom: 24,
+} as const;
 
 /**
  * 顶部布局内容
+ * 性能优化：
+ * 1. 提取静态样式对象到组件外部
+ * 2. 使用 useCallback 缓存所有回调函数
+ * 3. 使用 useMemo 缓存 MessageBox 组件
+ * 4. 优化 Dropdown 的 dropdownRender
  */
-const Header = () => {
+const Header = memo(() => {
   const [openSetting, setOpenSetting] = useState<boolean>(false);
-  
+
   // 使用 useShallow 优化选择器，避免不必要的重渲染
-  const { updatePreferences, headerEnable, widgetConfig } = usePreferencesStore(
+  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
     useShallow((state) => ({
       updatePreferences: state.updatePreferences,
       headerEnable: state.preferences.header.enable,
+      tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
     }))
   );
-  
+
   const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
   const { t } = useTranslation();
 
   /**
-   * 跳转到github
+   * 跳转到github - 使用 useCallback 缓存
    */
   const routeGitHub = useCallback(() => {
     window.open('https://github.com/yecongling/nexus-admin', '_blank');
   }, []);
 
+  /**
+   * 开启锁屏 - 使用 useCallback 缓存
+   */
+  const handleLockScreen = useCallback(() => {
+    updatePreferences('widget', 'lockScreenStatus', true);
+  }, [updatePreferences]);
+
+  /**
+   * 打开设置面板 - 使用 useCallback 缓存
+   */
+  const handleOpenSetting = useCallback(() => {
+    setOpenSetting(true);
+  }, []);
+
+  /**
+   * 关闭设置面板 - 使用 useCallback 缓存
+   */
+  const handleCloseSetting = useCallback(() => {
+    setOpenSetting(false);
+  }, []);
+
+  /**
+   * MessageBox 组件 - 使用 useMemo 缓存，避免 Dropdown 重渲染
+   */
+  const messageBoxContent = useMemo(() => <MessageBox />, []);
+
+  /**
+   * 设置按钮提示文本 - 使用 useMemo 缓存
+   */
+  const settingTooltip = useMemo(() => t('layout.header.setting'), [t]);
+
+  /**
+   * 锁屏按钮提示文本 - 使用 useMemo 缓存
+   */
+  const lockTooltip = useMemo(() => t('layout.header.lock'), [t]);
+
   return (
     <>
       {headerEnable ? (
-        <Layout.Header
-          className="ant-layout-header header-container h-auto!"
-          style={{
-            borderBottom: ' 1px solid #e9edf0',
-            padding: 0,
-          }}
-        >
+        <Layout.Header className="ant-layout-header header-container h-auto!" style={headerStyles}>
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}
@@ -65,33 +118,28 @@ const Header = () => {
               {/* 全局搜索 */}
               {globalSearch && <SearchMenuModal />}
               <Tooltip placement="bottom" title="github">
-                <GithubOutlined style={{ cursor: 'pointer', fontSize: '18px' }} onClick={routeGitHub} />
+                <GithubOutlined style={iconStyles} onClick={routeGitHub} />
               </Tooltip>
               {/* 锁屏 */}
               {lockScreen && (
-                <Tooltip placement="bottom" title={t('layout.header.lock')}>
-                  <LockOutlined
-                    style={{ cursor: 'pointer', fontSize: '18px' }}
-                    onClick={() => {
-                      updatePreferences('widget', 'lockScreenStatus', true);
-                    }}
-                  />
+                <Tooltip placement="bottom" title={lockTooltip}>
+                  <LockOutlined style={iconStyles} onClick={handleLockScreen} />
                 </Tooltip>
               )}
               {/* 邮件 */}
               <Badge count={5}>
-                <MailOutlined style={{ cursor: 'pointer', fontSize: '18px' }} />
+                <MailOutlined style={iconStyles} />
               </Badge>
               {/* 通知 */}
               {notification && (
-                <Dropdown placement="bottom" popupRender={() => <MessageBox />}>
+                <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
                   <Badge count={5}>
-                    <BellOutlined style={{ cursor: 'pointer', fontSize: '18px' }} />
+                    <BellOutlined style={iconStyles} />
                   </Badge>
                 </Dropdown>
               )}
-              <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
-                <SettingOutlined style={{ cursor: 'pointer', fontSize: '18px' }} onClick={() => setOpenSetting(true)} />
+              <Tooltip placement="bottomRight" title={settingTooltip}>
+                <SettingOutlined style={iconStyles} onClick={handleOpenSetting} />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
@@ -103,23 +151,28 @@ const Header = () => {
           </div>
 
           {/* 第二行：TabBar区域 */}
-          <div className="header-tab-row">
-            <ActivityTabBar />
-          </div>
+          {tabbarEnable && (
+            <div className="header-tab-row">
+              <ActivityTabBar />
+            </div>
+          )}
         </Layout.Header>
       ) : (
         <FloatButton
           icon={<SettingOutlined />}
-          tooltip={<span>{t('layout.header.setting')}</span>}
-          style={{ right: 24, bottom: 24 }}
-          onClick={() => setOpenSetting(true)}
+          tooltip={<span>{settingTooltip}</span>}
+          style={floatButtonStyles}
+          onClick={handleOpenSetting}
         />
       )}
       {/* 系统设置界面 */}
       <Suspense fallback={<Skeleton />}>
-        <Setting open={openSetting} setOpen={setOpenSetting} />
+        <Setting open={openSetting} setOpen={handleCloseSetting} />
       </Suspense>
     </>
   );
-};
-export default memo(Header);
+});
+
+Header.displayName = 'Header';
+
+export default Header;

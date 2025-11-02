@@ -1,18 +1,18 @@
-import type React from 'react';
-import { useNavigate } from 'react-router';
-import { EllipsisOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
-import clsx from '@/utils/classnames';
-import { usePermission } from '@/hooks/usePermission';
-import CustomPopover from '@/components/popover';
-import DuplicateAppModal from './duplicate-modal';
-import EditAppModal from './edit-app-modal';
 import TagSelector from '@/components/base/tag-management/selector';
-import SwitchAppModal from './swith-app-modal';
+import CustomPopover from '@/components/popover';
+import { usePermission } from '@/hooks/usePermission';
 import type { Tag } from '@/services/common/tags/tagsModel';
 import type { App } from '@/services/integrated/apps/app';
+import clsx from '@/utils/classnames';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { useNavigate } from '@tanstack/react-router';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import AppCardOperations from './AppCardOperations';
 import './apps.scss';
+import DuplicateAppModal from './duplicate-modal';
+import EditAppModal from './edit-app-modal';
+import SwitchAppModal from './swith-app-modal';
 
 /**
  * 应用
@@ -39,20 +39,20 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate(`/integrated/app/${id}/workflow`);
+    navigate({ to: `/integrated/app/${id}/workflow`, params: { appId: id } });
   };
 
   return (
     <>
       <div
         onClick={(e) => redirectWorkflow(e)}
-        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer bg-[#fcfcfd] border-[#fff] flex-col rounded-xl border-[1px] border-solid shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
+        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer bg-[#fcfcfd] border-white flex-col rounded-xl border border-solid shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
       >
         <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
           {/* icon */}
           <div className="relative shrink-0">icon</div>
           {/* 应用名称 */}
-          <div className="w-0 grow py-[1px]">
+          <div className="w-0 grow py">
             <div className="flex items-center text-sm font-semibold leading-5 text-[#354052]">
               <div className="truncate" title="工作流测试">
                 {name}
@@ -75,7 +75,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
         <div
           className={clsx(
             'absolute bottom-1 left-0 right-0 h-[42px] shrink-0 items-center pb-[6px] pl-[14px] pr-[6px] pt-1',
-            tags.length ? 'flex' : '!hidden group-hover:!flex',
+            tags.length ? 'flex' : 'hidden! group-hover:flex!'
           )}
         >
           {hasEditorPermission && (
@@ -89,8 +89,8 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
               >
                 <div
                   className={clsx(
-                    'mr-[41px] w-full grow group-hover:!mr-0 group-hover:!block',
-                    tags.length ? '!block' : '!hidden',
+                    'mr-[41px] w-full grow group-hover:mr-0! group-hover:block!',
+                    tags.length ? 'block!' : 'hidden!'
                   )}
                 >
                   {/* 标签过滤器 */}
@@ -98,16 +98,16 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                     position="bl"
                     type="app"
                     targetID={id}
-                    value={tags.map((tag) => tag.id)}
+                    value={tags.map((tag) => tag.id) as string[]} // ensure value is string[]
                     selectedTags={tags}
                     onCacheUpdate={setTags}
                     onChange={onRefresh}
                   />
                 </div>
               </div>
-              <div className="mx-1 !hidden h-[14px] w-[1px] shrink-0 group-hover:!flex" />
+              <div className="mx-1 hidden! h-[14px] w-px shrink-0 group-hover:flex!" />
               <div
-                className="!hidden shrink-0 group-hover:!flex"
+                className="hidden! shrink-0 group-hover:flex!"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -134,7 +134,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                   btnClassName={(open) =>
                     clsx(
                       open ? '!bg-black/5 !shadow-none' : '!bg-transparent',
-                      'h-8 w-8 rounded-md border-none !p-2 hover:!bg-black/5',
+                      'h-8 w-8 rounded-md border-none !p-2 hover:!bg-black/5'
                     )
                   }
                   popupClassName={
@@ -157,7 +157,9 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           onCancel={() => {
             setShowEditModal(false);
           }}
-          onConfirm={() => {}}
+          onConfirm={() => {
+            return Promise.resolve();
+          }}
         />
       )}
       {/* 复制框 */}
@@ -172,7 +174,9 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           onCancel={() => {
             setShowDuplicateModal(false);
           }}
-          onConfirm={() => {}}
+          onConfirm={() => {
+            return Promise.resolve();
+          }}
         />
       )}
       {/* 切换应用类型弹窗 */}
@@ -196,5 +200,5 @@ export interface AppCardProps {
    * 刷新应用列表
    * @returns
    */
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }

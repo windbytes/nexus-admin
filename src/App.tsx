@@ -1,59 +1,55 @@
-import { Spin, App as AntdApp, Skeleton } from 'antd';
-import type React from 'react';
-import { Suspense, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router';
-import { Icon } from '@iconify-icon/react';
-import { Router } from '@/router/router';
-import { antdUtils } from '@/utils/antdUtil';
-import { useMenuStore } from './stores/store';
-import { useQuery } from '@tanstack/react-query';
+import { Router } from '@/router';
 import { commonService } from '@/services/common';
-import { useUserStore } from './stores/userStore';
+import { useMenuStore } from '@/stores/store';
+import { useUserStore } from '@/stores/userStore';
+import { antdUtils } from '@/utils/antdUtil';
+import { Icon } from '@iconify-icon/react';
+import { useQuery } from '@tanstack/react-query';
+import { App as AntdApp, Spin } from 'antd';
+import type React from 'react';
+import { useEffect } from 'react';
 
 /**
  * 主应用
+ * 负责菜单数据加载和路由渲染
  */
 const App: React.FC = () => {
   const { setMenus } = useMenuStore();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { roleId = '', isLogin } = useUserStore();
   const { notification, message, modal } = AntdApp.useApp();
 
   // 使用 TanStack Query 获取菜单数据
   const { isLoading, refetch } = useQuery({
-    queryKey: ['menuData'],
+    queryKey: ['menuData', roleId],
     queryFn: async () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       return menu;
     },
-    enabled: false,
+    enabled: false, // 初始不自动执行
   });
 
   useEffect(() => {
+    // 设置 antd 工具实例
     antdUtils.setMessageInstance(message);
     antdUtils.setNotificationInstance(notification);
     antdUtils.setModalInstance(modal);
 
-    if (!isLogin || location.pathname === '/login') {
-      navigate('/login');
-    } else {
-      // 查询菜单数据
+    // 如果已登录，加载菜单数据
+    if (isLogin && roleId) {
       refetch();
     }
-  }, []);
+  }, [isLogin, roleId]);
 
   return (
     <>
       {isLoading ? (
         <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" fullscreen />
       ) : (
-        <Suspense fallback={<Skeleton />}>
-          <Router />
-        </Suspense>
+        <Router />
       )}
     </>
   );
 };
+
 export default App;

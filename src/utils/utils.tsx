@@ -1,41 +1,8 @@
+import { MyIcon } from '@/components/MyIcon/index';
+import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
 import React from 'react';
-import { MyIcon } from '@/components/MyIcon/index';
-import { LazyLoad } from '@/router/lazyLoad';
-import type { RouteItem, RouteObject } from '@/types/route';
 import { isObject } from './is';
-
-/**
- * @description 使用递归处理路由菜单，生成一维数组，做菜单权限判断
- * @param {Array} routerList 所有菜单列表
- * @param newArr
- * @return array
- */
-export function handleRouter(routerList: RouteItem[], newArr: RouteObject[] = []) {
-  if (!routerList) return newArr;
-  for (const item of routerList) {
-    const menu: RouteObject = {
-      handle: {
-        menuKey: item.id,
-      },
-    };
-    if (typeof item === 'object' && item.path && item.route) {
-      menu.path = item.path;
-      menu.component = LazyLoad(item.component).type;
-      // 这里要添加id
-      newArr.push(menu);
-    }
-    if (item.children?.length) {
-      menu.children = [];
-      handleRouter(item.children, newArr);
-    }
-    if (item.childrenRoute?.length) {
-      menu.children = [];
-      handleRouter(item.childrenRoute, newArr);
-    }
-  }
-  return newArr;
-}
 
 /**
  * Add the object as a parameter to the URL
@@ -121,7 +88,7 @@ export const addIcon = (name: string | undefined | null) => {
  */
 export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
   const openKeys: string[] = [];
-  
+
   /**
    * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
    * @param menuList 菜单列表
@@ -135,14 +102,14 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
       if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
         continue;
       }
-      
+
       // 如果找到目标路径
       if (menu.path === targetPath) {
         // 将当前路径的所有父级路径添加到 openKeys
         openKeys.push(...parentPaths);
         return true;
       }
-      
+
       // 如果有子菜单，递归查找
       if (menu.children && menu.children.length > 0) {
         const currentParentPaths = [...parentPaths, menu.path];
@@ -150,7 +117,7 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
           return true;
         }
       }
-      
+
       // 如果有子路由，也递归查找
       if (menu.childrenRoute && menu.childrenRoute.length > 0) {
         const currentParentPaths = [...parentPaths, menu.path];
@@ -161,10 +128,10 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
     }
     return false;
   };
-  
+
   // 在菜单中查找目标路径
   findMenuPath(menus, path);
-  
+
   return openKeys;
 };
 

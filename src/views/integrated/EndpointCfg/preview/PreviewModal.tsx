@@ -1,13 +1,7 @@
-import React, { useState, memo } from 'react';
-import { Modal, Form, Tabs, Button, Space, Divider, App, Badge, Empty } from 'antd';
-import { 
-  EyeOutlined, 
-  SaveOutlined, 
-  CloseOutlined, 
-  FileTextOutlined,
-  CodeOutlined 
-} from '@ant-design/icons';
 import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { CloseOutlined, CodeOutlined, EyeOutlined, FileTextOutlined, SaveOutlined } from '@ant-design/icons';
+import { App, Badge, Button, Divider, Empty, Form, Modal, Space, Tabs } from 'antd';
+import React, { memo, useState } from 'react';
 import PreviewFormRenderer from './PreviewFormRenderer';
 
 interface PreviewModalProps {
@@ -37,7 +31,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      
+
       // 展示保存的数据
       Modal.info({
         title: '表单数据预览',
@@ -53,7 +47,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
         okText: '关闭',
         icon: <CodeOutlined className="text-blue-500" />,
       });
-      
+
       message.success('表单验证通过！');
     } catch (error: any) {
       message.error('请完善表单信息');
@@ -74,10 +68,10 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    */
   const renderJsonView = () => {
     if (!config) return null;
-    
+
     return (
       <div className="json-view-container">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 border border-blue-100">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 border border-blue-100">
           <h4 className="text-base font-semibold text-gray-800 mb-2 flex items-center">
             <FileTextOutlined className="mr-2 text-blue-500" />
             端点配置信息
@@ -102,8 +96,10 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
           </div>
         </div>
 
-        <Divider orientation="left" className="text-sm">完整配置 JSON</Divider>
-        
+        <Divider orientation="left" className="text-sm">
+          完整配置 JSON
+        </Divider>
+
         <pre className="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-auto max-h-[500px] text-sm leading-relaxed shadow-inner">
           {JSON.stringify(config, null, 2)}
         </pre>
@@ -116,7 +112,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    */
   const getFieldCountByMode = (mode: string) => {
     if (!config?.schemaFields) return 0;
-    return config.schemaFields.filter(field => !field.mode || field.mode.includes(mode)).length;
+    return config.schemaFields.filter((field) => !field.mode || field.mode.includes(mode)).length;
   };
 
   /**
@@ -128,39 +124,24 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
         {
           key: 'default',
           label: '默认模式',
-          children: (
-            <PreviewFormRenderer
-              form={form}
-              fields={config?.schemaFields || []}
-              initialValues={{}}
-            />
-          ),
+          children: <PreviewFormRenderer form={form} fields={config?.schemaFields || []} initialValues={{}} />,
         },
       ];
     }
 
     return config.supportMode.map((mode) => {
       const fieldCount = getFieldCountByMode(mode);
-      
+
       return {
         key: mode,
         label: (
           <span className="flex items-center gap-2">
             {mode}
-            <Badge 
-              count={fieldCount} 
-              showZero 
-              style={{ backgroundColor: '#52c41a' }}
-            />
+            <Badge count={fieldCount} showZero style={{ backgroundColor: '#52c41a' }} />
           </span>
         ),
         children: (
-          <PreviewFormRenderer
-            form={form}
-            fields={config?.schemaFields || []}
-            mode={mode}
-            initialValues={{}}
-          />
+          <PreviewFormRenderer form={form} fields={config?.schemaFields || []} mode={mode} initialValues={{}} />
         ),
       };
     });
@@ -226,14 +207,8 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
           <Space>
             {viewMode === 'form' && (
               <>
-                <Button onClick={handleReset}>
-                  重置表单
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<SaveOutlined />}
-                  onClick={handleSave}
-                >
+                <Button onClick={handleReset}>重置表单</Button>
+                <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
                   验证并查看数据
                 </Button>
               </>
@@ -248,7 +223,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
       {viewMode === 'form' ? (
         <div className="preview-modal-content">
           {/* 配置信息展示 */}
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg mb-6 border border-blue-100 shadow-sm">
+          <div className="bg-linear-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-6 border border-blue-100 shadow-sm">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 mb-1">端点类型</span>
@@ -262,9 +237,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 mb-1">字段总数</span>
-                <span className="font-semibold text-gray-800">
-                  {config.schemaFields?.length || 0} 个
-                </span>
+                <span className="font-semibold text-gray-800">{config.schemaFields?.length || 0} 个</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 mb-1">状态</span>
@@ -273,7 +246,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
                 </span>
               </div>
             </div>
-            
+
             {config.description && (
               <div className="mt-3 pt-3 border-t border-blue-100">
                 <span className="text-xs text-gray-500">描述：</span>
@@ -292,14 +265,10 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
                 size="large"
                 tabBarStyle={{
                   marginBottom: 24,
-                  borderBottom: '2px solid #f0f0f0',
                 }}
               />
             ) : (
-              <Empty
-                description="暂无字段配置"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+              <Empty description="暂无字段配置" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
           </div>
         </div>
@@ -352,4 +321,3 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
 PreviewModal.displayName = 'PreviewModal';
 
 export default PreviewModal;
-

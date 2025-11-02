@@ -2,7 +2,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Input, Modal, Empty } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
 import { getShortcutLabel } from '@/utils/utils';
 import { useMenuStore } from '@/stores/store';
@@ -67,7 +67,7 @@ const SearchMenuModal: React.FC = () => {
   // 处理选择
   const handleSelect = (item: SearchResultItem | SearchHistoryItem) => {
     add({ id: item.id, name: item.name, path: item.path, timestamp: Date.now() });
-    navigate(item.path);
+    navigate({ to: item.path });
     setOpenModal(false);
     setSearchValue('');
     setSelectedIndex(0);

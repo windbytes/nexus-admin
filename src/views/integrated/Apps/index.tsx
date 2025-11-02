@@ -1,22 +1,22 @@
 import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SolutionOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 
+import TagManagementModal from '@/components/base/tag-management';
+import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
+import { usePermission } from '@/hooks/usePermission';
+import type { App, AppSearchParams } from '@/services/integrated/apps/app';
+import { appsService } from '@/services/integrated/apps/appsApi';
+import { useTagStore } from '@/stores/useTagStore.ts';
+import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
+import { Icon } from '@iconify-icon/react';
 import { useDebounceFn } from 'ahooks';
-import { Segmented, type SegmentedProps, Input, type InputRef, Checkbox, Spin } from 'antd';
+import { Checkbox, Input, Segmented, Spin, type InputRef, type SegmentedProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import TagManagementModal from '@/components/base/tag-management';
-import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
-import { usePermission } from '@/hooks/usePermission';
-import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
-import type { App, AppSearchParams } from '@/services/integrated/apps/app';
-import { appsService } from '@/services/integrated/apps/appsApi';
-import { useTagStore } from '@/stores/useTagStore.ts';
 import AppCard from './AppCard';
 import './apps.scss';
-import { Icon } from '@iconify-icon/react';
 const { Search } = Input;
 /**
  * 应用设计
@@ -78,7 +78,7 @@ const Apps: React.FC = () => {
   const handleSearch = (value: string) => {
     const search = {
       name: value,
-      type: searchParams.type,
+      type: searchParams.type ?? 0,
       pageNum: searchParams.pageNum,
       pageSize: searchParams.pageSize,
     };
@@ -87,7 +87,7 @@ const Apps: React.FC = () => {
       refetch();
       return;
     }
-    setSearchParams((prev) => ({ ...prev, ...search }));
+    setSearchParams((prev) => ({ ...prev, ...search, type: search.type ?? prev.type }));
   };
 
   useEffect(() => {
@@ -127,7 +127,7 @@ const Apps: React.FC = () => {
       // 更新页面应用的检索
       setSearchParams((prev) => ({ ...prev, tags: tagFilterValue }));
     },
-    { wait: 500 },
+    { wait: 500 }
   );
 
   /**
@@ -157,7 +157,11 @@ const Apps: React.FC = () => {
             />
           </div>
           <div className="w-full flex justify-between items-center">
-            <Segmented<number> options={segmentedOptions} onChange={onSegmentedChange} value={searchParams.type} />
+            <Segmented<number>
+              options={segmentedOptions}
+              onChange={onSegmentedChange}
+              value={searchParams.type ?? (0 as number)}
+            />
             <div>
               {/* 区分我创建的、标签页 */}
               <Checkbox onChange={(e) => onCreatedChange(e.target.checked)}>{t('app.createBy')}</Checkbox>

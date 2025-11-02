@@ -87,22 +87,6 @@ export interface EndpointTypeConfig {
   updateBy?: string;
 }
 
-/**
- * 端点类型列表项
- */
-export interface EndpointTypeListItem {
-  id: string;
-  endpointType: string;
-  typeName: string;
-  typeCode: string;
-  icon?: string;
-  description?: string;
-  schemaVersion: string;
-  fieldCount: number;
-  status: boolean;
-  createTime?: string;
-  updateTime?: string;
-}
 
 /**
  * 端点类型搜索参数
@@ -162,8 +146,8 @@ export const endpointConfigService = {
    */
   async getEndpointTypeList(
     params: EndpointTypeSearchParams
-  ): Promise<PageResult<EndpointTypeListItem>> {
-    const response = await HttpRequest.post<PageResult<EndpointTypeListItem>>(
+  ): Promise<PageResult<EndpointTypeConfig>> {
+    const response = await HttpRequest.post<PageResult<EndpointTypeConfig>>(
       {
         url: EndpointConfigAction.list,
         data: params,

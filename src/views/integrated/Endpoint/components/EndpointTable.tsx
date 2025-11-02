@@ -1,15 +1,9 @@
-import React from 'react';
-import { Table, Tag, Space, Button, Switch, Tooltip } from 'antd';
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExportOutlined,
-  ThunderboltOutlined,
-} from '@ant-design/icons';
-import type { TableProps, TablePaginationConfig } from 'antd';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import type { TablePaginationConfig, TableProps } from 'antd';
+import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import React from 'react';
 
 interface EndpointTableProps {
   /** 数据源 */
@@ -92,19 +86,11 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       ),
     },
     {
-      title: '端点编码',
-      dataIndex: 'code',
-      key: 'code',
-      width: 180,
-    },
-    {
       title: '端点类型',
       dataIndex: 'endpointType',
       key: 'endpointType',
       width: 150,
-      render: (type: string) => (
-        <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>
-      ),
+      render: (type: string) => <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>,
     },
     {
       title: '端点分类',
@@ -146,6 +132,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
+      align: 'center',
       width: 180,
       render: (time) => time || '-',
     },
@@ -157,49 +144,23 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => onView(record)}
-          >
+          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)}>
             查看
           </Button>
 
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(record)}
-          >
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
             编辑
           </Button>
 
-          <Button
-            type="link"
-            size="small"
-            icon={<ThunderboltOutlined />}
-            onClick={() => onTest(record)}
-          >
+          <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)}>
             测试
           </Button>
 
-          <Button
-            type="link"
-            size="small"
-            icon={<ExportOutlined />}
-            onClick={() => onExport(record)}
-          >
+          <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)}>
             导出
           </Button>
 
-          <Button
-            type="link"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => onDelete(record)}
-          >
+          <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)}>
             删除
           </Button>
         </Space>
@@ -226,4 +187,3 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
 };
 
 export default React.memo(EndpointTable);
-

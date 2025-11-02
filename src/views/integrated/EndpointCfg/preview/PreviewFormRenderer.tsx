@@ -1,8 +1,8 @@
-import React, { memo, useState } from 'react';
-import { Form } from 'antd';
-import type { FormInstance } from 'antd';
-import { AppstoreAddOutlined } from '@ant-design/icons';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { AppstoreAddOutlined } from '@ant-design/icons';
+import type { FormInstance } from 'antd';
+import { Form } from 'antd';
+import React, { memo, useState } from 'react';
 import PreviewFormField from './PreviewFormField';
 
 interface PreviewFormRendererProps {
@@ -21,25 +21,20 @@ interface PreviewFormRendererProps {
  * 根据字段配置动态渲染整个表单
  * 使用 memo 避免不必要的重渲染
  */
-const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
-  form,
-  fields,
-  mode,
-  initialValues = {},
-}) => {
+const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields, mode, initialValues = {} }) => {
   /**
    * 合并字段的默认值到初始值中
    */
   const mergedInitialValues = React.useMemo(() => {
     const merged = { ...initialValues };
-    
-    fields.forEach(field => {
+
+    fields.forEach((field) => {
       // 如果字段有默认值且初始值中没有该字段，则使用默认值
       if (field.properties?.['defaultValue'] !== undefined && merged[field.field] === undefined) {
         merged[field.field] = field.properties?.['defaultValue'];
       }
     });
-    
+
     return merged;
   }, [fields, initialValues]);
 
@@ -60,14 +55,14 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
     // 先过滤
     let filtered = fields;
     if (mode) {
-      filtered = fields.filter(field => {
+      filtered = fields.filter((field) => {
         // 如果字段没有指定 mode，则在所有模式下都显示
         if (!field.mode) return true;
         // 检查字段的 mode 是否匹配当前模式
         return field.mode.includes(mode);
       });
     }
-    
+
     // 再排序
     return [...filtered].sort((a, b) => {
       const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
@@ -81,58 +76,26 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
           <AppstoreAddOutlined className="text-6xl text-gray-300 mb-4" />
-          <p className="text-gray-400 text-base">
-            {mode ? `当前模式 (${mode}) 下暂无字段配置` : '暂无字段配置'}
-          </p>
+          <p className="text-gray-400 text-base">{mode ? `当前模式 (${mode}) 下暂无字段配置` : '暂无字段配置'}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="preview-form-renderer">
-      <Form
-        form={form}
-        layout="horizontal"
-        initialValues={mergedInitialValues}
-        onValuesChange={handleValuesChange}
-        autoComplete="off"
-      >
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '0 16px'
-        }}>
-          {sortedFields.map((field) => (
-            <div 
-              key={field.id || field.field}
-              style={{
-                gridColumn: (field.component === 'TextArea' || field.component === 'JSON') 
-                  ? '1 / -1' 
-                  : 'auto'
-              }}
-            >
-              <PreviewFormField field={field} formValues={formValues} />
-            </div>
-          ))}
-        </div>
-      </Form>
-
-      <style>{`
-        .preview-form-renderer .ant-form-item {
-          margin-bottom: 20px;
-        }
-        
-        .preview-form-renderer .ant-form-item-label {
-          padding-bottom: 4px;
-        }
-        
-        .preview-form-renderer .ant-form-item-label > label {
-          font-weight: 500;
-          color: #262626;
-        }
-      `}</style>
-    </div>
+    <Form
+      form={form}
+      layout="horizontal"
+      initialValues={mergedInitialValues}
+      onValuesChange={handleValuesChange}
+      labelCol={{ span: 3 }}
+      wrapperCol={{ span: 19 }}
+      autoComplete="off"
+    >
+      {sortedFields.map((field: SchemaField) => (
+        <PreviewFormField key={field.field} field={field} formValues={formValues} />
+      ))}
+    </Form>
   );
 };
 
@@ -148,4 +111,3 @@ export default memo(PreviewFormRenderer, (prevProps, nextProps) => {
     prevProps.initialValues === nextProps.initialValues
   );
 });
-

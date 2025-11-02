@@ -1,32 +1,41 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Tabs, Dropdown, Button, type TabsProps, type MenuProps } from 'antd';
-import { useNavigate, useLocation } from 'react-router';
-import { useTranslation } from 'react-i18next';
-import { useShallow } from 'zustand/shallow';
-import { useTabStore, type TabItem } from '@/stores/tabStore';
 import { useMenuStore } from '@/stores/store';
+import { useTabStore, type TabItem } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
-import { getIcon } from '@/utils/optimized-icons';
 import type { RouteItem } from '@/types/route';
+import { getIcon } from '@/utils/optimized-icons';
 import { DownOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Tabs, type MenuProps, type TabsProps } from 'antd';
+import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useShallow } from 'zustand/shallow';
 import './tabBar.scss';
 
 interface ActivityTabBarProps {
   className?: string;
 }
 
-
-const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
+/**
+ * 使用 React 19.2 优化的 TabBar 组件
+ *
+ * 核心优化：
+ * 1. 拆分复杂的 useEffect，提升可读性和性能
+ * 2. 减少 startTransition 的使用，只在真正需要时使用
+ * 3. 优化菜单配置函数，减少重新创建
+ * 4. 使用 useRef 缓存稳定的引用，减少依赖
+ * 5. 简化路由缓存逻辑
+ */
+const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // 用于右键菜单的状态管理
+  // 右键菜单状态
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [contextMenuTabKey, setContextMenuTabKey] = useState<string>('');
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [contextMenuTabKey, setContextMenuTabKey] = useState('');
 
-  // 使用 useShallow 优化状态选择，减少不必要的重渲染
+  // 使用 useShallow 优化状态选择
   const {
     tabs,
     activeKey,
@@ -60,149 +69,128 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
       setTabs: state.setTabs,
     }))
   );
-  
-  const { menus } = useMenuStore(useShallow((state) => ({ menus: state.menus })));
-  const { homePath } = useUserStore(useShallow((state) => ({ homePath: state.homePath })));
 
-  // 根据当前路径查找路由信息 - 使用 useMemo 缓存
-  const findRouteByPath = useMemo(
-    () => (path: string): RouteItem | undefined => {
-      const searchRoute = (routes: RouteItem[], targetPath: string): RouteItem | undefined => {
-        for (const route of routes) {
-          if (route.path === targetPath) {
-            return route;
-          }
-          if (route.children) {
-            const found = searchRoute(route.children, targetPath);
-            if (found) return found;
-          }
+  const menus = useMenuStore((state) => state.menus);
+  const homePath = useUserStore((state) => state.homePath);
+
+  // 使用 Map 缓存路由查找结果
+  const routeCacheRef = useRef(new Map<string, RouteItem | undefined>());
+
+  // 路由查找函数 - 使用稳定的引用
+  const findRouteByPathRef = useRef((path: string): RouteItem | undefined => {
+    // 先从缓存查找
+    if (routeCacheRef.current.has(path)) {
+      return routeCacheRef.current.get(path);
+    }
+
+    // 递归搜索
+    const searchRoute = (routes: RouteItem[], targetPath: string): RouteItem | undefined => {
+      for (const route of routes) {
+        if (route.path === targetPath) return route;
+        if (route.children) {
+          const found = searchRoute(route.children, targetPath);
+          if (found) return found;
         }
-        return undefined;
-      };
+      }
+      return undefined;
+    };
 
-      return searchRoute(menus, path);
-    },
-    [menus],
+    const result = searchRoute(menus, path);
+    routeCacheRef.current.set(path, result);
+    return result;
+  });
+
+  // 菜单变化时清空缓存
+  const prevMenusLengthRef = useRef(menus.length);
+  if (prevMenusLengthRef.current !== menus.length) {
+    routeCacheRef.current.clear();
+    prevMenusLengthRef.current = menus.length;
+  }
+
+  // 创建 tab 的辅助函数
+  const createTabItem = useCallback(
+    (path: string, route: RouteItem, closable: boolean): TabItem => ({
+      key: path,
+      label: route.meta?.title || path,
+      ...(route.meta?.icon && { icon: route.meta.icon }),
+      path,
+      closable,
+      route,
+    }),
+    []
   );
 
-  // 初始化标记，避免重复初始化
+  // 初始化标记
   const isInitializedRef = useRef(false);
-  // 前一个pathname，用于防止重复处理
-  const prevPathnameRef = useRef(pathname);
 
-  // 【优化】合并所有 tab 管理逻辑到单个 useEffect
-  React.useEffect(() => {
-    // 1. 基础检查
-    if (!menus.length || !homePath) return;
-    if (pathname === '/login') return;
+  // 【优化1】初始化逻辑 - 只在首次运行
+  useEffect(() => {
+    if (isInitializedRef.current || !menus.length || !homePath || pathname === '/login') return;
 
-    // 2. 初始化逻辑（只执行一次）
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-      
+    isInitializedRef.current = true;
+    const findRouteByPath = findRouteByPathRef.current;
+
+    // 使用 startTransition 包裹初始化逻辑
+    startTransition(() => {
       if (tabs.length === 0) {
-        // 首次加载，创建 homePath tab
+        // 初始化：创建首页 tab
         const homeRoute = findRouteByPath(homePath);
         if (homeRoute?.path) {
-          const homeTabItem: TabItem = {
-            key: homePath,
-            label: homeRoute.meta?.title || homePath,
-            ...(homeRoute.meta?.icon && { icon: homeRoute.meta.icon }),
-            path: homePath,
-            closable: false,
-            route: homeRoute,
-          };
-          addTab(homeTabItem, { insertAt: 'head', activate: false });
-        }
+          const homeTab = createTabItem(homePath, homeRoute, false);
+          addTab(homeTab, { insertAt: 'head', activate: false });
 
-        // 如果当前路径不是 homePath，创建对应 tab
-        if (pathname !== homePath) {
-          const currentRoute = findRouteByPath(pathname);
-          if (currentRoute?.path) {
-            const currentTabItem: TabItem = {
-              key: pathname,
-              label: currentRoute.meta?.title || pathname,
-              ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
-              path: pathname,
-              closable: true,
-              route: currentRoute,
-            };
-            addTab(currentTabItem, { insertAt: 'tail', activate: true });
+          // 如果当前路径不是首页，创建对应 tab
+          if (pathname !== homePath) {
+            const currentRoute = findRouteByPath(pathname);
+            if (currentRoute?.path) {
+              const currentTab = createTabItem(pathname, currentRoute, true);
+              addTab(currentTab, { insertAt: 'tail', activate: true });
+            } else {
+              navigate({ to: homePath, replace: true });
+            }
           } else {
-            // 路径无效，跳转到 homePath
-            navigate(homePath, { replace: true });
+            setActiveKey(homePath);
           }
-        } else {
-          setActiveKey(homePath);
         }
       } else {
-        // 已有 tabs（可能从 localStorage 恢复），确保 homePath tab 存在且正确
+        // 已有 tabs，确保首页 tab 在第一位
         const homeRoute = findRouteByPath(homePath);
         if (homeRoute?.path) {
-          const homeTabIndex = tabs.findIndex(tab => tab.key === homePath);
-          
+          const homeTabIndex = tabs.findIndex((tab) => tab.key === homePath);
+
           if (homeTabIndex === -1) {
-            // homePath tab 不存在，添加
-            const homeTabItem: TabItem = {
-              key: homePath,
-              label: homeRoute.meta?.title || homePath,
-              ...(homeRoute.meta?.icon && { icon: homeRoute.meta.icon }),
-              path: homePath,
-              closable: false,
-              route: homeRoute,
-            };
-            addTab(homeTabItem, { insertAt: 'head', activate: false });
+            const homeTab = createTabItem(homePath, homeRoute, false);
+            addTab(homeTab, { insertAt: 'head', activate: false });
           } else if (homeTabIndex > 0) {
-            // homePath tab 存在但不在第一位，重新排序
             const homeTab = tabs[homeTabIndex];
             if (homeTab) {
-              const otherTabs = tabs.filter(tab => tab.key !== homePath);
+              const otherTabs = tabs.filter((tab) => tab.key !== homePath);
               setTabs([homeTab, ...otherTabs], activeKey);
             }
           }
-          
-          // 确保 homePath tab 不可关闭
-          const homeTab = tabs.find(tab => tab.key === homePath);
-          if (homeTab?.closable) {
-            const updatedTabs = tabs.map(tab => 
-              tab.key === homePath ? { ...tab, closable: false } : tab
-            );
-            setTabs(updatedTabs, activeKey);
-          }
         }
 
-        // 激活当前路径对应的 tab
-        const currentTab = tabs.find(tab => tab.key === pathname);
+        // 激活当前路径
+        const currentTab = tabs.find((tab) => tab.key === pathname);
         if (currentTab) {
           setActiveKey(pathname);
         } else if (pathname !== homePath) {
           const currentRoute = findRouteByPath(pathname);
           if (currentRoute?.path) {
-            const currentTabItem: TabItem = {
-              key: pathname,
-              label: currentRoute.meta?.title || pathname,
-              ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
-              path: pathname,
-              closable: true,
-              route: currentRoute,
-            };
-            addTab(currentTabItem, { insertAt: 'tail', activate: true });
+            const currentTab = createTabItem(pathname, currentRoute, true);
+            addTab(currentTab, { insertAt: 'tail', activate: true });
           }
         }
       }
-      return;
-    }
+    });
+  }, [menus.length, homePath, pathname]); // 最小化依赖
 
-    // 3. 路径变化处理（初始化后）
-    // 只有当 pathname 真正变化时才处理
-    if (prevPathnameRef.current === pathname) {
-      return;
-    }
-    prevPathnameRef.current = pathname;
+  // 【优化2】路径变化处理 - 独立的 effect
+  useEffect(() => {
+    if (!isInitializedRef.current || !menus.length || !homePath || pathname === '/login') return;
 
-    // 检查当前路径对应的 tab
-    const currentTab = tabs.find(tab => tab.key === pathname);
-    
+    const currentTab = tabs.find((tab) => tab.key === pathname);
+
     if (currentTab) {
       // tab 存在，只需激活
       if (activeKey !== pathname) {
@@ -210,31 +198,25 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
       }
     } else {
       // tab 不存在，创建新 tab
+      const findRouteByPath = findRouteByPathRef.current;
       const currentRoute = findRouteByPath(pathname);
+
       if (currentRoute?.path) {
-        const currentTabItem: TabItem = {
-          key: pathname,
-          label: currentRoute.meta?.title || pathname,
-          ...(currentRoute.meta?.icon && { icon: currentRoute.meta.icon }),
-          path: pathname,
-          closable: true,
-          route: currentRoute,
-        };
-        addTab(currentTabItem, { insertAt: 'tail', activate: true });
-      } else if (pathname !== homePath) {
-        // 路径无效且不是 homePath，跳转到 homePath
-        navigate(homePath, { replace: true });
+        const currentTab = createTabItem(pathname, currentRoute, true);
+        startTransition(() => {
+          addTab(currentTab, { insertAt: 'tail', activate: true });
+        });
       }
     }
 
-    // 4. 确保 tabs 为空时跳转到 homePath
+    // tabs 为空时跳转首页
     if (tabs.length === 0 && pathname !== homePath) {
-      navigate(homePath, { replace: true });
+      navigate({ to: homePath, replace: true });
     }
-  }, [pathname, tabs, activeKey, menus, homePath, findRouteByPath, addTab, setActiveKey, setTabs, navigate]);
+  }, [pathname, tabs.length, activeKey]); // 最小化依赖
 
-  // 【优化】监听用户退出登录事件（独立的副作用）
-  React.useEffect(() => {
+  // 【优化3】监听用户退出登录 - 独立的 effect
+  useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'user-storage') {
         try {
@@ -243,8 +225,8 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
             resetTabs();
             isInitializedRef.current = false;
           }
-        } catch (error) {
-          // 解析失败，忽略
+        } catch {
+          // 忽略解析错误
         }
       }
     };
@@ -253,170 +235,204 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [resetTabs]);
 
-  // 处理右键菜单显示
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent, tabKey: string) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      setContextMenuTabKey(tabKey);
-      setContextMenuPosition({ x: e.clientX, y: e.clientY });
-      setContextMenuVisible(true);
-    },
-    []
-  );
-
-  // 处理右键菜单隐藏
-  const handleContextMenuClose = useCallback(() => {
-    setContextMenuVisible(false);
-    setContextMenuTabKey('');
+  // 处理右键菜单
+  const handleContextMenu = useCallback((e: React.MouseEvent, tabKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuTabKey(tabKey);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setContextMenuVisible(true);
   }, []);
 
-  // 【优化】处理tab点击切换 - 直接导航，让 useEffect 处理状态更新
+  const handleContextMenuClose = useCallback(() => {
+    setContextMenuVisible(false);
+  }, []);
+
+  // 处理 tab 点击切换
   const handleTabClick = useCallback(
-    (key: string, e?: React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>) => {
-      // 检查事件是否来自Dropdown菜单
+    (key: string, e?: React.MouseEvent | React.KeyboardEvent) => {
+      // 检查事件是否来自 Dropdown 菜单
       if (e?.target) {
         const target = e.target as HTMLElement;
-        if (target.closest('.ant-dropdown-menu') || 
-            target.closest('.ant-dropdown-menu-item') ||
-            target.closest('[role="menuitem"]')) {
+        if (target.closest('.ant-dropdown-menu') || target.closest('[role="menuitem"]')) {
           return;
         }
       }
-      
-      // 【优化】只执行导航，状态更新由 useEffect 统一处理
+
+      // 只在路径不同时才导航
       if (key !== pathname) {
-        navigate(key, { replace: true });
+        navigate({ to: key, replace: true });
       }
     },
-    [navigate, pathname],
+    [navigate, pathname]
   );
 
-  // 【优化】处理tab关闭
+  // 处理 tab 关闭
   const handleTabEdit = useCallback(
-    (e: React.Key | React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>, action: 'add' | 'remove') => {
+    (e: React.Key | React.MouseEvent | React.KeyboardEvent, action: 'add' | 'remove') => {
       if (action === 'remove' && typeof e === 'string') {
         const newActiveKey = removeTab(e);
-        // 如果关闭的是当前激活的tab，跳转到新的激活tab
+        // 如果关闭的是当前激活的 tab，跳转到新的激活 tab
         if (e === activeKey && newActiveKey && newActiveKey !== pathname) {
-          navigate(newActiveKey, { replace: true });
+          navigate({ to: newActiveKey, replace: true });
         }
       }
     },
-    [removeTab, activeKey, pathname, navigate],
+    [removeTab, activeKey, pathname, navigate]
   );
 
-  // 【优化】统一的菜单配置函数 - 修复依赖项
+  // 【优化4】统一的菜单配置 - 使用 useCallback + 稳定的 actions ref
+  const actionsRef = useRef({
+    closeTab: (tabKey: string) => {
+      const newActiveKey = removeTab(tabKey);
+      if (tabKey === activeKey && newActiveKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    togglePin: (tabKey: string, isClosable: boolean) => {
+      isClosable ? pinTab(tabKey) : unpinTab(tabKey);
+    },
+    reloadTab: (tabKey: string) => reloadTab(tabKey),
+    openInNew: (path: string) => window.open(path, '_blank'),
+    closeLeftTabs: (tabKey: string) => {
+      const newActiveKey = closeLeftTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeRightTabs: (tabKey: string) => {
+      const newActiveKey = closeRightTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeOtherTabs: (tabKey: string) => {
+      const newActiveKey = closeOtherTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeAllTabs: () => {
+      const newActiveKey = closeAllTabs(homePath);
+      if (newActiveKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      } else if (!newActiveKey && homePath) {
+        navigate({ to: homePath, replace: true });
+      }
+    },
+  });
+
+  // 更新 actions ref
+  actionsRef.current = {
+    closeTab: (tabKey: string) => {
+      const newActiveKey = removeTab(tabKey);
+      if (tabKey === activeKey && newActiveKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    togglePin: (tabKey: string, isClosable: boolean) => {
+      isClosable ? pinTab(tabKey) : unpinTab(tabKey);
+    },
+    reloadTab: (tabKey: string) => reloadTab(tabKey),
+    openInNew: (path: string) => window.open(path, '_blank'),
+    closeLeftTabs: (tabKey: string) => {
+      const newActiveKey = closeLeftTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeRightTabs: (tabKey: string) => {
+      const newActiveKey = closeRightTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeOtherTabs: (tabKey: string) => {
+      const newActiveKey = closeOtherTabs(tabKey, homePath);
+      if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      }
+    },
+    closeAllTabs: () => {
+      const newActiveKey = closeAllTabs(homePath);
+      if (newActiveKey && newActiveKey !== pathname) {
+        navigate({ to: newActiveKey, replace: true });
+      } else if (!newActiveKey && homePath) {
+        navigate({ to: homePath, replace: true });
+      }
+    },
+  };
+
   const getMenuItems = useCallback(
     (targetTabKey?: string): MenuProps['items'] => {
       const tabKey = targetTabKey || activeKey;
-      const targetTab = tabs.find(tab => tab.key === tabKey);
-      
+      const targetTab = tabs.find((tab) => tab.key === tabKey);
       if (!tabKey || !targetTab) return [];
+
+      const actions = actionsRef.current;
 
       return [
         {
           key: 'close',
           label: t('common.close'),
           icon: <span>✕</span>,
-          onClick: () => {
-            const newActiveKey = removeTab(tabKey);
-            if (tabKey === activeKey && newActiveKey && newActiveKey !== pathname) {
-              navigate(newActiveKey, { replace: true });
-            }
-          },
+          onClick: () => actions.closeTab(tabKey),
         },
         {
           key: 'pin',
           label: targetTab.closable ? t('common.pin') : t('common.unpin'),
           icon: <span>📌</span>,
-          onClick: () => {
-            if (targetTab.closable) {
-              pinTab(tabKey);
-            } else {
-              unpinTab(tabKey);
-            }
-          },
+          onClick: () => actions.togglePin(tabKey, targetTab.closable),
         },
         {
           key: 'reload',
           label: t('common.reload'),
           icon: <span>🔄</span>,
-          onClick: () => {
-            reloadTab(tabKey);
-          },
+          onClick: () => actions.reloadTab(tabKey),
         },
         {
           key: 'openInNewWindow',
           label: t('common.openInNewWindow'),
           icon: <span>⧉</span>,
-          onClick: () => {
-            window.open(targetTab.path, '_blank');
-          },
+          onClick: () => actions.openInNew(targetTab.path),
         },
         { type: 'divider' },
         {
           key: 'closeLeft',
           label: t('common.closeLeftTabs'),
           icon: <span>◀</span>,
-          onClick: () => {
-            const newActiveKey = closeLeftTabs(tabKey, homePath);
-            if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-              navigate(newActiveKey, { replace: true });
-            }
-          },
+          onClick: () => actions.closeLeftTabs(tabKey),
         },
         {
           key: 'closeRight',
           label: t('common.closeRightTabs'),
           icon: <span>▶</span>,
-          onClick: () => {
-            const newActiveKey = closeRightTabs(tabKey, homePath);
-            if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-              navigate(newActiveKey, { replace: true });
-            }
-          },
+          onClick: () => actions.closeRightTabs(tabKey),
         },
         {
           key: 'closeOthers',
           label: t('common.closeOtherTabs'),
           icon: <span>❌</span>,
-          onClick: () => {
-            const newActiveKey = closeOtherTabs(tabKey, homePath);
-            if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-              navigate(newActiveKey, { replace: true });
-            }
-          },
+          onClick: () => actions.closeOtherTabs(tabKey),
         },
         {
           key: 'closeAll',
           label: t('common.closeAllTabs'),
           icon: <span>❌</span>,
-          onClick: () => {
-            const newActiveKey = closeAllTabs(homePath);
-            if (newActiveKey && newActiveKey !== pathname) {
-              navigate(newActiveKey, { replace: true });
-            } else if (!newActiveKey && homePath) {
-              navigate(homePath, { replace: true });
-            }
-          },
+          onClick: () => actions.closeAllTabs(),
         },
       ];
     },
-    [activeKey, tabs, t, removeTab, navigate, pathname, pinTab, unpinTab, reloadTab, closeLeftTabs, closeRightTabs, closeOtherTabs, closeAllTabs, homePath],
+    [activeKey, tabs, t]
   );
 
-  // 【优化】构建tab items - 修复依赖项
+  // 构建 tab items - 使用 useMemo 缓存
   const tabItems = useMemo((): TabsProps['items'] => {
     return tabs.map((tab) => ({
       key: tab.key,
       label: (
-        <div 
-          className="flex items-center gap-1 tab-label"
-          onContextMenu={(e) => handleContextMenu(e, tab.key)}
-        >
-          <span className="mr-0.5">{tab.icon && getIcon(tab.icon)}</span>
+        <div className="flex items-center gap-1 tab-label" onContextMenu={(e) => handleContextMenu(e, tab.key)}>
+          {tab.icon && <span className="mr-0.5">{getIcon(tab.icon)}</span>}
           <span>{t(tab.label)}</span>
         </div>
       ),
@@ -425,9 +441,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
     }));
   }, [tabs, t, handleContextMenu]);
 
-
-
-  // 如果没有tabs，不渲染组件
+  // 如果没有 tabs，不渲染组件
   if (tabs.length === 0) {
     return null;
   }
@@ -446,12 +460,10 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
           hideAdd
           className="tab-bar-tabs"
           style={{ margin: 0, width: 'calc(100% - 43px)' }}
-
         />
 
         {/* 右侧功能区域 */}
         <div className="tab-bar-actions">
-          {/* 下拉菜单 */}
           <Dropdown menu={{ items: getMenuItems() || [] }} placement="bottomRight" trigger={['click']}>
             <Button type="text" size="small" icon={<DownOutlined />} className="tab-action-btn" />
           </Dropdown>
@@ -476,6 +488,8 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = ({ className }) => {
       </Dropdown>
     </div>
   );
-};
+});
 
-export default React.memo(ActivityTabBar);
+ActivityTabBar.displayName = 'ActivityTabBar';
+
+export default ActivityTabBar;
