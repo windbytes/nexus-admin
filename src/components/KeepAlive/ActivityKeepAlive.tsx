@@ -21,6 +21,7 @@ interface CacheItem {
  * 3. 优化滚动恢复 - 使用更简洁的方式
  * 4. 使用 useMemo 缓存组件列表，减少渲染
  * 5. 移除不必要的状态，直接渲染缓存的组件
+ * 6. 支持 reloadKey 强制重新加载组件
  *
  * @param children - 子组件
  */
@@ -123,6 +124,10 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
     };
   }, []);
 
+  // 获取当前 tab 的 reloadKey（用于强制重新加载）
+  const currentTab = tabs.find((tab) => tab.key === activeKey);
+  const reloadKey = currentTab?.reloadKey;
+
   // 使用 useMemo 缓存渲染的组件列表
   const cachedComponents = useMemo(() => {
     const components: React.ReactNode[] = [];
@@ -130,8 +135,12 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
     // 渲染所有缓存的组件，使用 Activity 控制显示/隐藏
     cacheRef.current.forEach((cache, key) => {
       const isVisible = key === activeKey;
+      const tab = tabs.find((t) => t.key === key);
+      // 使用 reloadKey 作为 key 的一部分，确保 reloadKey 变化时强制重新挂载
+      const componentKey = tab?.reloadKey ? `${key}-${tab.reloadKey}` : key;
+      
       components.push(
-        <Activity key={key} mode={isVisible ? 'visible' : 'hidden'}>
+        <Activity key={componentKey} mode={isVisible ? 'visible' : 'hidden'}>
           {cache.component}
         </Activity>
       );
@@ -140,15 +149,18 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
     // 如果当前页面未缓存（不需要 keepAlive），直接渲染
     const currentCached = cacheRef.current.get(activeKey);
     if (!currentCached && activeKey) {
+      // 使用 reloadKey 确保组件在 reload 时重新挂载
+      const componentKey = reloadKey ? `${activeKey}-${reloadKey}` : activeKey;
+      
       components.push(
-        <Activity key={activeKey} mode="visible">
+        <Activity key={componentKey} mode="visible">
           {children}
         </Activity>
       );
     }
 
     return components;
-  }, [activeKey, children, tabs.length]); // 依赖 tabs.length 触发更新
+  }, [activeKey, children, tabs.length, reloadKey]); // 添加 reloadKey 到依赖
 
   return (
     <div ref={containerRef} className="h-full relative flex flex-col p-4">
