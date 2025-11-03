@@ -1,5 +1,5 @@
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
-import type { PageQueryParams } from '@/types/global';
 
 /**
  * 组件类型选项
@@ -87,7 +87,6 @@ export interface EndpointTypeConfig {
   updateBy?: string;
 }
 
-
 /**
  * 端点类型搜索参数
  */
@@ -113,17 +112,6 @@ export interface EndpointTypeFormData {
 }
 
 /**
- * 分页结果
- */
-export interface PageResult<T> {
-  records: T[];
-  total: number;
-  totalRow?: number;
-  pageNum: number;
-  pageSize: number;
-}
-
-/**
  * 端点配置API路径
  */
 enum EndpointConfigAction {
@@ -144,9 +132,7 @@ export const endpointConfigService = {
   /**
    * 分页查询端点类型配置列表
    */
-  async getEndpointTypeList(
-    params: EndpointTypeSearchParams
-  ): Promise<PageResult<EndpointTypeConfig>> {
+  async getEndpointTypeList(params: EndpointTypeSearchParams): Promise<PageResult<EndpointTypeConfig>> {
     const response = await HttpRequest.post<PageResult<EndpointTypeConfig>>(
       {
         url: EndpointConfigAction.list,
@@ -161,9 +147,12 @@ export const endpointConfigService = {
    * 获取端点类型配置详情
    */
   async getEndpointTypeDetail(id: string): Promise<EndpointTypeConfig> {
-    const response = await HttpRequest.get<EndpointTypeConfig>({
-      url: `${EndpointConfigAction.detail}/${id}`,
-    }, { successMessageMode: 'none' });
+    const response = await HttpRequest.get<EndpointTypeConfig>(
+      {
+        url: `${EndpointConfigAction.detail}/${id}`,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -247,4 +236,3 @@ export const endpointConfigService = {
     return response;
   },
 };
-

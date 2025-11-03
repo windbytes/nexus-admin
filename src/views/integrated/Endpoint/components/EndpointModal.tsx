@@ -54,7 +54,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ title, children, defa
     {
       key: '1',
       label: title,
-      children: <Card bordered={false}>{children}</Card>,
+      children: <Card variant="borderless">{children}</Card>,
     },
   ];
 
@@ -470,7 +470,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         },
       }}
     >
-      <Tabs defaultActiveKey="config" items={tabItems} />
+      <Tabs defaultActiveKey="config" type="card" items={tabItems} />
     </Modal>
   );
 };

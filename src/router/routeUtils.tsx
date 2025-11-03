@@ -77,7 +77,7 @@ export function flattenRoutes(
 
       result.push({
         path: normalizedPath,
-        component: component, // 直接使用组件函数，不需要 .type
+        component: component,
         menuKey: route.id,
         meta: route.meta,
       });

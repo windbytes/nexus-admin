@@ -1,6 +1,7 @@
+import { usePermission } from '@/hooks/usePermission';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
-import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExportOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import React from 'react';
@@ -46,6 +47,11 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   onStatusChange,
   pagination,
 }) => {
+  // 是否有编辑、导出、删除权限
+  const canEdit = usePermission(['integrated:endpoint:edit']);
+  const canExport = usePermission(['integrated:endpoint:export']);
+  const canDelete = usePermission(['integrated:endpoint:delete']);
+
   /**
    * 获取端点类型标签颜色
    */
@@ -71,7 +77,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
 
   const columns: TableProps<Endpoint>['columns'] = [
     {
-      title: '端点名称',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       width: 200,
@@ -86,24 +92,31 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       ),
     },
     {
-      title: '端点类型',
+      title: '类型',
       dataIndex: 'endpointType',
       key: 'endpointType',
       width: 150,
       render: (type: string) => <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>,
     },
     {
-      title: '端点分类',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 120,
       render: (category) => category || '-',
     },
     {
+      title: '模式',
+      dataIndex: 'mode',
+      key: 'mode',
+      width: 80,
+      align: 'center',
+    },
+    {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
-      width: 250,
+      width: 220,
       ellipsis: {
         showTitle: false,
       },
@@ -140,29 +153,31 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 280,
+      width: 180,
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
-          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)}>
-            查看
-          </Button>
-
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
-            编辑
-          </Button>
+          {canEdit && (
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
+              编辑
+            </Button>
+          )}
 
           <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)}>
             测试
           </Button>
 
-          <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)}>
-            导出
-          </Button>
+          {canExport && (
+            <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)}>
+              导出
+            </Button>
+          )}
 
-          <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)}>
-            删除
-          </Button>
+          {canDelete && (
+            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)}>
+              删除
+            </Button>
+          )}
         </Space>
       ),
     },
@@ -177,11 +192,14 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       dataSource={data}
       loading={loading}
       pagination={pagination}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 'max-content' }}
       rowSelection={{
         selectedRowKeys,
         onChange: onSelectionChange,
       }}
+      onRow={(record) => ({
+        onDoubleClick: () => onView(record),
+      })}
     />
   );
 };

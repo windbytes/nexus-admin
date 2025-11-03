@@ -1,18 +1,15 @@
-import type React from 'react';
-import { useState, useReducer, useCallback } from 'react';
-import { Card, App } from 'antd';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import type {
-  Endpoint,
-  EndpointSearchParams,
-  EndpointFormData,
-} from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint, EndpointFormData, EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
 import { endpointService } from '@/services/integrated/endpoint/endpointApi';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card } from 'antd';
+import type React from 'react';
+import { lazy, useCallback, useReducer, useState } from 'react';
 import EndpointSearchForm from './components/EndpointSearchForm';
-import EndpointTableActions from './components/EndpointTableActions';
 import EndpointTable from './components/EndpointTable';
-import EndpointModal from './components/EndpointModal';
+import EndpointTableActions from './components/EndpointTableActions';
+
+const EndpointModal = lazy(() => import('./components/EndpointModal'));
 
 /**
  * 页面状态定义
@@ -138,8 +135,7 @@ const Endpoint: React.FC = () => {
 
   // 导出端点配置 mutation
   const exportConfigMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
-      endpointService.exportConfig(id, name),
+    mutationFn: ({ id, name }: { id: string; name: string }) => endpointService.exportConfig(id, name),
     onSuccess: () => {
       message.success('导出成功！');
     },
@@ -272,6 +268,13 @@ const Endpoint: React.FC = () => {
   }, [state.selectedRowKeys, state.selectedRows, message, exportConfigMutation]);
 
   /**
+   * 处理导入
+   */
+  const handleImport = () => {
+    message.info('导入功能开发中...');
+  };
+
+  /**
    * 处理测试
    */
   const handleTest = useCallback(
@@ -305,15 +308,12 @@ const Endpoint: React.FC = () => {
   /**
    * 处理选择变更
    */
-  const handleSelectionChange = useCallback(
-    (selectedRowKeys: React.Key[], selectedRows: Endpoint[]) => {
-      dispatch({
-        selectedRowKeys,
-        selectedRows,
-      });
-    },
-    []
-  );
+  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: Endpoint[]) => {
+    dispatch({
+      selectedRowKeys,
+      selectedRows,
+    });
+  }, []);
 
   /**
    * 处理弹窗确认
@@ -355,6 +355,7 @@ const Endpoint: React.FC = () => {
         <EndpointTableActions
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
+          onImport={handleImport}
           onBatchExport={handleBatchExport}
           onRefresh={handleRefresh}
           selectedRowKeys={state.selectedRowKeys}
@@ -378,7 +379,7 @@ const Endpoint: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,
