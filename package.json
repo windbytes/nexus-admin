@@ -55,7 +55,7 @@
     "@tanstack/react-router-devtools": "^1.134.9",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^22.18.13",
+    "@types/node": "^22.19.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/react-is": "^19.2.0",
