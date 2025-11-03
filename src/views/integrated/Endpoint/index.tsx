@@ -61,16 +61,18 @@ const Endpoint: React.FC = () => {
   // Modal/Drawer状态管理
   const { state, modalActions, drawerActions, selectionActions } = useDrawerState();
 
+  // 稳定的回调函数引用
+  const handleMutationSuccess = useCallback(() => {
+    refetch();
+    modalActions.close();
+  }, [refetch, modalActions.close]);
+
+  const handleClearSelection = useCallback(() => {
+    selectionActions.clearSelection();
+  }, [selectionActions.clearSelection]);
+
   // Mutations管理
-  const mutations = useEndpointMutations(
-    () => {
-      refetch();
-      modalActions.close();
-    },
-    () => {
-      selectionActions.clearSelection();
-    }
-  );
+  const mutations = useEndpointMutations(handleMutationSuccess, handleClearSelection);
 
   // 端点处理器Hook
   const { tableHandlers, actionHandlers } = useEndpointHandlers({
@@ -87,6 +89,7 @@ const Endpoint: React.FC = () => {
       selectedRowKeys: state.selectedRowKeys,
       selectedRows: state.selectedRows,
     },
+    onRefresh: refetch,
   });
 
   // 端点测试Hook

@@ -136,12 +136,13 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
 
     if (config) {
       setSelectedEndpointTypeConfig(config);
-      // 类型改变时，清空 model 字段
+      // 类型改变时，清空 mode 字段
       form.setFieldValue('mode', undefined);
     } else {
       setSelectedEndpointTypeConfig(null);
     }
-  }, [endpointTypeName, endpointTypeListModule, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endpointTypeName, endpointTypeListModule]);
 
   /**
    * 获取Schema字段列表（根据选择的 mode 过滤并排序）
@@ -191,7 +192,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       setSelectedEndpointTypeConfig(null);
       setFormValues({});
     }
-  }, [open, initialValues, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialValues]);
 
   /**
    * 当编辑已有数据时，根据 endpointType 加载对应的配置
@@ -301,21 +303,6 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
             <Form.Item name="name" label="端点名称" rules={[{ required: true, message: '请输入端点名称' }]}>
               <Input placeholder="请输入端点名称" />
             </Form.Item>
-
-            <Form.Item
-              name="code"
-              label="端点编码"
-              rules={[
-                { required: true, message: '请输入端点编码' },
-                {
-                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
-                  message: '编码必须以字母开头，只能包含字母、数字和下划线',
-                },
-              ]}
-            >
-              <Input placeholder="请输入端点编码" disabled={!!initialValues?.id} />
-            </Form.Item>
-
             <Form.Item name="endpointType" label="端点类型" rules={[{ required: true, message: '请选择端点类型' }]}>
               <Select
                 placeholder="请选择端点类型"

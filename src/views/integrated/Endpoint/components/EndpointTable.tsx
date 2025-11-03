@@ -240,7 +240,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
             </Button>
           )}
 
-          <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['click']}>
+          <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['hover']}>
             <Button type="link" size="small">
               更多 <DownOutlined />
             </Button>

@@ -29,6 +29,7 @@ interface EndpointHandlersOptions {
     selectedRowKeys: React.Key[];
     selectedRows: Endpoint[];
   };
+  onRefresh: () => void;
 }
 
 /**
@@ -41,6 +42,7 @@ export const useEndpointHandlers = ({
   selectionActions,
   mutations,
   selectedData,
+  onRefresh,
 }: EndpointHandlersOptions) => {
   const { modal, message } = App.useApp();
 
@@ -48,9 +50,12 @@ export const useEndpointHandlers = ({
    * 表格操作处理器
    */
   const tableHandlers = {
-    onView: useCallback((record: Endpoint) => {
-      drawerActions.openDetail(record);
-    }, [drawerActions]),
+    onView: useCallback(
+      (record: Endpoint) => {
+        drawerActions.openDetail(record);
+      },
+      [drawerActions]
+    ),
 
     onEdit: useCallback(
       (record: Endpoint) => {
@@ -178,7 +183,9 @@ export const useEndpointHandlers = ({
       });
     }, [selectedData.selectedRowKeys, selectedData.selectedRows, message, mutations.exportConfig]),
 
-    onRefresh: undefined as any, // 需要外部传入refetch函数
+    onRefresh: useCallback(() => {
+      onRefresh();
+    }, [onRefresh]),
   };
 
   return {
@@ -186,4 +193,3 @@ export const useEndpointHandlers = ({
     actionHandlers,
   };
 };
-
