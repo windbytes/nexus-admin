@@ -417,10 +417,10 @@ const EndpointConfig: React.FC = () => {
     () => ({
       current: queryParams.pageNum || 1,
       pageSize: queryParams.pageSize || 10,
-      total: configListData?.total || 0,
+      total: configListData?.totalRow || 0,
       onChange: handlePaginationChange,
     }),
-    [queryParams.pageNum, queryParams.pageSize, configListData?.total, handlePaginationChange]
+    [queryParams.pageNum, queryParams.pageSize, configListData?.totalRow, handlePaginationChange]
   );
 
   /**
