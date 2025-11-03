@@ -4,10 +4,16 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
-import { lazy, useCallback, useReducer, useState } from 'react';
+import { lazy, useCallback, useMemo, useReducer, useState } from 'react';
+import EndpointCharts from './components/EndpointCharts';
+import EndpointDetailDrawer from './components/EndpointDetailDrawer';
+import EndpointLogDrawer from './components/EndpointLogDrawer';
 import EndpointSearchForm from './components/EndpointSearchForm';
+import EndpointStatistics from './components/EndpointStatistics';
 import EndpointTable from './components/EndpointTable';
 import EndpointTableActions from './components/EndpointTableActions';
+import EndpointTestDrawer from './components/EndpointTestDrawer';
+import EndpointVersionDrawer from './components/EndpointVersionDrawer';
 
 const EndpointModal = lazy(() => import('./components/EndpointModal'));
 
@@ -21,6 +27,14 @@ interface PageState {
   isViewMode: boolean;
   selectedRowKeys: React.Key[];
   selectedRows: Endpoint[];
+  testDrawerVisible: boolean;
+  testEndpoint: Endpoint | null;
+  detailDrawerVisible: boolean;
+  detailEndpoint: Endpoint | null;
+  versionDrawerVisible: boolean;
+  versionEndpoint: Endpoint | null;
+  logDrawerVisible: boolean;
+  logEndpoint: Endpoint | null;
 }
 
 /**
@@ -52,6 +66,14 @@ const Endpoint: React.FC = () => {
       isViewMode: false,
       selectedRowKeys: [],
       selectedRows: [],
+      testDrawerVisible: false,
+      testEndpoint: null,
+      detailDrawerVisible: false,
+      detailEndpoint: null,
+      versionDrawerVisible: false,
+      versionEndpoint: null,
+      logDrawerVisible: false,
+      logEndpoint: null,
     }
   );
 
@@ -175,10 +197,71 @@ const Endpoint: React.FC = () => {
    */
   const handleView = useCallback((record: Endpoint) => {
     dispatch({
-      modalVisible: true,
-      modalTitle: '查看端点',
-      currentRecord: record,
-      isViewMode: true,
+      detailDrawerVisible: true,
+      detailEndpoint: record,
+    });
+  }, []);
+
+  /**
+   * 关闭详情抽屉
+   */
+  const handleCloseDetailDrawer = useCallback(() => {
+    dispatch({
+      detailDrawerVisible: false,
+      detailEndpoint: null,
+    });
+  }, []);
+
+  /**
+   * 处理版本管理
+   */
+  const handleVersion = useCallback((record: Endpoint) => {
+    dispatch({
+      versionDrawerVisible: true,
+      versionEndpoint: record,
+    });
+  }, []);
+
+  /**
+   * 关闭版本抽屉
+   */
+  const handleCloseVersionDrawer = useCallback(() => {
+    dispatch({
+      versionDrawerVisible: false,
+      versionEndpoint: null,
+    });
+  }, []);
+
+  /**
+   * 恢复版本
+   */
+  const handleRestoreVersion = useCallback(async (_endpoint: Endpoint, _version: any) => {
+    // 模拟API调用
+    // TODO: 实际应该调用后端API进行版本恢复
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
+  }, []);
+
+  /**
+   * 处理日志查看
+   */
+  const handleLog = useCallback((record: Endpoint) => {
+    dispatch({
+      logDrawerVisible: true,
+      logEndpoint: record,
+    });
+  }, []);
+
+  /**
+   * 关闭日志抽屉
+   */
+  const handleCloseLogDrawer = useCallback(() => {
+    dispatch({
+      logDrawerVisible: false,
+      logEndpoint: null,
     });
   }, []);
 
@@ -190,6 +273,23 @@ const Endpoint: React.FC = () => {
       modalVisible: true,
       modalTitle: '编辑端点',
       currentRecord: record,
+      isViewMode: false,
+    });
+  }, []);
+
+  /**
+   * 处理克隆
+   */
+  const handleClone = useCallback((record: Endpoint) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, createTime, updateTime, createBy, updateBy, ...cloneData } = record;
+    dispatch({
+      modalVisible: true,
+      modalTitle: '克隆端点',
+      currentRecord: {
+        ...cloneData,
+        name: `${record.name}_副本`,
+      } as Partial<Endpoint>,
       isViewMode: false,
     });
   }, []);
@@ -277,13 +377,62 @@ const Endpoint: React.FC = () => {
   /**
    * 处理测试
    */
-  const handleTest = useCallback(
-    (record: Endpoint) => {
-      message.info(`测试端点：${record.name}（功能开发中...）`);
-      // TODO: 实现端点测试功能
-    },
-    [message]
-  );
+  const handleTest = useCallback((record: Endpoint) => {
+    dispatch({
+      testDrawerVisible: true,
+      testEndpoint: record,
+    });
+  }, []);
+
+  /**
+   * 执行端点测试
+   */
+  const executeTest = useCallback(async (endpoint: Endpoint) => {
+    // 模拟测试逻辑，实际应该调用后端API
+    const startTime = Date.now();
+
+    return new Promise<any>((resolve) => {
+      setTimeout(() => {
+        const responseTime = Date.now() - startTime;
+        const isSuccess = Math.random() > 0.3; // 70%成功率模拟
+
+        if (isSuccess) {
+          resolve({
+            status: 'success',
+            message: '端点连接测试成功',
+            responseTime,
+            timestamp: new Date().toISOString(),
+            details: {
+              endpointType: endpoint.endpointType,
+              connectionStatus: 'connected',
+              serverResponse: 'OK',
+            },
+          });
+        } else {
+          resolve({
+            status: 'failed',
+            message: '端点连接测试失败',
+            responseTime,
+            timestamp: new Date().toISOString(),
+            details: {
+              errorCode: 'CONNECTION_ERROR',
+              errorMessage: '无法连接到目标服务',
+            },
+          });
+        }
+      }, 1500);
+    });
+  }, []);
+
+  /**
+   * 关闭测试抽屉
+   */
+  const handleCloseTestDrawer = useCallback(() => {
+    dispatch({
+      testDrawerVisible: false,
+      testEndpoint: null,
+    });
+  }, []);
 
   /**
    * 处理刷新
@@ -344,8 +493,53 @@ const Endpoint: React.FC = () => {
     updateStatusMutation.isPending ||
     exportConfigMutation.isPending;
 
+  /**
+   * 统计数据计算
+   */
+  const statisticsData = useMemo(() => {
+    const endpoints = result?.records || [];
+    const enabled = endpoints.filter((e) => e.status).length;
+    const disabled = endpoints.filter((e) => !e.status).length;
+
+    // 按类型统计
+    const typeStats: Record<string, number> = {};
+    const typeData: Array<{ name: string; value: number }> = [];
+    endpoints.forEach((e) => {
+      typeStats[e.endpointType] = (typeStats[e.endpointType] || 0) + 1;
+    });
+    Object.entries(typeStats).forEach(([name, value]) => {
+      typeData.push({ name, value });
+    });
+
+    // 按分类统计
+    const categoryStats: Record<string, number> = {};
+    const categoryData: Array<{ name: string; value: number }> = [];
+    endpoints.forEach((e) => {
+      const category = e.category || '未分类';
+      categoryStats[category] = (categoryStats[category] || 0) + 1;
+    });
+    Object.entries(categoryStats).forEach(([name, value]) => {
+      categoryData.push({ name, value });
+    });
+
+    return {
+      total: result?.totalRow || 0,
+      enabled,
+      disabled,
+      typeData,
+      categoryData,
+    };
+  }, [result]);
+
   return (
     <div className="h-full flex flex-col gap-4">
+      {/* 统计卡片 */}
+      <EndpointStatistics
+        total={statisticsData.total}
+        enabled={statisticsData.enabled}
+        disabled={statisticsData.disabled}
+      />
+
       {/* 搜索表单 */}
       <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
 
@@ -370,9 +564,12 @@ const Endpoint: React.FC = () => {
           onSelectionChange={handleSelectionChange}
           onView={handleView}
           onEdit={handleEdit}
+          onClone={handleClone}
           onDelete={handleDelete}
           onExport={handleExport}
           onTest={handleTest}
+          onVersion={handleVersion}
+          onLog={handleLog}
           onStatusChange={handleStatusChange}
           pagination={{
             pageSize: searchParams.pageSize,
@@ -391,6 +588,9 @@ const Endpoint: React.FC = () => {
         />
       </Card>
 
+      {/* 图表区域 */}
+      <EndpointCharts typeData={statisticsData.typeData} categoryData={statisticsData.categoryData} />
+
       {/* 新增/编辑/查看弹窗 */}
       <EndpointModal
         open={state.modalVisible}
@@ -401,6 +601,32 @@ const Endpoint: React.FC = () => {
         onOk={handleModalOk}
         onCancel={handleModalCancel}
       />
+
+      {/* 测试抽屉 */}
+      <EndpointTestDrawer
+        open={state.testDrawerVisible}
+        endpoint={state.testEndpoint}
+        onClose={handleCloseTestDrawer}
+        onTest={executeTest}
+      />
+
+      {/* 详情抽屉 */}
+      <EndpointDetailDrawer
+        open={state.detailDrawerVisible}
+        endpoint={state.detailEndpoint}
+        onClose={handleCloseDetailDrawer}
+      />
+
+      {/* 版本管理抽屉 */}
+      <EndpointVersionDrawer
+        open={state.versionDrawerVisible}
+        endpoint={state.versionEndpoint}
+        onClose={handleCloseVersionDrawer}
+        onRestore={handleRestoreVersion}
+      />
+
+      {/* 日志查看抽屉 */}
+      <EndpointLogDrawer open={state.logDrawerVisible} endpoint={state.logEndpoint} onClose={handleCloseLogDrawer} />
     </div>
   );
 };

@@ -1,7 +1,16 @@
 import { usePermission } from '@/hooks/usePermission';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
-import { DeleteOutlined, EditOutlined, ExportOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExportOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  HistoryOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import React from 'react';
@@ -25,6 +34,12 @@ interface EndpointTableProps {
   onExport: (record: Endpoint) => void;
   /** 测试回调 */
   onTest: (record: Endpoint) => void;
+  /** 克隆回调 */
+  onClone: (record: Endpoint) => void;
+  /** 版本管理回调 */
+  onVersion: (record: Endpoint) => void;
+  /** 日志查看回调 */
+  onLog: (record: Endpoint) => void;
   /** 状态变更回调 */
   onStatusChange: (record: Endpoint, checked: boolean) => void;
   /** 分页配置 */
@@ -44,6 +59,9 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   onDelete,
   onExport,
   onTest,
+  onClone,
+  onVersion,
+  onLog,
   onStatusChange,
   pagination,
 }) => {
@@ -153,30 +171,48 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 180,
+      width: 240,
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
+          <Tooltip title="查看详情">
+            <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)} />
+          </Tooltip>
+
           {canEdit && (
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
-              编辑
-            </Button>
+            <Tooltip title="编辑">
+              <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+            </Tooltip>
           )}
 
-          <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)}>
-            测试
-          </Button>
+          {canEdit && (
+            <Tooltip title="克隆">
+              <Button type="link" size="small" icon={<CopyOutlined />} onClick={() => onClone(record)} />
+            </Tooltip>
+          )}
+
+          <Tooltip title="测试连接">
+            <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)} />
+          </Tooltip>
+
+          <Tooltip title="版本管理">
+            <Button type="link" size="small" icon={<HistoryOutlined />} onClick={() => onVersion(record)} />
+          </Tooltip>
+
+          <Tooltip title="操作日志">
+            <Button type="link" size="small" icon={<FileTextOutlined />} onClick={() => onLog(record)} />
+          </Tooltip>
 
           {canExport && (
-            <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)}>
-              导出
-            </Button>
+            <Tooltip title="导出配置">
+              <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)} />
+            </Tooltip>
           )}
 
           {canDelete && (
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)}>
-              删除
-            </Button>
+            <Tooltip title="删除">
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)} />
+            </Tooltip>
           )}
         </Space>
       ),

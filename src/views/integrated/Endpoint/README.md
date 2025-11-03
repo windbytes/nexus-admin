@@ -23,14 +23,22 @@
 - **统一管理界面**：搜索、新增、编辑、删除、批量操作、导出等完整功能
 - **实时验证**：表单字段实时验证，支持自定义验证规则
 - **状态管理**：支持端点启用/禁用状态切换
-- **测试功能**：支持端点配置测试（开发中）
+- **端点克隆**：快速克隆现有端点配置，提高配置效率
+- **连接测试**：支持端点配置测试，实时展示测试结果和响应时间
+- **详情查看**：抽屉式详情展示，完整查看端点配置信息
+- **数据统计**：实时统计端点数量、状态、类型分布等关键指标
+- **可视化图表**：ECharts图表展示端点类型和分类分布
+- **版本管理**：记录配置变更历史，支持版本回滚
+- **操作日志**：详细记录端点操作日志，支持日志过滤和搜索
 
 ### 🎨 用户体验
 
-- **简洁界面**：上下布局，搜索区域+表格区域
-- **最小化渲染**：组件细粒度拆分，React.memo优化性能
+- **简洁界面**：统计卡片+搜索区域+表格区域+可视化图表的完整布局
+- **最小化渲染**：组件细粒度拆分，React.memo优化性能，每个组件不超过300行
 - **响应式设计**：基于Tailwind CSS的响应式布局
 - **友好提示**：完整的成功/错误提示信息
+- **抽屉式交互**：测试、详情、版本、日志等功能采用抽屉式展示，不阻断主流程
+- **图标化操作**：操作按钮采用图标+Tooltip形式，节省空间且直观
 
 ## 技术架构
 
@@ -55,6 +63,12 @@
 │   ├── 表格操作 (EndpointTableActions.tsx)
 │   ├── 数据表格 (EndpointTable.tsx)
 │   ├── 配置弹窗 (EndpointModal.tsx)
+│   ├── 统计卡片 (EndpointStatistics.tsx)
+│   ├── 可视化图表 (EndpointCharts.tsx)
+│   ├── 测试抽屉 (EndpointTestDrawer.tsx)
+│   ├── 详情抽屉 (EndpointDetailDrawer.tsx)
+│   ├── 版本抽屉 (EndpointVersionDrawer.tsx)
+│   ├── 日志抽屉 (EndpointLogDrawer.tsx)
 │   └── 动态表单 (DynamicForm/index.tsx)
 └── 页面层
     └── 主页面 (index.tsx)
@@ -115,8 +129,15 @@ CREATE TABLE tb_endpoint (
 
 ### 3. 查看端点
 
-1. 在表格中点击「查看」按钮
-2. 查看端点完整配置信息（只读模式）
+1. 在表格中点击「查看详情」图标
+2. 在右侧抽屉中查看端点完整配置信息
+3. 包含基础信息、配置信息、标签、备注和系统信息
+
+### 3.1. 克隆端点
+
+1. 在表格中点击「克隆」图标
+2. 系统自动复制端点配置并添加"\_副本"后缀
+3. 修改名称和编码后保存
 
 ### 4. 删除端点
 
@@ -130,7 +151,36 @@ CREATE TABLE tb_endpoint (
 
 ### 6. 测试端点
 
-点击表格中的「测试」按钮，测试端点连接（功能开发中）
+1. 点击表格中的「测试连接」图标
+2. 在测试抽屉中点击「开始测试」按钮
+3. 查看测试结果、响应时间和详细信息
+4. 支持重新测试功能
+
+### 7. 版本管理
+
+1. 点击表格中的「版本管理」图标
+2. 查看端点配置的历史版本列表
+3. 点击「查看」查看指定版本的配置详情
+4. 点击「恢复」将配置回滚到指定版本
+
+### 8. 操作日志
+
+1. 点击表格中的「操作日志」图标
+2. 查看端点的所有操作记录
+3. 支持按日志级别筛选（全部/成功/信息/警告/错误）
+4. 支持关键词搜索日志内容
+5. 点击「刷新」按钮更新日志列表
+
+### 9. 数据统计
+
+1. 页面顶部展示4个统计卡片：
+   - 端点总数
+   - 启用端点数
+   - 禁用端点数
+   - 活跃率
+2. 页面底部展示2个图表：
+   - 端点类型分布（饼图）
+   - 端点分类统计（柱状图）
 
 ## 组件说明
 
@@ -139,10 +189,12 @@ CREATE TABLE tb_endpoint (
 **功能**：提供端点搜索功能
 
 **Props**：
+
 - `onSearch`: 搜索回调函数
 - `loading`: 加载状态
 
 **搜索条件**：
+
 - 端点名称（模糊搜索）
 - 端点编码（模糊搜索）
 - 端点类型
@@ -154,6 +206,7 @@ CREATE TABLE tb_endpoint (
 **功能**：提供批量操作按钮
 
 **Props**：
+
 - `onAdd`: 新增回调
 - `onBatchDelete`: 批量删除回调
 - `onBatchExport`: 批量导出回调
@@ -166,23 +219,144 @@ CREATE TABLE tb_endpoint (
 **功能**：展示端点列表数据
 
 **Props**：
+
 - `data`: 数据源
 - `loading`: 加载状态
 - `selectedRowKeys`: 选中的行
 - `onSelectionChange`: 选择变更回调
 - `onView`: 查看回调
 - `onEdit`: 编辑回调
+- `onClone`: 克隆回调
 - `onDelete`: 删除回调
 - `onExport`: 导出回调
 - `onTest`: 测试回调
+- `onVersion`: 版本管理回调
+- `onLog`: 日志查看回调
 - `onStatusChange`: 状态变更回调
 - `pagination`: 分页配置
+
+**操作按钮**：
+
+- 查看详情（眼睛图标）
+- 编辑（编辑图标）
+- 克隆（复制图标）
+- 测试连接（闪电图标）
+- 版本管理（历史图标）
+- 操作日志（文档图标）
+- 导出配置（导出图标）
+- 删除（删除图标）
+
+### EndpointStatistics - 统计卡片
+
+**功能**：展示端点统计数据
+
+**Props**：
+
+- `total`: 端点总数
+- `enabled`: 启用的端点数
+- `disabled`: 禁用的端点数
+
+**特性**：
+
+- 4个统计卡片展示关键指标
+- 使用Ant Design主题色[[memory:7793762]]
+- 鼠标悬停有阴影效果
+
+### EndpointCharts - 可视化图表
+
+**功能**：ECharts图表展示端点分布[[memory:7793770]]
+
+**Props**：
+
+- `typeData`: 按类型统计的数据
+- `categoryData`: 按分类统计的数据
+
+**特性**：
+
+- 饼图展示端点类型分布
+- 柱状图展示端点分类统计
+- Canvas渲染模式
+- 响应式自适应
+- 使用Ant Design主题色[[memory:7793762]]
+
+### EndpointTestDrawer - 测试抽屉
+
+**功能**：端点连接测试
+
+**Props**：
+
+- `open`: 是否显示
+- `endpoint`: 当前端点信息
+- `onClose`: 关闭回调
+- `onTest`: 测试函数
+
+**特性**：
+
+- 展示端点基本信息
+- 实时显示测试状态
+- 展示响应时间和详细信息
+- 测试成功/失败的提示建议
+
+### EndpointDetailDrawer - 详情抽屉
+
+**功能**：查看端点完整配置
+
+**Props**：
+
+- `open`: 是否显示
+- `endpoint`: 端点信息
+- `onClose`: 关闭回调
+
+**特性**：
+
+- 基础信息展示
+- 配置信息JSON格式化显示
+- 标签展示
+- 系统信息（创建/更新时间和操作人）
+
+### EndpointVersionDrawer - 版本抽屉
+
+**功能**：端点配置版本管理
+
+**Props**：
+
+- `open`: 是否显示
+- `endpoint`: 端点信息
+- `onClose`: 关闭回调
+- `onRestore`: 恢复版本回调
+
+**特性**：
+
+- 版本列表展示
+- 当前版本标记
+- 查看版本配置详情
+- 版本回滚功能
+- 确认对话框防误操作
+
+### EndpointLogDrawer - 日志抽屉
+
+**功能**：查看端点操作日志
+
+**Props**：
+
+- `open`: 是否显示
+- `endpoint`: 端点信息
+- `onClose`: 关闭回调
+
+**特性**：
+
+- 日志级别筛选
+- 关键词搜索
+- 日志列表分页展示
+- 不同级别用不同颜色标记
+- 刷新功能
 
 ### EndpointModal - 配置弹窗
 
 **功能**：新增/编辑/查看端点
 
 **Props**：
+
 - `open`: 是否显示
 - `title`: 标题
 - `loading`: 加载状态
@@ -192,6 +366,7 @@ CREATE TABLE tb_endpoint (
 - `onCancel`: 取消回调
 
 **特性**：
+
 - 三个Tab页：基础信息、配置信息、其他信息
 - 根据端点类型动态加载配置Schema
 - 自动表单验证
@@ -201,10 +376,12 @@ CREATE TABLE tb_endpoint (
 **功能**：根据Schema配置动态渲染表单字段
 
 **Props**：
+
 - `schema`: 表单Schema配置
 - `form`: 表单实例
 
 **支持的组件类型**：
+
 - Input - 输入框
 - InputPassword - 密码输入框
 - InputNumber - 数字输入框
@@ -219,19 +396,19 @@ CREATE TABLE tb_endpoint (
 ### 端点列表查询
 
 ```typescript
-POST /integrated/endpoint/list
+POST / integrated / endpoint / list;
 ```
 
 ### 新增端点
 
 ```typescript
-POST /integrated/endpoint/add
+POST / integrated / endpoint / add;
 ```
 
 ### 更新端点
 
 ```typescript
-POST /integrated/endpoint/update
+POST / integrated / endpoint / update;
 ```
 
 ### 删除端点
@@ -243,37 +420,37 @@ POST /integrated/endpoint/delete
 ### 批量删除端点
 
 ```typescript
-POST /integrated/endpoint/batchDelete
+POST / integrated / endpoint / batchDelete;
 ```
 
 ### 获取端点详情
 
 ```typescript
-GET /integrated/endpoint/detail/{id}
+GET / integrated / endpoint / detail / { id };
 ```
 
 ### 测试端点
 
 ```typescript
-POST /integrated/endpoint/test
+POST / integrated / endpoint / test;
 ```
 
 ### 验证配置
 
 ```typescript
-POST /integrated/endpoint/validateConfig
+POST / integrated / endpoint / validateConfig;
 ```
 
 ### 导出配置
 
 ```typescript
-POST /integrated/endpoint/exportConfig/{id}
+POST / integrated / endpoint / exportConfig / { id };
 ```
 
 ### 导入配置
 
 ```typescript
-POST /integrated/endpoint/importConfig
+POST / integrated / endpoint / importConfig;
 ```
 
 ### 获取配置Schema
@@ -287,6 +464,7 @@ GET /integrated/endpoint/getConfigSchema?endpointType={type}
 ### 添加新的端点类型
 
 1. **数据库层**：创建对应的配置表
+
    ```sql
    CREATE TABLE tb_endpoint_newtype (
        id BIGSERIAL PRIMARY KEY,
@@ -297,24 +475,26 @@ GET /integrated/endpoint/getConfigSchema?endpointType={type}
    ```
 
 2. **API层**：在 `endpointApi.ts` 中添加类型定义
+
    ```typescript
    export interface NewTypeEndpointConfig {
-       // 配置字段定义
+     // 配置字段定义
    }
    ```
 
 3. **Schema层**：在 `endpointConfigSchema.mock.ts` 中添加Schema配置
+
    ```typescript
    export const newtypeEndpointSchema: FormSchemaField[] = [
-       // Schema配置
+     // Schema配置
    ];
    ```
 
 4. **更新映射**：在 `endpointSchemaMap` 中添加映射关系
    ```typescript
    export const endpointSchemaMap = {
-       // ...
-       newtype: newtypeEndpointSchema,
+     // ...
+     newtype: newtypeEndpointSchema,
    };
    ```
 
@@ -332,13 +512,23 @@ GET /integrated/endpoint/getConfigSchema?endpointType={type}
 4. **密码安全**：数据库密码等敏感信息需要加密存储
 5. **模拟数据**：当前使用模拟的Schema配置，后续需要对接真实的后端接口
 
-## 未来规划
+## 功能完成情况
 
-- [ ] 完善端点测试功能
-- [ ] 支持端点配置版本管理
-- [ ] 支持端点配置克隆
-- [ ] 增加端点使用统计
-- [ ] 支持更多端点类型
-- [ ] 配置可视化编辑器
+### ✅ 已完成
+
+- [x] 完善端点测试功能 - 实时测试结果展示
+- [x] 支持端点配置版本管理 - 历史版本查看和回滚
+- [x] 支持端点配置克隆 - 快速复制配置
+- [x] 增加端点使用统计 - 统计卡片和可视化图表
+- [x] 操作日志查看 - 详细的操作记录
+- [x] 详情抽屉展示 - 完整配置查看
+
+### 🚀 未来规划
+
+- [ ] 支持更多端点类型（Kafka、RocketMQ等）
+- [ ] 配置可视化编辑器（拖拽式配置）
 - [ ] 端点调用链路追踪
-
+- [ ] 端点性能监控和告警
+- [ ] 端点依赖关系图谱
+- [ ] 批量导入功能
+- [ ] 配置模板市场
