@@ -4,6 +4,7 @@ import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointAp
 import {
   CopyOutlined,
   DeleteOutlined,
+  DownOutlined,
   EditOutlined,
   ExportOutlined,
   EyeOutlined,
@@ -12,7 +13,7 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
-import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import { Button, Dropdown, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import React from 'react';
 
 interface EndpointTableProps {
@@ -93,6 +94,59 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
     return option?.label || type;
   };
 
+  /**
+   * 生成更多操作菜单
+   */
+  const getMoreMenuItems = (record: Endpoint) => {
+    const items = [
+      {
+        key: 'clone',
+        label: '克隆',
+        icon: <CopyOutlined />,
+        onClick: () => onClone(record),
+        disabled: !canEdit,
+      },
+      {
+        key: 'test',
+        label: '测试',
+        icon: <ThunderboltOutlined />,
+        onClick: () => onTest(record),
+      },
+      {
+        key: 'version',
+        label: '版本管理',
+        icon: <HistoryOutlined />,
+        onClick: () => onVersion(record),
+      },
+      {
+        key: 'log',
+        label: '操作日志',
+        icon: <FileTextOutlined />,
+        onClick: () => onLog(record),
+      },
+      {
+        type: 'divider' as const,
+      },
+      {
+        key: 'export',
+        label: '导出配置',
+        icon: <ExportOutlined />,
+        onClick: () => onExport(record),
+        disabled: !canExport,
+      },
+      {
+        key: 'delete',
+        label: '删除',
+        icon: <DeleteOutlined />,
+        onClick: () => onDelete(record),
+        danger: true,
+        disabled: !canDelete,
+      },
+    ];
+
+    return items;
+  };
+
   const columns: TableProps<Endpoint>['columns'] = [
     {
       title: '名称',
@@ -171,49 +225,25 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 240,
+      width: 150,
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="查看详情">
-            <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)} />
-          </Tooltip>
+          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)}>
+            查看
+          </Button>
 
           {canEdit && (
-            <Tooltip title="编辑">
-              <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)} />
-            </Tooltip>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
+              编辑
+            </Button>
           )}
 
-          {canEdit && (
-            <Tooltip title="克隆">
-              <Button type="link" size="small" icon={<CopyOutlined />} onClick={() => onClone(record)} />
-            </Tooltip>
-          )}
-
-          <Tooltip title="测试连接">
-            <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)} />
-          </Tooltip>
-
-          <Tooltip title="版本管理">
-            <Button type="link" size="small" icon={<HistoryOutlined />} onClick={() => onVersion(record)} />
-          </Tooltip>
-
-          <Tooltip title="操作日志">
-            <Button type="link" size="small" icon={<FileTextOutlined />} onClick={() => onLog(record)} />
-          </Tooltip>
-
-          {canExport && (
-            <Tooltip title="导出配置">
-              <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)} />
-            </Tooltip>
-          )}
-
-          {canDelete && (
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)} />
-            </Tooltip>
-          )}
+          <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['click']}>
+            <Button type="link" size="small">
+              更多 <DownOutlined />
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
