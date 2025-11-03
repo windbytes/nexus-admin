@@ -155,7 +155,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       width: 200,
       fixed: 'left',
       ellipsis: {
-        showTitle: false,
+        showTitle: true,
       },
       render: (name) => (
         <Tooltip placement="topLeft" title={name}>
@@ -167,7 +167,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '类型',
       dataIndex: 'endpointType',
       key: 'endpointType',
-      width: 150,
+      width: 120,
       render: (type: string) => <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>,
     },
     {
@@ -219,6 +219,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       key: 'createTime',
       align: 'center',
       width: 180,
+      sorter: (a: Endpoint, b: Endpoint) => (a.createTime || '').localeCompare(b.createTime || ''),
       render: (time) => time || '-',
     },
     {

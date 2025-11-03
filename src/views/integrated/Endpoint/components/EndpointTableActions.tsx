@@ -13,6 +13,8 @@ interface EndpointTableActionsProps {
   onBatchExport: () => void;
   /** 刷新回调 */
   onRefresh: () => void;
+  /** 预加载Modal回调（可选） */
+  onPreloadModal?: () => void;
   /** 选中的行 */
   selectedRowKeys: React.Key[];
   /** 加载状态 */
@@ -28,6 +30,7 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
   onImport,
   onBatchExport,
   onRefresh,
+  onPreloadModal,
   selectedRowKeys,
   loading,
 }) => {
@@ -36,25 +39,21 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
   return (
     <div className="mb-4 flex justify-between items-center">
       <Space size="small">
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-          新增端点
-        </Button>
         <Button
-          danger
-          icon={<DeleteOutlined />}
-          onClick={onBatchDelete}
-          disabled={!hasSelected || loading}
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={onAdd}
+          onMouseEnter={onPreloadModal} // 鼠标悬停时预加载Modal
         >
+          新增
+        </Button>
+        <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelected || loading}>
           批量删除
         </Button>
         <Button icon={<ImportOutlined />} onClick={onImport}>
           导入
         </Button>
-        <Button
-          icon={<ExportOutlined />}
-          onClick={onBatchExport}
-          disabled={!hasSelected || loading}
-        >
+        <Button icon={<ExportOutlined />} onClick={onBatchExport} disabled={!hasSelected || loading}>
           批量导出
         </Button>
       </Space>

@@ -166,19 +166,17 @@ const Endpoint: React.FC = () => {
       </Card>
 
       {/* 新增/编辑/查看弹窗 */}
-      {state.modalVisible && (
-        <Suspense fallback={<Spin />}>
-          <EndpointModal
-            open={state.modalVisible}
-            title={state.modalTitle}
-            loading={mutations.saveEndpoint.isPending}
-            {...(state.currentRecord && { initialValues: state.currentRecord })}
-            isViewMode={state.isViewMode}
-            onOk={handleModalOk}
-            onCancel={modalActions.close}
-          />
-        </Suspense>
-      )}
+      <Suspense fallback={<Spin />}>
+        <EndpointModal
+          open={state.modalVisible}
+          title={state.modalTitle}
+          loading={mutations.saveEndpoint.isPending}
+          {...(state.currentRecord && { initialValues: state.currentRecord })}
+          isViewMode={state.isViewMode}
+          onOk={handleModalOk}
+          onCancel={modalActions.close}
+        />
+      </Suspense>
 
       {/* 测试抽屉 */}
       {state.testDrawerVisible && (
