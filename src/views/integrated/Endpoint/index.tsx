@@ -4,15 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, Spin } from 'antd';
 import type React from 'react';
 import { lazy, Suspense, useCallback, useState } from 'react';
-import EndpointCharts from './components/EndpointCharts';
 import EndpointSearchForm from './components/EndpointSearchForm';
-import EndpointStatistics from './components/EndpointStatistics';
 import EndpointTable from './components/EndpointTable';
 import EndpointTableActions from './components/EndpointTableActions';
 import { useDrawerState } from './hooks/useDrawerState';
 import { useEndpointHandlers } from './hooks/useEndpointHandlers';
 import { useEndpointMutations } from './hooks/useEndpointMutations';
-import { useEndpointStatistics } from './hooks/useEndpointStatistics';
 import { useEndpointTest } from './hooks/useEndpointTest';
 
 // 懒加载组件
@@ -34,6 +31,15 @@ const PAGINATION_CONFIG = {
 
 /**
  * 端点维护主页面
+ *
+ * 功能说明：
+ * - 端点的增删改查操作
+ * - 端点搜索与筛选
+ * - 端点测试与详情查看
+ * - 端点版本管理与日志查看
+ * - 端点批量操作（删除、导出、导入）
+ *
+ * 注意：统计功能已迁移至 /src/views/statics/Endpoint/index.tsx
  */
 const Endpoint: React.FC = () => {
   // 搜索参数管理
@@ -126,18 +132,8 @@ const Endpoint: React.FC = () => {
   // 表格加载状态
   const tableLoading = isLoading || mutations.isLoading;
 
-  // 使用统计数据Hook
-  const statisticsData = useEndpointStatistics(result?.records || [], result?.totalRow || 0);
-
   return (
     <div className="h-full flex flex-col gap-4">
-      {/* 统计卡片 */}
-      <EndpointStatistics
-        total={statisticsData.total}
-        enabled={statisticsData.enabled}
-        disabled={statisticsData.disabled}
-      />
-
       {/* 搜索表单 */}
       <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
 
@@ -168,9 +164,6 @@ const Endpoint: React.FC = () => {
           }}
         />
       </Card>
-
-      {/* 图表区域 */}
-      <EndpointCharts typeData={statisticsData.typeData} categoryData={statisticsData.categoryData} />
 
       {/* 新增/编辑/查看弹窗 */}
       {state.modalVisible && (
