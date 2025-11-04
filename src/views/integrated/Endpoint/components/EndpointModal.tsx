@@ -1,3 +1,4 @@
+import DragModal from '@/components/modal/DragModal';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_CATEGORIES } from '@/services/integrated/endpoint/endpointApi';
 import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -5,7 +6,7 @@ import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpo
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { CollapseProps, TabsProps } from 'antd';
-import { Button, Card, Collapse, Divider, Form, Input, Modal, Select, Space, Tabs } from 'antd';
+import { Button, Card, Collapse, Divider, Form, Input, Select, Space, Tabs } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SchemaFormFieldRenderer from './SchemaFormFieldRenderer';
 
@@ -441,7 +442,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   ];
 
   return (
-    <Modal
+    <DragModal
       title={title}
       open={open}
       onOk={handleOk}
@@ -458,7 +459,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       }}
     >
       <Tabs defaultActiveKey="config" type="card" items={tabItems} />
-    </Modal>
+    </DragModal>
   );
 };
 

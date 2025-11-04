@@ -8,12 +8,14 @@ interface EndpointHandlersOptions {
     openAdd: () => void;
     openEdit: (record: Endpoint) => void;
     openClone: (record: Endpoint) => void;
+    openCallChainTrace: (record: Endpoint) => void;
   };
   drawerActions: {
     openDetail: (record: Endpoint) => void;
     openTest: (record: Endpoint) => void;
     openVersion: (record: Endpoint) => void;
     openLog: (record: Endpoint) => void;
+    openDependencies: (record: Endpoint) => void;
   };
   selectionActions: {
     setSelection: (selectedRowKeys: React.Key[], selectedRows: Endpoint[]) => void;
@@ -115,6 +117,20 @@ export const useEndpointHandlers = ({
     onLog: useCallback(
       (record: Endpoint) => {
         drawerActions.openLog(record);
+      },
+      [drawerActions]
+    ),
+
+    onCallChainTrace: useCallback(
+      (record: Endpoint) => {
+        modalActions.openCallChainTrace(record);
+      },
+      [modalActions]
+    ),
+
+    onDependencies: useCallback(
+      (record: Endpoint) => {
+        drawerActions.openDependencies(record);
       },
       [drawerActions]
     ),

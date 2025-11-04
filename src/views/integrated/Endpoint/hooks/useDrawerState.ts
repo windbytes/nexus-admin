@@ -10,6 +10,8 @@ interface DrawerState {
   modalTitle: string;
   currentRecord: Partial<Endpoint> | null;
   isViewMode: boolean;
+  callChainTraceModalVisible: boolean;
+  callChainTraceEndpoint: Endpoint | null;
 
   // Drawer状态
   testDrawerVisible: boolean;
@@ -20,7 +22,8 @@ interface DrawerState {
   versionEndpoint: Endpoint | null;
   logDrawerVisible: boolean;
   logEndpoint: Endpoint | null;
-
+  dependenciesDrawerVisible: boolean;
+  dependenciesEndpoint: Endpoint | null;
   // 选择状态
   selectedRowKeys: React.Key[];
   selectedRows: Endpoint[];
@@ -34,6 +37,9 @@ const initialState: DrawerState = {
   modalTitle: '新增端点',
   currentRecord: null,
   isViewMode: false,
+  callChainTraceModalVisible: false,
+  callChainTraceEndpoint: null,
+
   testDrawerVisible: false,
   testEndpoint: null,
   detailDrawerVisible: false,
@@ -42,6 +48,9 @@ const initialState: DrawerState = {
   versionEndpoint: null,
   logDrawerVisible: false,
   logEndpoint: null,
+  dependenciesDrawerVisible: false,
+  dependenciesEndpoint: null,
+
   selectedRowKeys: [],
   selectedRows: [],
 };
@@ -109,6 +118,18 @@ export const useDrawerState = () => {
         isViewMode: false,
       });
     }, []),
+    openCallChainTrace: useCallback((record: Endpoint) => {
+      dispatch({
+        callChainTraceModalVisible: true,
+        callChainTraceEndpoint: record,
+      });
+    }, []),
+    closeCallChainTrace: useCallback(() => {
+      dispatch({
+        callChainTraceModalVisible: false,
+        callChainTraceEndpoint: null,
+      });
+    }, []),
   };
 
   // Drawer操作
@@ -168,6 +189,18 @@ export const useDrawerState = () => {
         logEndpoint: null,
       });
     }, []),
+    openDependencies: useCallback((record: Endpoint) => {
+      dispatch({
+        dependenciesDrawerVisible: true,
+        dependenciesEndpoint: record,
+      });
+    }, []),
+    closeDependencies: useCallback(() => {
+      dispatch({
+        dependenciesDrawerVisible: false,
+        dependenciesEndpoint: null,
+      });
+    }, []),
   };
 
   // 选择操作
@@ -194,4 +227,3 @@ export const useDrawerState = () => {
     selectionActions,
   };
 };
-

@@ -18,6 +18,10 @@ const EndpointTestDrawer = lazy(() => import('./components/EndpointTestDrawer'))
 const EndpointDetailDrawer = lazy(() => import('./components/EndpointDetailDrawer'));
 const EndpointVersionDrawer = lazy(() => import('./components/EndpointVersionDrawer'));
 const EndpointLogDrawer = lazy(() => import('./components/EndpointLogDrawer'));
+/** 调用链路追踪Modal */
+const EndpointCallChainTraceModal = lazy(() => import('./components/EndpointCallChainTraceModal'));
+/** 依赖关系图谱Drawer */
+const EndpointDependenciesDrawer = lazy(() => import('./components/EndpointDependenciesDrawer'));
 
 /**
  * 分页配置常量
@@ -223,6 +227,28 @@ const Endpoint: React.FC = () => {
             open={state.logDrawerVisible}
             endpoint={state.logEndpoint}
             onClose={drawerActions.closeLog}
+          />
+        </Suspense>
+      )}
+
+      {/* 调用链路追踪弹窗 */}
+      {state.callChainTraceModalVisible && (
+        <Suspense fallback={null}>
+          <EndpointCallChainTraceModal
+            open={state.callChainTraceModalVisible}
+            endpoint={state.callChainTraceEndpoint}
+            onClose={modalActions.closeCallChainTrace}
+          />
+        </Suspense>
+      )}
+
+      {/* 依赖关系图谱抽屉 */}
+      {state.dependenciesDrawerVisible && (
+        <Suspense fallback={null}>
+          <EndpointDependenciesDrawer
+            open={state.dependenciesDrawerVisible}
+            endpoint={state.dependenciesEndpoint}
+            onClose={drawerActions.closeDependencies}
           />
         </Suspense>
       )}

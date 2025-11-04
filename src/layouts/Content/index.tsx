@@ -44,11 +44,7 @@ const Content = memo(({ children }: ContentProps) => {
           minHeight: '400px',
         }}
       >
-        <Spin
-          indicator={<Icon icon="eos-icons:bubble-loading" width={48} />}
-          size="large"
-          tip={<div style={{ marginTop: 16, fontSize: 16, color: '#1890ff' }}>页面加载中...</div>}
-        />
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" />
       </div>
     ),
     []

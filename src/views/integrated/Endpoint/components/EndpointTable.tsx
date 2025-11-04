@@ -2,6 +2,7 @@ import { usePermission } from '@/hooks/usePermission';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import {
+  ApiOutlined,
   CopyOutlined,
   DeleteOutlined,
   DownOutlined,
@@ -10,6 +11,7 @@ import {
   EyeOutlined,
   FileTextOutlined,
   HistoryOutlined,
+  LinkOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
@@ -41,6 +43,10 @@ interface EndpointTableProps {
   onVersion: (record: Endpoint) => void;
   /** 日志查看回调 */
   onLog: (record: Endpoint) => void;
+  /** 调用链路追踪回调 */
+  onCallChainTrace: (record: Endpoint) => void;
+  /** 依赖关系图谱回调 */
+  onDependencies: (record: Endpoint) => void;
   /** 状态变更回调 */
   onStatusChange: (record: Endpoint, checked: boolean) => void;
   /** 分页配置 */
@@ -63,6 +69,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   onClone,
   onVersion,
   onLog,
+  onCallChainTrace,
+  onDependencies,
   onStatusChange,
   pagination,
 }) => {
@@ -123,6 +131,25 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
         label: '操作日志',
         icon: <FileTextOutlined />,
         onClick: () => onLog(record),
+      },
+      {
+        type: 'divider' as const,
+      },
+      {
+        key: 'callChainTrace',
+        label: '调用链路追踪',
+        icon: <LinkOutlined />,
+        onClick: () => {
+          onCallChainTrace(record);
+        },
+      },
+      {
+        key: 'dependencies',
+        label: '依赖关系图谱',
+        icon: <ApiOutlined />,
+        onClick: () => {
+          onDependencies(record);
+        },
       },
       {
         type: 'divider' as const,
@@ -226,7 +253,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 150,
+      width: 120,
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
