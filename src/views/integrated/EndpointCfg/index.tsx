@@ -40,8 +40,6 @@ const EndpointConfig: React.FC = () => {
     pageNum: 1,
     pageSize: 10,
   });
-  // 用于标记是否是第一次加载数据
-  const isFirstLoad = useRef(true);
 
   /**
    * 查询端点类型列表和详情（合并查询）
@@ -52,7 +50,13 @@ const EndpointConfig: React.FC = () => {
     refetch: refetchList,
   } = useQuery({
     queryKey: ['endpoint_config_list', queryParams],
-    queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
+    queryFn: async () => {
+      const configData = await endpointConfigService.getEndpointTypeList(queryParams);
+      if (configData?.records?.[0] && !selectedType) {
+        setSelectedType(configData.records[0]);
+      }
+      return configData;
+    },
   });
 
   /**
@@ -67,8 +71,13 @@ const EndpointConfig: React.FC = () => {
     },
     onSuccess: () => {
       setIsEditing(false);
-      // 清除之前保存的数据
-      setPreviousSelectedType(null);
+      // 如果新增的则清除选择，默认选择到第一个去
+      if (!selectedType?.id) {
+        setPreviousSelectedType(null);
+        setSelectedType(null);
+      } else {
+        setPreviousSelectedType(selectedType);
+      }
       // 刷新列表
       refetchList();
     },
@@ -384,17 +393,6 @@ const EndpointConfig: React.FC = () => {
       setEditingSchemaFields(selectedType.schemaFields || []);
     }
   }, [selectedType?.id, isEditing, basicForm]);
-
-  /**
-   * 首次加载列表数据后，自动选中第一条记录
-   */
-  React.useEffect(() => {
-    // 只在第一次加载且有数据时执行
-    if (configListData?.records?.[0] && !selectedType && isFirstLoad.current) {
-      isFirstLoad.current = false;
-      setSelectedType(configListData.records[0]);
-    }
-  }, [configListData, selectedType]);
 
   /**
    * 缓存列表数据，避免子组件不必要的重渲染

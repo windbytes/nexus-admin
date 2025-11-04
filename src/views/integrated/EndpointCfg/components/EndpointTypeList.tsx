@@ -174,7 +174,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
       }
     >
       <Space.Compact>
-        <Search placeholder="请输入端点类型名称" allowClear onSearch={onSearch} enterButton="Search" className="my-2" />
+        <Search placeholder="请输入端点类型名称" allowClear onSearch={onSearch} enterButton className="my-2" />
       </Space.Compact>
       <Table<EndpointTypeConfig>
         rowKey="id"
