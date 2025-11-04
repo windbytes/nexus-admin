@@ -1,4 +1,5 @@
 import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { getIcon } from '@/utils/optimized-icons';
 import { ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import { Button, Card, Input, Space, Table, Tag, Tooltip, message } from 'antd';
@@ -115,7 +116,7 @@ const EndpointTypeList: React.FC<EndpointTypeListProps> = ({
         ellipsis: true,
         render: (text, record) => (
           <div className="flex items-center gap-2">
-            {record.icon && <span className={record.icon} />}
+            {record.icon && getIcon(record.icon)}
             <span>{text}</span>
           </div>
         ),
