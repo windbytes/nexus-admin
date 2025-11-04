@@ -6,7 +6,7 @@ import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpo
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { CollapseProps, TabsProps } from 'antd';
-import { Button, Card, Collapse, Divider, Form, Input, Select, Space, Tabs } from 'antd';
+import { Button, Card, Collapse, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SchemaFormFieldRenderer from './SchemaFormFieldRenderer';
 
@@ -84,6 +84,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   // 监听端点类型和模式变化
   const endpointTypeName = Form.useWatch('endpointType', form);
   const selectedMode = Form.useWatch('mode', form);
+  // 监听是否启用指数退避策略
+  const useExponentialBackoff = Form.useWatch('useExponentialBackoff', form);
 
   /**
    * 获取所有启用的端点类型配置列表
@@ -142,7 +144,6 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     } else {
       setSelectedEndpointTypeConfig(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endpointTypeName, endpointTypeListModule]);
 
   /**
@@ -346,9 +347,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           {/* 配置信息区域 - 只有选择了端点类型和模式后才显示 */}
           {endpointTypeName && selectedMode && selectedEndpointTypeConfig && (
             <>
-              <Divider orientation="left" plain>
-                配置信息
-              </Divider>
+              <Divider orientation="left">配置信息</Divider>
               <div className="border border-gray-200 rounded p-4">
                 {getSchemaFields.length > 0 ? (
                   <div className="flex flex-col gap-0">
@@ -361,6 +360,78 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
                     当前端点类型在【{selectedMode}】模式下暂无配置项
                   </div>
                 )}
+              </div>
+            </>
+          )}
+          {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
+          {selectedEndpointTypeConfig?.supportRetry && (
+            <>
+              <Divider orientation="left">重试策略</Divider>
+              <div className="border border-gray-200 rounded p-4">
+                <Form.Item
+                  name="maximumRedeliveries"
+                  label="重试次数"
+                  tooltip="最大重试次数"
+                  rules={[{ required: true, message: '请输入重试次数' }]}
+                >
+                  <InputNumber
+                    className="w-full"
+                    placeholder="请输入重试次数"
+                    min={1}
+                    max={10}
+                    step={1}
+                    addonAfter="次"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="redeliveryDelay"
+                  label="初始延迟"
+                  tooltip="初始延迟时间"
+                  rules={[{ required: true, message: '请输入初始延迟' }]}
+                >
+                  <InputNumber
+                    className="w-full"
+                    placeholder="请输入初始延迟"
+                    min={50}
+                    max={10000}
+                    step={1000}
+                    addonAfter="ms"
+                  />
+                </Form.Item>
+                <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
+                  <Switch checkedChildren="是" unCheckedChildren="否" />
+                </Form.Item>
+                <Form.Item
+                  name="backOffMultiplier"
+                  label="退避倍数"
+                  tooltip="退避倍数"
+                  rules={[{ required: useExponentialBackoff, message: '请输入退避倍数' }]}
+                >
+                  <InputNumber
+                    disabled={!useExponentialBackoff}
+                    className="w-full"
+                    placeholder="请输入退避倍数"
+                    min={1}
+                    max={10}
+                    step={1}
+                    addonAfter="倍"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="maximumRedeliveryDelay"
+                  label="最大延迟"
+                  tooltip="最大延迟时间"
+                  rules={[{ required: true, message: '请输入最大延迟' }]}
+                >
+                  <InputNumber
+                    className="w-full"
+                    placeholder="请输入最大延迟"
+                    min={50}
+                    max={60000}
+                    step={1000}
+                    addonAfter="ms"
+                  />
+                </Form.Item>
               </div>
             </>
           )}

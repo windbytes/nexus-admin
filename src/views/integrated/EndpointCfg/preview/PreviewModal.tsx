@@ -1,3 +1,4 @@
+import DragModal from '@/components/modal/DragModal';
 import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { CloseOutlined, CodeOutlined, EyeOutlined, FileTextOutlined, SaveOutlined } from '@ant-design/icons';
 import { App, Badge, Button, Divider, Empty, Form, Modal, Space, Tabs } from 'antd';
@@ -124,7 +125,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
         {
           key: 'default',
           label: '默认模式',
-          children: <PreviewFormRenderer form={form} fields={config?.schemaFields || []} initialValues={{}} />,
+          children: <PreviewFormRenderer form={form} config={config!} initialValues={{}} />,
         },
       ];
     }
@@ -140,9 +141,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
             <Badge count={fieldCount} showZero style={{ backgroundColor: '#52c41a' }} />
           </span>
         ),
-        children: (
-          <PreviewFormRenderer form={form} fields={config?.schemaFields || []} mode={mode} initialValues={{}} />
-        ),
+        children: <PreviewFormRenderer form={form} config={config} mode={mode} initialValues={{}} />,
       };
     });
   }, [config, form]);
@@ -162,7 +161,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
   }
 
   return (
-    <Modal
+    <DragModal
       title={
         <div className="flex items-center gap-3">
           <EyeOutlined className="text-blue-500 text-xl" />
@@ -314,7 +313,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
       `}</style>
-    </Modal>
+    </DragModal>
   );
 });
 

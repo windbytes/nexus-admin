@@ -77,6 +77,10 @@ export interface EndpointTypeConfig {
   schemaFields: SchemaField[];
   /** 状态 */
   status: boolean;
+  /** 支持重试 */
+  supportRetry?: boolean;
+  /** 删除标记 */
+  delFlag?: boolean;
   /** 创建时间 */
   createTime?: string;
   /** 更新时间 */

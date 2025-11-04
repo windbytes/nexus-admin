@@ -172,6 +172,7 @@ const EndpointConfig: React.FC = () => {
           schemaVersion: basicValues.schemaVersion,
           schemaFields: latestFields,
           status: basicValues.status ?? true,
+          supportRetry: basicValues.supportRetry ?? false,
         };
 
         // 临时将预览配置存储到 selectedType 中
@@ -451,66 +452,67 @@ const EndpointConfig: React.FC = () => {
   }, [previewVisible, isEditing, selectedType, basicForm]);
 
   return (
-    <div className="h-full flex gap-4">
-      {/* 左侧：端点类型列表 */}
-      <EndpointTypeList
-        data={listData}
-        loading={listLoading}
-        {...(selectedType?.id && { selectedId: selectedType.id })}
-        onSelect={handleSelectType}
-        onAdd={handleAdd}
-        onSearch={handleSearch}
-        onBatchExport={handleBatchExport}
-        onImport={handleImport}
-        pagination={paginationConfig}
-      />
-
-      {/* 右侧：配置详情 */}
-      <Card
-        className="flex-1 min-w-0"
-        styles={{
-          body: {
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-        loading={listLoading}
-      >
-        {/* 基础信息 */}
-        <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
-
-        {/* Schema配置 */}
-        <SchemaFieldsTable
+    <>
+      <div className="h-full flex gap-4">
+        {/* 左侧：端点类型列表 */}
+        <EndpointTypeList
+          data={listData}
           loading={listLoading}
-          ref={schemaFieldsTableRef}
-          fields={editingSchemaFields}
-          disabled={!isEditing}
-          onChange={handleSchemaFieldsChange}
-        />
-
-        {/* 底部操作按钮 */}
-        <ActionButtons
-          isEditing={isEditing}
-          hasSelected={!!selectedType}
-          saveLoading={saveConfigMutation.isPending}
-          onPreview={handlePreview}
-          onEdit={handleEdit}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          onDelete={handleDelete}
-          onExport={handleExport}
+          {...(selectedType?.id && { selectedId: selectedType.id })}
+          onSelect={handleSelectType}
+          onAdd={handleAdd}
+          onSearch={handleSearch}
+          onBatchExport={handleBatchExport}
           onImport={handleImport}
+          pagination={paginationConfig}
         />
-      </Card>
 
+        {/* 右侧：配置详情 */}
+        <Card
+          className="flex-1 min-w-0"
+          styles={{
+            body: {
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          }}
+          loading={listLoading}
+        >
+          {/* 基础信息 */}
+          <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
+
+          {/* Schema配置 */}
+          <SchemaFieldsTable
+            loading={listLoading}
+            ref={schemaFieldsTableRef}
+            fields={editingSchemaFields}
+            disabled={!isEditing}
+            onChange={handleSchemaFieldsChange}
+          />
+
+          {/* 底部操作按钮 */}
+          <ActionButtons
+            isEditing={isEditing}
+            hasSelected={!!selectedType}
+            saveLoading={saveConfigMutation.isPending}
+            onPreview={handlePreview}
+            onEdit={handleEdit}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onDelete={handleDelete}
+            onExport={handleExport}
+            onImport={handleImport}
+          />
+        </Card>
+      </div>
       {/* 预览弹窗 - 使用 Suspense 包裹懒加载组件 */}
       {previewVisible && (
         <Suspense fallback={<Skeleton active />}>
           <PreviewModal visible={previewVisible} config={previewConfig} onClose={() => setPreviewVisible(false)} />
         </Suspense>
       )}
-    </div>
+    </>
   );
 };
 

@@ -140,38 +140,39 @@ const Endpoint: React.FC = () => {
   const tableLoading = isLoading || mutations.isLoading;
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      {/* 搜索表单 */}
-      <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
+    <>
+      <div className="h-full flex flex-col gap-4">
+        {/* 搜索表单 */}
+        <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
 
-      {/* 表格区域 */}
-      <Card className="flex-1">
-        {/* 表格操作按钮 */}
-        <EndpointTableActions {...actionHandlers} selectedRowKeys={state.selectedRowKeys} loading={tableLoading} />
+        {/* 表格区域 */}
+        <Card className="flex-1">
+          {/* 表格操作按钮 */}
+          <EndpointTableActions {...actionHandlers} selectedRowKeys={state.selectedRowKeys} loading={tableLoading} />
 
-        {/* 端点表格 */}
-        <EndpointTable
-          data={result?.records || []}
-          loading={tableLoading}
-          selectedRowKeys={state.selectedRowKeys}
-          {...tableHandlers}
-          pagination={{
-            pageSize: searchParams.pageSize,
-            current: searchParams.pageNum,
-            ...PAGINATION_CONFIG,
-            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.totalRow ?? 0,
-            onChange(page, pageSize) {
-              setSearchParams({
-                ...searchParams,
-                pageNum: page,
-                pageSize: pageSize,
-              });
-            },
-          }}
-        />
-      </Card>
-
+          {/* 端点表格 */}
+          <EndpointTable
+            data={result?.records || []}
+            loading={tableLoading}
+            selectedRowKeys={state.selectedRowKeys}
+            {...tableHandlers}
+            pagination={{
+              pageSize: searchParams.pageSize,
+              current: searchParams.pageNum,
+              ...PAGINATION_CONFIG,
+              showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+              total: result?.totalRow ?? 0,
+              onChange(page, pageSize) {
+                setSearchParams({
+                  ...searchParams,
+                  pageNum: page,
+                  pageSize: pageSize,
+                });
+              },
+            }}
+          />
+        </Card>
+      </div>
       {/* 新增/编辑/查看弹窗 */}
       <Suspense fallback={<Spin />}>
         <EndpointModal
@@ -252,7 +253,7 @@ const Endpoint: React.FC = () => {
           />
         </Suspense>
       )}
-    </div>
+    </>
   );
 };
 
