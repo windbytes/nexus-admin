@@ -24,8 +24,6 @@
   -ms-overflow-style: none !important;
 }
 
-
-
 // 协调系统主题的logo卡片风格
 .system-logo-card {
   height: 64px;
@@ -37,11 +35,14 @@
   cursor: pointer;
 
   // 与系统主题协调的渐变背景
-  background: linear-gradient(135deg,
-      #f8fafc 0%, // 浅灰白
-      #e2e8f0 50%, // 浅灰
-      #cbd5e1 100% // 中灰
-    );
+  background: linear-gradient(
+    135deg,
+    #f8fafc 0%,
+    // 浅灰白
+    #e2e8f0 50%,
+    // 浅灰
+    #cbd5e1 100% // 中灰
+  );
 
   // 边框和阴影效果
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -53,11 +54,14 @@
   // hover浮动效果
   &:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg,
-        #ffffff 0%, // 纯白
-        #f1f5f9 50%, // 极浅灰
-        #e2e8f0 100% // 浅灰
-      );
+    background: linear-gradient(
+      135deg,
+      #ffffff 0%,
+      // 纯白
+      #f1f5f9 50%,
+      // 极浅灰
+      #e2e8f0 100% // 浅灰
+    );
     border-color: rgba(59, 130, 246, 0.3);
     box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.1),
@@ -66,9 +70,7 @@
 
     .logo-background {
       transform: scale(1.05);
-      background: linear-gradient(135deg,
-          rgba(59, 130, 246, 0.1) 0%,
-          rgba(59, 130, 246, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
       border-color: rgba(59, 130, 246, 0.2);
     }
 
@@ -79,9 +81,7 @@
 
     .card-glow {
       opacity: 0.3;
-      background: linear-gradient(135deg,
-          rgba(59, 130, 246, 0.1) 0%,
-          rgba(147, 197, 253, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
     }
   }
 
@@ -106,10 +106,12 @@
     width: 48px;
     height: 48px;
     border-radius: 10px;
-    background: linear-gradient(135deg,
-        rgba(255, 255, 255, 0.8) 0%,
-        rgba(248, 250, 252, 0.6) 50%,
-        rgba(241, 245, 249, 0.4) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(248, 250, 252, 0.6) 50%,
+      rgba(241, 245, 249, 0.4) 100%
+    );
     border: 1px solid rgba(148, 163, 184, 0.3);
     display: flex;
     align-items: center;
@@ -138,8 +140,7 @@
     position: relative;
     z-index: 1;
     font-weight: 600;
-    font-size: 16px;
-    letter-spacing: 0.3px;
+    font-size: 18px;
   }
 
   // 发光效果
@@ -150,10 +151,12 @@
     right: -2px;
     bottom: -2px;
     border-radius: 14px;
-    background: linear-gradient(135deg,
-        rgba(59, 130, 246, 0.1) 0%,
-        rgba(147, 197, 253, 0.05) 50%,
-        rgba(59, 130, 246, 0.1) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.1) 0%,
+      rgba(147, 197, 253, 0.05) 50%,
+      rgba(59, 130, 246, 0.1) 100%
+    );
     opacity: 0;
     transition: all 0.3s ease;
     z-index: 0;
@@ -193,7 +196,6 @@
 // 菜单项美化样式
 .side-menu {
   .ant-menu {
-
     // 菜单项基础样式
     .ant-menu-item {
       position: relative;
@@ -210,10 +212,7 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(24, 144, 255, 0.1) 50%,
-            transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
         transition: left 0.5s ease;
         z-index: 0;
       }
@@ -234,9 +233,7 @@
 
       // 选中状态
       &.ant-menu-item-selected {
-        background: linear-gradient(135deg,
-            rgba(24, 144, 255, 0.1) 0%,
-            rgba(24, 144, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
         box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 
         &::after {
@@ -281,10 +278,7 @@
           left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg,
-              transparent 0%,
-              rgba(24, 144, 255, 0.1) 50%,
-              transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
           transition: left 0.5s ease;
           z-index: 0;
         }
@@ -335,10 +329,7 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(24, 144, 255, 0.1) 50%,
-            transparent 100%);
+        background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
         transition: left 0.5s ease;
         z-index: 0;
       }
@@ -358,9 +349,7 @@
 
       // 选中状态
       &.ant-menu-item-selected {
-        background: linear-gradient(135deg,
-            rgba(24, 144, 255, 0.1) 0%,
-            rgba(24, 144, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
         box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 
         &::after {
@@ -398,10 +387,7 @@
           left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg,
-              transparent 0%,
-              rgba(24, 144, 255, 0.1) 50%,
-              transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
           transition: left 0.5s ease;
           z-index: 0;
         }

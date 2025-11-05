@@ -21,7 +21,7 @@ const SystemLogo = () => {
               </div>
             </div>
             <span className="system-name" style={{ color: colorPrimary }}>
-              Nexus Admin
+              Nexus Platform
             </span>
           </div>
           <div className="card-glow"></div>
