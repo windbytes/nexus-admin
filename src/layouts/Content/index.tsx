@@ -1,4 +1,4 @@
-import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
+import KeepAlive from '@/components/KeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { Icon } from '@iconify-icon/react';
@@ -22,7 +22,7 @@ interface ContentProps {
 const Content = memo(({ children }: ContentProps) => {
   // 【性能监控】监控路由切换性能
   useRouteChangeMonitor({
-    enabled: import.meta.env.MODE === 'development',
+    enabled: false,
     threshold: 300,
   });
 
@@ -56,7 +56,7 @@ const Content = memo(({ children }: ContentProps) => {
     >
       <Suspense fallback={loadingFallback}>
         <ErrorBoundary fallback={errorFallback}>
-          <ActivityKeepAlive>{children}</ActivityKeepAlive>
+          <KeepAlive>{children}</KeepAlive>
         </ErrorBoundary>
       </Suspense>
     </Layout.Content>

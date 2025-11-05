@@ -6,7 +6,7 @@ import { getOpenKeys, searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify-icon/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
@@ -49,13 +49,7 @@ const MenuComponent = memo(() => {
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
-  // 【优化】使用 React 19 的 useTransition 处理路由切换
-  const [isPending, startTransition] = useTransition();
-
-  // 【优化】缓存上一次的语言，避免不必要的菜单重新生成
   const prevLanguageRef = useRef(i18n.language);
-
-  // 【优化】将 getItem 移到 useMemo 外部，避免重复创建
   const getItem = useCallback(
     (label: any, key?: React.Key | null, icon?: React.ReactNode, children?: MenuItem[], type?: 'group'): MenuItem => {
       return {
@@ -91,11 +85,7 @@ const MenuComponent = memo(() => {
   // 【核心优化】使用 startTransition 优化菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(
     ({ key }: { key: string }) => {
-      // 使用 startTransition 将路由切换标记为低优先级更新
-      // 这样可以让菜单的视觉反馈（高亮、loading 等）先响应
-      startTransition(() => {
-        navigate({ to: key, replace: true });
-      });
+      navigate({ to: key, replace: true });
     },
     [navigate]
   );
@@ -179,8 +169,8 @@ const MenuComponent = memo(() => {
     <Spin
       wrapperClassName="side-menu"
       indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-      spinning={loading || isPending}
-      tip={isPending ? '加载中...' : '加载菜单'}
+      spinning={loading}
+      tip={loading ? '加载中...' : '加载菜单'}
     >
       {menuList.length > 0 ? (
         <Menu
