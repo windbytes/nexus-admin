@@ -1,25 +1,25 @@
 import { debounce } from 'lodash-es';
 
-import { WorkflowNodeLinesData, type FreeLayoutProps } from '@flowgram.ai/free-layout-editor';
-import { createFreeLinesPlugin } from '@flowgram.ai/free-lines-plugin';
-import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
-import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
-import { createFreeNodePanelPlugin } from '@flowgram.ai/free-node-panel-plugin';
-import { createContainerNodePlugin } from '@flowgram.ai/free-container-plugin';
-import { createFreeGroupPlugin } from '@flowgram.ai/free-group-plugin';
-import { CommentRender } from '@/components/workflow/nodes/comment/components/commentRender';
 import { LineAddButton } from '@/components/workflow/line-add-button';
+import { CommentRender } from '@/components/workflow/nodes/comment/components/commentRender';
 import { WorkflowNodeType } from '@/components/workflow/nodes/constants';
 import { createSyncVariablePlugin } from '@/components/workflow/plugins';
 import SelectBoxPopover from '@/components/workflow/select-box-popover';
 import { RunningService } from '@/components/workflow/services/running-service';
 import { shortcuts } from '@/components/workflow/shortcuts/shortcuts';
 import { onDragLineEnd } from '@/components/workflow/utils/on-drag-line-end';
+import { createContainerNodePlugin } from '@flowgram.ai/free-container-plugin';
+import { createFreeGroupPlugin } from '@flowgram.ai/free-group-plugin';
+import { WorkflowNodeLinesData, type FreeLayoutProps } from '@flowgram.ai/free-layout-editor';
+import { createFreeLinesPlugin } from '@flowgram.ai/free-lines-plugin';
+import { createFreeNodePanelPlugin } from '@flowgram.ai/free-node-panel-plugin';
+import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
+import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 
-import { NodePanel } from '@/components/workflow/node-panel';
 import { GroupNodeRender } from '@/components/workflow/group/node-render';
+import { NodePanel } from '@/components/workflow/node-panel';
 import BaseNode from '@/components/workflow/nodes/base-node';
-import { defaultFormMeta } from '@/components/workflow/nodes/default-form-meta';
+import { DefaultNode } from '@/components/workflow/nodes/defaultNode/defaultNode';
 import { createContextMenuPlugin } from '@/components/workflow/plugins/context-menu-plugin/context-menu-plugin';
 import type { FlowDocumentJSON, FlowNodeRegistry } from '@/types/workflow/node';
 import { useMemo } from 'react';
@@ -31,9 +31,10 @@ import { useMemo } from 'react';
 export function useEditorProps(
   initialData: FlowDocumentJSON,
   nodeRegistries: FlowNodeRegistry[],
-  handleSave?: (data: FlowDocumentJSON) => void,
+  handleSave?: (data: FlowDocumentJSON) => void
 ): FreeLayoutProps {
-  return useMemo(() => ({
+  return useMemo(
+    () => ({
       // 支持背景
       background: true,
 
@@ -58,8 +59,12 @@ export function useEditorProps(
           type,
           meta: {
             defaultExpanded: true,
+            // 禁用侧边栏
+            disableSideBar: true,
+            // 禁用弹窗
+            disableModal: true,
           },
-          formMeta: defaultFormMeta,
+          formMeta: DefaultNode,
         };
       },
 
@@ -253,7 +258,6 @@ export function useEditorProps(
             nodeBorderColor: 'rgba(6, 7, 9, 0.10)',
             overlayColor: 'rgba(255, 255, 255, 0.55)',
           },
-          inactiveDebounceTime: 1,
         }),
 
         /**
@@ -292,5 +296,7 @@ export function useEditorProps(
          */
         createContextMenuPlugin({}),
       ],
-    }), [])
+    }),
+    []
+  );
 }

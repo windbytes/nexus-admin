@@ -20,7 +20,7 @@ const ModalRenderer: React.FC = () => {
    * 关闭弹窗
    */
   const handleClose = useCallback(() => {
-    setNodeId(undefined);
+    setNodeId('');
   }, []);
 
   /**
@@ -28,7 +28,7 @@ const ModalRenderer: React.FC = () => {
    */
   const handleOk = useCallback(() => {
     console.log('点击了确定，更新节点数据');
-    setNodeId(undefined);
+    setNodeId('');
   }, []);
 
   /**
@@ -52,7 +52,7 @@ const ModalRenderer: React.FC = () => {
     if (node) {
       const toDispose = node.onDispose(() => {
         console.log('监听到节点销毁', node);
-        setNodeId(undefined);
+        setNodeId('');
       });
       return () => {
         toDispose.dispose();

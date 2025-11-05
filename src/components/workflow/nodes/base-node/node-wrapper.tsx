@@ -1,15 +1,11 @@
-import { SidebarContext } from "@/context/workflow/sidebar-context";
-import { useNodeRenderContext } from "@/context/workflow/use-node-render-context";
-import {
-  useClientContext,
-  useNodeRender,
-  WorkflowPortRender,
-} from "@flowgram.ai/free-layout-editor";
-import { useContext, useState } from "react";
-import { scrollToView } from "./util";
-import "./node-wrapper.scss";
-import { NodeModalContext } from "@/context/workflow/node-modal-context";
-import { usePreferencesStore } from "@/stores/store";
+import { NodeModalContext } from '@/context/workflow/node-modal-context';
+import { SidebarContext } from '@/context/workflow/sidebar-context';
+import { useNodeRenderContext } from '@/context/workflow/use-node-render-context';
+import { usePreferencesStore } from '@/stores/store';
+import { useClientContext, useNodeRender, WorkflowPortRender } from '@flowgram.ai/free-layout-editor';
+import { useContext, useState } from 'react';
+import './node-wrapper.scss';
+import { scrollToView } from './util';
 
 /**
  * 节点包裹器属性
@@ -27,20 +23,14 @@ export interface NodeWrapperProps {
  * @param props 节点包裹器属性
  * @returns 节点包裹器组件
  */
-const NodeWrapper: React.FC<NodeWrapperProps> = ({
-  isScrollToView = false,
-  children,
-}) => {
+const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, children }) => {
   // 获取主题配置
-  const colorPrimary = usePreferencesStore(
-    (state) => state.preferences.theme.colorPrimary
-  );
+  const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 
   // 获取当前渲染的节点
   const nodeRenderCtx = useNodeRenderContext();
   const nodeRender = useNodeRender();
-  const { selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur } =
-    nodeRenderCtx;
+  const { selected, startDrag, ports, selectNode, nodeRef, onFocus, onBlur } = nodeRenderCtx;
   const [isDragging, setIsDragging] = useState(false);
   const sidebar = useContext(SidebarContext);
   // 弹窗
@@ -52,11 +42,7 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({
 
   // 节点端口渲染(端口样式-后续版本支持)
   const portsRender = ports.map((port) => (
-    <WorkflowPortRender
-      key={port.id}
-      entity={port}
-      secondaryColor={colorPrimary}
-    />
+    <WorkflowPortRender key={port.id} entity={port} secondaryColor={colorPrimary} />
   ));
 
   return (
@@ -86,7 +72,7 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({
         onDoubleClick={(e) => {
           selectNode(e);
           // 触发节点配置的双击事件
-          registry.onDblClick?.(ctx, nodeRender.node);
+          registry['onDblClick']?.(ctx, nodeRender.node);
           if (!isDragging) {
             nodeModal.setNodeId(nodeRender.node.id);
             // 可选：将 isScrollToView 设为 true，可以让节点选中后滚动到画布中间
@@ -97,8 +83,8 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({
         }}
         data-node-selected={String(selected)}
         style={{
-          outline: form?.state.invalid ? "1px solid red" : "none",
-          border: selected ? `2px solid ${colorPrimary}` : "none",
+          outline: form?.state.invalid ? '1px solid red' : 'none',
+          border: selected ? `2px solid ${colorPrimary}` : 'none',
         }}
       >
         {children}

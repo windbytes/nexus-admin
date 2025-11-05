@@ -23,6 +23,7 @@ export const HttpNodeRegistry: FlowNodeRegistry = {
     },
     // 这个配置表明当前节点不会触发侧边栏的显示
     disableSideBar: true,
+    disableModal: false,
   },
   info: {
     icon: '',

@@ -5,11 +5,12 @@ import React from 'react';
  */
 export const NodeModalContext = React.createContext<{
   open: boolean;
-  nodeId?: string;
-  setNodeId: (nodeId: string | undefined) => void;
+  nodeId: string;
+  setNodeId: (nodeId: string) => void;
 }>({
   open: false,
-  setNodeId: () => {},
+  nodeId: '',
+  setNodeId: (nodeId: string) => {},
 });
 
 /**
