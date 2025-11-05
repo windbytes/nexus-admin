@@ -21,10 +21,11 @@ interface CacheItem {
  * 3. 优化滚动恢复 - 使用更简洁的方式
  * 4. 使用 useMemo 缓存组件列表，减少渲染
  * 5. 移除不必要的状态，直接渲染缓存的组件
- * 6. 支持 reloadKey 强制重新加载组件
+ * 6. 支持 reloadKey 强制重新加载组件 - 2025-11-05 该功能目前实现有点困难，153行的组件如果添加了key来重载，会导致切换前的旧路由也会触发渲染，导致组件重复渲染，目前先移除该功能
  *
  * @param children - 子组件
  */
+
 const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) => {
   const { tabs, activeKey } = useTabStore();
   const cacheRef = useRef(new LRUCache<string, CacheItem>(10));
@@ -138,7 +139,7 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
       const tab = tabs.find((t) => t.key === key);
       // 使用 reloadKey 作为 key 的一部分，确保 reloadKey 变化时强制重新挂载
       const componentKey = tab?.reloadKey ? `${key}-${tab.reloadKey}` : key;
-      
+
       components.push(
         <Activity key={componentKey} mode={isVisible ? 'visible' : 'hidden'}>
           {cache.component}
@@ -149,18 +150,11 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
     // 如果当前页面未缓存（不需要 keepAlive），直接渲染
     const currentCached = cacheRef.current.get(activeKey);
     if (!currentCached && activeKey) {
-      // 使用 reloadKey 确保组件在 reload 时重新挂载
-      const componentKey = reloadKey ? `${activeKey}-${reloadKey}` : activeKey;
-      
-      components.push(
-        <Activity key={componentKey} mode="visible">
-          {children}
-        </Activity>
-      );
+      components.push(children);
     }
 
     return components;
-  }, [activeKey, children, tabs.length, reloadKey]); // 添加 reloadKey 到依赖
+  }, [children, tabs.length, reloadKey]); // 添加 reloadKey 到依赖
 
   return (
     <div ref={containerRef} className="h-full relative flex flex-col p-4">

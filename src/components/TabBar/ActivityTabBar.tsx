@@ -4,10 +4,10 @@ import { useUserStore } from '@/stores/userStore';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { DownOutlined } from '@ant-design/icons';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Button, Dropdown, Tabs, type MenuProps, type TabsProps } from 'antd';
 import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useShallow } from 'zustand/shallow';
 import './tabBar.scss';
 
@@ -388,6 +388,8 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
           key: 'reload',
           label: t('common.reload'),
           icon: <span>🔄</span>,
+          disabled: true,
+          title: '该功能暂未实现',
           onClick: () => actions.reloadTab(tabKey),
         },
         {

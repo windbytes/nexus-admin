@@ -26,11 +26,12 @@ const MenuComponent = memo(() => {
 
   const menus = useMenuStore((state) => state.menus);
   const { activeKey } = useTabStore();
-  const { accordion, dynamicTitle, collapsed } = usePreferencesStore(
+  const { accordion, dynamicTitle, collapsed, tabbarEnable } = usePreferencesStore(
     useShallow((state) => ({
       accordion: state.preferences.navigation.accordion,
       dynamicTitle: state.preferences.app.dynamicTitle,
       collapsed: state.preferences.sidebar.collapsed,
+      tabbarEnable: state.preferences.tabbar.enable,
     }))
   );
   const mode = usePreferencesStore((state) => {
@@ -101,11 +102,11 @@ const MenuComponent = memo(() => {
 
   // 【优化】监听 tab 切换，同步更新左侧菜单选中状态
   const currentSelectedKeys = useMemo(() => {
-    if (activeKey && activeKey !== pathname) {
+    if (tabbarEnable && activeKey && activeKey !== pathname) {
       return [activeKey];
     }
     return [pathname];
-  }, [activeKey, pathname]);
+  }, [activeKey, pathname, tabbarEnable]);
 
   // 【优化】使用 useMemo 优化 openKeys 的计算
   const currentOpenKeys = useMemo(() => {

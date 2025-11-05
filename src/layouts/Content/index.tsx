@@ -2,7 +2,6 @@ import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { Icon } from '@iconify-icon/react';
-import { useRouterState } from '@tanstack/react-router';
 import { Layout, Spin } from 'antd';
 import { memo, Suspense, useMemo, type ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -21,8 +20,6 @@ interface ContentProps {
 }
 
 const Content = memo(({ children }: ContentProps) => {
-  const location = useRouterState({ select: (s) => s.location });
-
   // 【性能监控】监控路由切换性能
   useRouteChangeMonitor({
     enabled: import.meta.env.MODE === 'development',
@@ -58,7 +55,7 @@ const Content = memo(({ children }: ContentProps) => {
       }}
     >
       <Suspense fallback={loadingFallback}>
-        <ErrorBoundary key={location.pathname} fallback={errorFallback}>
+        <ErrorBoundary fallback={errorFallback}>
           <ActivityKeepAlive>{children}</ActivityKeepAlive>
         </ErrorBoundary>
       </Suspense>
