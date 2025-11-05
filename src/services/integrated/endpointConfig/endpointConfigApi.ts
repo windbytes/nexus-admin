@@ -141,6 +141,7 @@ export const endpointConfigService = {
       {
         url: EndpointConfigAction.list,
         data: params,
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' }
     );
@@ -208,12 +209,13 @@ export const endpointConfigService = {
    * 导出Schema配置
    */
   async exportSchema(id: string, typeName: string): Promise<void> {
-    const response = await HttpRequest.postDownload<Blob>({
+    // getDownload已经在axios封装层统一处理了错误情况
+    const blob = await HttpRequest.getDownload<Blob>({
       url: `${EndpointConfigAction.exportSchema}/${id}`,
-      responseType: 'blob',
     });
 
-    const url = window.URL.createObjectURL(new Blob([response]));
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `${typeName}_schema.json`);

@@ -233,6 +233,46 @@ export const transform: AxiosTransform = {
   responseInterceptors: async (res: AxiosResponse) => {
     const userStore = useUserStore.getState();
     const config = res.config;
+
+    // 处理下载请求（responseType为blob）的错误响应
+    // 当后端返回错误时，全局异常拦截器会返回 JSON 格式的错误信息
+    if (config.responseType === 'blob' && res.data instanceof Blob) {
+      const contentType = res.headers['content-type'] || '';
+      const contentDisposition = res.headers['content-disposition'] || '';
+
+      // 判断是否为错误响应：Content-Type 是 JSON 且没有 Content-Disposition
+      // 正常文件下载会有 Content-Disposition 头
+      const isErrorResponse = contentType.includes('application/json') && !contentDisposition;
+
+      if (isErrorResponse) {
+        try {
+          // 将 Blob 转换为文本，解析错误信息
+          const text = await res.data.text();
+          const errorData = JSON.parse(text);
+
+          // 构造标准的错误响应，让后续的错误处理逻辑能够捕获
+          const error: any = new Error(errorData.message || '操作失败');
+          error.response = {
+            data: errorData,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          };
+          error.status = res.status;
+          return Promise.reject(error);
+        } catch (e) {
+          // JSON 解析失败
+          if (e instanceof SyntaxError) {
+            const error: any = new Error('服务器返回了无效的响应格式');
+            error.response = res;
+            return Promise.reject(error);
+          }
+          return Promise.reject(e);
+        }
+      }
+    }
+
     const result = res.data;
     const { code: responseCode } = result;
     // 判断是否跳过请求
