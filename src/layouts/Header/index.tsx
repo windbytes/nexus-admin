@@ -92,16 +92,6 @@ const Header = memo(() => {
    */
   const messageBoxContent = useMemo(() => <MessageBox />, []);
 
-  /**
-   * 设置按钮提示文本 - 使用 useMemo 缓存
-   */
-  const settingTooltip = useMemo(() => t('layout.header.setting'), [t]);
-
-  /**
-   * 锁屏按钮提示文本 - 使用 useMemo 缓存
-   */
-  const lockTooltip = useMemo(() => t('layout.header.lock'), [t]);
-
   return (
     <>
       {headerEnable ? (
@@ -122,7 +112,7 @@ const Header = memo(() => {
               </Tooltip>
               {/* 锁屏 */}
               {lockScreen && (
-                <Tooltip placement="bottom" title={lockTooltip}>
+                <Tooltip placement="bottom" title={t('layout.header.lock')}>
                   <LockOutlined style={iconStyles} onClick={handleLockScreen} />
                 </Tooltip>
               )}
@@ -138,7 +128,7 @@ const Header = memo(() => {
                   </Badge>
                 </Dropdown>
               )}
-              <Tooltip placement="bottomRight" title={settingTooltip}>
+              <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
                 <SettingOutlined style={iconStyles} onClick={handleOpenSetting} />
               </Tooltip>
               {/* 语言切换 */}
@@ -160,7 +150,7 @@ const Header = memo(() => {
       ) : (
         <FloatButton
           icon={<SettingOutlined />}
-          tooltip={<span>{settingTooltip}</span>}
+          tooltip={<span>{t('layout.header.setting')}</span>}
           style={floatButtonStyles}
           onClick={handleOpenSetting}
         />
