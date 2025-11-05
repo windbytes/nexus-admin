@@ -48,6 +48,7 @@ const MenuComponent = memo(() => {
   const [menuList, setMenuList] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [userInteracted, setUserInteracted] = useState(false); // 标记用户是否手动操作过菜单
 
   const prevLanguageRef = useRef(i18n.language);
   const getItem = useCallback(
@@ -85,6 +86,8 @@ const MenuComponent = memo(() => {
   // 【核心优化】使用 startTransition 优化菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(
     ({ key }: { key: string }) => {
+      // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
+      setUserInteracted(false);
       navigate({ to: key, replace: true });
     },
     [navigate]
@@ -106,23 +109,42 @@ const MenuComponent = memo(() => {
 
   // 【优化】使用 useCallback 优化
   const onOpenChange = useCallback(
-    (openKeys: string[]) => {
-      if (!accordion) return setOpenKeys(openKeys);
-      if (openKeys.length < 1) return setOpenKeys(openKeys);
-      const latestOpenKey = openKeys[openKeys.length - 1];
-      if (latestOpenKey && openKeys[0] && latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
-      if (latestOpenKey) setOpenKeys([latestOpenKey]);
+    (newOpenKeys: string[]) => {
+      setUserInteracted(true); // 标记用户已手动操作
+
+      if (!accordion) {
+        setOpenKeys(newOpenKeys);
+        return;
+      }
+
+      // 手风琴模式：只保留最新打开的一级菜单
+      if (newOpenKeys.length < 1) {
+        setOpenKeys(newOpenKeys);
+        return;
+      }
+
+      const latestOpenKey = newOpenKeys[newOpenKeys.length - 1];
+      if (latestOpenKey && newOpenKeys[0] && latestOpenKey.includes(newOpenKeys[0])) {
+        setOpenKeys(newOpenKeys);
+        return;
+      }
+
+      if (latestOpenKey) {
+        setOpenKeys([latestOpenKey]);
+      }
     },
     [accordion]
   );
 
   // 【优化】智能合并用户手动操作和自动同步的 openKeys
   const mergedOpenKeys = useMemo(() => {
-    if (openKeys.length > 0) {
+    // 如果用户手动操作过，完全使用用户的选择
+    if (userInteracted) {
       return openKeys;
     }
+    // 否则使用自动计算的 openKeys
     return currentOpenKeys;
-  }, [openKeys, currentOpenKeys]);
+  }, [userInteracted, openKeys, currentOpenKeys]);
 
   // 【优化】合并 pathname 和标题更新逻辑
   useEffect(() => {
@@ -137,6 +159,8 @@ const MenuComponent = memo(() => {
       if (!collapsed) {
         const openKey = getOpenKeys(pathname, menus);
         setOpenKeys(openKey);
+        // 路由变化时重置用户交互标志，让菜单自动同步
+        setUserInteracted(false);
       }
     }
   }, [pathname, collapsed, menus, dynamicTitle, t]);
