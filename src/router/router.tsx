@@ -1,3 +1,4 @@
+import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { useMenuStore } from '@/stores/store';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
@@ -46,12 +47,7 @@ export function Router() {
       defaultPreload: 'intent', // 预加载策略
       defaultPreloadDelay: 100, // 预加载延迟
       // 添加默认的错误处理
-      defaultErrorComponent: ({ error }) => (
-        <div style={{ padding: '20px' }}>
-          <h2>发生错误</h2>
-          <pre>{error.message}</pre>
-        </div>
-      ),
+      defaultErrorComponent: ({ error }) => <ErrorFallback error={error} />,
     });
 
     setRouterInstance(router);
