@@ -27,28 +27,34 @@ export const Comment: React.FC = () => {
   /**
    * 计算注释的位置
    */
-  const calcNodePosition = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    const mousePosition = playground.config.getPosFromMouseEvent(e);
-    return {
-      x: mousePosition.x,
-      y: mousePosition.y - 75,
-    };
-  }, [playground]);
+  const calcNodePosition = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      const mousePosition = playground.config.getPosFromMouseEvent(e);
+      return {
+        x: mousePosition.x,
+        y: mousePosition.y - 75,
+      };
+    },
+    [playground]
+  );
 
   /**
    * 创建注释节点
    */
-  const createComment = useCallback(async (e: MouseEvent<HTMLButtonElement>) => {
-    const canvasPosition = calcNodePosition(e);
-    // 创建节点
-    const node = document.createWorkflowNodeByType(WorkflowNodeType.Comment, canvasPosition);
-    // 等待节点渲染
-    await delay(16);
-    // 选中节点
-    selectService.selectNode(node);
-    // 开始拖拽
-    dragService.startDragSelectedNodes(e);
-  }, [calcNodePosition, document, dragService, selectService]);
+  const createComment = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      const canvasPosition = calcNodePosition(e);
+      // 创建节点
+      const node = document.createWorkflowNodeByType(WorkflowNodeType.Comment, canvasPosition);
+      // 等待节点渲染
+      await delay(16);
+      // 选中节点
+      selectService.selectNode(node);
+      // 开始拖拽
+      dragService.startDragSelectedNodes(e);
+    },
+    [calcNodePosition, document, dragService, selectService]
+  );
 
   return (
     <Tooltip title={t('workflow.tools.comment')}>

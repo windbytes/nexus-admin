@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 
 import WorkflowEditor from '@/components/workflow';
 import { usePreferencesStore } from '@/stores/store';
-import NodeAddPanel from './node-add-panel';
 import './workflow.module.scss';
 
 /**
@@ -43,7 +42,6 @@ const Workflow: React.FC = () => {
             应用中心
           </Button>
         </div>
-        <NodeAddPanel />
       </Card>
 
       <div className="w-full flex flex-auto relative">

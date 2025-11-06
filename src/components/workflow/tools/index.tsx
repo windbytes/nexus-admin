@@ -21,7 +21,6 @@ const WorkflowTools: React.FC = () => {
   const [canRedo, setCanRedo] = useState(false);
   const [minimapVisible, setMinimapVisible] = useState(true);
   const tools = usePlaygroundTools();
-
   useEffect(() => {
     const disposable = history.undoRedoService.onChange(() => {
       setCanUndo(history.canUndo());
