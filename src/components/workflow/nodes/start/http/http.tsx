@@ -22,7 +22,11 @@ export const HttpNode = (props: FormRenderProps<FlowNodeJSON>) => {
     return <div>http节点的具体配置界面</div>;
   }
   // 画布上节点渲染的内容
-  return <div style={{ width: nodeMeta.size.width, height: nodeMeta.size.height }}>http输出节点</div>;
+  return (
+    <div className="text-center" style={{ width: nodeMeta.size.width, height: nodeMeta.size.height }}>
+      http输出节点
+    </div>
+  );
 };
 
 export const formMeta: FormMeta<FlowNodeJSON> = {

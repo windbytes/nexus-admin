@@ -54,14 +54,14 @@ const Workflow: React.FC<WorkflowProps> = (props) => {
         classNames={{ body: 'w-full h-full p-2! flex flex-col' }}
       >
         <Space>
-          <Button icon={<OrderedListOutlined />} />
-          <Button type="primary" size="middle" onClick={handleSaveClick}>
+          <Button size="small" icon={<OrderedListOutlined />} />
+          <Button type="primary" size="small" onClick={handleSaveClick}>
             保存
           </Button>
-          <Button type="primary" icon={<DownOutlined />}>
+          <Button type="primary" size="small" icon={<DownOutlined />}>
             发布
           </Button>
-          <Button icon={<HistoryOutlined />}></Button>
+          <Button size="small" icon={<HistoryOutlined />}></Button>
         </Space>
       </Card>
       {/* 右边设计部分 */}
