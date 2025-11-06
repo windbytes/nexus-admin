@@ -171,7 +171,10 @@ export function useEditorProps(
        * 历史记录相关（撤销、重做）
        */
       history: {
+        // 启用撤销重做
         enable: true,
+        // 监听节点数据变化
+        enableChangeNode: true,
       },
 
       /**
@@ -216,7 +219,7 @@ export function useEditorProps(
        * 画布所有 layer 第一次渲染完成后触发
        */
       onAllLayersRendered(ctx) {
-        ctx.document.fitView(false);
+        ctx.tools.fitView(false);
         console.log('--- onAllLayersRendered ---');
       },
 

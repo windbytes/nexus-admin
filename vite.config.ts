@@ -69,31 +69,35 @@ export default defineConfig(({ mode }) => {
           advancedChunks: {
             groups: [
               {
-                name: 'react-vendor',
-                test: /node_modules[\\/](react|react-dom|react-router)/,
+                name: 'lib-react',
+                test: /node_modules[\\/](react|react-dom)/,
               },
               {
-                name: 'utils-vendor',
+                name: 'lib-router',
+                test: /node_modules[\\/]@tanstack[\\/]react-router/,
+              },
+              {
+                name: 'lib-utils',
                 test: /node_modules[\\/](lodash-es|dayjs|crypto-js|jsencrypt)/,
               },
               {
-                name: 'network-vendor',
+                name: 'lib-network',
                 test: /node_modules[\\/]axios/,
               },
               {
-                name: 'chart-vendor',
+                name: 'lib-chart',
                 test: /node_modules[\\/]echarts/,
               },
               {
-                name: 'antd-vendor',
+                name: 'lib-antd',
                 test: /node_modules[\\/]antd/,
               },
               {
-                name: 'antd-icons-vendor',
+                name: 'lib-antd-icons',
                 test: /node_modules[\\/]@ant-design\/icons/,
               },
               {
-                name: 'other-vendor',
+                name: 'lib-other',
                 test: /node_modules[\\/](classnames|@iconify-icon|i18next)/,
               },
             ],

@@ -1,21 +1,21 @@
+import { useEditorProps } from '@/hooks/workflow/use-editor-props';
 import { DownOutlined, HistoryOutlined, OrderedListOutlined } from '@ant-design/icons';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
-  type WorkflowJSON,
   type FreeLayoutPluginContext,
+  type WorkflowJSON,
 } from '@flowgram.ai/free-layout-editor';
 import '@flowgram.ai/free-layout-editor/index.css';
-import { Card, Space, Button } from 'antd';
+import { Button, Card, Space } from 'antd';
 import { useCallback, useRef } from 'react';
-import { useEditorProps } from '@/hooks/workflow/use-editor-props';
+import { initialData } from './init-data';
+import ModalRenderer from './node-modal/modal-renderer';
+import { NodeModalProvider } from './node-modal/node-modal-provider';
+import { nodeRegistries } from './nodes';
 import { SidebarProvider } from './sidebar/sidebar-provider';
 import SidebarRenderer from './sidebar/sidebar-renderer';
 import WorkflowTools from './tools';
-import { NodeModalProvider } from './node-modal/node-modal-provider';
-import ModalRenderer from './node-modal/modal-renderer';
-import { nodeRegistries } from './nodes';
-import { initialData } from './init-data';
 import './workflow.scss';
 
 /**
@@ -72,6 +72,7 @@ const Workflow: React.FC<WorkflowProps> = (props) => {
               <div className="workflow-container">
                 <EditorRenderer className="workflow-editor" />
               </div>
+              {/* 工具栏 */}
               <WorkflowTools />
               {/* 侧边栏 */}
               <SidebarRenderer />
