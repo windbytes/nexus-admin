@@ -1,5 +1,4 @@
-import { useService } from '@flowgram.ai/free-layout-editor';
-import { FlowMinimapService, MinimapRender } from '@flowgram.ai/minimap-plugin';
+import { MinimapRender } from '@flowgram.ai/minimap-plugin';
 import { Activity } from 'react';
 
 /**
@@ -8,12 +7,10 @@ import { Activity } from 'react';
  * @returns
  */
 const MiniMap: React.FC<MiniMapProps> = ({ visible }) => {
-  const minimapService = useService(FlowMinimapService);
   return (
     <Activity mode={visible ? 'visible' : 'hidden'}>
       <div className="absolute bottom-14 w-[198px]">
         <MinimapRender
-          service={minimapService}
           panelStyles={{}}
           containerStyles={{
             pointerEvents: 'auto',

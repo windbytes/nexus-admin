@@ -15,7 +15,7 @@ import './workflow.module.scss';
 const Workflow: React.FC = () => {
   const { token } = theme.useToken();
   // 当前应用ID
-  const { appId } = useParams({ from: '/integrated/app/$appId/workflow' });
+  const { appId } = useParams({ from: '/_authenticated/integrated/app/$appId/workflow' });
   // 获取主题配置
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 

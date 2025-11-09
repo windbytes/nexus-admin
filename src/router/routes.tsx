@@ -32,8 +32,7 @@ export const rootRoute = createRootRoute({
  */
 export const authenticatedRoute = createRoute({
   getParentRoute: () => rootRoute,
-  // id: '_authenticated',
-  path: '/',
+  id: '_authenticated',
   component: () => {
     const lockScreenStatus = usePreferencesStore((state) => state.preferences.widget.lockScreenStatus);
 
