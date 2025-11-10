@@ -1,23 +1,23 @@
-import { isEqual } from 'lodash-es';
-import { ExclamationCircleFilled } from '@ant-design/icons';
-import { Card, Table, App } from 'antd';
-import type React from 'react';
-import { useMemo, useReducer, useState } from 'react';
-import { userService } from '@/services/system/user/userApi';
-import type { UserSearchParams } from './types';
-import { getColumns } from './columns';
-import SearchForm from './SearchForm';
-import UserInfoModal from './UserInfoModal';
-import type { UserModel } from '@/services/system/user/type';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import TableActionButtons from './TableActionButtons';
-import UserPasswordModal from './UserPasswordModal';
-import { useTranslation } from 'react-i18next';
-import { usePreferencesStore } from '@/stores/store';
-import { Icon } from '@iconify-icon/react';
-import Operation from './Operation';
 import { MyIcon } from '@/components/MyIcon';
 import { usePermission } from '@/hooks/usePermission';
+import type { UserModel } from '@/services/system/user/type';
+import { userService } from '@/services/system/user/userApi';
+import { usePreferencesStore } from '@/stores/store';
+import { ExclamationCircleFilled } from '@ant-design/icons';
+import { Icon } from '@iconify-icon/react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card, Table } from 'antd';
+import { isEqual } from 'lodash-es';
+import type React from 'react';
+import { useMemo, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { getColumns } from './columns';
+import Operation from './Operation';
+import SearchForm from './SearchForm';
+import TableActionButtons from './TableActionButtons';
+import type { UserSearchParams } from './types';
+import UserInfoModal from './UserInfoModal';
+import UserPasswordModal from './UserPasswordModal';
 
 /**
  * 用户管理
@@ -52,7 +52,7 @@ const User: React.FC = () => {
       selectedRows: [],
       // 当前操作
       action: '',
-    },
+    }
   );
 
   // 查询参数（包含分页参数）
@@ -360,13 +360,13 @@ const User: React.FC = () => {
           },
         ],
         handleStatusChange,
-        canUpdateStatus,
+        canUpdateStatus
       ),
-    [handleStatusChange, canUpdateStatus],
+    [handleStatusChange, canUpdateStatus]
   );
 
   return (
-    <div className="user-management-container h-full flex flex-col gap-4">
+    <div className="user-management-container h-full flex flex-col gap-4 p-4">
       {/* 搜索表单 */}
       <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 

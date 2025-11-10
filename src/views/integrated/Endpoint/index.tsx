@@ -141,7 +141,7 @@ const Endpoint: React.FC = () => {
 
   return (
     <>
-      <div className="h-full flex flex-col gap-4">
+      <div className="h-full flex flex-col gap-4 p-4">
         {/* 搜索表单 */}
         <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
 

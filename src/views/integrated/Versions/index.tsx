@@ -1,11 +1,11 @@
+import type { WorkflowVersion } from '@/services/integrated/version/model';
+import { useDeleteVersion } from '@/views/integrated/Versions/useVersionQueries';
+import { message } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
-import { message } from 'antd';
-import VersionList from './VersionList';
-import VersionComparison from './VersionComparison';
 import CreateVersionModal from './CreateVersionModal';
-import { useDeleteVersion } from '@/views/integrated/Versions/useVersionQueries';
-import type { WorkflowVersion } from '@/services/integrated/version/model';
+import VersionComparison from './VersionComparison';
+import VersionList from './VersionList';
 
 /**
  * 版本管理主组件
@@ -35,7 +35,7 @@ const Versions: React.FC = () => {
   const handleCompareVersion = (version: WorkflowVersion) => {
     setComparisonVersions({
       baseVersion: version.version,
-      targetVersion: undefined,
+      targetVersion: '',
     });
     setShowComparison(true);
   };
@@ -86,7 +86,7 @@ const Versions: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col gap-4 p-4">
       <VersionList
         workflowId={workflowId}
         onViewVersion={handleViewVersion}
@@ -112,7 +112,7 @@ const Versions: React.FC = () => {
         workflowId={workflowId}
         currentVersion="v2.1.0"
       />
-    </>
+    </div>
   );
 };
 

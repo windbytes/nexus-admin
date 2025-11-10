@@ -1,29 +1,16 @@
-import type React from 'react';
-import { useState, useMemo } from 'react';
-import {
-  Card,
-  Input,
-  Select,
-  Button,
-  Row,
-  Col,
-  Pagination,
-  Spin,
-  Empty,
-  App,
-} from 'antd';
-import {
-  PlusOutlined,
-} from '@ant-design/icons';
 import { type WorkflowVersion, VersionStatus } from '@/services/integrated/version/model';
 import {
-  useVersionList,
   useDeleteVersion,
   usePublishVersion,
   useRollbackVersion,
+  useVersionList,
 } from '@/views/integrated/Versions/useVersionQueries';
-import VersionListItem from './VersionListItem';
+import { PlusOutlined } from '@ant-design/icons';
+import { App, Button, Card, Col, Empty, Input, Pagination, Row, Select, Spin } from 'antd';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 import ReleaseConfirmation from './ReleaseConfirmation';
+import VersionListItem from './VersionListItem';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -73,7 +60,7 @@ const VersionList: React.FC<VersionListProps> = ({
     pageSize: 20,
     total: 0,
   });
-  
+
   // 弹窗状态管理
   const [releaseModalVisible, setReleaseModalVisible] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<WorkflowVersion | null>(null);
@@ -88,7 +75,7 @@ const VersionList: React.FC<VersionListProps> = ({
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
     }),
-    [workflowId, searchKeyword, statusFilter, branchFilter, pagination.current, pagination.pageSize],
+    [workflowId, searchKeyword, statusFilter, branchFilter, pagination.current, pagination.pageSize]
   );
 
   // 使用 React Query 获取版本列表
@@ -110,7 +97,6 @@ const VersionList: React.FC<VersionListProps> = ({
   const deleteVersionMutation = useDeleteVersion();
   const publishVersionMutation = usePublishVersion();
   const rollbackVersionMutation = useRollbackVersion();
-
 
   /**
    * 删除版本
@@ -196,7 +182,6 @@ const VersionList: React.FC<VersionListProps> = ({
     }));
   };
 
-
   /**
    * 错误处理
    */
@@ -266,7 +251,7 @@ const VersionList: React.FC<VersionListProps> = ({
           style={{
             flex: 1,
             overflow: 'auto',
-            paddingRight: '8px', // 为滚动条留出空间
+            // paddingRight: '8px', // 为滚动条留出空间
           }}
         >
           {isLoading ? (
@@ -311,7 +296,7 @@ const VersionList: React.FC<VersionListProps> = ({
 
       {/* 分页组件 - 固定在底部 */}
       <Pagination
-        className="flex-shrink-0 flex justify-center p-4 bg-bg-container mt-4!  "
+        className="shrink-0 flex justify-center p-4 bg-bg-container mt-4!  "
         current={pagination.current}
         pageSize={pagination.pageSize}
         total={pagination.total}
@@ -324,11 +309,7 @@ const VersionList: React.FC<VersionListProps> = ({
       />
 
       {/* 发布确认弹窗 */}
-      <ReleaseConfirmation
-        visible={releaseModalVisible}
-        onClose={handleCloseReleaseModal}
-        version={selectedVersion}
-      />
+      <ReleaseConfirmation visible={releaseModalVisible} onClose={handleCloseReleaseModal} version={selectedVersion} />
     </div>
   );
 };

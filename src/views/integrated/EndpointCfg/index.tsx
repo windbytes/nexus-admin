@@ -451,7 +451,7 @@ const EndpointConfig: React.FC = () => {
 
   return (
     <>
-      <div className="h-full flex gap-4">
+      <div className="h-full flex gap-4 p-4">
         {/* 左侧：端点类型列表 */}
         <EndpointTypeList
           data={listData}

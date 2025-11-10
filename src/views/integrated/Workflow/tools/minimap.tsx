@@ -9,7 +9,7 @@ import { Activity } from 'react';
 const MiniMap: React.FC<MiniMapProps> = ({ visible }) => {
   return (
     <Activity mode={visible ? 'visible' : 'hidden'}>
-      <div className="absolute bottom-14 w-[198px]">
+      <div className="absolute bottom-14 right-2 w-[188px]">
         <MinimapRender
           panelStyles={{}}
           containerStyles={{

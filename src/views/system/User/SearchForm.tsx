@@ -1,8 +1,8 @@
-import { SearchOutlined, RedoOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, Select, DatePicker, Divider, Typography, ConfigProvider } from 'antd';
-import type { UserSearchParams } from './types';
-import { useTranslation } from 'react-i18next';
+import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
+import { Button, Card, ConfigProvider, DatePicker, Divider, Form, Input, Select, Typography } from 'antd';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { UserSearchParams } from './types';
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -51,7 +51,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
       }}
     >
       <Card className="mb-4">
-        <Form form={form} onFinish={onSearch}>
+        <Form form={form} onFinish={onSearch} labelCol={{ span: 4 }}>
           {/* 基础搜索 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Form.Item name="username" label="用户名" colon={false}>

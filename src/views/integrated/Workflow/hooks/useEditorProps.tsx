@@ -45,7 +45,7 @@ export function useEditorProps(
           text: 'NEXUS PLATFORM',
           position: 'center',
           size: 200,
-          opacity: 0.25,
+          opacity: 1,
           color: '#fff',
           // 字体
           fontFamily: 'Arial, sans-serif',

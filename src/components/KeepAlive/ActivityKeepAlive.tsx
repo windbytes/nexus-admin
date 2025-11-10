@@ -157,7 +157,7 @@ const ActivityKeepAlive: React.FC<ActivityKeepAliveProps> = memo(({ children }) 
   }, [children, tabs.length, reloadKey]); // 添加 reloadKey 到依赖
 
   return (
-    <div ref={containerRef} className="h-full relative flex flex-col p-4">
+    <div ref={containerRef} className="h-full relative flex flex-col">
       {cachedComponents}
     </div>
   );

@@ -1,13 +1,12 @@
-import { Layout, theme } from 'antd';
+import { menuService } from '@/services/system/menu/menuApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { App, Layout, theme } from 'antd';
 import type React from 'react';
 import { useCallback, useReducer } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
 import MenuDetail from './menu-detail';
 import MenuInfoDrawer from './menu-info-drawer';
 import MenuInterfacePermission from './menu-interface-permission';
 import MenuTree from './menu-tree';
-import { menuService } from '@/services/system/menu/menuApi';
 
 /**
  *
@@ -17,7 +16,7 @@ const Menu: React.FC = () => {
   const { token } = theme.useToken();
   const { message, modal } = App.useApp();
   const queryClient = useQueryClient();
-  
+
   // 合并的状态
   const [state, dispatch] = useReducer((prev: any, action: any) => ({ ...prev, ...action }), {
     // 抽屉是否打开
@@ -65,12 +64,12 @@ const Menu: React.FC = () => {
       url: menuData.url ? `${menuData.url}_copy` : undefined, // 如果存在url，添加"_copy"后缀
       componentName: menuData.componentName ? `${menuData.componentName}_copy` : undefined, // 如果存在组件名，添加"_copy"后缀
     };
-    
+
     // 设置复制的菜单数据并打开新增抽屉
-    dispatch({ 
-      copiedMenuData: copiedData, 
-      openDrawer: true, 
-      operation: 'add' 
+    dispatch({
+      copiedMenuData: copiedData,
+      openDrawer: true,
+      operation: 'add',
     });
   }, []);
 
@@ -166,15 +165,15 @@ const Menu: React.FC = () => {
 
   return (
     <>
-      <Layout>
+      <Layout className="p-4">
         <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
           {/* 左边菜单列表 */}
           <MenuTree onSelectMenu={onSelectMenu} onOpenDrawer={onOpenDrawer} />
         </Layout.Sider>
         <Layout.Content className="flex flex-col ml-4 gap-4">
           {/* 菜单详情 */}
-          <MenuDetail 
-            menu={state.currentMenu} 
+          <MenuDetail
+            menu={state.currentMenu}
             onOpenDrawer={onOpenDrawer}
             onDeleteMenu={handleDeleteMenu}
             onCopyMenu={handleCopyMenu}

@@ -1,22 +1,22 @@
-import type React from 'react';
-import { useState, useCallback } from 'react';
-import { App, Card, Modal } from 'antd';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import SearchForm from './components/SearchForm';
-import TableActionButtons from './components/TableActionButtons';
-import ParamTable from './components/ParamTable';
-import ParamDrawer from './components/ParamDrawer';
 import {
   sysParamService,
-  type SysParam,
-  type SysParamSearchParams,
-  type SysParamFormData,
   type ExportOptions,
+  type SysParam,
+  type SysParamFormData,
+  type SysParamSearchParams,
 } from '@/services/system/params';
-import { updateParamCache, deleteParamCache, clearAllParamCache } from '@/utils/paramService';
+import { clearAllParamCache, deleteParamCache, updateParamCache } from '@/utils/paramService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App, Card, Modal } from 'antd';
+import { isEqual } from 'lodash-es';
+import type React from 'react';
+import { useCallback, useState } from 'react';
+import ParamDrawer from './components/ParamDrawer';
+import ParamTable from './components/ParamTable';
+import SearchForm from './components/SearchForm';
+import TableActionButtons from './components/TableActionButtons';
 import { PAGINATION_CONFIG } from './config';
 import './styles/params.module.scss';
-import { isEqual } from 'lodash-es';
 
 const { confirm } = Modal;
 
@@ -58,7 +58,7 @@ const Params: React.FC = () => {
     onSuccess: (_, data) => {
       setDrawerVisible(false);
       queryClient.invalidateQueries({ queryKey: ['sys_params'] });
-      
+
       // 更新参数缓存
       if (data.code && data.value) {
         updateParamCache(data.code, data.value);
@@ -72,7 +72,7 @@ const Params: React.FC = () => {
     onSuccess: (_, { data }) => {
       setDrawerVisible(false);
       queryClient.invalidateQueries({ queryKey: ['sys_params'] });
-      
+
       // 更新参数缓存
       if (data.code && data.value) {
         updateParamCache(data.code, data.value);
@@ -85,7 +85,7 @@ const Params: React.FC = () => {
     mutationFn: ({ id }: { id: number; code: string }) => sysParamService.deleteParam(id),
     onSuccess: (_, { code }) => {
       queryClient.invalidateQueries({ queryKey: ['sys_params'] });
-      
+
       // 删除参数缓存
       if (code) {
         deleteParamCache(code);
@@ -99,10 +99,10 @@ const Params: React.FC = () => {
     onSuccess: (_, { codes }) => {
       setSelectedRowKeys([]);
       queryClient.invalidateQueries({ queryKey: ['sys_params'] });
-      
+
       // 批量删除参数缓存
       if (codes && codes.length > 0) {
-        codes.forEach(code => {
+        codes.forEach((code) => {
           if (code) {
             deleteParamCache(code);
           }
@@ -116,7 +116,7 @@ const Params: React.FC = () => {
     mutationFn: (file: File) => sysParamService.importParams(file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sys_params'] });
-      
+
       // 导入可能影响多个参数，清空所有缓存
       clearAllParamCache();
     },
@@ -124,7 +124,11 @@ const Params: React.FC = () => {
 
   // 导出参数
   const exportMutation = useMutation({
-    mutationFn: (options: { type: 'all' | 'selected'; selectedIds?: number[]; searchParams?: SysParamSearchParams }) => {
+    mutationFn: (options: {
+      type: 'all' | 'selected';
+      selectedIds?: number[];
+      searchParams?: SysParamSearchParams;
+    }) => {
       const exportOptions: ExportOptions = {
         type: options.type,
         ...(options.selectedIds && { selectedIds: options.selectedIds }),
@@ -191,7 +195,7 @@ const Params: React.FC = () => {
         },
       });
     },
-    [deleteMutation],
+    [deleteMutation]
   );
 
   // 处理批量删除
@@ -202,10 +206,8 @@ const Params: React.FC = () => {
     }
 
     // 获取选中记录的code
-    const selectedRecords = result?.records?.filter(record => 
-      selectedRowKeys.includes(record.id)
-    ) || [];
-    const selectedCodes = selectedRecords.map(record => record.code);
+    const selectedRecords = result?.records?.filter((record) => selectedRowKeys.includes(record.id)) || [];
+    const selectedCodes = selectedRecords.map((record) => record.code);
 
     confirm({
       title: '确认批量删除',
@@ -213,9 +215,9 @@ const Params: React.FC = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        batchDeleteMutation.mutate({ 
-          ids: selectedRowKeys as number[], 
-          codes: selectedCodes 
+        batchDeleteMutation.mutate({
+          ids: selectedRowKeys as number[],
+          codes: selectedCodes,
         });
       },
     });
@@ -227,20 +229,26 @@ const Params: React.FC = () => {
   }, [refetch]);
 
   // 处理导入
-  const handleImport = useCallback((file: File) => {
-    importMutation.mutate(file);
-  }, [importMutation]);
+  const handleImport = useCallback(
+    (file: File) => {
+      importMutation.mutate(file);
+    },
+    [importMutation]
+  );
 
   // 处理导出
-  const handleExport = useCallback((type: 'all' | 'selected') => {
-    const exportOptions: { type: 'all' | 'selected'; selectedIds?: number[]; searchParams?: SysParamSearchParams } = {
-      type,
-      ...(type === 'selected' && { selectedIds: selectedRowKeys as number[] }),
-      ...(type === 'all' && { searchParams }),
-    };
-    
-    exportMutation.mutate(exportOptions);
-  }, [exportMutation, selectedRowKeys, searchParams]);
+  const handleExport = useCallback(
+    (type: 'all' | 'selected') => {
+      const exportOptions: { type: 'all' | 'selected'; selectedIds?: number[]; searchParams?: SysParamSearchParams } = {
+        type,
+        ...(type === 'selected' && { selectedIds: selectedRowKeys as number[] }),
+        ...(type === 'all' && { searchParams }),
+      };
+
+      exportMutation.mutate(exportOptions);
+    },
+    [exportMutation, selectedRowKeys, searchParams]
+  );
 
   // 处理展开搜索
   const handleToggleSearchExpand = useCallback(() => {
@@ -255,7 +263,7 @@ const Params: React.FC = () => {
         data: { ...record, status: checked },
       });
     },
-    [updateMutation],
+    [updateMutation]
   );
 
   // 处理表格选择变更
@@ -281,7 +289,7 @@ const Params: React.FC = () => {
 
       setDrawerLoading(false);
     },
-    [currentRecord, createMutation, updateMutation],
+    [currentRecord, createMutation, updateMutation]
   );
 
   // 处理抽屉取消
@@ -301,7 +309,7 @@ const Params: React.FC = () => {
     exportMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col params-container gap-4">
+    <div className="h-full flex flex-col params-container gap-4 p-4">
       {/* 搜索表单 */}
       <SearchForm
         onSearch={handleSearch}
