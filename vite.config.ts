@@ -14,7 +14,14 @@ export default defineConfig(({ mode }) => {
       react({
         // 启用 React 编译器优化
         babel: {
-          plugins: [['babel-plugin-react-compiler']],
+          plugins: [
+            // 装饰器插件
+            ['@babel/plugin-proposal-decorators', { legacy: true }],
+            // 类属性插件
+            ['@babel/plugin-proposal-class-properties', { loose: true }],
+            // React 编译器插件
+            ['babel-plugin-react-compiler'],
+          ],
         },
       }),
       tailwindcss(),

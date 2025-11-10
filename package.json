@@ -15,12 +15,14 @@
   },
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@flowgram.ai/free-auto-layout-plugin": "^1.0.2",
     "@flowgram.ai/free-container-plugin": "^1.0.2",
     "@flowgram.ai/free-group-plugin": "^1.0.2",
     "@flowgram.ai/free-layout-editor": "^1.0.2",
     "@flowgram.ai/free-lines-plugin": "^1.0.2",
     "@flowgram.ai/free-node-panel-plugin": "^1.0.2",
     "@flowgram.ai/free-snap-plugin": "^1.0.2",
+    "@flowgram.ai/free-stack-plugin": "^1.0.2",
     "@flowgram.ai/minimap-plugin": "^1.0.2",
     "@flowgram.ai/shortcuts-plugin": "^1.0.2",
     "@monaco-editor/react": "^4.7.0",
@@ -49,6 +51,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-decorators": "^7.28.0",
     "@eslint/js": "^9.39.1",
     "@iconify-icon/react": "^3.0.3",
     "@tailwindcss/vite": "^4.1.17",
