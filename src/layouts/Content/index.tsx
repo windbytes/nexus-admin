@@ -49,7 +49,7 @@ const Content = memo(({ children }: ContentProps) => {
 
   return (
     <Layout.Content
-      className="overflow-x-hidden overflow-y-auto"
+      className="overflow-x-hidden overflow-y-auto bg-[#fafbfc]"
       style={{
         position: 'relative',
       }}

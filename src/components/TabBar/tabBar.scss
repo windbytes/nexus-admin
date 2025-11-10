@@ -1,36 +1,34 @@
 .tab-bar {
   width: 100%;
   padding: 0 16px;
-  
+
   .tab-bar-content {
     display: flex;
     width: 100%;
   }
-  
+
   .tab-bar-tabs {
     flex: 1;
-    
+
     .ant-tabs-nav {
       margin: 0;
-      
+
       &::before {
         border-bottom: 1px solid #f0f0f0;
       }
     }
-    
+
     .ant-tabs-tab {
       padding: 8px 16px;
       margin: 0 2px 0 0;
       border-radius: 6px 6px 0 0;
-      border: 1px solid transparent;
-      border-bottom: none;
       background: #fafafa;
       transition: all 0.2s;
-      
+
       &:hover {
         background: #f0f0f0;
       }
-      
+
       &.ant-tabs-tab-active {
         background: #fff;
         border-color: #d9d9d9;
@@ -38,43 +36,43 @@
         margin-bottom: -1px;
         z-index: 1;
       }
-      
+
       .tab-label {
         cursor: pointer;
         user-select: none;
       }
     }
-    
+
     .ant-tabs-tab-remove {
       margin-left: 8px;
       color: #999;
-      
+
       &:hover {
         color: #ff4d4f;
         background: rgba(255, 77, 79, 0.1);
       }
     }
-    
+
     .ant-tabs-content-holder {
       display: none; // 隐藏内容区域，因为内容由KeepAlive组件渲染
     }
   }
-  
+
   .tab-bar-actions {
     display: flex;
     align-items: center;
-    
+
     .tab-action-btn {
       padding: 4px 8px;
       height: 28px;
       border: none;
       color: #666;
-      
+
       &:hover {
         color: #1890ff;
         background: rgba(24, 144, 255, 0.1);
       }
-      
+
       .anticon {
         font-size: 14px;
       }
@@ -88,7 +86,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     span {
       font-size: 12px;
     }
@@ -99,7 +97,7 @@
 @media (max-width: 768px) {
   .tab-bar {
     margin: 0 8px;
-    
+
     .tab-bar-tabs {
       .ant-tabs-tab {
         padding: 6px 12px;

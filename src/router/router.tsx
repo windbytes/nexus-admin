@@ -1,6 +1,8 @@
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { useMenuStore } from '@/stores/store';
+import { Icon } from '@iconify-icon/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { authenticatedRoute, baseRoutes, rootRoute } from './routes';
 import { routeTreeManager } from './routeTree';
@@ -34,8 +36,6 @@ export function Router() {
 
     if (menus && menus.length > 0) {
       dynamicRoutes = routeTreeManager.generateRoutes(menus);
-    } else {
-      console.log('⚠️ 没有菜单数据，只加载基础路由');
     }
 
     // 创建路由树（即使没有动态路由，也要创建基础路由）
@@ -59,12 +59,13 @@ export function Router() {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'center',
           alignItems: 'center',
-          height: '100vh',
+          justifyContent: 'center',
+          height: '100%',
+          minHeight: '400px',
         }}
       >
-        正在初始化路由...
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} fullscreen />
       </div>
     );
   }

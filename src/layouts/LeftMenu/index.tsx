@@ -1,12 +1,12 @@
+import { Layout } from 'antd';
 import type React from 'react';
 import { memo, useMemo } from 'react';
-import { Layout } from 'antd';
 import { useShallow } from 'zustand/shallow';
 
-import './leftMenu.scss';
 import { usePreferencesStore } from '@/stores/store';
-import SystemLogo from './component/SystemLogo';
 import MenuComponent from './component/MenuComponent';
+import SystemLogo from './component/SystemLogo';
+import './leftMenu.scss';
 
 // 提取静态样式对象到组件外部，避免每次渲染都创建新对象
 const siderStyles = {
@@ -14,8 +14,7 @@ const siderStyles = {
   position: 'relative',
   transition: 'width .2s cubic-bezier(.34,.69,.1,1)',
   zIndex: 999,
-  boxShadow: '0 2px 5px #00000014',
-  borderRight: '1px solid #ededed',
+  borderRight: '1px solid #00000012',
 } as const;
 
 const containerStyles = {
@@ -37,7 +36,7 @@ const LeftMenu: React.FC = memo(() => {
       sidebar: state.preferences.sidebar,
       mode: state.preferences.theme.mode,
       semiDarkSidebar: state.preferences.theme.semiDarkSidebar,
-    })),
+    }))
   );
 
   // 使用 useMemo 缓存派生的 mode 值

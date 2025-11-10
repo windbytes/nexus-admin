@@ -141,7 +141,7 @@ const Apps: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col h-full pt-2 pr-4 pl-4 bg-[#f5f6f7]">
+      <div className="flex flex-col h-full pt-2 pr-4 pl-4">
         {/* 卡片列表和筛选框 */}
         <div className="mb-[8px]">
           <div className="w-[600px] my-4 mx-auto">

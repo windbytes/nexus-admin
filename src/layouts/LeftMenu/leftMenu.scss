@@ -35,55 +35,55 @@
   cursor: pointer;
 
   // 与系统主题协调的渐变背景
-  background: linear-gradient(
-    135deg,
-    #f8fafc 0%,
-    // 浅灰白
-    #e2e8f0 50%,
-    // 浅灰
-    #cbd5e1 100% // 中灰
-  );
+  // background: linear-gradient(
+  //   135deg,
+  //   #f8fafc 0%,
+  //   // 浅灰白
+  //   #e2e8f0 50%,
+  //   // 浅灰
+  //   #cbd5e1 100% // 中灰
+  // );
 
-  // 边框和阴影效果
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  // // 边框和阴影效果
+  // border: 1px solid rgba(148, 163, 184, 0.2);
+  // box-shadow:
+  //   0 2px 8px rgba(0, 0, 0, 0.06),
+  //   0 1px 3px rgba(0, 0, 0, 0.1),
+  //   inset 0 1px 0 rgba(255, 255, 255, 0.8);
 
-  // hover浮动效果
-  &:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(
-      135deg,
-      #ffffff 0%,
-      // 纯白
-      #f1f5f9 50%,
-      // 极浅灰
-      #e2e8f0 100% // 浅灰
-    );
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.1),
-      0 2px 8px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  // // hover浮动效果
+  // &:hover {
+  //   transform: translateY(-2px);
+  //   background: linear-gradient(
+  //     135deg,
+  //     #ffffff 0%,
+  //     // 纯白
+  //     #f1f5f9 50%,
+  //     // 极浅灰
+  //     #e2e8f0 100% // 浅灰
+  //   );
+  //   border-color: rgba(59, 130, 246, 0.3);
+  //   box-shadow:
+  //     0 4px 16px rgba(0, 0, 0, 0.1),
+  //     0 2px 8px rgba(0, 0, 0, 0.08),
+  //     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-    .logo-background {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-      border-color: rgba(59, 130, 246, 0.2);
-    }
+  //   .logo-background {
+  //     transform: scale(1.05);
+  //     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+  //     border-color: rgba(59, 130, 246, 0.2);
+  //   }
 
-    .system-name {
-      transform: translateX(2px);
-      color: #1e40af;
-    }
+  //   .system-name {
+  //     transform: translateX(2px);
+  //     color: #1e40af;
+  //   }
 
-    .card-glow {
-      opacity: 0.3;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
-    }
-  }
+  //   .card-glow {
+  //     opacity: 0.3;
+  //     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
+  //   }
+  // }
 
   // 卡片内容
   .logo-card-content {
@@ -105,21 +105,21 @@
   .logo-background {
     width: 48px;
     height: 48px;
-    border-radius: 10px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(248, 250, 252, 0.6) 50%,
-      rgba(241, 245, 249, 0.4) 100%
-    );
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    // border-radius: 10px;
+    // background: linear-gradient(
+    //   135deg,
+    //   rgba(255, 255, 255, 0.8) 0%,
+    //   rgba(248, 250, 252, 0.6) 50%,
+    //   rgba(241, 245, 249, 0.4) 100%
+    // );
+    // border: 1px solid rgba(148, 163, 184, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow:
-      0 2px 6px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    // transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    // box-shadow:
+    //   0 2px 6px rgba(0, 0, 0, 0.08),
+    //   inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
   // logo图片
@@ -131,7 +131,7 @@
 
   // 系统名称
   .system-name {
-    padding-left: 16px;
+    // padding-left: 16px;
     white-space: nowrap;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     line-height: 1.5;
@@ -194,223 +194,223 @@
 }
 
 // 菜单项美化样式
-.side-menu {
-  .ant-menu {
-    // 菜单项基础样式
-    .ant-menu-item {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 8px;
-      margin: 2px 8px;
+// .side-menu {
+//   .ant-menu {
+//     // 菜单项基础样式
+//     .ant-menu-item {
+//       position: relative;
+//       overflow: hidden;
+//       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+//       border-radius: 8px;
+//       margin: 2px 8px;
 
-      // 渐变背景效果
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
-        transition: left 0.5s ease;
-        z-index: 0;
-      }
+//       // 渐变背景效果
+//       &::before {
+//         content: '';
+//         position: absolute;
+//         top: 0;
+//         left: -100%;
+//         width: 100%;
+//         height: 100%;
+//         background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
+//         transition: left 0.5s ease;
+//         z-index: 0;
+//       }
 
-      // hover 动效
-      &:hover {
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+//       // hover 动效
+//       &:hover {
+//         transform: translateX(4px);
+//         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
 
-        &::before {
-          left: 100%;
-        }
+//         &::before {
+//           left: 100%;
+//         }
 
-        .ant-menu-item-icon {
-          transform: scale(1.1);
-        }
-      }
+//         .ant-menu-item-icon {
+//           transform: scale(1.1);
+//         }
+//       }
 
-      // 选中状态
-      &.ant-menu-item-selected {
-        background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
-        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+//       // 选中状态
+//       &.ant-menu-item-selected {
+//         background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+//         box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 
-        &::after {
-          content: '';
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 3px;
-          height: 20px;
-          background: var(--color-primary);
-          border-radius: 2px 0 0 2px;
-        }
-      }
+//         &::after {
+//           content: '';
+//           position: absolute;
+//           right: 0;
+//           top: 50%;
+//           transform: translateY(-50%);
+//           width: 3px;
+//           height: 20px;
+//           background: var(--color-primary);
+//           border-radius: 2px 0 0 2px;
+//         }
+//       }
 
-      .ant-menu-item-icon {
-        transition: transform 0.3s ease;
-        z-index: 1;
-        position: relative;
-      }
+//       .ant-menu-item-icon {
+//         transition: transform 0.3s ease;
+//         z-index: 1;
+//         position: relative;
+//       }
 
-      .ant-menu-title-content {
-        z-index: 1;
-        position: relative;
-        transition: transform 0.3s ease;
-      }
-    }
+//       .ant-menu-title-content {
+//         z-index: 1;
+//         position: relative;
+//         transition: transform 0.3s ease;
+//       }
+//     }
 
-    // 子菜单样式
-    .ant-menu-submenu {
-      .ant-menu-submenu-title {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: 8px;
-        margin: 2px 8px;
+//     // 子菜单样式
+//     .ant-menu-submenu {
+//       .ant-menu-submenu-title {
+//         position: relative;
+//         overflow: hidden;
+//         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+//         border-radius: 8px;
+//         margin: 2px 8px;
 
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
-          transition: left 0.5s ease;
-          z-index: 0;
-        }
+//         &::before {
+//           content: '';
+//           position: absolute;
+//           top: 0;
+//           left: -100%;
+//           width: 100%;
+//           height: 100%;
+//           background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
+//           transition: left 0.5s ease;
+//           z-index: 0;
+//         }
 
-        &:hover {
-          transform: translateX(4px);
-          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+//         &:hover {
+//           transform: translateX(4px);
+//           box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
 
-          &::before {
-            left: 100%;
-          }
+//           &::before {
+//             left: 100%;
+//           }
 
-          .ant-menu-item-icon {
-            transform: scale(1.1);
-          }
-        }
+//           .ant-menu-item-icon {
+//             transform: scale(1.1);
+//           }
+//         }
 
-        .ant-menu-item-icon {
-          transition: transform 0.3s ease;
-          z-index: 1;
-          position: relative;
-        }
+//         .ant-menu-item-icon {
+//           transition: transform 0.3s ease;
+//           z-index: 1;
+//           position: relative;
+//         }
 
-        .ant-menu-title-content {
-          z-index: 1;
-          position: relative;
-          transition: transform 0.3s ease;
-        }
-      }
-    }
-  }
-}
+//         .ant-menu-title-content {
+//           z-index: 1;
+//           position: relative;
+//           transition: transform 0.3s ease;
+//         }
+//       }
+//     }
+//   }
+// }
 
-// 收起状态下的特殊样式
-.ant-menu-submenu-popup {
-  .ant-menu {
-    .ant-menu-item {
-      margin: 2px 4px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
+// // 收起状态下的特殊样式
+// .ant-menu-submenu-popup {
+//   .ant-menu {
+//     .ant-menu-item {
+//       margin: 2px 4px;
+//       position: relative;
+//       overflow: hidden;
+//       border-radius: 8px;
 
-      // 渐变背景效果
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
-        transition: left 0.5s ease;
-        z-index: 0;
-      }
+//       // 渐变背景效果
+//       &::before {
+//         content: '';
+//         position: absolute;
+//         top: 0;
+//         left: -100%;
+//         width: 100%;
+//         height: 100%;
+//         background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
+//         transition: left 0.5s ease;
+//         z-index: 0;
+//       }
 
-      &:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+//       &:hover {
+//         transform: scale(1.05);
+//         box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
 
-        &::before {
-          left: 100%;
-        }
+//         &::before {
+//           left: 100%;
+//         }
 
-        .ant-menu-item-icon {
-          transform: scale(1.1);
-        }
-      }
+//         .ant-menu-item-icon {
+//           transform: scale(1.1);
+//         }
+//       }
 
-      // 选中状态
-      &.ant-menu-item-selected {
-        background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
-        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+//       // 选中状态
+//       &.ant-menu-item-selected {
+//         background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+//         box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 
-        &::after {
-          content: '';
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 3px;
-          height: 20px;
-          background: var(--color-primary);
-          border-radius: 2px 0 0 2px;
-        }
-      }
+//         &::after {
+//           content: '';
+//           position: absolute;
+//           right: 0;
+//           top: 50%;
+//           transform: translateY(-50%);
+//           width: 3px;
+//           height: 20px;
+//           background: var(--color-primary);
+//           border-radius: 2px 0 0 2px;
+//         }
+//       }
 
-      .ant-menu-item-icon {
-        transition: transform 0.3s ease;
-        z-index: 1;
-        position: relative;
-      }
-    }
+//       .ant-menu-item-icon {
+//         transition: transform 0.3s ease;
+//         z-index: 1;
+//         position: relative;
+//       }
+//     }
 
-    .ant-menu-submenu {
-      .ant-menu-submenu-title {
-        margin: 2px 4px;
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
+//     .ant-menu-submenu {
+//       .ant-menu-submenu-title {
+//         margin: 2px 4px;
+//         position: relative;
+//         overflow: hidden;
+//         border-radius: 8px;
 
-        // 渐变背景效果
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
-          transition: left 0.5s ease;
-          z-index: 0;
-        }
+//         // 渐变背景效果
+//         &::before {
+//           content: '';
+//           position: absolute;
+//           top: 0;
+//           left: -100%;
+//           width: 100%;
+//           height: 100%;
+//           background: linear-gradient(90deg, transparent 0%, rgba(24, 144, 255, 0.1) 50%, transparent 100%);
+//           transition: left 0.5s ease;
+//           z-index: 0;
+//         }
 
-        &:hover {
-          transform: scale(1.05);
-          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+//         &:hover {
+//           transform: scale(1.05);
+//           box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
 
-          &::before {
-            left: 100%;
-          }
+//           &::before {
+//             left: 100%;
+//           }
 
-          .ant-menu-item-icon {
-            transform: scale(1.1);
-          }
-        }
+//           .ant-menu-item-icon {
+//             transform: scale(1.1);
+//           }
+//         }
 
-        .ant-menu-item-icon {
-          transition: transform 0.3s ease;
-          z-index: 1;
-          position: relative;
-        }
-      }
-    }
-  }
-}
+//         .ant-menu-item-icon {
+//           transition: transform 0.3s ease;
+//           z-index: 1;
+//           position: relative;
+//         }
+//       }
+//     }
+//   }
+// }

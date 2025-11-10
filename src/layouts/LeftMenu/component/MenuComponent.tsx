@@ -1,16 +1,52 @@
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
-import { useTabStore } from '@/stores/tabStore';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { getOpenKeys, searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify-icon/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { TFunction } from 'i18next';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
 type MenuItem = Required<MenuProps>['items'][number];
+
+const getItem = (
+  t: TFunction,
+  label: any,
+  key?: React.Key | null,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+  type?: 'group'
+): MenuItem => {
+  return {
+    key,
+    icon,
+    children,
+    label: t(label),
+    type,
+  } as MenuItem;
+};
+
+const buildMenuItems = (menuList: RouteItem[], t: TFunction): MenuItem[] => {
+  const result: MenuItem[] = [];
+
+  for (const item of menuList) {
+    if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
+      continue;
+    }
+
+    if (!item?.children?.length) {
+      result.push(getItem(t, item.meta?.title, item.path, getIcon(item.meta?.icon)));
+      continue;
+    }
+
+    result.push(getItem(t, item.meta?.title, item.path, getIcon(item.meta?.icon), buildMenuItems(item.children, t)));
+  }
+
+  return result;
+};
 
 /**
  * 菜单组件
@@ -20,18 +56,17 @@ type MenuItem = Required<MenuProps>['items'][number];
  * 3. 优化菜单构建性能
  */
 const MenuComponent = memo(() => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   const menus = useMenuStore((state) => state.menus);
-  const { activeKey } = useTabStore();
-  const { accordion, dynamicTitle, collapsed, tabbarEnable } = usePreferencesStore(
+  const { accordion, dynamicTitle, collapsed, locale } = usePreferencesStore(
     useShallow((state) => ({
       accordion: state.preferences.navigation.accordion,
       dynamicTitle: state.preferences.app.dynamicTitle,
       collapsed: state.preferences.sidebar.collapsed,
-      tabbarEnable: state.preferences.tabbar.enable,
+      locale: state.preferences.app.locale,
     }))
   );
   const mode = usePreferencesStore((state) => {
@@ -50,62 +85,18 @@ const MenuComponent = memo(() => {
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [userInteracted, setUserInteracted] = useState(false); // 标记用户是否手动操作过菜单
 
-  const prevLanguageRef = useRef(i18n.language);
-  const getItem = useCallback(
-    (label: any, key?: React.Key | null, icon?: React.ReactNode, children?: MenuItem[], type?: 'group'): MenuItem => {
-      return {
-        key,
-        icon,
-        children,
-        label: t(label),
-        type,
-      } as MenuItem;
-    },
-    [t]
-  );
+  const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
+    // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
+    setUserInteracted(false);
+    navigate({ to: key, replace: true });
+  }, []);
 
-  // 【优化】使用 useMemo 缓存菜单构建函数
-  const deepLoopFloat = useMemo(
-    () =>
-      (menuList: RouteItem[], newArr: MenuItem[] = []): MenuItem[] => {
-        for (const item of menuList) {
-          if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
-            continue;
-          }
-          if (!item?.children?.length) {
-            newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
-            continue;
-          }
-          newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
-        }
-        return newArr;
-      },
-    [getItem]
-  );
+  // 当前选中的菜单（这么做是因为tabbar组件中可能也会引起pathname的变化-切换tab）
+  const currentSelectedKeys = useMemo(() => [pathname], [pathname]);
 
-  // 【核心优化】使用 startTransition 优化菜单点击
-  const clickMenu: MenuProps['onClick'] = useCallback(
-    ({ key }: { key: string }) => {
-      // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
-      setUserInteracted(false);
-      navigate({ to: key, replace: true });
-    },
-    [navigate]
-  );
-
-  // 【优化】监听 tab 切换，同步更新左侧菜单选中状态
-  const currentSelectedKeys = useMemo(() => {
-    if (tabbarEnable && activeKey && activeKey !== pathname) {
-      return [activeKey];
-    }
-    return [pathname];
-  }, [activeKey, pathname, tabbarEnable]);
-
-  // 【优化】使用 useMemo 优化 openKeys 的计算
   const currentOpenKeys = useMemo(() => {
-    const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
-    return getOpenKeys(targetPath, menus);
-  }, [activeKey, pathname, menus]);
+    return getOpenKeys(pathname, menus);
+  }, [pathname, menus]);
 
   // 【优化】使用 useCallback 优化
   const onOpenChange = useCallback(
@@ -172,22 +163,16 @@ const MenuComponent = memo(() => {
       return;
     }
 
-    // 检查语言是否真的变化了
-    const languageChanged = prevLanguageRef.current !== i18n.language;
-    if (languageChanged) {
-      prevLanguageRef.current = i18n.language;
-    }
-
     setLoading(true);
     // 使用 setTimeout 将菜单构建推迟到空闲时
     const timeoutId = setTimeout(() => {
-      const menu = deepLoopFloat(menus, []);
+      const menu = buildMenuItems(menus, t);
       setMenuList(menu);
       setLoading(false);
     }, 0);
 
     return () => clearTimeout(timeoutId);
-  }, [menus, i18n.language, deepLoopFloat]);
+  }, [menus, locale, t]);
 
   return (
     <Spin

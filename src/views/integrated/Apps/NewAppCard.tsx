@@ -1,12 +1,12 @@
-import React, { useReducer } from 'react';
-import { ExportOutlined, FileAddFilled, PlusOutlined } from '@ant-design/icons';
-import { Card } from 'antd';
-import AppCreate from './create-app-modal';
-import ImportDsl from './create-from-dsl-modal';
-import { useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
 import type { App, AppModalState } from '@/services/integrated/apps/app.ts';
 import { appsService } from '@/services/integrated/apps/appsApi.ts';
+import { ExportOutlined, FileAddFilled, PlusOutlined } from '@ant-design/icons';
+import { useMutation } from '@tanstack/react-query';
+import { Card } from 'antd';
+import React, { useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
+import AppCreate from './create-app-modal';
+import ImportDsl from './create-from-dsl-modal';
 
 // 模版中心
 const AppTemplates = React.lazy(() => import('./create-app-template/index.tsx'));
@@ -43,7 +43,7 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
       openTemplateModal: false,
       // 导入窗口的打开状态
       openImportModal: false,
-    },
+    }
   );
 
   // 处理应用新增
@@ -55,7 +55,7 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
       dispatch({
         openAddModal: false,
       });
-    }
+    },
   });
 
   /**
@@ -146,7 +146,7 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
   return (
     <>
       <Card
-        className="relative col-span-1 inline-flex flex-col justify-between h-[160px] bg-components-card-bg rounded-xl"
+        className="relative col-span-1 inline-flex flex-col justify-between h-[160px] rounded-xl"
         classNames={{ body: 'grow p-2! rounded-t-xl' }}
       >
         <div className="px-6 pt-2 pb-1 text-xs font-medium leading-[18px] text-[#676f83]">

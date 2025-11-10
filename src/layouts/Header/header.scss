@@ -4,15 +4,15 @@
     align-items: center;
     height: 60px;
     padding: 0 16px;
-    background: #fff;
+    background: #fafbfc;
     border-bottom: 1px solid #f0f0f0;
   }
 
   .header-tab-row {
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
+    background: #fafbfc;
+    // border-bottom: 1px solid #f0f0f0;
     padding-top: 4px;
-    
+
     .tab-bar {
       width: 100%;
       padding: 0 8px;
@@ -30,7 +30,7 @@
     .header-main-row {
       padding: 0 16px;
     }
-    
+
     .header-tab-row {
       .tab-bar {
         padding: 0 12px;

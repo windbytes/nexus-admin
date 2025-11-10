@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
-import { Row, Col, Card } from 'antd';
+import { Card, Col, Row } from 'antd';
 import type React from 'react';
 import {
-  StatisticCards,
+  Announcements,
+  FailedFlowsList,
+  FlowCategoryChart,
   FlowTrendChart,
+  HelpDocuments,
   HotFlowsTable,
+  PendingFlowsList,
   QuickAccess,
   RecentVisits,
-  Announcements,
-  HelpDocuments,
-  FlowCategoryChart,
+  StatisticCards,
   TodoReminders,
-  FailedFlowsList,
-  PendingFlowsList,
 } from './components';
+import ProjectDescription from './components/ProjectDescription';
 import { mockWorkbenchData } from './mockData';
 import styles from './Workbench.module.scss';
-import ProjectDescription from './components/ProjectDescription';
 
 /**
  * 工作台

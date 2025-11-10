@@ -21,7 +21,6 @@ const Setting = lazy(() => import('./component/Setting'));
 
 // 提取静态样式对象，避免每次渲染都创建新对象
 const headerStyles = {
-  borderBottom: '1px solid #e9edf0',
   padding: 0,
 } as const;
 
@@ -95,7 +94,7 @@ const Header = memo(() => {
   return (
     <>
       {headerEnable ? (
-        <Layout.Header className="ant-layout-header header-container h-auto!" style={headerStyles}>
+        <Layout.Header className="ant-layout-header header-container h-auto! bg-[#fafbfc]" style={headerStyles}>
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}
