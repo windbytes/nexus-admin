@@ -29,16 +29,6 @@ const Workbench: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-6 bg-gray-50 min-h-screen">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">加载中...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`p-2 min-h-screen workbench}`}>
       {/* 统计卡片 */}
@@ -49,6 +39,7 @@ const Workbench: React.FC = () => {
         <Col xs={24} xl={18} lg={16} className="flex! flex-col gap-4">
           {/* 流程运行时间趋势图 */}
           <Card
+            loading={isLoading}
             title="流程运行时间趋势图 (近7日)"
             className="mainCard"
             styles={{
@@ -61,27 +52,27 @@ const Workbench: React.FC = () => {
           </Card>
 
           {/* 热门流程 TOP5 */}
-          <Card title="热门流程 TOP5" className="mainCard">
+          <Card loading={isLoading} title="热门流程 TOP5" className="mainCard">
             <HotFlowsTable />
           </Card>
 
           {/* 失败流程列表 */}
-          <Card title="失败流程列表" className="mainCard">
+          <Card loading={isLoading} title="失败流程列表" className="mainCard">
             <FailedFlowsList />
           </Card>
 
           {/* 等待人工处理的流程 */}
-          <Card title="等待人工处理的流程" className="mainCard">
+          <Card loading={isLoading} title="等待人工处理的流程" className="mainCard">
             <PendingFlowsList />
           </Card>
 
           {/* 流程类别占比 - 移动到左侧 */}
-          <Card title="流程类别分布" className="mainCard">
+          <Card loading={isLoading} title="流程类别分布" className="mainCard">
             <FlowCategoryChart />
           </Card>
 
           {/* 项目介绍 */}
-          <Card className="mainCard">
+          <Card loading={isLoading} className="mainCard">
             <ProjectDescription />
           </Card>
         </Col>
@@ -89,27 +80,32 @@ const Workbench: React.FC = () => {
         {/* 右侧边栏 - 调整比例并增加间距 */}
         <Col xs={24} xl={6} lg={8} className="flex! flex-col gap-4">
           {/* 快捷入口 */}
-          <Card title="快捷入口" className="sidebarCard" extra={<a href="/dashboard/workbench">管理</a>}>
+          <Card
+            loading={isLoading}
+            title="快捷入口"
+            className="sidebarCard"
+            extra={<a href="/dashboard/workbench">管理</a>}
+          >
             <QuickAccess />
           </Card>
 
           {/* 最近访问 */}
-          <Card title="最近访问" className="sidebarCard">
+          <Card loading={isLoading} title="最近访问" className="sidebarCard">
             <RecentVisits />
           </Card>
 
           {/* 待办提醒 / 异常警报 */}
-          <Card title="待办提醒 / 异常警报" className="sidebarCard">
+          <Card loading={isLoading} title="待办提醒 / 异常警报" className="sidebarCard">
             <TodoReminders />
           </Card>
 
           {/* 公告 */}
-          <Card title="公告" className="sidebarCard" extra={<a href="/announcements">查看更多</a>}>
+          <Card loading={isLoading} title="公告" className="sidebarCard" extra={<a href="/announcements">查看更多</a>}>
             <Announcements />
           </Card>
 
           {/* 帮助文档 */}
-          <Card title="帮助文档" className="mainCard" extra={<a href="/help">查看更多</a>}>
+          <Card loading={isLoading} title="帮助文档" className="mainCard" extra={<a href="/help">查看更多</a>}>
             <HelpDocuments />
           </Card>
         </Col>
