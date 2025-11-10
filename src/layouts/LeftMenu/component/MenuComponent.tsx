@@ -48,6 +48,57 @@ const buildMenuItems = (menuList: RouteItem[], t: TFunction): MenuItem[] => {
   return result;
 };
 
+const isVisibleMenu = (menu: RouteItem) => {
+  return !(menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3);
+};
+
+const hasRoutePath = (routes: RouteItem[] | undefined, targetPath: string): boolean => {
+  if (!routes || routes.length === 0) {
+    return false;
+  }
+
+  for (const route of routes) {
+    if (route.path === targetPath) {
+      return true;
+    }
+
+    if (hasRoutePath(route.children, targetPath)) {
+      return true;
+    }
+
+    if (hasRoutePath(route.childrenRoute, targetPath)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const findNearestVisibleMenuPath = (menuList: RouteItem[], targetPath: string): string | null => {
+  for (const menu of menuList) {
+    if (!isVisibleMenu(menu)) {
+      continue;
+    }
+
+    if (menu.path === targetPath) {
+      return menu.path;
+    }
+
+    if (menu.children && menu.children.length > 0) {
+      const childMatch = findNearestVisibleMenuPath(menu.children, targetPath);
+      if (childMatch) {
+        return childMatch;
+      }
+    }
+
+    if (hasRoutePath(menu.childrenRoute, targetPath)) {
+      return menu.path;
+    }
+  }
+
+  return null;
+};
+
 /**
  * 菜单组件
  * 性能优化：
@@ -84,6 +135,8 @@ const MenuComponent = memo(() => {
   const [loading, setLoading] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [userInteracted, setUserInteracted] = useState(false); // 标记用户是否手动操作过菜单
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([pathname]);
+  const [computedOpenKeys, setComputedOpenKeys] = useState<string[]>(() => getOpenKeys(pathname, menus));
 
   const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
     // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
@@ -91,12 +144,9 @@ const MenuComponent = memo(() => {
     navigate({ to: key, replace: true });
   }, []);
 
-  // 当前选中的菜单（这么做是因为tabbar组件中可能也会引起pathname的变化-切换tab）
-  const currentSelectedKeys = useMemo(() => [pathname], [pathname]);
+  const currentSelectedKeys = useMemo(() => selectedKeys, [selectedKeys]);
 
-  const currentOpenKeys = useMemo(() => {
-    return getOpenKeys(pathname, menus);
-  }, [pathname, menus]);
+  const currentOpenKeys = useMemo(() => computedOpenKeys, [computedOpenKeys]);
 
   // 【优化】使用 useCallback 优化
   const onOpenChange = useCallback(
@@ -140,21 +190,44 @@ const MenuComponent = memo(() => {
   // 【优化】合并 pathname 和标题更新逻辑
   useEffect(() => {
     const route = searchRoute(pathname, menus);
-    if (route && Object.keys(route).length) {
-      // 更新标题
-      if (dynamicTitle) {
-        const title = route.meta?.title;
-        if (title) document.title = `Nexus - ${t(title)}`;
-      }
-      // 非折叠状态下，设置打开的 key
-      if (!collapsed) {
-        const openKey = getOpenKeys(pathname, menus);
-        setOpenKeys(openKey);
-        // 路由变化时重置用户交互标志，让菜单自动同步
-        setUserInteracted(false);
-      }
+    if (route && Object.keys(route).length && dynamicTitle) {
+      const title = route.meta?.title;
+      if (title) document.title = `Nexus - ${t(title)}`;
     }
-  }, [pathname, collapsed, menus, dynamicTitle, t]);
+  }, [pathname, menus, dynamicTitle, t]);
+
+  useEffect(() => {
+    if (!menus || menus.length === 0) {
+      return;
+    }
+
+    const nearestMenuPath = findNearestVisibleMenuPath(menus, pathname);
+    if (!nearestMenuPath) {
+      return;
+    }
+
+    setSelectedKeys((prev) => {
+      if (prev.length === 1 && prev[0] === nearestMenuPath) {
+        return prev;
+      }
+      return [nearestMenuPath];
+    });
+
+    const openKey = getOpenKeys(nearestMenuPath, menus);
+    setComputedOpenKeys((prev) => {
+      if (prev.length === openKey.length && prev.every((key, index) => key === openKey[index])) {
+        return prev;
+      }
+      return openKey;
+    });
+    setOpenKeys((prev) => {
+      if (prev.length === openKey.length && prev.every((key, index) => key === openKey[index])) {
+        return prev;
+      }
+      return openKey;
+    });
+    setUserInteracted(false);
+  }, [pathname, menus]);
 
   // 【优化】只在菜单数据或语言真正变化时重新生成菜单列表
   useEffect(() => {

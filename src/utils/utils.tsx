@@ -99,7 +99,7 @@ export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
   const findMenuPath = (menuList: RouteItem[], targetPath: string, parentPaths: string[] = []): boolean => {
     for (const menu of menuList) {
       // 跳过隐藏的菜单项
-      if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
+      if (menu.hidden || menu.meta?.menuType === 3) {
         continue;
       }
 
