@@ -1,3 +1,6 @@
+import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
+import { menuService } from '@/services/system/menu/menuApi';
+import { addIcon } from '@/utils/optimized-icons';
 import {
   CloseOutlined,
   MinusCircleOutlined,
@@ -23,9 +26,6 @@ import {
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
-import { menuService } from '@/services/system/menu/menuApi';
-import { addIcon } from '@/utils/optimized-icons';
 
 // 菜单类型枚举
 const MenuType = {
@@ -96,23 +96,23 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
   // 递归处理目录数据，对 title 进行国际化
   const translateDirectory = useCallback(
-    (data: any[], typeFilter?: MenuType): any[] => {
+    (data: any[], filterFn?: (item: any) => boolean): any[] => {
       const loop = (items: any[]): any[] =>
         items
-          .filter((item) => {
-            // 如果传入了类型过滤，则只保留匹配类型的项
-            return typeFilter === MenuType.PERMISSION_BUTTON
-              ? item.menuType !== MenuType.PERMISSION_BUTTON
-              : item.menuType === typeFilter;
-          })
           .map((item) => {
+            const shouldKeep = filterFn ? filterFn(item) : true;
+
+            if (!shouldKeep) {
+              return null;
+            }
+
             const iconNode = item.icon ? addIcon(item.icon) : null;
+            const children = Array.isArray(item.children) ? loop(item.children) : [];
 
             const newItem: any = {
               ...item,
               value: item.id,
-              selectable:
-                menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(item.children) || item.children.length === 0,
+              selectable: menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(children) || children.length === 0,
               title: (
                 <Space>
                   {iconNode}
@@ -121,16 +121,17 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
               ),
             };
 
-            if (Array.isArray(item.children) && item.children.length > 0) {
-              newItem.children = loop(item.children);
+            if (children.length > 0) {
+              newItem.children = children;
             }
 
             return newItem;
-          });
+          })
+          .filter((item): item is any => Boolean(item));
 
       return loop(data);
     },
-    [t, menuType],
+    [t, menuType]
   );
 
   // 使用 useQuery 获取目录数据
@@ -143,12 +144,25 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
   });
 
   // 根据当前菜单类型进行过滤并国际化
+  const directoryFilter = useMemo(() => {
+    if (menuType === MenuType.PERMISSION_BUTTON) {
+      return (item: any) => item.menuType !== MenuType.PERMISSION_BUTTON;
+    }
+
+    if (menuType === MenuType.SUB_ROUTE) {
+      return (item: any) => item.menuType === MenuType.TOP_LEVEL || item.menuType === MenuType.SUB_MENU;
+    }
+
+    if (menuType === MenuType.SUB_MENU || menuType === MenuType.TOP_LEVEL) {
+      return (item: any) => item.menuType === MenuType.TOP_LEVEL;
+    }
+
+    return undefined;
+  }, [menuType]);
+
   const directoryData = useMemo(() => {
-    return translateDirectory(
-      allDirectoryData || [],
-      menuType === MenuType.SUB_MENU || menuType === MenuType.SUB_ROUTE ? MenuType.TOP_LEVEL : menuType,
-    );
-  }, [allDirectoryData, menuType, translateDirectory]);
+    return translateDirectory(allDirectoryData || [], directoryFilter);
+  }, [allDirectoryData, directoryFilter, translateDirectory]);
 
   /**
    * 提交表单
@@ -183,7 +197,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         nameRef.current?.focus();
       });
     },
-    [form, nameRef],
+    [form, nameRef]
   );
 
   // 选择图标
@@ -305,7 +319,13 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
                     },
                   ]}
                 >
-                  <Input allowClear placeholder="请输入前端组件" addonBefore="views/" addonAfter="/index.tsx" autoComplete="off" />
+                  <Input
+                    allowClear
+                    placeholder="请输入前端组件"
+                    addonBefore="views/"
+                    addonAfter="/index.tsx"
+                    autoComplete="off"
+                  />
                 </Form.Item>
                 <Form.Item name="componentName" label="组件名称">
                   <Input allowClear autoComplete="off" />

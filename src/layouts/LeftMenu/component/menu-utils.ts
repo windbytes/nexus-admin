@@ -6,6 +6,7 @@ import type { TFunction } from 'i18next';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { getOpenKeys } from '@/utils/utils';
+import { matchPathname } from '@tanstack/react-router';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -201,6 +202,26 @@ export const isVisibleMenu = (menu: RouteItem) => {
 };
 
 /**
+ * 判断路由路径是否与目标路径匹配。
+ *
+ * @param routePath - 路由路径
+ * @param targetPath - 目标路径
+ * @returns 是否匹配
+ */
+const matchRoutePath = (routePath: string | undefined, targetPath: string): boolean => {
+  if (!routePath) {
+    return false;
+  }
+
+  const matchedParams = matchPathname(targetPath, {
+    to: routePath,
+    caseSensitive: false,
+  });
+
+  return matchedParams !== undefined;
+};
+
+/**
  * 检查目标路径是否存在于给定的路由列表（含子级）。
  *
  * @param routes - 路由列表
@@ -213,7 +234,7 @@ export const hasRoutePath = (routes: RouteItem[] | undefined, targetPath: string
   }
 
   for (const route of routes) {
-    if (route.path === targetPath) {
+    if (matchRoutePath(route.path, targetPath)) {
       return true;
     }
 
@@ -242,7 +263,7 @@ export const findNearestVisibleMenuPath = (menuList: RouteItem[], targetPath: st
       continue;
     }
 
-    if (menu.path === targetPath) {
+    if (matchRoutePath(menu.path, targetPath)) {
       return menu.path;
     }
 

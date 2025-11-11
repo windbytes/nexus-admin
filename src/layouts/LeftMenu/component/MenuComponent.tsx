@@ -114,7 +114,6 @@ const MenuComponent = memo(() => {
     if (!menus || menus.length === 0) {
       return;
     }
-
     const nearestMenuPath = findNearestVisibleMenuPath(menus, pathname);
     if (!nearestMenuPath) {
       return;
