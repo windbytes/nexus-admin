@@ -1,8 +1,8 @@
 import type {
+  FlowNodeEntity,
   WorkflowNodeJSON as FlowNodeJsonDefault,
   WorkflowNodeRegistry as FlowNodeRegistryDefault,
   FreeLayoutPluginContext,
-  FlowNodeEntity,
   WorkflowEdgeJSON,
   WorkflowNodeMeta,
 } from '@flowgram.ai/free-layout-editor';
@@ -42,7 +42,7 @@ export interface FlowNodeMeta extends WorkflowNodeMeta {
  *
  */
 export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
-  meta: FlowNodeMeta;
+  meta: WorkflowNodeMeta;
 
   info?: {
     icon: string;

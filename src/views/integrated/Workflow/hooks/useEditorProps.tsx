@@ -9,6 +9,7 @@ import { createFreeNodePanelPlugin } from '@flowgram.ai/free-node-panel-plugin';
 import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
 import { createFreeStackPlugin } from '@flowgram.ai/free-stack-plugin';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
+import { createPanelManagerPlugin } from '@flowgram.ai/panel-manager-plugin';
 import { debounce } from 'lodash-es';
 import { useMemo } from 'react';
 import BaseNode from '../components/base-node';
@@ -17,6 +18,7 @@ import { GroupNodeRender } from '../components/group/components/node-render';
 import { LineAddButton } from '../components/line-add-button';
 import { NodePanel } from '../components/node-panel';
 import SelectBoxPopover from '../components/select-box-popover';
+import { nodeFormPanelFactory } from '../components/sidebar';
 import { DefaultNode } from '../nodes/defaultNode';
 import { createContextMenuPlugin } from '../plugins/context-menu-plugin/context-menu-plugin';
 import { CustomService } from '../services/custom-service';
@@ -439,6 +441,12 @@ export function useEditorProps(
          * ContextMenu plugin
          */
         createContextMenuPlugin({}),
+        /**
+         * Panel manager plugin
+         */
+        createPanelManagerPlugin({
+          factories: [nodeFormPanelFactory],
+        }),
       ],
     }),
     []

@@ -24,6 +24,7 @@
     "@flowgram.ai/free-snap-plugin": "^1.0.2",
     "@flowgram.ai/free-stack-plugin": "^1.0.2",
     "@flowgram.ai/minimap-plugin": "^1.0.2",
+    "@flowgram.ai/panel-manager-plugin": "^1.0.2",
     "@flowgram.ai/shortcuts-plugin": "^1.0.2",
     "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.90.7",

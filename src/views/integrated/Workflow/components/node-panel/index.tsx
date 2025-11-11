@@ -1,7 +1,7 @@
 import type { NodePanelRenderProps } from '@flowgram.ai/free-node-panel-plugin';
 
 /**
- * 节点面板
+ * 节点添加面板
  * @returns
  */
 export const NodePanel: React.FC<NodePanelRenderProps> = (props) => {

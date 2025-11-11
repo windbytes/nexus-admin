@@ -11,7 +11,7 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
   const { token } = theme.useToken();
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-1000 px-3 h-14 flex items-center justify-between">
+    <div className="absolute top-0 left-0 right-0 z-20 px-3 h-14 flex items-center justify-between">
       {/* 左侧：自动保存状态 */}
       <div className="flex items-center gap-2 text-sm" style={{ color: token.colorTextSecondary }}>
         <span>自动保存 22:10:05 · 未发布</span>
@@ -37,15 +37,15 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
         </div>
 
         <Badge count={1} offset={[-5, 5]}>
-          <Button size="large" icon={<AppstoreOutlined />} onClick={() => console.log('检查清单')}>
+          <Button icon={<AppstoreOutlined />} onClick={() => console.log('检查清单')}>
             检查清单
           </Button>
         </Badge>
-        <Button size="large" type="primary" onClick={() => console.log('发布')}>
+        <Button type="primary" onClick={() => console.log('发布')}>
           发布
         </Button>
         <Tooltip title="版本历史">
-          <Button size="large" icon={<HistoryOutlined />} onClick={() => console.log('版本历史')} />
+          <Button icon={<HistoryOutlined />} onClick={() => console.log('版本历史')} />
         </Tooltip>
       </Space>
     </div>

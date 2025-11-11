@@ -12,7 +12,7 @@ const BottomToolbar: React.FC = () => {
   const [minimapVisible, setMinimapVisible] = useState(true);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-1000 px-2 pb-2 flex items-center justify-between">
+    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pb-2 flex items-center justify-between">
       {/* 左侧：撤销、重做、历史记录 */}
       <HistoryControls />
 
