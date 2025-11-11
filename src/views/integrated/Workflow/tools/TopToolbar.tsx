@@ -27,7 +27,7 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
 
       {/* 右侧：操作按钮 */}
       <Space size="small">
-        <div className="flex items-center justify-center bg-white rounded-lg p-1 shadow-lg gap-2">
+        <div className="flex items-center justify-center bg-white rounded-lg p-1 shadow-sm gap-2">
           <Button icon={<PlayCircleOutlined />} onClick={() => console.log('预览')}>
             预览
           </Button>
@@ -37,15 +37,15 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
         </div>
 
         <Badge count={1} offset={[-5, 5]}>
-          <Button icon={<AppstoreOutlined />} onClick={() => console.log('检查清单')}>
+          <Button size="large" icon={<AppstoreOutlined />} onClick={() => console.log('检查清单')}>
             检查清单
           </Button>
         </Badge>
-        <Button type="primary" onClick={() => console.log('发布')}>
+        <Button size="large" type="primary" onClick={() => console.log('发布')}>
           发布
         </Button>
         <Tooltip title="版本历史">
-          <Button icon={<HistoryOutlined />} onClick={() => console.log('版本历史')} />
+          <Button size="large" icon={<HistoryOutlined />} onClick={() => console.log('版本历史')} />
         </Tooltip>
       </Space>
     </div>
