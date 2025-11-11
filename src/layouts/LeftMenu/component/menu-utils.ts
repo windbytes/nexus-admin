@@ -5,8 +5,7 @@ import type { TFunction } from 'i18next';
 
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { getOpenKeys } from '@/utils/utils';
-import { matchPathname } from '@tanstack/react-router';
+import { getOpenKeys, matchRoutePath } from '@/utils/utils';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -199,26 +198,6 @@ export const buildMenuItems = (menuList: RouteItem[], t: TFunction): MenuItem[] 
  */
 export const isVisibleMenu = (menu: RouteItem) => {
   return !(menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3);
-};
-
-/**
- * 判断路由路径是否与目标路径匹配。
- *
- * @param routePath - 路由路径
- * @param targetPath - 目标路径
- * @returns 是否匹配
- */
-const matchRoutePath = (routePath: string | undefined, targetPath: string): boolean => {
-  if (!routePath) {
-    return false;
-  }
-
-  const matchedParams = matchPathname(targetPath, {
-    to: routePath,
-    caseSensitive: false,
-  });
-
-  return matchedParams !== undefined;
 };
 
 /**

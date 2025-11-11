@@ -1,5 +1,6 @@
 import { AppstoreOutlined, HistoryOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import { Badge, Button, Space, theme, Tooltip } from 'antd';
+import { useNavigate } from '@tanstack/react-router';
+import { Badge, Button, Space, Tag, theme, Tooltip } from 'antd';
 import { IconRunHistory } from '../assets/icon-run-history';
 
 /**
@@ -9,6 +10,7 @@ import { IconRunHistory } from '../assets/icon-run-history';
  */
 const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
   const { token } = theme.useToken();
+  const navigate = useNavigate();
 
   return (
     <div className="absolute top-0 left-0 right-0 z-20 px-3 h-14 flex items-center justify-between">
@@ -19,22 +21,26 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
 
       {/* 中间：项目名称（空白） */}
       <div className="flex-1 flex items-center justify-center">
-        <span className="text-base font-medium" style={{ color: token.colorText }}>
-          {/* 项目名称 */}
-          应用ID ：{appId}
-        </span>
+        <Tooltip title="回到应用中心" color={token.colorPrimary} placement="bottom">
+          <Tag
+            color="green"
+            className="text-[16px]! p-1! cursor-pointer!"
+            onClick={() => navigate({ to: `/integrated/apps`, replace: true })}
+          >
+            {/* 项目名称 */}
+            应用ID ：{appId}
+          </Tag>
+        </Tooltip>
       </div>
 
       {/* 右侧：操作按钮 */}
       <Space size="small">
-        <div className="flex items-center justify-center bg-white rounded-lg p-1 shadow-sm gap-2">
-          <Button icon={<PlayCircleOutlined />} onClick={() => console.log('预览')}>
-            预览
-          </Button>
-          <Tooltip title="查看运行记录">
-            <Button icon={IconRunHistory} onClick={() => console.log('运行记录')} />
-          </Tooltip>
-        </div>
+        <Button icon={<PlayCircleOutlined />} onClick={() => console.log('预览')}>
+          预览
+        </Button>
+        <Tooltip title="查看运行记录">
+          <Button icon={IconRunHistory} onClick={() => console.log('运行记录')} />
+        </Tooltip>
 
         <Badge count={1} offset={[-5, 5]}>
           <Button icon={<AppstoreOutlined />} onClick={() => console.log('检查清单')}>

@@ -65,7 +65,7 @@ export default defineConfig(({ mode }) => {
       target: 'es2015',
       // 设置 chunk 大小警告限制
       chunkSizeWarningLimit: 1000,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           // 使用更安全的文件命名，不暴露库名
           chunkFileNames: 'static/js/[hash].js',

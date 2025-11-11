@@ -120,7 +120,7 @@ export function useEditorProps(
           meta: {
             defaultExpanded: true,
             // 禁用侧边栏
-            disableSideBar: true,
+            disableSideBar: false,
             // 禁用弹窗
             disableModal: true,
           },

@@ -1,6 +1,7 @@
 import { MyIcon } from '@/components/MyIcon/index';
 import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
+import { matchPathname } from '@tanstack/react-router';
 import React from 'react';
 import { isObject } from './is';
 
@@ -189,3 +190,23 @@ export function transformData(data: any[], expanded: string[], t: (key: string) 
     return newItem;
   });
 }
+
+/**
+ * 判断路由路径是否与目标路径匹配。
+ *
+ * @param routePath - 路由路径
+ * @param targetPath - 目标路径
+ * @returns 是否匹配
+ */
+export const matchRoutePath = (routePath: string | undefined, targetPath: string): boolean => {
+  if (!routePath) {
+    return false;
+  }
+
+  const matchedParams = matchPathname(targetPath, {
+    to: routePath,
+    caseSensitive: false,
+  });
+
+  return matchedParams !== undefined;
+};

@@ -1,12 +1,13 @@
-import type React from "react";
-import { memo, useEffect, useState } from "react";
-import { Breadcrumb } from "antd";
-import { Link, useRouterState } from "@tanstack/react-router";
-import type { RouteItem } from "@/types/route";
-import { getIcon } from "@/utils/optimized-icons";
-import { useMenuStore, usePreferencesStore } from "@/stores/store";
-import { t } from "i18next";
-import { useTranslation } from "react-i18next";
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import type { RouteItem } from '@/types/route';
+import { getIcon } from '@/utils/optimized-icons';
+import { matchRoutePath } from '@/utils/utils';
+import { Link, useRouterState } from '@tanstack/react-router';
+import { Breadcrumb } from 'antd';
+import { t } from 'i18next';
+import type React from 'react';
+import { memo, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 面包屑
@@ -20,17 +21,11 @@ const BreadcrumbNav: React.FC = () => {
   const { menus } = menuState;
   const [items, setItems] = useState<Record<string, any>[]>([]);
   // 从全局状态中获取配置是否开启面包屑、图标
-  const breadcrumb = usePreferencesStore(
-    (state) => state.preferences.breadcrumb
-  );
+  const breadcrumb = usePreferencesStore((state) => state.preferences.breadcrumb);
   const { t, i18n } = useTranslation();
   useEffect(() => {
     // 将menu里面的内容和path进行对照获取
-    const breadItems = patchBreadcrumb(
-      menus,
-      pathname,
-      breadcrumb.showIcon
-    );
+    const breadItems = patchBreadcrumb(menus, pathname, breadcrumb.showIcon);
     if (breadItems.length > 0) {
       setItems(breadItems);
     }
@@ -38,13 +33,7 @@ const BreadcrumbNav: React.FC = () => {
   }, [pathname, menus, breadcrumb, t, i18n.language]);
 
   // 组件的DOM内容
-  return (
-    <Breadcrumb
-        items={items}
-        className="flex justify-between items-center"
-        style={{ marginLeft: "10px" }}
-      />
-  );
+  return <Breadcrumb items={items} className="flex justify-between items-center" style={{ marginLeft: '10px' }} />;
 };
 export default memo(BreadcrumbNav);
 
@@ -55,13 +44,9 @@ export default memo(BreadcrumbNav);
  * @param joinIcon 是否显示图标
  * @returns 面包屑内容集合
  */
-function patchBreadcrumb(
-  routerList: RouteItem[],
-  pathname: string,
-  joinIcon: boolean
-): Record<string, any>[] {
+function patchBreadcrumb(routerList: RouteItem[], pathname: string, joinIcon: boolean): Record<string, any>[] {
   const breadcrumbItems: Record<string, any>[] = [];
-  
+
   /**
    * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
    * @param menuList 菜单列表
@@ -70,31 +55,29 @@ function patchBreadcrumb(
    * @returns 是否找到目标路径
    */
   const findMenuBreadcrumb = (
-    menuList: RouteItem[], 
-    targetPath: string, 
+    menuList: RouteItem[],
+    targetPath: string,
     parentItems: Record<string, any>[] = []
   ): boolean => {
     for (const menu of menuList) {
       // 跳过隐藏的菜单项
-      if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
+      if (menu.hidden || menu.meta?.menuType === 3) {
         continue;
       }
-      
+
       // 创建当前菜单项的面包屑项
       const breadcrumbItem: Record<string, any> = {
         title: (
           <>
             {joinIcon && menu.meta?.icon && getIcon(menu.meta.icon)}
-            <span style={{ padding: "0 4px" }}>
-              {t(menu.meta?.title as string)}
-            </span>
+            <span style={{ padding: '0 4px' }}>{t(menu.meta?.title as string)}</span>
           </>
         ),
         key: menu.path,
       };
-      
+
       // 如果是当前路径，添加链接
-      if (menu.path === targetPath) {
+      if (matchRoutePath(menu.path, targetPath)) {
         breadcrumbItem['title'] = (
           <>
             {joinIcon && menu.meta?.icon && getIcon(menu.meta.icon)}
@@ -105,7 +88,7 @@ function patchBreadcrumb(
         breadcrumbItems.push(...parentItems, breadcrumbItem);
         return true;
       }
-      
+
       // 如果有子菜单，递归查找
       if (menu.children && menu.children.length > 0) {
         const currentParentItems = [...parentItems, breadcrumbItem];
@@ -113,7 +96,7 @@ function patchBreadcrumb(
           return true;
         }
       }
-      
+
       // 如果有子路由，也递归查找
       if (menu.childrenRoute && menu.childrenRoute.length > 0) {
         const currentParentItems = [...parentItems, breadcrumbItem];
@@ -124,9 +107,9 @@ function patchBreadcrumb(
     }
     return false;
   };
-  
+
   // 在菜单中查找目标路径
   findMenuBreadcrumb(routerList, pathname);
-  
+
   return breadcrumbItems;
 }
