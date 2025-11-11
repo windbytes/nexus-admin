@@ -208,11 +208,11 @@ const Role: React.FC = () => {
 
   return (
     <>
-      <div className="h-full flex flex-col gap-4 p-4">
+      <div className="h-full flex flex-col gap-2">
         {/* 菜单检索条件栏 */}
         <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
         {/* 查询表格 */}
-        <Card className="flex-1 mt-4!" styles={{ body: { height: '100%' } }} ref={parentRef}>
+        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%' } }} ref={parentRef}>
           {/* 操作按钮 */}
           <RoleActionButtons
             onAddRoleClick={onAddRoleClick}

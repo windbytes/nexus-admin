@@ -165,12 +165,12 @@ const Menu: React.FC = () => {
 
   return (
     <>
-      <Layout className="p-4">
+      <Layout>
         <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
           {/* 左边菜单列表 */}
           <MenuTree onSelectMenu={onSelectMenu} onOpenDrawer={onOpenDrawer} />
         </Layout.Sider>
-        <Layout.Content className="flex flex-col ml-4 gap-4">
+        <Layout.Content className="flex flex-col ml-2 gap-2">
           {/* 菜单详情 */}
           <MenuDetail
             menu={state.currentMenu}

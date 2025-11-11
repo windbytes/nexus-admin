@@ -44,7 +44,7 @@ const Workflow: React.FC = () => {
   }, [colorPrimary]);
 
   return (
-    <div className="workflow-feature-overview">
+    <div className="workflow-feature-overview -m-2">
       <FreeLayoutEditorProvider ref={ref} {...editorProps}>
         {/* 顶部工具栏 */}
         <TopToolbar appId={appId} />

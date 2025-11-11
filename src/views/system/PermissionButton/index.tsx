@@ -24,12 +24,12 @@ const PermissionButton: React.FC = () => {
   }, []);
 
   return (
-    <Layout className="p-4">
+    <Layout>
       <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
         {/* 左侧按钮树 */}
         <ButtonTree onSelectButton={handleSelectButton} selectedButtonId={selectedButton ? selectedButton.id : ''} />
       </Layout.Sider>
-      <Layout.Content className="flex flex-col ml-4 gap-4">
+      <Layout.Content className="flex flex-col ml-2 gap-2">
         {/* 按钮详情 */}
         <ButtonDetail button={selectedButton} />
         {/* 按钮接口权限列表 */}

@@ -309,7 +309,7 @@ const Params: React.FC = () => {
     exportMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col params-container gap-4 p-4">
+    <div className="h-full flex flex-col params-container gap-2">
       {/* 搜索表单 */}
       <SearchForm
         onSearch={handleSearch}

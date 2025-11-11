@@ -39,7 +39,7 @@ export const authenticatedRoute = createRoute({
     return (
       <>
         <RouteLoadingBar />
-        <Layout className="h-full bg-[#fafbfc]">
+        <Layout className="h-full">
           <Suspense fallback={<Skeleton active />}>
             <LeftMenu />
           </Suspense>

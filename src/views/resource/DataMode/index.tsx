@@ -326,7 +326,7 @@ const DataMode: React.FC = () => {
     exportSchemaMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-4 p-4">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <DataModeSearchForm onSearch={handleSearch} loading={isLoading} />
 

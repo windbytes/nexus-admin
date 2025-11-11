@@ -30,13 +30,13 @@ const Workbench: React.FC = () => {
   });
 
   return (
-    <div className={`p-2 min-h-screen workbench}`}>
+    <div className={`min-h-screen workbench}`}>
       {/* 统计卡片 */}
       <StatisticCards />
 
-      <Row gutter={[16, 24]} className="mt-4">
+      <Row gutter={[16, 24]} className="mt-2">
         {/* 左侧主要内容区域 - 调整为更大的比例 */}
-        <Col xs={24} xl={18} lg={16} className="flex! flex-col gap-4">
+        <Col xs={24} xl={18} lg={16} className="flex! flex-col gap-2">
           {/* 流程运行时间趋势图 */}
           <Card
             loading={isLoading}
@@ -78,7 +78,7 @@ const Workbench: React.FC = () => {
         </Col>
 
         {/* 右侧边栏 - 调整比例并增加间距 */}
-        <Col xs={24} xl={6} lg={8} className="flex! flex-col gap-4">
+        <Col xs={24} xl={6} lg={8} className="flex! flex-col gap-2">
           {/* 快捷入口 */}
           <Card
             loading={isLoading}

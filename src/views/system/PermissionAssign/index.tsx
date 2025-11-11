@@ -22,7 +22,7 @@ const PermissionAssign: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col gap-4 p-4">
+    <div className="h-full flex flex-col gap-2">
       <Card className="h-full" classNames={{ body: 'p-4! h-full' }}>
         <Tabs
           activeKey={activeTab}
