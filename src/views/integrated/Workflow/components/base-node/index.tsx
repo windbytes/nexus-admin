@@ -8,7 +8,7 @@ import NodeWrapper from './node-wrapper';
 /**
  * 节点渲染方法（所有节点渲染的入口）
  */
-export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
+const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   /**
    * 提供节点渲染相关的方法
    */

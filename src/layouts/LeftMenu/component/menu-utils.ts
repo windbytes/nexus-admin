@@ -5,7 +5,8 @@ import type { TFunction } from 'i18next';
 
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { getOpenKeys, matchRoutePath } from '@/utils/utils';
+import { matchRoutePath, type MenuCaches } from '@/utils/utils';
+import { matchPathname } from '@tanstack/react-router';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -123,15 +124,25 @@ export const menuStateReducer = (state: MenuState, action: MenuAction): MenuStat
  * 根据当前路径和菜单数据生成初始的菜单状态。
  *
  * @param pathname - 当前路由路径
- * @param menus - 当前可用的菜单数据
+ * @param caches - 当前可用的菜单数据
  * @returns 初始菜单状态
  */
-export const createInitialMenuState = (pathname: string, menus?: RouteItem[]): MenuState => {
-  const initialOpenKeys = getOpenKeys(pathname, menus);
+export const createInitialMenuState = (pathname: string, caches: MenuCaches): MenuState => {
+  const { selectedPath, openKeys } = resolveMenuSelection(pathname, caches);
+
+  if (!selectedPath) {
+    return {
+      selectedKeys: [],
+      computedOpenKeys: [],
+      openKeys: [],
+      userInteracted: false,
+    };
+  }
+
   return {
-    selectedKeys: [pathname],
-    computedOpenKeys: initialOpenKeys,
-    openKeys: initialOpenKeys,
+    selectedKeys: [selectedPath],
+    computedOpenKeys: openKeys,
+    openKeys,
     userInteracted: false,
   };
 };
@@ -228,35 +239,53 @@ export const hasRoutePath = (routes: RouteItem[] | undefined, targetPath: string
 
   return false;
 };
-
 /**
- * 查找距离目标路径最近的可见菜单路径，用于同步选中状态。
- *
- * @param menuList - 路由菜单列表
- * @param targetPath - 目标路径
- * @returns 匹配到的菜单路径，未找到则返回 null
+ * 根据 pathname 决定选中/展开的菜单 path。
+ * 若命中纯路由节点，则退回最近的可见菜单。
+ * 若完全未命中，则尝试做动态匹配。
  */
-export const findNearestVisibleMenuPath = (menuList: RouteItem[], targetPath: string): string | null => {
-  for (const menu of menuList) {
-    if (!isVisibleMenu(menu)) {
-      continue;
-    }
+export function resolveMenuSelection(
+  pathname: string,
+  caches: MenuCaches
+): { selectedPath: string | null; openKeys: string[] } {
+  const { pathMap, ancestorsMap, routeToMenuPathMap } = caches;
 
-    if (matchRoutePath(menu.path, targetPath)) {
-      return menu.path;
-    }
+  let targetPath = pathname;
 
-    if (menu.children && menu.children.length > 0) {
-      const childMatch = findNearestVisibleMenuPath(menu.children, targetPath);
-      if (childMatch) {
-        return childMatch;
+  let entity = pathMap.get(pathname);
+  if (!entity) {
+    for (const [candidatePath, candidateEntity] of pathMap.entries()) {
+      if (
+        matchPathname(pathname, {
+          to: candidatePath,
+          caseSensitive: false,
+        })
+      ) {
+        entity = candidateEntity;
+        targetPath = candidatePath;
+        break;
       }
-    }
-
-    if (hasRoutePath(menu.childrenRoute, targetPath)) {
-      return menu.path;
     }
   }
 
-  return null;
-};
+  if (!entity) {
+    return { selectedPath: null, openKeys: [] };
+  }
+
+  // 纯路由回退到最近的可见菜单 path
+  if (entity.meta?.menuType === 2 || entity.hidden) {
+    const fallback = routeToMenuPathMap.get(targetPath);
+    if (!fallback) {
+      return { selectedPath: null, openKeys: [] };
+    }
+    return {
+      selectedPath: fallback,
+      openKeys: ancestorsMap.get(fallback) ?? [],
+    };
+  }
+
+  return {
+    selectedPath: entity.path,
+    openKeys: ancestorsMap.get(entity.path) ?? [],
+  };
+}

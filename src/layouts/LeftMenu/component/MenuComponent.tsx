@@ -1,6 +1,6 @@
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
-import type { RouteItem } from '@/types/route';
-import { getOpenKeys, searchRoute } from '@/utils/utils';
+import type { MenuCaches } from '@/utils/utils';
+import { searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify-icon/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
@@ -11,8 +11,8 @@ import { useShallow } from 'zustand/shallow';
 import {
   buildMenuItems,
   createInitialMenuState,
-  findNearestVisibleMenuPath,
   menuStateReducer,
+  resolveMenuSelection,
   type MenuItem,
 } from './menu-utils';
 
@@ -28,7 +28,12 @@ const MenuComponent = memo(() => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const menus = useMenuStore((state) => state.menus);
+  const { menus, caches } = useMenuStore(
+    useShallow((state) => ({
+      menus: state.menus,
+      caches: state.caches,
+    }))
+  );
   const { accordion, dynamicTitle, collapsed, locale } = usePreferencesStore(
     useShallow((state) => ({
       accordion: state.preferences.navigation.accordion,
@@ -52,9 +57,8 @@ const MenuComponent = memo(() => {
   const [loading, setLoading] = useState(false);
   const [menuState, dispatchMenuState] = useReducer(
     menuStateReducer,
-    { pathname, menus },
-    (initial: { pathname: string; menus: RouteItem[] | undefined }) =>
-      createInitialMenuState(initial.pathname, initial.menus)
+    { pathname, caches },
+    (initial: { pathname: string; caches: MenuCaches }) => createInitialMenuState(initial.pathname, initial.caches)
   );
   const { selectedKeys, computedOpenKeys, openKeys, userInteracted } = menuState;
 
@@ -111,21 +115,21 @@ const MenuComponent = memo(() => {
   }, [pathname, menus, dynamicTitle, t]);
 
   useEffect(() => {
-    if (!menus || menus.length === 0) {
-      return;
-    }
-    const nearestMenuPath = findNearestVisibleMenuPath(menus, pathname);
-    if (!nearestMenuPath) {
+    if (!menus || menus.length === 0 || !caches?.pathMap?.size) {
       return;
     }
 
-    const computedKeys = getOpenKeys(nearestMenuPath, menus);
+    const { selectedPath, openKeys } = resolveMenuSelection(pathname, caches);
+    if (!selectedPath) {
+      return;
+    }
+
     dispatchMenuState({
       type: 'sync',
-      selectedKeys: [nearestMenuPath],
-      computedOpenKeys: computedKeys,
+      selectedKeys: [selectedPath],
+      computedOpenKeys: openKeys,
     });
-  }, [pathname, menus]);
+  }, [pathname, menus, caches]);
 
   // 【优化】只在菜单数据或语言真正变化时重新生成菜单列表
   useEffect(() => {

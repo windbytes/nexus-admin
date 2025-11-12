@@ -5,6 +5,19 @@ import { matchPathname } from '@tanstack/react-router';
 import React from 'react';
 import { isObject } from './is';
 
+export type MenuEntity = RouteItem & {
+  id: string;
+  path: string;
+  parentId?: string | null;
+  children?: MenuEntity[];
+};
+
+export type MenuCaches = {
+  pathMap: Map<string, MenuEntity>;
+  ancestorsMap: Map<string, string[]>;
+  routeToMenuPathMap: Map<string, string>;
+};
+
 /**
  * Add the object as a parameter to the URL
  * @param baseUrl url
@@ -210,3 +223,45 @@ export const matchRoutePath = (routePath: string | undefined, targetPath: string
 
   return matchedParams !== undefined;
 };
+
+/**
+ * 构建菜单缓存：
+ * - pathMap：path -> 菜单实体
+ * - ancestorsMap：path -> 父级 path 链（用于 openKeys）
+ * - routeToMenuPathMap：路由 path -> 可见菜单 path（menuType === 3 时会用到）
+ */
+export function buildMenuCaches(menuList: MenuEntity[]): MenuCaches {
+  const pathMap = new Map<string, MenuEntity>();
+  const ancestorsMap = new Map<string, string[]>();
+  const routeToMenuPathMap = new Map<string, string>();
+
+  const dfs = (node: MenuEntity, parentVisibleAncestors: string[]) => {
+    const isPureRoute = node.meta?.menuType === 2;
+
+    // 可见菜单：自身 path 是 key；隐藏/纯路由：仅记录 pathMap 方便匹配
+    pathMap.set(node.path, node);
+
+    if (!isPureRoute && !node.hidden) {
+      ancestorsMap.set(node.path, [...parentVisibleAncestors]);
+    }
+
+    if (isPureRoute) {
+      // 路由节点指向最近的可见菜单
+      const nearestVisible = parentVisibleAncestors[parentVisibleAncestors.length - 1];
+      if (nearestVisible) {
+        routeToMenuPathMap.set(node.path, nearestVisible);
+      }
+    }
+
+    // 计算下一层可见菜单的父链
+    const nextVisibleAncestors =
+      isPureRoute || node.hidden ? parentVisibleAncestors : [...parentVisibleAncestors, node.path];
+
+    node.children?.forEach((child) => dfs(child, nextVisibleAncestors));
+    node.childrenRoute?.forEach((child) => dfs(child as MenuEntity, nextVisibleAncestors));
+  };
+
+  menuList.forEach((root) => dfs(root, []));
+
+  return { pathMap, ancestorsMap, routeToMenuPathMap };
+}
