@@ -9,6 +9,10 @@ import NodeFormPanel from './node-form-panel';
 export const nodeFormPanelFactory: PanelFactory<NodeFormPanelProps> = {
   key: 'node-form-panel',
   defaultSize: 500,
+  style: {
+    marginTop: 50,
+    height: 'calc(100% - 50px)',
+  },
   render: (props) => {
     return <NodeFormPanel {...props} />;
   },

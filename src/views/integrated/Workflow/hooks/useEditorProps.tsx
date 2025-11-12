@@ -92,6 +92,8 @@ export function useEditorProps(
         autoResize: true,
         // 阻止 mac 浏览器收拾翻页
         preventGlobalGesture: true,
+        // 默认鼠标交互
+        ineractiveType: 'MOUSE',
       },
 
       /**

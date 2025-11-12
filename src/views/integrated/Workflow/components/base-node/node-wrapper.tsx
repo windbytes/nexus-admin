@@ -73,6 +73,23 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, child
             }
           }
         }}
+        onContextMenu={(e) => {
+          // 阻止冒泡，避免触发到全局的右键插件绑定事件上（节点上右键，则显示组件相关的右键操作）
+          e.preventDefault();
+          e.stopPropagation();
+          selectNode(e);
+          if (!isDragging) {
+            panelManager.open(nodeFormPanelFactory.key, 'right', {
+              props: {
+                nodeId: nodeRender.node.id,
+              },
+            });
+            // 可选：将 isScrollToView 设为 true，可以让节点选中后滚动到画布中间
+            if (isScrollToView) {
+              scrollToView(ctx, nodeRender.node);
+            }
+          }
+        }}
         onMouseUp={() => setIsDragging(false)}
         onFocus={onFocus}
         onBlur={onBlur}

@@ -44,6 +44,8 @@ const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
           )}
           {form?.render()}
         </NodeWrapper>
+        {/* 节点状态条 */}
+        {/* <NodeStatusBar /> */}
       </NodeRenderContext>
       {/* <WorkflowNodeRenderer node={node}>
         {form?.render()}

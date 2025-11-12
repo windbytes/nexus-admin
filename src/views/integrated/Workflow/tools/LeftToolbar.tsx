@@ -1,5 +1,5 @@
 import { PlusCircleFilled, QuestionCircleOutlined, SettingOutlined } from '@ant-design/icons';
-import { InteractiveType, useClientContext, usePlaygroundTools, useRefresh } from '@flowgram.ai/free-layout-editor';
+import { useClientContext, useRefresh } from '@flowgram.ai/free-layout-editor';
 import { Button, theme, Tooltip } from 'antd';
 import { useEffect } from 'react';
 import AutoLayout from './AutoLayout';
@@ -13,13 +13,7 @@ import SwitchLine from './SwitchLine';
  */
 const LeftToolbar: React.FC = () => {
   const { token } = theme.useToken();
-  const tools = usePlaygroundTools();
   const { playground } = useClientContext();
-
-  // 设置默认的鼠标交互
-  useEffect(() => {
-    tools.setInteractiveType(InteractiveType.MOUSE);
-  }, []);
 
   // 刷新钩子
   const refresh = useRefresh();
