@@ -140,7 +140,11 @@
     position: relative;
     z-index: 1;
     font-weight: 600;
-    font-size: 18px;
+    font-size: 28px;
+    font-family: 'Arial', sans-serif;
+    font-style: italic;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    margin-left: 12px;
   }
 
   // 发光效果

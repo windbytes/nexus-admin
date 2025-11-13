@@ -28,7 +28,7 @@ export const NodePanel: React.FC<NodePanelRenderProps> = (props) => {
       placement="right"
       arrow={false}
       align={{
-        offset: [10, 0],
+        offset: [10, 80],
       }}
       getPopupContainer={containerNode ? () => ref.current || document.body : undefined}
       styles={{

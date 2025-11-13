@@ -50,9 +50,9 @@ export function useEditorProps(
       background: {
         enabled: true,
         logo: {
-          text: 'NEXUS PLATFORM',
+          text: 'NEXUS',
           position: 'center',
-          size: 200,
+          size: 400,
           opacity: 1,
           color: '#fff',
           // 字体
