@@ -42,7 +42,7 @@ export interface FlowNodeMeta extends WorkflowNodeMeta {
  *
  */
 export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
-  meta: WorkflowNodeMeta;
+  meta: FlowNodeMeta;
 
   info?: {
     icon: string;

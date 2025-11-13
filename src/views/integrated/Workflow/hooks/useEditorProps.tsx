@@ -1,9 +1,15 @@
 import { WorkflowNodeType } from '@/components/workflow/nodes/constants';
 import type { FlowDocumentJSON, FlowNodeRegistry } from '@/types/workflow/node';
+import { DeleteOutlined, PlayCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { createFreeAutoLayoutPlugin } from '@flowgram.ai/free-auto-layout-plugin';
 import { createContainerNodePlugin } from '@flowgram.ai/free-container-plugin';
 import { createFreeGroupPlugin } from '@flowgram.ai/free-group-plugin';
-import { FlowNodeBaseType, WorkflowNodeEntity, type FreeLayoutProps } from '@flowgram.ai/free-layout-editor';
+import {
+  FlowNodeBaseType,
+  FreeLayoutPluginContext,
+  WorkflowNodeEntity,
+  type FreeLayoutProps,
+} from '@flowgram.ai/free-layout-editor';
 import { createFreeLinesPlugin } from '@flowgram.ai/free-lines-plugin';
 import { createFreeNodePanelPlugin } from '@flowgram.ai/free-node-panel-plugin';
 import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
@@ -15,7 +21,7 @@ import { useMemo } from 'react';
 import BaseNode from '../components/base-node';
 import { CommentRender } from '../components/comment/components/render';
 import { GroupNodeRender } from '../components/group/components/node-render';
-import { LineAddButton } from '../components/line-add-button';
+import { LineDeleteButton } from '../components/line-delete-button';
 import { NodePanel } from '../components/node-panel';
 import SelectBoxPopover from '../components/select-box-popover';
 import { nodeFormPanelFactory } from '../components/sidebar';
@@ -125,6 +131,41 @@ export function useEditorProps(
             disableSideBar: false,
             // 禁用弹窗
             disableModal: true,
+            // 右键菜单
+            contextMenu: [
+              {
+                label: '运行此步骤',
+                key: 'run-step',
+                icon: <PlayCircleOutlined />,
+                onClick: (ctx: FreeLayoutPluginContext, node: WorkflowNodeEntity) => {
+                  console.log('运行此步骤', ctx, node);
+                },
+              },
+              {
+                type: 'divider',
+              },
+              {
+                label: '帮助',
+                key: 'help',
+                icon: <QuestionCircleOutlined />,
+                onClick: (ctx: FreeLayoutPluginContext, node: WorkflowNodeEntity) => {
+                  console.log('帮助', ctx, node);
+                },
+              },
+              {
+                type: 'divider',
+              },
+              {
+                label: '删除',
+                key: 'delete',
+                icon: <DeleteOutlined />,
+                danger: true,
+                extra: 'Del',
+                onClick: (ctx: FreeLayoutPluginContext, node: WorkflowNodeEntity) => {
+                  console.log('删除', ctx, node);
+                },
+              },
+            ],
           },
           formMeta: DefaultNode,
         };
@@ -383,7 +424,7 @@ export function useEditorProps(
          * 连线渲染插件
          */
         createFreeLinesPlugin({
-          renderInsideLine: LineAddButton,
+          renderInsideLine: LineDeleteButton,
         }),
 
         /**

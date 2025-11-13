@@ -36,7 +36,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "noImplicitAny": true,

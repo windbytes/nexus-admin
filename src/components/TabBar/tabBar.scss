@@ -77,22 +77,34 @@
         font-size: 14px;
       }
     }
+
+    // 右键菜单样式
+    .ant-dropdown-menu {
+      .ant-dropdown-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        span {
+          font-size: 12px;
+        }
+      }
+    }
   }
-}
 
-// 右键菜单样式
-.ant-dropdown-menu {
-  .ant-dropdown-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  // 右键菜单样式
+  .ant-dropdown-menu {
+    .ant-dropdown-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
 
-    span {
-      font-size: 12px;
+      span {
+        font-size: 12px;
+      }
     }
   }
 }
-
 // 响应式设计
 @media (max-width: 768px) {
   .tab-bar {
