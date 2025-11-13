@@ -1,6 +1,6 @@
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { useMenuStore } from '@/stores/store';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';

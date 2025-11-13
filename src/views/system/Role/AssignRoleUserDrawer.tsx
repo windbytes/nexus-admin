@@ -1,4 +1,6 @@
-import { isEqual } from "lodash-es";
+import { roleService } from '@/services/system/role/roleApi';
+import type { UserSearchParams } from '@/services/system/role/type';
+import { usePreferencesStore } from '@/stores/store';
 import {
   CloseOutlined,
   DeleteOutlined,
@@ -9,8 +11,9 @@ import {
   SearchOutlined,
   WarningOutlined,
   WomanOutlined,
-} from "@ant-design/icons";
-import { Icon } from "@iconify-icon/react";
+} from '@ant-design/icons';
+import { Icon } from '@iconify/react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   App,
   Button,
@@ -28,27 +31,18 @@ import {
   Table,
   type TableProps,
   Tooltip,
-} from "antd";
-import { memo, useRef, useState } from "react";
-import AddUser from "./AddUserModal";
-import { roleService } from "@/services/system/role/roleApi";
-import type { UserSearchParams } from "@/services/system/role/type";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { usePreferencesStore } from "@/stores/store";
+} from 'antd';
+import { isEqual } from 'lodash-es';
+import { memo, useRef, useState } from 'react';
+import AddUser from './AddUserModal';
 
 /**
  * 给角色分配用户
  * @returns
  */
-const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
-  open,
-  roleId,
-  onCancel,
-}) => {
+const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel }) => {
   const { modal, message } = App.useApp();
-  const colorError = usePreferencesStore(
-    (state) => state.preferences.theme.colorError
-  );
+  const colorError = usePreferencesStore((state) => state.preferences.theme.colorError);
   // 添加用户弹窗的打开关闭
   const [openAddUser, setOpenAddUser] = useState<boolean>(false);
   // 检索表单
@@ -66,17 +60,16 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
 
   // 查询用户数据
   const { isLoading, data, refetch } = useQuery({
-    queryKey: ["sys_role_users_drawer", [roleId, searchParams]],
+    queryKey: ['sys_role_users_drawer', [roleId, searchParams]],
     queryFn: () => roleService.getRoleUser(roleId, searchParams),
     enabled: open,
   });
 
   // 删除用户的mutation
   const deleteRoleUserMutation = useMutation({
-    mutationFn: (userIds: string[]) =>
-      roleService.assignRoleUser(roleId, userIds, "remove"),
+    mutationFn: (userIds: string[]) => roleService.assignRoleUser(roleId, userIds, 'remove'),
     onSuccess: () => {
-      message.success("删除用户成功");
+      message.success('删除用户成功');
       // 刷新表格数据
       refetch();
       // 清空选择项
@@ -84,7 +77,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
     },
     onError: (error: any) => {
       modal.error({
-        title: "删除用户失败",
+        title: '删除用户失败',
         content: error.message,
       });
     },
@@ -93,50 +86,46 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
   /**
    * 定义表格的列
    */
-  const columns: TableProps["columns"] = [
+  const columns: TableProps['columns'] = [
     {
-      title: "id",
-      dataIndex: "id",
+      title: 'id',
+      dataIndex: 'id',
       hidden: true,
     },
     {
-      title: "用户ID",
-      dataIndex: "userId",
+      title: '用户ID',
+      dataIndex: 'userId',
       width: 80,
-      align: "center",
+      align: 'center',
       hidden: true,
     },
     {
-      title: "用户名",
-      dataIndex: "username",
+      title: '用户名',
+      dataIndex: 'username',
       width: 80,
-      align: "left",
+      align: 'left',
     },
     {
-      title: "实名",
-      dataIndex: "realName",
+      title: '实名',
+      dataIndex: 'realName',
       width: 80,
-      align: "left",
+      align: 'left',
     },
     {
-      title: "性别",
-      dataIndex: "sex",
+      title: '性别',
+      dataIndex: 'sex',
       width: 80,
-      align: "center",
+      align: 'center',
       render: (text) => {
-        return text === 1 ? (
-          <ManOutlined className="text-blue-400!" />
-        ) : (
-          <WomanOutlined className="text-pink-400!" />
-        );
+        return text === 1 ? <ManOutlined className="text-blue-400!" /> : <WomanOutlined className="text-pink-400!" />;
       },
     },
     {
-      title: "操作",
-      dataIndex: "action",
+      title: '操作',
+      dataIndex: 'action',
       width: 80,
-      fixed: "right",
-      align: "center",
+      fixed: 'right',
+      align: 'center',
       render: (_text, record) => {
         return (
           <Popconfirm
@@ -148,12 +137,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
             <Tooltip title="移除用户">
               <Button
                 type="text"
-                icon={
-                  <Icon
-                    icon="fluent:delete-dismiss-24-filled"
-                    className="text-xl block text-[#ff4d4f]"
-                  />
-                }
+                icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-xl block text-[#ff4d4f]" />}
               />
             </Tooltip>
           </Popconfirm>
@@ -196,7 +180,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
   /**
    * 多行选中的配置
    */
-  const rowSelection: TableProps["rowSelection"] = {
+  const rowSelection: TableProps['rowSelection'] = {
     // 行选中的回调
     onChange(_selectedRowKeys, selectedRows) {
       setSelectedRows(selectedRows);
@@ -236,9 +220,9 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
   const deleteBatch = (id?: string) => {
     // 删除操作需要二次确定
     modal.confirm({
-      title: "删除用户",
+      title: '删除用户',
       icon: <ExclamationCircleFilled />,
-      content: "确定删除用户吗？数据删除后将无法恢复！",
+      content: '确定删除用户吗？数据删除后将无法恢复！',
       onOk() {
         // 调用删除接口，删除成功后刷新页面数据
         const ids = selRows.map((item: any) => item.id);
@@ -277,60 +261,38 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
         width={920}
         open={open}
         closeIcon={false}
-        extra={
-          <Button type="text" icon={<CloseOutlined />} onClick={onCancel} />
-        }
+        extra={<Button type="text" icon={<CloseOutlined />} onClick={onCancel} />}
         onClose={onCancel}
-        classNames={{ footer: "text-right", body: "flex flex-col" }}
+        classNames={{ footer: 'text-right', body: 'flex flex-col' }}
       >
         <Card>
           <Form form={form} onFinish={onFinish}>
             <Row gutter={12}>
               <Col span={6}>
-                <Form.Item
-                  className="mb-0"
-                  name="username"
-                  label="用户名"
-                  colon={false}
-                >
+                <Form.Item className="mb-0" name="username" label="用户名" colon={false}>
                   <Input autoFocus allowClear autoComplete="off" ref={ref} />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item
-                  className="mb-0"
-                  name="realName"
-                  label="实际名"
-                  colon={false}
-                >
+                <Form.Item className="mb-0" name="realName" label="实际名" colon={false}>
                   <Input allowClear autoComplete="off" />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item
-                  className="mb-0"
-                  name="sex"
-                  label="性别"
-                  colon={false}
-                >
+                <Form.Item className="mb-0" name="sex" label="性别" colon={false}>
                   <Select
                     allowClear
                     options={[
-                      { value: "", label: "请选择", disabled: true },
-                      { value: 1, label: "男" },
-                      { value: 0, label: "女" },
+                      { value: '', label: '请选择', disabled: true },
+                      { value: 1, label: '男' },
+                      { value: 0, label: '女' },
                     ]}
                   />
                 </Form.Item>
               </Col>
-              <Col span={6} style={{ textAlign: "right" }}>
+              <Col span={6} style={{ textAlign: 'right' }}>
                 <Space>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={isLoading}
-                    icon={<SearchOutlined />}
-                  >
+                  <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
                     检索
                   </Button>
                   <Button
@@ -347,20 +309,12 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
             </Row>
           </Form>
         </Card>
-        <Card
-          className="mt-4! flex-1 min-h-0"
-          styles={{ body: { height: "100%" } }}
-        >
+        <Card className="mt-4! flex-1 min-h-0" styles={{ body: { height: '100%' } }}>
           <Space>
             <Button type="primary" onClick={addUser} icon={<PlusOutlined />}>
               添加用户
             </Button>
-            <Button
-              icon={<DeleteOutlined />}
-              danger
-              disabled={selRows.length === 0}
-              onClick={() => deleteBatch()}
-            >
+            <Button icon={<DeleteOutlined />} danger disabled={selRows.length === 0} onClick={() => deleteBatch()}>
               批量删除
             </Button>
           </Space>
@@ -385,18 +339,13 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({
                 onPageSizeChange(page, pageSize);
               },
             }}
-            scroll={{ x: "max-content" }}
+            scroll={{ x: 'max-content' }}
             rowSelection={{ ...rowSelection }}
           />
         </Card>
       </Drawer>
       {/* 添加用户弹窗 */}
-      <AddUser
-        roleId={roleId}
-        open={openAddUser}
-        onCancel={cancelAddUser}
-        onOk={handleOk}
-      />
+      <AddUser roleId={roleId} open={openAddUser} onCancel={cancelAddUser} onOk={handleOk} />
     </ConfigProvider>
   );
 };

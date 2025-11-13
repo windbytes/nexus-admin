@@ -1,7 +1,7 @@
 import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Layout, Spin } from 'antd';
 import { memo, Suspense, useMemo, type ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';

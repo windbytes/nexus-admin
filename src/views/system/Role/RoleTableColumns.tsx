@@ -1,10 +1,10 @@
-import type { TableProps } from 'antd';
-import { ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
-import { Space, Button, Dropdown, App, Tooltip, Switch } from 'antd';
 import type { RoleState } from '@/services/system/role/type';
-import type { UseMutationResult } from '@tanstack/react-query';
-import { Icon } from '@iconify-icon/react/dist/iconify.mjs';
 import { usePreferencesStore } from '@/stores/store';
+import { ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
+import type { UseMutationResult } from '@tanstack/react-query';
+import type { TableProps } from 'antd';
+import { App, Button, Dropdown, Space, Switch, Tooltip } from 'antd';
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 
@@ -25,11 +25,10 @@ const getRoleTableColumns = ({
   toggleRoleStatusMutation,
 }: RoleTableColumnsProps): TableProps['columns'] => {
   const { modal, message } = App.useApp();
-  const { colorPrimary, colorSuccess } = usePreferencesStore(
+  const { colorPrimary } = usePreferencesStore(
     useShallow((state) => ({
       colorPrimary: state.preferences.theme.colorPrimary,
-      colorSuccess: state.preferences.theme.colorSuccess,
-    })),
+    }))
   );
   // 更多操作
   const more = useCallback(
@@ -70,7 +69,7 @@ const getRoleTableColumns = ({
         },
       },
     ],
-    [],
+    []
   );
 
   /**
@@ -119,7 +118,7 @@ const getRoleTableColumns = ({
             value={value}
             onChange={(checked) => {
               toggleRoleStatusMutation.mutate({
-                id: record.id,
+                id: record['id'],
                 status: checked,
               });
             }}

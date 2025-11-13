@@ -1,11 +1,11 @@
+import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
 import { Button, Card, Spin, Tabs, type TabsProps } from 'antd';
+import { groupBy } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { Icon } from '@iconify-icon/react';
 import styles from './message-box.module.scss';
 import MessageList, { type MessageListType } from './MessageList';
-import { groupBy } from 'lodash-es';
-import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
 /**
  * 通知模块
  */

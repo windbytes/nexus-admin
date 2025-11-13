@@ -1,9 +1,15 @@
-import { App, Button, Dropdown, type MenuProps, Space, Upload, Tooltip, Badge } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { Icon } from '@iconify-icon/react';
-import { PlusOutlined, ReloadOutlined, SettingOutlined, ColumnHeightOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { usePermission } from '@/hooks/usePermission';
 import { MyIcon } from '@/components/MyIcon';
+import { usePermission } from '@/hooks/usePermission';
+import {
+  ColumnHeightOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SettingOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons';
+import { Icon } from '@iconify/react';
+import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface TableActionButtonsProps {
   handleAdd: () => void;
@@ -173,9 +179,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               }
             }}
           >
-            <Button
-              icon={<Icon icon="material-icon-theme:folder-import" className="text-xl! block" />}
-            >
+            <Button icon={<Icon icon="material-icon-theme:folder-import" className="text-xl! block" />}>
               {t('common.operation.import')}
             </Button>
           </Upload>
@@ -227,51 +231,59 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             className="text-gray-500 hover:text-blue-500"
           />
         </Tooltip>
-        
+
         <Tooltip title="列设置">
           <Button
             icon={<Icon icon="fluent:column-edit-24-regular" className="text-lg block" />}
             type="text"
-            onClick={() => modal.error({
-              title: '功能暂未开放',
-              content: '表格列设置功能正在开发中，敬请期待。',
-            })}
+            onClick={() =>
+              modal.error({
+                title: '功能暂未开放',
+                content: '表格列设置功能正在开发中，敬请期待。',
+              })
+            }
             className="text-gray-500 hover:text-blue-500"
           />
         </Tooltip>
-        
+
         <Tooltip title="表格大小">
           <Button
             icon={<ColumnHeightOutlined />}
             type="text"
-            onClick={() => modal.error({
-              title: '功能暂未开放',
-              content: '表格大小调整功能正在开发中，敬请期待。',
-            })}
+            onClick={() =>
+              modal.error({
+                title: '功能暂未开放',
+                content: '表格大小调整功能正在开发中，敬请期待。',
+              })
+            }
             className="text-gray-500 hover:text-blue-500"
           />
         </Tooltip>
-        
+
         <Tooltip title="表格密度">
           <Button
             icon={<UnorderedListOutlined />}
             type="text"
-            onClick={() => modal.error({
-              title: '功能暂未开放',
-              content: '表格密度调整功能正在开发中，敬请期待。',
-            })}
+            onClick={() =>
+              modal.error({
+                title: '功能暂未开放',
+                content: '表格密度调整功能正在开发中，敬请期待。',
+              })
+            }
             className="text-gray-500 hover:text-blue-500"
           />
         </Tooltip>
-        
+
         <Tooltip title="表格设置">
           <Button
             icon={<SettingOutlined />}
             type="text"
-            onClick={() => modal.error({
-              title: '功能暂未开放',
-              content: '表格设置功能正在开发中，敬请期待。',
-            })}
+            onClick={() =>
+              modal.error({
+                title: '功能暂未开放',
+                content: '表格设置功能正在开发中，敬请期待。',
+              })
+            }
             className="text-gray-500 hover:text-blue-500"
           />
         </Tooltip>

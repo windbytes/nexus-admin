@@ -4,7 +4,7 @@ import type { UserModel } from '@/services/system/user/type';
 import { userService } from '@/services/system/user/userApi';
 import { usePreferencesStore } from '@/stores/store';
 import { ExclamationCircleFilled } from '@ant-design/icons';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card, Table } from 'antd';
 import { isEqual } from 'lodash-es';

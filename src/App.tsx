@@ -3,7 +3,7 @@ import { commonService } from '@/services/common';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useQuery } from '@tanstack/react-query';
 import { App as AntdApp, Spin } from 'antd';
 import type React from 'react';

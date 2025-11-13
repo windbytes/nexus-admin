@@ -8,7 +8,7 @@ import type { App, AppSearchParams } from '@/services/integrated/apps/app';
 import { appsService } from '@/services/integrated/apps/appsApi';
 import { useTagStore } from '@/stores/useTagStore.ts';
 import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useDebounceFn } from 'ahooks';
 import { Checkbox, Input, Segmented, Spin, type InputRef, type SegmentedProps } from 'antd';
 import { isEqual } from 'lodash-es';

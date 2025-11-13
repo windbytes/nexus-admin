@@ -1,7 +1,7 @@
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
 import { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
