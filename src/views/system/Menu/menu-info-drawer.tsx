@@ -23,6 +23,7 @@ import {
   TreeSelect,
   type InputRef,
 } from 'antd';
+import type { String } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,10 +39,10 @@ type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 // 菜单数据类型
 export interface MenuData {
-  id?: string | number;
+  id?: String;
   menuType: MenuType;
   name: string;
-  parentId?: string | number;
+  parentId?: string;
   url?: string;
   component?: string;
   componentName?: string;
@@ -81,12 +82,12 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
     if (operation === 'add' && copiedMenuData) {
       // 如果是新增操作且有复制的数据，使用复制的数据
-      form.setFieldsValue(copiedMenuData);
       setMenuType(copiedMenuData.menuType);
+      form.setFieldsValue(copiedMenuData);
     } else if (menu && operation !== 'add') {
       // 如果是编辑操作，使用当前菜单数据
-      form.setFieldsValue(menu);
       setMenuType(menu.menuType);
+      form.setFieldsValue(menu);
     } else {
       // 普通新增操作，重置表单
       form.resetFields();
@@ -110,7 +111,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
             const children = Array.isArray(item.children) ? loop(item.children) : [];
 
             const newItem: any = {
-              ...item,
+              key: item.id,
               value: item.id,
               selectable: menuType !== MenuType.PERMISSION_BUTTON || !Array.isArray(children) || children.length === 0,
               title: (
@@ -144,25 +145,22 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
   });
 
   // 根据当前菜单类型进行过滤并国际化
-  const directoryFilter = useMemo(() => {
-    if (menuType === MenuType.PERMISSION_BUTTON) {
-      return (item: any) => item.menuType !== MenuType.PERMISSION_BUTTON;
-    }
+  const directoryFilter = useCallback(
+    (item: any) => {
+      if (menuType === MenuType.PERMISSION_BUTTON) {
+        return item.menuType !== MenuType.PERMISSION_BUTTON;
+      }
 
-    if (menuType === MenuType.SUB_ROUTE) {
-      return (item: any) => item.menuType === MenuType.TOP_LEVEL || item.menuType === MenuType.SUB_MENU;
-    }
-
-    if (menuType === MenuType.SUB_MENU || menuType === MenuType.TOP_LEVEL) {
-      return (item: any) => item.menuType === MenuType.TOP_LEVEL;
-    }
-
-    return undefined;
-  }, [menuType]);
+      return item.menuType === MenuType.TOP_LEVEL || item.menuType === MenuType.SUB_MENU;
+    },
+    [menuType]
+  );
 
   const directoryData = useMemo(() => {
-    return translateDirectory(allDirectoryData || [], directoryFilter);
-  }, [allDirectoryData, directoryFilter, translateDirectory]);
+    const di = open ? translateDirectory(allDirectoryData || [], directoryFilter) : [];
+    console.log(di);
+    return di;
+  }, [allDirectoryData, menuType, open]);
 
   /**
    * 提交表单
