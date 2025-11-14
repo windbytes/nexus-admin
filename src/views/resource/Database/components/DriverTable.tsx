@@ -80,7 +80,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         render: (value: string) => (
           <div className="flex items-center gap-2">
             <DatabaseOutlined className="text-blue-500!" />
-            <span className="font-medium">{value}</span>
+            <span>{value}</span>
           </div>
         ),
       },
@@ -101,11 +101,6 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         ellipsis: {
           showTitle: false,
         },
-        render: (value: string) => (
-          <Tooltip title={value}>
-            <code className="bg-gray-100 px-2 py-1 rounded">{value}</code>
-          </Tooltip>
-        ),
       },
       {
         title: '驱动版本',
@@ -140,10 +135,6 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         width: 180,
         align: 'center',
         sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.uploadTime.localeCompare(b.uploadTime),
-        render: (value: string) => {
-          if (!value) return '-';
-          return new Date(value).toLocaleString('zh-CN');
-        },
       },
       {
         title: '状态',

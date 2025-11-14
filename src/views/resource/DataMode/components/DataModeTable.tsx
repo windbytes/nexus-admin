@@ -1,16 +1,16 @@
-import type React from 'react';
-import { Table, Button, Space, Tooltip, Tag, Switch } from 'antd';
+import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import {
-  EditOutlined,
+  CloudUploadOutlined,
+  DatabaseOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  EditOutlined,
   EyeOutlined,
-  DatabaseOutlined,
   FileTextOutlined,
-  CloudUploadOutlined,
 } from '@ant-design/icons';
-import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import type { TablePaginationConfig, TableProps } from 'antd';
+import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import type React from 'react';
 import { memo } from 'react';
 
 interface DataModeTableProps {
@@ -96,6 +96,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         fixed: 'left',
         width: 70,
         align: 'center',
+        hidden: true,
         render: (_: any, __: any, index: number) => {
           const pageNum = (pagination as TablePaginationConfig)?.current || 1;
           const pageSize = (pagination as TablePaginationConfig)?.pageSize || 20;
@@ -125,7 +126,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         },
         render: (value: string) => (
           <Tooltip title={value}>
-            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{value}</code>
+            <code className="bg-gray-100 px-2 py-1 rounded">{value}</code>
           </Tooltip>
         ),
       },
@@ -158,17 +159,6 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         render: (value: 'database' | 'json' | 'file') => getDataSourceTag(value),
       },
       {
-        title: '端点名称',
-        dataIndex: 'endpointName',
-        key: 'endpointName',
-        width: 150,
-        ellipsis: true,
-        render: (value: string, record: JsonDataMode) => {
-          if (record.dataSource !== 'database') return '-';
-          return value || '-';
-        },
-      },
-      {
         title: 'Schema版本',
         dataIndex: 'schemaVersion',
         key: 'schemaVersion',
@@ -182,9 +172,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         key: 'fields',
         width: 100,
         align: 'center',
-        render: (value: number) => (
-          <Tag color="geekblue">{value || 0} 个</Tag>
-        ),
+        render: (value: number) => <Tag color="geekblue">{value || 0} 个</Tag>,
       },
       {
         title: '标签',
@@ -229,7 +217,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         align: 'center',
         render: (value: string) => {
           if (!value) return '-';
-          return new Date(value).toLocaleString('zh-CN');
+          return value;
         },
       },
       {
@@ -240,7 +228,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         align: 'center',
         render: (value: string) => {
           if (!value) return '-';
-          return new Date(value).toLocaleString('zh-CN');
+          return value;
         },
       },
       {
@@ -269,7 +257,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EyeOutlined className="text-purple-500! hover:text-purple-600!"/>}
+                icon={<EyeOutlined className="text-purple-500! hover:text-purple-600!" />}
                 onClick={() => onView(record)}
               />
             </Tooltip>
@@ -277,7 +265,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!"/>}
+                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!" />}
                 onClick={() => onEdit(record)}
               />
             </Tooltip>
@@ -285,7 +273,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!"/>}
+                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!" />}
                 onClick={() => onExport(record)}
               />
             </Tooltip>
@@ -293,7 +281,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!"/>}
+                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!" />}
                 onClick={() => onDelete(record)}
               />
             </Tooltip>
@@ -321,10 +309,9 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         size="middle"
       />
     );
-  },
+  }
 );
 
 DataModeTable.displayName = 'DataModeTable';
 
 export default DataModeTable;
-
