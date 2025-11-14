@@ -11,7 +11,7 @@ import { loginService, type LoginParams, type LoginResponse, type UserRole } fro
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { antdUtils } from '@/utils/antdUtil';
 import { useMenuStore } from '@/stores/store';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { commonService } from '@/services/common';
 import { useUserStore } from '@/stores/userStore';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +34,7 @@ const Login: React.FC = () => {
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
   const { updatePreferences } = usePreferencesStore();
+  const queryClient = useQueryClient();
   
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
@@ -77,13 +78,7 @@ const Login: React.FC = () => {
       }
 
        // 更新用户存储
-      userStore.login(
-        currentLoginData.username, 
-        currentLoginData.accessToken, 
-        currentLoginData.refreshToken, 
-        selectedRole.id,
-        selectedRole.roleCode
-      );
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels = rolesToUse.map(role => ({
@@ -103,8 +98,9 @@ const Login: React.FC = () => {
       }
 
       // 获取角色对应的菜单
-      const menu = await commonService.getMenuListByRoleId(roleId, currentLoginData.accessToken);
+      const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
+      queryClient.setQueryData(['menuData', roleId], menu);
 
       // 确定首页路径
       let homePath = currentLoginData.homePath;

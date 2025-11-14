@@ -1,8 +1,9 @@
-import { App, Avatar, Divider, Dropdown, theme, type MenuProps, message } from "antd";
-import { memo, type ReactNode, useMemo } from "react";
-import type React from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "@tanstack/react-router";
+import avatar from '@/assets/images/avatar.png';
+import { commonService } from '@/services/common';
+import { frameworkService } from '@/services/framework/frameworkApi';
+import { usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
 import {
   ExclamationCircleOutlined,
   FileMarkdownOutlined,
@@ -12,29 +13,25 @@ import {
   QuestionCircleFilled,
   SyncOutlined,
   UserOutlined,
-} from "@ant-design/icons";
-import avatar from "@/assets/images/avatar.png";
-import { commonService } from "@/services/common";
-import { usePreferencesStore } from "@/stores/store";
-import { useUserStore } from "@/stores/userStore";
-import { useTabStore } from "@/stores/tabStore";
-import { frameworkService } from "@/services/framework/frameworkApi";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useShallow } from "zustand/shallow";
+} from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { App, Avatar, Divider, Dropdown, type MenuProps, message, theme } from 'antd';
+import type React from 'react';
+import { memo, type ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
 
 /**
  * 用户信息下拉框
  * @returns
  */
 const UserDropdown: React.FC = () => {
-  const updatePreferences = usePreferencesStore(
-    (state) => state.updatePreferences
-  );
+  const updatePreferences = usePreferencesStore(useShallow((state) => state.updatePreferences));
   const userStore = useUserStore(
     useShallow((state) => ({
       loginUser: state.loginUser,
       isLogin: state.isLogin,
-      token: state.token,
       currentRoleId: state.currentRoleId,
       roleCode: state.roleCode,
       switchRole: state.switchRole,
@@ -60,13 +57,14 @@ const UserDropdown: React.FC = () => {
     error: rolesError,
   } = useQuery({
     queryKey: ['user-roles', userStore.loginUser],
-    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser)
+    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser),
+    enabled: userStore.isLogin && Boolean(userStore.loginUser),
   });
 
   // 使用 useMemo 计算当前角色信息，避免无限循环
   const currentRoleInfo = useMemo(() => {
     const currentRoleId = userStore.currentRoleId;
-    const currentRole = userRoles.find(role => role.id === currentRoleId);
+    const currentRole = userRoles.find((role) => role.id === currentRoleId);
     return {
       currentRoleId,
       currentRoleName: currentRole?.roleName || userStore.roleCode || '未选择角色',
@@ -79,19 +77,19 @@ const UserDropdown: React.FC = () => {
     mutationFn: async (roleId: string) => {
       // 更新当前角色
       userStore.switchRole(roleId);
-      
+
       // 重新获取菜单数据（为后续菜单重新加载做准备）
-      await commonService.getMenuListByRoleId(roleId, userStore.token);
-      
+      await commonService.getMenuListByRoleId(roleId);
+
       return roleId;
     },
     onSuccess: () => {
       // 清空当前标签页
       resetTabs();
-      
+
       // 显示成功消息
       message.success('角色切换成功，页面将刷新');
-      
+
       // 延迟刷新页面，让用户看到成功消息
       setTimeout(() => {
         window.location.reload();
@@ -109,15 +107,15 @@ const UserDropdown: React.FC = () => {
   };
 
   // 菜单栏
-  const items: MenuProps["items"] = [
+  const items: MenuProps['items'] = [
     {
-      key: "doc",
-      label: t("layout.header.userDropdown.doc"),
+      key: 'doc',
+      label: t('layout.header.userDropdown.doc'),
       icon: <FileMarkdownOutlined />,
     },
     {
-      key: "1",
-      label: t("layout.header.userDropdown.profile"),
+      key: '1',
+      label: t('layout.header.userDropdown.profile'),
       icon: <UserOutlined />,
       disabled: false,
       onClick: () => {
@@ -125,13 +123,11 @@ const UserDropdown: React.FC = () => {
       },
     },
     {
-      key: "switchRole",
+      key: 'switchRole',
       label: (
         <div className="flex items-center justify-between">
-          <span>{t("layout.header.userDropdown.switchRole")}</span>
-          <span className="text-xs text-gray-500">
-            {currentRoleInfo.currentRoleName}
-          </span>
+          <span>{t('layout.header.userDropdown.switchRole')}</span>
+          <span className="text-xs text-gray-500">{currentRoleInfo.currentRoleName}</span>
         </div>
       ),
       icon: <UserOutlined />,
@@ -142,22 +138,30 @@ const UserDropdown: React.FC = () => {
       popupOffset: [2, 8],
       children: [
         // 加载状态
-        ...(loading ? [{
-          key: 'loading',
-          label: '加载中...',
-          icon: <SyncOutlined spin />,
-          disabled: true,
-        }] : []),
+        ...(loading
+          ? [
+              {
+                key: 'loading',
+                label: '加载中...',
+                icon: <SyncOutlined spin />,
+                disabled: true,
+              },
+            ]
+          : []),
         // 错误状态
-        ...(rolesError ? [{
-          key: 'error',
-          label: '加载失败，点击重试',
-          icon: <ExclamationCircleOutlined />,
-          onClick: () => {
-            // 重新获取角色列表
-            queryClient.invalidateQueries({ queryKey: ['user-roles'] });
-          },
-        }] : []),
+        ...(rolesError
+          ? [
+              {
+                key: 'error',
+                label: '加载失败，点击重试',
+                icon: <ExclamationCircleOutlined />,
+                onClick: () => {
+                  // 重新获取角色列表
+                  queryClient.invalidateQueries({ queryKey: ['user-roles'] });
+                },
+              },
+            ]
+          : []),
         // 角色列表
         ...userRoles.map((role) => ({
           key: role.id,
@@ -165,9 +169,7 @@ const UserDropdown: React.FC = () => {
             <div className="flex items-center justify-between">
               <span>{role.roleName}</span>
               <div className="flex items-center gap-1">
-                {currentRoleInfo.currentRoleId === role.id && (
-                  <span className="text-xs text-green-500">当前</span>
-                )}
+                {currentRoleInfo.currentRoleId === role.id && <span className="text-xs text-green-500">当前</span>}
                 {roleSwitchMutation.isPending && roleSwitchMutation.variables === role.id && (
                   <SyncOutlined spin className="text-xs" />
                 )}
@@ -181,8 +183,8 @@ const UserDropdown: React.FC = () => {
       ],
     },
     {
-      key: "help",
-      label: t("layout.header.userDropdown.support"),
+      key: 'help',
+      label: t('layout.header.userDropdown.support'),
       icon: <QuestionCircleFilled />,
       popupStyle: {
         width: 220,
@@ -190,16 +192,16 @@ const UserDropdown: React.FC = () => {
       popupOffset: [2, 8],
       children: [
         {
-          key: "help1",
-          label: t("layout.header.userDropdown.feedback"),
+          key: 'help1',
+          label: t('layout.header.userDropdown.feedback'),
           icon: <QuestionCircleFilled />,
           onClick: () => {
             // 跳转到问题反馈
           },
         },
         {
-          key: "help2",
-          label: t("layout.header.userDropdown.question"),
+          key: 'help2',
+          label: t('layout.header.userDropdown.question'),
           icon: <QuestionCircleFilled />,
           onClick: () => {
             // 跳转到常见问题
@@ -208,13 +210,13 @@ const UserDropdown: React.FC = () => {
       ],
     },
     {
-      type: "divider",
+      type: 'divider',
     },
     {
-      key: "about",
+      key: 'about',
       label: (
         <div className="flex items-center justify-between">
-          <span>{t("layout.header.userDropdown.about")}</span>
+          <span>{t('layout.header.userDropdown.about')}</span>
           <div className="flex items-center">
             <div className="text-[12px]">0.0.1</div>
             <div className="w-2 h-2 bg-green-400 rounded-sm ml-1" />
@@ -227,52 +229,52 @@ const UserDropdown: React.FC = () => {
       },
     },
     {
-      key: "3",
-      label: t("layout.header.userDropdown.refresh"),
+      key: '3',
+      label: t('layout.header.userDropdown.refresh'),
       icon: <SyncOutlined />,
       onClick: () => {
         // 后端的缓存信息（相当于把缓存数据刷新）
       },
     },
     {
-      type: "divider",
+      type: 'divider',
     },
     {
-      key: "lock",
-      label: t("layout.header.lock"),
+      key: 'lock',
+      label: t('layout.header.lock'),
       icon: <LockOutlined />,
       onClick: () => {
-        updatePreferences("widget", "lockScreenStatus", true);
+        updatePreferences('widget', 'lockScreenStatus', true);
       },
     },
     {
-      type: "divider",
+      type: 'divider',
     },
     {
-      key: "4",
-      label: t("layout.header.userDropdown.logout"),
+      key: '4',
+      label: t('layout.header.userDropdown.logout'),
       icon: <LogoutOutlined />,
       disabled: false,
       danger: true,
       onClick: () => {
         modal.confirm({
-          title: t("layout.header.userDropdown.logout"),
+          title: t('layout.header.userDropdown.logout'),
           icon: <ExclamationCircleOutlined />,
-          content: t("login.confirmLogout"),
+          content: t('login.confirmLogout'),
           onOk: () => {
-            const token = userStore.token;
-
             // 清除后端的信息
-            commonService.logout(token as string).then((res: boolean) => {
+            commonService.logout().then((res: boolean) => {
               if (res) {
                 // 清空所有tab
                 resetTabs();
-                // 清空token
+                // 清理角色相关的缓存
+                queryClient.removeQueries({ queryKey: ['user-roles'] });
+                // 清理用户信息
                 userStore.logout();
                 // 修改回document.title
-                document.title = "nexus";
+                document.title = 'nexus';
                 // 退出到登录页面
-                navigate("/login", { replace: true });
+                navigate({ to: '/login', replace: true });
               }
             });
           },
@@ -301,7 +303,7 @@ const UserDropdown: React.FC = () => {
         <div className="avatar flex items-center p-3">
           <Avatar size="large" src={avatar} />
         </div>
-        <Divider style={{ margin: "2px 0" }} />
+        <Divider style={{ margin: '2px 0' }} />
         {menus}
       </div>
     );
@@ -309,15 +311,15 @@ const UserDropdown: React.FC = () => {
 
   return (
     <Dropdown
-      trigger={["hover"]}
-      menu={{ items, triggerSubMenuAction: "hover" }}
+      trigger={['hover']}
+      menu={{ items, triggerSubMenuAction: 'hover' }}
       popupRender={renderDropdown}
       placement="bottomLeft"
       overlayStyle={{ width: 240 }}
     >
       <div className="login-user flex items-center cursor-pointer justify-between h-[50] transition-all duration-300">
         <Avatar size="default" src={avatar} />
-        <span style={{ margin: "0 0 0 6px" }}>{userStore.loginUser}</span>
+        <span style={{ margin: '0 0 0 6px' }}>{userStore.loginUser}</span>
       </div>
     </Dropdown>
   );

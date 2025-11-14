@@ -20,17 +20,29 @@ import { joinTimestamp } from './helper';
 // 标记是否正在刷新token
 let isRefreshing = false;
 // 存储等待的请求
-let refreshSubscribers: ((token: string) => void)[] = [];
+interface RefreshSubscriber {
+  resolve: () => void;
+  reject: (error: unknown) => void;
+}
 
-function onTokenRefreshed(newToken: string) {
-  for (const callback of refreshSubscribers) {
-    callback(newToken);
+let refreshSubscribers: RefreshSubscriber[] = [];
+
+function onTokenRefreshed() {
+  for (const subscriber of refreshSubscribers) {
+    subscriber.resolve();
   }
   refreshSubscribers = [];
 }
 
-function addSubscriber(callback: (token: string) => void) {
-  refreshSubscribers.push(callback);
+function onTokenRefreshFailed(error: unknown) {
+  for (const subscriber of refreshSubscribers) {
+    subscriber.reject(error);
+  }
+  refreshSubscribers = [];
+}
+
+function addSubscriber(subscriber: RefreshSubscriber) {
+  refreshSubscribers.push(subscriber);
 }
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
@@ -170,13 +182,12 @@ export const transform: AxiosTransform = {
   },
 
   /**
-   * 请求拦截器处理（主要用于处理如token的传入，授权信息等，或请求头里的一些特殊参数）
+   * 请求拦截器处理
    * @param config
    * @param options
    */
   requestInterceptors: (config, options) => {
-    const userStore = useUserStore.getState();
-    const token = options?.requestOptions?.token || userStore.token;
+    config.headers = config.headers || {};
     const cpt = options?.requestOptions?.encrypt;
     // 进行数据加密
     if (config.data && cpt === 1) {
@@ -197,8 +208,6 @@ export const transform: AxiosTransform = {
     }
     // 将加密配置放到请求头里面
     config.headers['X-Encrypted'] = cpt;
-    // 处理token
-    config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
 
@@ -276,7 +285,10 @@ export const transform: AxiosTransform = {
     const result = res.data;
     const { code: responseCode } = result;
     // 判断是否跳过请求
-    if ((config as CreateAxiosOptions).requestOptions?.skipAuthInterceptor && responseCode === HttpCodeEnum.RC401) {
+    const axiosConfig = config as CreateAxiosOptions;
+    const requestOptions = axiosConfig.requestOptions ?? {};
+
+    if (requestOptions?.skipAuthInterceptor && responseCode === HttpCodeEnum.RC401) {
       antdUtils.modal?.confirm({
         title: t('login.loginValid'),
         content: t('login.retryLogin'),
@@ -289,28 +301,27 @@ export const transform: AxiosTransform = {
       return Promise.reject(t('login.loginValid'));
     }
     // 判断responseCode是否为401(即token失效),添加_retry属性防止重复刷新token
-    if (responseCode === HttpCodeEnum.RC401 && !(config as CreateAxiosOptions)._retry) {
-      (config as CreateAxiosOptions)._retry = true;
+    if (responseCode === HttpCodeEnum.RC401 && !axiosConfig._retry) {
+      axiosConfig._retry = true;
       // 判断是否正在刷新token
       if (!isRefreshing) {
         isRefreshing = true;
         try {
           // 调用刷新token的接口
-          const newToken = await commonService.refreshToken(userStore.refreshToken);
-          if (!newToken) {
-            throw new Error('refresh token failed');
-          }
-          // 更新token到store
-          userStore.setToken(newToken);
+          await commonService.refreshToken();
           // 执行等待的请求
-          onTokenRefreshed(newToken);
+          onTokenRefreshed();
           // 重新发起原始请求(这里需要注意一点的是，内部的url可能是有前缀的，所以需要把前缀去掉)
           if (config.url?.startsWith('/api')) {
             config.url = config.url.slice(4);
           }
-          const response = await HttpRequest.request({ ...config }, { token: newToken, isReturnNativeResponse: true });
+          const response = await HttpRequest.request(
+            { ...config },
+            { ...requestOptions, isReturnNativeResponse: true }
+          );
           return response;
         } catch (refreshError) {
+          onTokenRefreshFailed(refreshError);
           // 刷新 token 失败，跳转登录页
           antdUtils.modal?.confirm({
             title: t('login.loginValid'),
@@ -328,14 +339,19 @@ export const transform: AxiosTransform = {
       } else {
         // 正在刷新token，将请求加入队列
         return new Promise((resolve, reject) => {
-          addSubscriber((token: string) => {
-            // 重新发起原始请求
-            if (config.url?.startsWith('/api')) {
-              config.url = config.url.slice(4);
-            }
-            HttpRequest.request({ ...config }, { token: token, isReturnNativeResponse: true })
-              .then(resolve)
-              .catch(reject);
+          addSubscriber({
+            resolve: () => {
+              // 重新发起原始请求
+              if (config.url?.startsWith('/api')) {
+                config.url = config.url.slice(4);
+              }
+              HttpRequest.request({ ...config }, { ...requestOptions, isReturnNativeResponse: true })
+                .then(resolve)
+                .catch(reject);
+            },
+            reject: (error) => {
+              reject(error);
+            },
           });
         });
       }

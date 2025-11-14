@@ -62,7 +62,7 @@ const Header = memo(() => {
    * 跳转到github - 使用 useCallback 缓存
    */
   const routeGitHub = useCallback(() => {
-    window.open('https://github.com/yecongling/nexus-admin', '_blank');
+    window.open('https://github.com/windbytes/nexus-admin', '_blank');
   }, []);
 
   /**
