@@ -23,7 +23,7 @@ export interface DatabaseDriver {
 /**
  * 驱动搜索参数
  */
-export interface DriverSearchParams extends PageQueryParams{
+export interface DriverSearchParams extends PageQueryParams {
   name?: string;
   databaseType?: string;
   status?: boolean;
@@ -67,14 +67,9 @@ export interface FileChunk {
 }
 
 /**
- * 上传进度回调
- */
-export type UploadProgressCallback = (progress: number) => void;
-
-/**
  * 驱动API路径
  */
-enum DriverAction {
+export enum DriverAction {
   /**
    * 分页查询驱动列表
    */
@@ -129,10 +124,13 @@ export const driverService = {
    * 分页查询驱动列表
    */
   async getDriverList(params: DriverSearchParams): Promise<PageResult<DatabaseDriver>> {
-    const response = await HttpRequest.post<PageResult<DatabaseDriver>>({
-      url: DriverAction.list,
-      data: params,
-    }, {successMessageMode: 'none'});
+    const response = await HttpRequest.post<PageResult<DatabaseDriver>>(
+      {
+        url: DriverAction.list,
+        data: params,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -202,40 +200,6 @@ export const driverService = {
   },
 
   /**
-   * 上传文件分片
-   */
-  async uploadChunk(
-    chunk: Blob,
-    chunkIndex: number,
-    totalChunks: number,
-    fileName: string,
-    fileHash: string,
-    onProgress?: UploadProgressCallback,
-  ): Promise<boolean> {
-    const formData = new FormData();
-    formData.append('chunk', chunk);
-    formData.append('chunkIndex', chunkIndex.toString());
-    formData.append('totalChunks', totalChunks.toString());
-    formData.append('fileName', fileName);
-    formData.append('fileHash', fileHash);
-
-    const response = await HttpRequest.post<boolean>({
-      url: DriverAction.upload,
-      data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(progress);
-        }
-      },
-    });
-    return response;
-  },
-
-  /**
    * 合并文件分片
    */
   async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string }> {
@@ -287,4 +251,3 @@ export const driverService = {
     window.URL.revokeObjectURL(url);
   },
 };
-

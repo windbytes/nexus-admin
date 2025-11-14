@@ -1,15 +1,20 @@
-import { HttpRequest } from "@/utils/request";
-import type { RoleModel } from "../system/role/type";
+import { HttpRequest } from '@/utils/request';
+import type { RoleModel } from '../system/role/type';
 
 /**
  * 框架相关接口
  */
 const FrameworkApi = {
-    /**
+  /**
    * 根据用户ID获取角色列表
    */
-    getUserRolesByUserName: '/sys/framework/queryRolesByUserName',
+  getUserRolesByUserName: '/sys/framework/queryRolesByUserName',
 };
+
+/**
+ * 上传进度回调
+ */
+export type UploadProgressCallback = (progress: number) => void;
 
 /**
  * 框架相关接口
@@ -19,6 +24,16 @@ interface IFrameworkService {
    * 根据用户名获取角色列表
    */
   getUserRolesByUserName(username: string): Promise<RoleModel[]>;
+
+  uploadChunk(
+    uploadUrl: string,
+    chunk: Blob,
+    chunkIndex: number,
+    totalChunks: number,
+    fileName: string,
+    fileHash: string,
+    onProgress?: UploadProgressCallback
+  ): Promise<boolean>;
 }
 
 /**
@@ -37,7 +52,50 @@ export const frameworkService: IFrameworkService = {
         params: { username },
         adapter: 'fetch',
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
+  },
+
+  /**
+   * 上传文件分片
+   * @param uploadUrl 上传URL
+   * @param chunk 文件分片
+   * @param chunkIndex 文件分片索引
+   * @param totalChunks 文件分片总数
+   * @param fileName 文件名称
+   * @param fileHash 文件哈希
+   * @param onProgress 上传进度回调
+   * @returns 是否上传成功
+   */
+  async uploadChunk(
+    uploadUrl: string,
+    chunk: Blob,
+    chunkIndex: number,
+    totalChunks: number,
+    fileName: string,
+    fileHash: string,
+    onProgress?: UploadProgressCallback
+  ): Promise<boolean> {
+    const formData = new FormData();
+    formData.append('chunk', chunk);
+    formData.append('chunkIndex', chunkIndex.toString());
+    formData.append('totalChunks', totalChunks.toString());
+    formData.append('fileName', fileName);
+    formData.append('fileHash', fileHash);
+
+    const response = await HttpRequest.post<boolean>({
+      url: uploadUrl,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(progress);
+        }
+      },
+    });
+    return response;
   },
 };

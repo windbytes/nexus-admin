@@ -1,13 +1,15 @@
-import { App, Progress, Upload, type UploadFile, type UploadProps } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import type React from 'react';
-import { useState, useCallback, memo } from 'react';
+import { frameworkService } from '@/services/framework/frameworkApi';
 import { driverService } from '@/services/resource/database/driverApi';
+import { InboxOutlined } from '@ant-design/icons';
+import { App, Progress, Upload, type UploadFile, type UploadProps } from 'antd';
 import CryptoJS from 'crypto-js';
+import type React from 'react';
+import { memo, useCallback, useState } from 'react';
 
 const { Dragger } = Upload;
 
 interface ChunkedUploadProps {
+  uploadUrl: string;
   onUploadSuccess: (filePath: string, fileName: string) => void;
   onUploadError?: (error: Error) => void;
   accept?: string;
@@ -19,7 +21,7 @@ interface ChunkedUploadProps {
  * 文件分片上传组件（支持断点续传、大文件上传）
  */
 const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
-  ({ onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2 }) => {
+  ({ uploadUrl, onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2 }) => {
     const { message } = App.useApp();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [uploading, setUploading] = useState(false);
@@ -77,13 +79,19 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
             const chunk = file.slice(start, end);
 
             // 上传分片
-            await driverService.uploadChunk(chunk, chunkIndex, totalChunks, file.name, fileHash, (progress) => {
-              // 计算总进度
-              const totalProgress = Math.round(
-                ((uploadedChunks + progress / 100) / totalChunks) * 100,
-              );
-              setUploadProgress(totalProgress);
-            });
+            await frameworkService.uploadChunk(
+              uploadUrl,
+              chunk,
+              chunkIndex,
+              totalChunks,
+              file.name,
+              fileHash,
+              (progress) => {
+                // 计算总进度
+                const totalProgress = Math.round(((uploadedChunks + progress / 100) / totalChunks) * 100);
+                setUploadProgress(totalProgress);
+              }
+            );
 
             uploadedChunks++;
           }
@@ -107,7 +115,7 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
           setUploading(false);
         }
       },
-      [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError],
+      [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError]
     );
 
     /**
@@ -136,7 +144,7 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
 
         return false; // 阻止自动上传
       },
-      [accept, maxSize, message, uploadFileInChunks],
+      [accept, maxSize, message, uploadFileInChunks]
     );
 
     /**
@@ -187,8 +195,7 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
         )}
       </div>
     );
-  },
+  }
 );
 
 export default ChunkedUpload;
-

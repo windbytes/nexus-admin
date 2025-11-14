@@ -1,13 +1,8 @@
-import type React from 'react';
-import { Table, Button, Space, Tooltip, Tag, Switch } from 'antd';
-import {
-  EditOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  DatabaseOutlined,
-} from '@ant-design/icons';
 import type { DatabaseDriver } from '@/services/resource/database/driverApi';
+import { DatabaseOutlined, DeleteOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
+import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import type React from 'react';
 import { memo } from 'react';
 
 interface DriverTableProps {
@@ -26,6 +21,7 @@ interface DriverTableProps {
  * 格式化文件大小
  */
 const formatFileSize = (bytes: number): string => {
+  if (typeof bytes !== 'number' || isNaN(bytes)) return '-';
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -56,17 +52,7 @@ const getDatabaseTypeColor = (type: string): string => {
  * 驱动表格组件
  */
 const DriverTable: React.FC<DriverTableProps> = memo(
-  ({
-    data,
-    loading,
-    selectedRowKeys,
-    onSelectionChange,
-    onEdit,
-    onDelete,
-    onDownload,
-    onStatusChange,
-    pagination,
-  }) => {
+  ({ data, loading, selectedRowKeys, onSelectionChange, onEdit, onDelete, onDownload, onStatusChange, pagination }) => {
     // 表格列配置
     const columns: TableProps<DatabaseDriver>['columns'] = [
       {
@@ -76,6 +62,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         fixed: 'left',
         width: 70,
         align: 'center',
+        hidden: true, // 隐藏序号列
         render: (_: any, __: any, index: number) => {
           const pageNum = (pagination as TablePaginationConfig)?.current || 1;
           const pageSize = (pagination as TablePaginationConfig)?.pageSize || 20;
@@ -89,9 +76,10 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         width: 180,
         fixed: 'left',
         ellipsis: true,
+        sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.name.localeCompare(b.name),
         render: (value: string) => (
           <div className="flex items-center gap-2">
-            <DatabaseOutlined className="text-blue-500" />
+            <DatabaseOutlined className="text-blue-500!" />
             <span className="font-medium">{value}</span>
           </div>
         ),
@@ -101,7 +89,8 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         dataIndex: 'databaseType',
         key: 'databaseType',
         width: 120,
-        align: 'center',
+        align: 'left',
+        sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.databaseType.localeCompare(b.databaseType),
         render: (value: string) => <Tag color={getDatabaseTypeColor(value)}>{value}</Tag>,
       },
       {
@@ -114,7 +103,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         },
         render: (value: string) => (
           <Tooltip title={value}>
-            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{value}</code>
+            <code className="bg-gray-100 px-2 py-1 rounded">{value}</code>
           </Tooltip>
         ),
       },
@@ -123,7 +112,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         dataIndex: 'driverVersion',
         key: 'driverVersion',
         width: 120,
-        align: 'center',
+        align: 'left',
         render: (value: string) => value || '-',
       },
       {
@@ -134,11 +123,6 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         ellipsis: {
           showTitle: false,
         },
-        render: (value: string) => (
-          <Tooltip title={value}>
-            <span className="text-blue-600">{value}</span>
-          </Tooltip>
-        ),
       },
       {
         title: '文件大小',
@@ -146,6 +130,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         key: 'fileSize',
         width: 100,
         align: 'center',
+        sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.fileSize - b.fileSize,
         render: (value: number) => formatFileSize(value),
       },
       {
@@ -154,6 +139,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         key: 'uploadTime',
         width: 180,
         align: 'center',
+        sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.uploadTime.localeCompare(b.uploadTime),
         render: (value: string) => {
           if (!value) return '-';
           return new Date(value).toLocaleString('zh-CN');
@@ -200,7 +186,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!"/>}
+                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!" />}
                 onClick={() => onEdit(record)}
               />
             </Tooltip>
@@ -208,7 +194,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!"/>}
+                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!" />}
                 onClick={() => onDownload(record)}
               />
             </Tooltip>
@@ -216,7 +202,7 @@ const DriverTable: React.FC<DriverTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!"/>}
+                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!" />}
                 onClick={() => onDelete(record)}
               />
             </Tooltip>
@@ -244,10 +230,9 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         size="middle"
       />
     );
-  },
+  }
 );
 
 DriverTable.displayName = 'DriverTable';
 
 export default DriverTable;
-
