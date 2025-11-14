@@ -128,7 +128,7 @@ const Header = memo(() => {
                 </Dropdown>
               )}
               <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
-                <SettingOutlined style={iconStyles} onClick={handleOpenSetting} />
+                <SettingOutlined className="my-spin" style={iconStyles} onClick={handleOpenSetting} />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
@@ -148,7 +148,7 @@ const Header = memo(() => {
         </Layout.Header>
       ) : (
         <FloatButton
-          icon={<SettingOutlined />}
+          icon={<SettingOutlined className="my-spin" />}
           tooltip={<span>{t('layout.header.setting')}</span>}
           style={floatButtonStyles}
           onClick={handleOpenSetting}

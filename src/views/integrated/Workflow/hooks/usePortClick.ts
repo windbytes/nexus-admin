@@ -18,6 +18,7 @@ export const usePortClick = () => {
   const onPortClick = useCallback(async (e: React.MouseEvent, port: WorkflowPortEntity) => {
     // 如果端口类型为输入端口，则不处理
     if (port.portType === 'input') return;
+    console.log('onPortClick', e, port);
   }, []);
   return onPortClick;
 };

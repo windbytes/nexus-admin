@@ -6,7 +6,7 @@ import {
   WorkflowPortRender,
 } from '@flowgram.ai/free-layout-editor';
 import { usePanelManager } from '@flowgram.ai/panel-manager-plugin';
-import { Dropdown, Popover } from 'antd';
+import { Dropdown } from 'antd';
 import { useState } from 'react';
 import { useNodeRenderContext } from '../../context/use-node-render-context';
 import { usePortClick } from '../../hooks/usePortClick';
@@ -49,22 +49,12 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, child
 
   // 节点端口渲染
   const portsRender = ports.map((port) => (
-    <Popover
+    <WorkflowPortRender
       key={port.id}
-      trigger="hover"
-      content={
-        <div>
-          <p>点击添加节点</p>
-          <p>拖拽连接节点</p>
-        </div>
-      }
-    >
-      <WorkflowPortRender
-        entity={port}
-        secondaryColor={colorPrimary}
-        {...(!readonly ? { onClick: onPortClick } : {})}
-      />
-    </Popover>
+      entity={port}
+      secondaryColor={colorPrimary}
+      {...(!readonly ? { onClick: onPortClick } : {})}
+    />
   ));
 
   // 获取节点配置的右键菜单

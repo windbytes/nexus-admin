@@ -22,6 +22,16 @@
   }
 }
 
+.my-spin {
+  animation: myRotate 3s linear infinite; /* 2s 即速度，可改 */
+}
+
+@keyframes myRotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 // 响应式设计
 @media (max-width: 768px) {
   .header-container {
