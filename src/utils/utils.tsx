@@ -95,61 +95,6 @@ export const addIcon = (name: string | undefined | null) => {
 };
 
 /**
- * @description 根据菜单结构获取需要展开的 subMenu
- * @param {String} path 当前访问地址
- * @param {Array} menus 菜单列表
- * @returns array
- */
-export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
-  const openKeys: string[] = [];
-
-  /**
-   * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
-   * @param menuList 菜单列表
-   * @param targetPath 目标路径
-   * @param parentPaths 父级路径数组
-   * @returns 是否找到目标路径
-   */
-  const findMenuPath = (menuList: RouteItem[], targetPath: string, parentPaths: string[] = []): boolean => {
-    for (const menu of menuList) {
-      // 跳过隐藏的菜单项
-      if (menu.hidden || menu.meta?.menuType === 3) {
-        continue;
-      }
-
-      // 如果找到目标路径
-      if (menu.path === targetPath) {
-        // 将当前路径的所有父级路径添加到 openKeys
-        openKeys.push(...parentPaths);
-        return true;
-      }
-
-      // 如果有子菜单，递归查找
-      if (menu.children && menu.children.length > 0) {
-        const currentParentPaths = [...parentPaths, menu.path];
-        if (findMenuPath(menu.children, targetPath, currentParentPaths)) {
-          return true;
-        }
-      }
-
-      // 如果有子路由，也递归查找
-      if (menu.childrenRoute && menu.childrenRoute.length > 0) {
-        const currentParentPaths = [...parentPaths, menu.path];
-        if (findMenuPath(menu.childrenRoute, targetPath, currentParentPaths)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  // 在菜单中查找目标路径
-  findMenuPath(menus, path);
-
-  return openKeys;
-};
-
-/**
  * 将后台拿到的数据映射成包含key的数据，用于react相关组件
  * @param data 数据
  * @param key 数据中的唯一字段
@@ -264,4 +209,24 @@ export function buildMenuCaches(menuList: MenuEntity[]): MenuCaches {
   menuList.forEach((root) => dfs(root, []));
 
   return { pathMap, ancestorsMap, routeToMenuPathMap };
+}
+
+/**
+ * 根据路径查找菜单
+ * @param path 路径
+ * @param caches 菜单缓存
+ * @returns 找到的菜单对象或 undefined
+ */
+export function findMenuByPath(path: string, caches: MenuCaches): MenuEntity | undefined {
+  const { pathMap } = caches;
+  let entity = pathMap.get(path);
+  if (!entity) {
+    for (const [candidatePath, candidateEntity] of pathMap.entries()) {
+      if (matchPathname(path, { to: candidatePath, caseSensitive: false })) {
+        entity = candidateEntity;
+        break;
+      }
+    }
+  }
+  return entity;
 }

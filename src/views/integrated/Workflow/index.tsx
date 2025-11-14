@@ -48,13 +48,10 @@ const Workflow: React.FC = () => {
       <FreeLayoutEditorProvider ref={ref} {...editorProps}>
         {/* 顶部工具栏 */}
         <TopToolbar appId={appId} />
-
         {/* 左侧工具栏 */}
         <LeftToolbar />
-
         {/* 底部工具栏 */}
         <BottomToolbar />
-
         {/* 画布区域 */}
         <div className="workflow-container">
           <EditorRenderer className="workflow-editor" />
