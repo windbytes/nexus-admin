@@ -1,9 +1,9 @@
-import ChunkedUpload from '@/components/FileUpload/ChunkedUpload';
+import ChunkedUpload, { type ChunkedUploadRef } from '@/components/FileUpload/ChunkedUpload';
 import DragModal from '@/components/modal/DragModal';
 import { DriverAction, type DatabaseDriver, type DriverFormData } from '@/services/resource/database/driverApi';
 import { Button, Form, Input, Select, Space, Switch } from 'antd';
 import type React from 'react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { DATABASE_TYPE_OPTIONS } from './DriverSearchForm';
 
 const { TextArea } = Input;
@@ -24,6 +24,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
   const [form] = Form.useForm();
   const [uploadedFilePath, setUploadedFilePath] = useState<string>('');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const chunkedUploadRef = useRef<ChunkedUploadRef>(null);
 
   // 初始化表单数据
   useEffect(() => {
@@ -78,7 +79,28 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
   /**
    * 取消回调
    */
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    // 如果已上传文件但未提交，删除已上传的文件
+    if (uploadedFilePath && !initialValues?.id) {
+      try {
+        // 取消上传并清理文件
+        if (chunkedUploadRef.current) {
+          await chunkedUploadRef.current.cancelUpload();
+        }
+      } catch (error) {
+        console.error('清理上传文件失败:', error);
+      }
+    } else if (uploadedFilePath && initialValues?.id) {
+      // 如果是编辑模式，只清理新上传的文件
+      try {
+        if (chunkedUploadRef.current) {
+          await chunkedUploadRef.current.cleanupUploadedFile();
+        }
+      } catch (error) {
+        console.error('清理上传文件失败:', error);
+      }
+    }
+
     form.resetFields();
     setUploadedFilePath('');
     setUploadedFileName('');
@@ -195,6 +217,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
               </div>
             )}
             <ChunkedUpload
+              ref={chunkedUploadRef}
               uploadUrl={DriverAction.upload}
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}

@@ -107,6 +107,10 @@ export enum DriverAction {
    */
   mergeChunks = '/resource/driver/mergeChunks',
   /**
+   * 删除已上传的文件（包括分片和合并后的文件）
+   */
+  deleteUploadedFile = '/resource/driver/deleteUploadedFile',
+  /**
    * 下载驱动
    */
   download = '/resource/driver/download',
@@ -207,6 +211,21 @@ export const driverService = {
       url: DriverAction.mergeChunks,
       data: { fileName, fileHash },
     });
+    return response;
+  },
+
+  /**
+   * 删除已上传的文件（包括分片和合并后的文件）
+   * @param fileHash 文件哈希值
+   */
+  async deleteUploadedFile(fileHash: string): Promise<boolean> {
+    const response = await HttpRequest.post<boolean>(
+      {
+        url: DriverAction.deleteUploadedFile,
+        data: { fileHash },
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 

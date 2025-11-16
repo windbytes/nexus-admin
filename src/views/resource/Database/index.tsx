@@ -132,12 +132,6 @@ const Database: React.FC = () => {
   // 下载驱动 mutation
   const downloadDriverMutation = useMutation({
     mutationFn: ({ id, fileName }: { id: string; fileName: string }) => driverService.downloadDriver(id, fileName),
-    onSuccess: () => {
-      message.success('下载成功！');
-    },
-    onError: (error: any) => {
-      message.error(`下载失败：${error.message}`);
-    },
   });
 
   // 批量下载驱动 mutation

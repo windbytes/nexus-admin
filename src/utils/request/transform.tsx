@@ -259,22 +259,44 @@ export const transform: AxiosTransform = {
           const text = await res.data.text();
           const errorData = JSON.parse(text);
 
-          // 构造标准的错误响应，让后续的错误处理逻辑能够捕获
-          const error: any = new Error(errorData.message || '操作失败');
-          error.response = {
-            data: errorData,
-            status: res.status,
-            statusText: res.statusText,
-            headers: res.headers,
-            config: res.config,
-          };
-          error.status = res.status;
-          return Promise.reject(error);
+          // 对于 401 错误，构造错误对象但不要立即 reject，让后续的 401 处理逻辑能够捕获并进行 token 刷新
+          // 构造标准的错误响应，包含在 response.data 中，以便后续的 401 检查逻辑能够识别
+          if (errorData.code === HttpCodeEnum.RC401 || res.status === 401) {
+            // 401 错误需要特殊处理，构造错误对象并设置 response.data，让后续逻辑能够识别并处理
+            const error: any = new Error(errorData.message || t('login.loginValid'));
+            error.response = {
+              data: errorData,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            };
+            error.status = res.status;
+            error.config = config;
+            // 将错误信息存储到 res.data 中，以便后续的 401 检查能够识别
+            res.data = errorData as any;
+            // 返回 res，让后续的 401 检查逻辑能够处理
+            // 后续的代码会检查 responseCode === HttpCodeEnum.RC401，所以需要确保 result.code 存在
+            // 这里不 reject，而是让错误继续到后续的 401 处理逻辑
+          } else {
+            // 非 401 错误，直接 reject 并显示错误信息
+            const error: any = new Error(errorData.message || '操作失败');
+            error.response = {
+              data: errorData,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            };
+            error.status = res.status;
+            return Promise.reject(error);
+          }
         } catch (e) {
           // JSON 解析失败
           if (e instanceof SyntaxError) {
             const error: any = new Error('服务器返回了无效的响应格式');
             error.response = res;
+            error.status = res.status;
             return Promise.reject(error);
           }
           return Promise.reject(e);
@@ -283,7 +305,7 @@ export const transform: AxiosTransform = {
     }
 
     const result = res.data;
-    const { code: responseCode } = result;
+    const { code: responseCode } = result || {};
     // 判断是否跳过请求
     const axiosConfig = config as CreateAxiosOptions;
     const requestOptions = axiosConfig.requestOptions ?? {};
@@ -315,10 +337,9 @@ export const transform: AxiosTransform = {
           if (config.url?.startsWith('/api')) {
             config.url = config.url.slice(4);
           }
-          const response = await HttpRequest.request(
-            { ...config },
-            { ...requestOptions, isReturnNativeResponse: true }
-          );
+          // 使用 isReturnNativeResponse: true 确保能够正确处理响应（包括 blob 响应）
+          const retryOptions = { ...requestOptions, isReturnNativeResponse: true };
+          const response = await HttpRequest.request({ ...config }, retryOptions);
           return response;
         } catch (refreshError) {
           onTokenRefreshFailed(refreshError);
@@ -345,7 +366,9 @@ export const transform: AxiosTransform = {
               if (config.url?.startsWith('/api')) {
                 config.url = config.url.slice(4);
               }
-              HttpRequest.request({ ...config }, { ...requestOptions, isReturnNativeResponse: true })
+              // 使用 isReturnNativeResponse: true 确保能够正确处理响应（包括 blob 响应）
+              const retryOptions = { ...requestOptions, isReturnNativeResponse: true };
+              HttpRequest.request({ ...config }, retryOptions)
                 .then(resolve)
                 .catch(reject);
             },
