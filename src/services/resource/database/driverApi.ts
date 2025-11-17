@@ -1,3 +1,4 @@
+import { frameworkService } from '@/services/framework/frameworkApi';
 import type { PageQueryParams } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
@@ -94,22 +95,7 @@ export enum DriverAction {
    * 获取驱动详情
    */
   detail = '/resource/driver/detail',
-  /**
-   * 上传驱动
-   */
-  upload = '/resource/driver/upload',
-  /**
-   * 检查文件分片是否已上传
-   */
-  checkChunk = '/resource/driver/checkChunk',
-  /**
-   * 合并文件分片
-   */
-  mergeChunks = '/resource/driver/mergeChunks',
-  /**
-   * 删除已上传的文件（包括分片和合并后的文件）
-   */
-  deleteUploadedFile = '/resource/driver/deleteUploadedFile',
+
   /**
    * 下载驱动
    */
@@ -196,25 +182,14 @@ export const driverService = {
    * 检查文件分片是否已上传
    */
   async checkChunk(fileHash: string, chunkIndex: number): Promise<boolean> {
-    const response = await HttpRequest.post<boolean>(
-      {
-        url: DriverAction.checkChunk,
-        data: { fileHash, chunkIndex },
-      },
-      { successMessageMode: 'none' }
-    );
-    return response;
+    return frameworkService.checkChunk(fileHash, chunkIndex);
   },
 
   /**
    * 合并文件分片
    */
   async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string }> {
-    const response = await HttpRequest.post<{ filePath: string }>({
-      url: DriverAction.mergeChunks,
-      data: { fileName, fileHash },
-    });
-    return response;
+    return frameworkService.mergeChunks(fileName, fileHash);
   },
 
   /**
@@ -223,54 +198,20 @@ export const driverService = {
    * @param fileName 合并后的文件名（可选，如果有则同时清理合并后的文件）
    */
   async deleteUploadedFile(fileHash: string, fileName?: string): Promise<boolean> {
-    const response = await HttpRequest.post<boolean>(
-      {
-        url: DriverAction.deleteUploadedFile,
-        data: { fileHash, fileName },
-      },
-      { successMessageMode: 'none' }
-    );
-    return response;
+    return frameworkService.deleteUploadedFile(fileHash, fileName);
   },
 
   /**
    * 下载驱动文件
    */
   async downloadDriver(id: string, fileName: string): Promise<void> {
-    const response = await HttpRequest.postDownload<Blob>({
-      url: `${DriverAction.download}/${id}`,
-      responseType: 'blob',
-    });
-
-    // 创建下载链接
-    const url = window.URL.createObjectURL(new Blob([response]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    return frameworkService.downloadFile(`${DriverAction.download}/${id}`, fileName);
   },
 
   /**
    * 批量下载驱动文件
    */
   async batchDownloadDriver(ids: string[]): Promise<void> {
-    const response = await HttpRequest.postDownload<Blob>({
-      url: DriverAction.batchDownload,
-      data: { ids },
-      responseType: 'blob',
-    });
-
-    // 创建下载链接
-    const url = window.URL.createObjectURL(new Blob([response]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `drivers_${Date.now()}.zip`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    return frameworkService.batchDownloadFile(DriverAction.batchDownload, ids, `drivers_${Date.now()}.zip`);
   },
 };
