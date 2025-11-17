@@ -139,7 +139,6 @@ const ChunkedUpload = memo(
           } catch (error) {
             // 如果是取消操作，不显示错误提示
             if (isCancelledRef.current) {
-              message.destroy('merging');
               return;
             }
             message.error('文件上传失败，请重试！');
@@ -149,6 +148,7 @@ const ChunkedUpload = memo(
             console.error('文件上传失败:', error);
           } finally {
             setUploading(false);
+            message.destroy('merging');
           }
         },
         [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError]
