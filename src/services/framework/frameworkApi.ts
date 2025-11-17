@@ -13,7 +13,7 @@ export const FrameworkApi = {
   /**
    * 上传文件分片
    */
-  upload: '/files/upload',
+  uploadChunk: '/files/uploadChunk',
   /**
    * 检查文件分片是否已上传
    */
@@ -42,8 +42,16 @@ interface IFrameworkService {
    */
   getUserRolesByUserName(username: string): Promise<RoleModel[]>;
 
+  /**
+   * 上传分片
+   * @param chunk 分片
+   * @param chunkIndex 分片索引
+   * @param totalChunks 总分片数目
+   * @param fileName 文件名
+   * @param fileHash 分片hash
+   * @param onProgress 进度
+   */
   uploadChunk(
-    uploadUrl: string,
     chunk: Blob,
     chunkIndex: number,
     totalChunks: number,
@@ -110,7 +118,6 @@ export const frameworkService: IFrameworkService = {
    * @returns 是否上传成功
    */
   async uploadChunk(
-    uploadUrl: string,
     chunk: Blob,
     chunkIndex: number,
     totalChunks: number,
@@ -133,7 +140,7 @@ export const frameworkService: IFrameworkService = {
 
     const response = await HttpRequest.post<boolean>(
       {
-        url: uploadUrl,
+        url: FrameworkApi.uploadChunk,
         data: formData,
         // 不需要手动设置 headers，拦截器会自动处理 FormData 的 Content-Type
         onUploadProgress: (progressEvent) => {

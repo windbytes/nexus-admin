@@ -1,6 +1,5 @@
 import ChunkedUpload, { type ChunkedUploadRef } from '@/components/FileUpload/ChunkedUpload';
 import DragModal from '@/components/modal/DragModal';
-import { FrameworkApi } from '@/services/framework/frameworkApi';
 import { type DatabaseDriver, type DriverFormData } from '@/services/resource/database/driverApi';
 import { Button, Form, Input, Select, Space, Switch } from 'antd';
 import type React from 'react';
@@ -219,7 +218,6 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
             )}
             <ChunkedUpload
               ref={chunkedUploadRef}
-              uploadUrl={FrameworkApi.upload}
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
               accept=".jar"

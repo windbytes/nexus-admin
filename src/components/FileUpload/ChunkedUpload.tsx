@@ -8,7 +8,6 @@ import React, { memo, useCallback, useImperativeHandle, useRef, useState } from 
 const { Dragger } = Upload;
 
 interface ChunkedUploadProps {
-  uploadUrl: string;
   onUploadSuccess: (filePath: string, fileName: string) => void;
   onUploadError?: (error: Error) => void;
   accept?: string;
@@ -36,7 +35,7 @@ export interface ChunkedUploadRef {
  */
 const ChunkedUpload = memo(
   React.forwardRef<ChunkedUploadRef, ChunkedUploadProps>(
-    ({ uploadUrl, onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2 }, ref) => {
+    ({ onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2 }, ref) => {
       const { message } = App.useApp();
       const [fileList, setFileList] = useState<UploadFile[]>([]);
       const [uploading, setUploading] = useState(false);
@@ -112,19 +111,11 @@ const ChunkedUpload = memo(
               const chunk = file.slice(start, end);
 
               // 上传分片
-              await frameworkService.uploadChunk(
-                uploadUrl,
-                chunk,
-                chunkIndex,
-                totalChunks,
-                file.name,
-                fileHash,
-                (progress) => {
-                  // 计算总进度
-                  const totalProgress = Math.round(((uploadedChunks + progress / 100) / totalChunks) * 100);
-                  setUploadProgress(totalProgress);
-                }
-              );
+              await frameworkService.uploadChunk(chunk, chunkIndex, totalChunks, file.name, fileHash, (progress) => {
+                // 计算总进度
+                const totalProgress = Math.round(((uploadedChunks + progress / 100) / totalChunks) * 100);
+                setUploadProgress(totalProgress);
+              });
 
               uploadedChunks++;
             }
@@ -161,7 +152,7 @@ const ChunkedUpload = memo(
             setUploading(false);
           }
         },
-        [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError, uploadUrl]
+        [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError]
       );
 
       /**
