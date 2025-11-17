@@ -42,6 +42,7 @@ const ChunkedUpload = memo(
       const [uploading, setUploading] = useState(false);
       const [uploadProgress, setUploadProgress] = useState(0);
       const [currentFileHash, setCurrentFileHash] = useState<string | null>(null);
+      const [mergedFileName, setMergedFileName] = useState<string | null>(null);
       const isCancelledRef = useRef(false);
 
       /**
@@ -69,6 +70,8 @@ const ChunkedUpload = memo(
           setUploading(true);
           setUploadProgress(0);
           isCancelledRef.current = false;
+          // 清理之前的状态
+          setMergedFileName(null);
 
           try {
             // 计算文件哈希
@@ -136,6 +139,9 @@ const ChunkedUpload = memo(
             const result = await driverService.mergeChunks(file.name, fileHash);
             message.success({ content: '文件上传成功！', key: 'merging' });
 
+            // 保存合并后的文件名，用于后续清理
+            setMergedFileName(file.name);
+
             // 回调
             onUploadSuccess(result.filePath, file.name);
             setFileList([]);
@@ -167,16 +173,18 @@ const ChunkedUpload = memo(
         setFileList([]);
         setUploadProgress(0);
 
-        // 如果有已上传的文件，清理它们
+        // 如果有已上传的文件，清理它们（包括分片和合并后的文件）
         if (currentFileHash) {
           try {
-            await driverService.deleteUploadedFile(currentFileHash);
+            // 如果有合并后的文件名，说明文件已经合并，需要同时清理合并后的文件
+            await driverService.deleteUploadedFile(currentFileHash, mergedFileName || undefined);
             setCurrentFileHash(null);
+            setMergedFileName(null);
           } catch (error) {
             console.error('清理上传文件失败:', error);
           }
         }
-      }, [currentFileHash]);
+      }, [currentFileHash, mergedFileName]);
 
       /**
        * 清理已上传的文件（不取消正在进行的上传）
@@ -184,13 +192,15 @@ const ChunkedUpload = memo(
       const cleanupUploadedFile = useCallback(async () => {
         if (currentFileHash) {
           try {
-            await driverService.deleteUploadedFile(currentFileHash);
+            // 如果有合并后的文件名，说明文件已经合并，需要同时清理合并后的文件
+            await driverService.deleteUploadedFile(currentFileHash, mergedFileName || undefined);
             setCurrentFileHash(null);
+            setMergedFileName(null);
           } catch (error) {
             console.error('清理上传文件失败:', error);
           }
         }
-      }, [currentFileHash]);
+      }, [currentFileHash, mergedFileName]);
 
       /**
        * 获取当前上传的文件哈希值
@@ -251,6 +261,8 @@ const ChunkedUpload = memo(
       const handleRemove = useCallback(() => {
         setFileList([]);
         setUploadProgress(0);
+        // 清理状态
+        setMergedFileName(null);
       }, []);
 
       return (

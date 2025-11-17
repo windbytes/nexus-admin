@@ -196,10 +196,13 @@ export const driverService = {
    * 检查文件分片是否已上传
    */
   async checkChunk(fileHash: string, chunkIndex: number): Promise<boolean> {
-    const response = await HttpRequest.post<boolean>({
-      url: DriverAction.checkChunk,
-      data: { fileHash, chunkIndex },
-    });
+    const response = await HttpRequest.post<boolean>(
+      {
+        url: DriverAction.checkChunk,
+        data: { fileHash, chunkIndex },
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -217,12 +220,13 @@ export const driverService = {
   /**
    * 删除已上传的文件（包括分片和合并后的文件）
    * @param fileHash 文件哈希值
+   * @param fileName 合并后的文件名（可选，如果有则同时清理合并后的文件）
    */
-  async deleteUploadedFile(fileHash: string): Promise<boolean> {
+  async deleteUploadedFile(fileHash: string, fileName?: string): Promise<boolean> {
     const response = await HttpRequest.post<boolean>(
       {
         url: DriverAction.deleteUploadedFile,
-        data: { fileHash },
+        data: { fileHash, fileName },
       },
       { successMessageMode: 'none' }
     );

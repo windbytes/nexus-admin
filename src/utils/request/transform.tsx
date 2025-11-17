@@ -142,6 +142,12 @@ export const transform: AxiosTransform = {
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
     const { apiUrl, joinPrefix, joinParamsToUrl, joinTime = true, urlPrefix } = options;
+    // 如果数据是 FormData，提前处理 headers，确保删除 Content-Type
+    // 这样可以让 axios 自动设置正确的 multipart/form-data; boundary=...
+    if (config.data instanceof FormData) {
+      config.headers = config.headers || {};
+    }
+
     if (joinPrefix) {
       config.url = `${urlPrefix}${config.url}`;
     }
@@ -161,7 +167,10 @@ export const transform: AxiosTransform = {
       }
     } else {
       if (!isString(params)) {
-        if (Reflect.has(config, 'data') && config.data && Object.keys(config.data).length > 0) {
+        if (
+          (Reflect.has(config, 'data') && config.data && Object.keys(config.data).length > 0) ||
+          config.data instanceof FormData
+        ) {
           config.data = data;
           config.params = params;
         } else {
@@ -189,6 +198,26 @@ export const transform: AxiosTransform = {
   requestInterceptors: (config, options) => {
     config.headers = config.headers || {};
     const cpt = options?.requestOptions?.encrypt;
+
+    // 如果数据是 FormData，删除 Content-Type 让 axios 自动设置（包含 boundary）
+    // 同时 FormData 不应该被加密处理
+    if (config.data instanceof FormData) {
+      // 确保删除所有可能的 Content-Type 设置（包括 common、post 等）
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+      if (config.headers['common']) {
+        delete (config.headers['common'] as any)['Content-Type'];
+        delete (config.headers['common'] as any)['content-type'];
+      }
+      if (config.headers['post']) {
+        delete (config.headers['post'] as any)['Content-Type'];
+        delete (config.headers['post'] as any)['content-type'];
+      }
+      // FormData 不需要加密，直接返回
+      config.headers['X-Encrypted'] = 0;
+      return config;
+    }
+
     // 进行数据加密
     if (config.data && cpt === 1) {
       // 判定json数据需要转为json字符串才能加密

@@ -82,20 +82,27 @@ export const frameworkService: IFrameworkService = {
     formData.append('totalChunks', totalChunks.toString());
     formData.append('fileName', fileName);
     formData.append('fileHash', fileHash);
+    // 在 frameworkApi.ts 的 uploadChunk 方法中添加
+    console.log('FormData:', formData);
+    console.log('FormData instanceof FormData:', formData instanceof FormData);
+    for (const pair of formData.entries()) {
+      console.log('FormData entry:', pair[0], pair[1]);
+    }
 
-    const response = await HttpRequest.post<boolean>({
-      url: uploadUrl,
-      data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    const response = await HttpRequest.post<boolean>(
+      {
+        url: uploadUrl,
+        data: formData,
+        // 不需要手动设置 headers，拦截器会自动处理 FormData 的 Content-Type
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(progress);
+          }
+        },
       },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(progress);
-        }
-      },
-    });
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 };
