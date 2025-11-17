@@ -1,17 +1,17 @@
-import type React from 'react';
-import { useEffect, useState, memo, useCallback, useRef } from 'react';
-import { Form, Input, Select, Switch, Space, Button, Upload, App } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import type { CodeEditorRef } from '@/components/CodeEditor';
+import { CodeEditor } from '@/components/CodeEditor';
 import DragModal from '@/components/modal/DragModal';
 import type {
-  JsonDataMode,
   DataModeFormData,
+  JsonDataMode,
 } from '@/services/resource/datamode/dataModeApi';
 import { DATA_MODE_CATEGORIES, dataModeService } from '@/services/resource/datamode/dataModeApi';
+import { InboxOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Button, Form, Input, Select, Space, Switch, Upload } from 'antd';
+import type React from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import DataSourceSelector, { type DataSourceType } from './DataSourceSelector';
-import { CodeEditor } from '@/components/CodeEditor';
-import type { CodeEditorRef } from '@/components/CodeEditor';
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -33,7 +33,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
   ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
     const { message } = App.useApp();
     const [form] = Form.useForm();
-    const [dataSource, setDataSource] = useState<DataSourceType>('database');
+    const [dataSource, setDataSource] = useState<DataSourceType>( initialValues?.dataSource || 'database');
     const [jsonText, setJsonText] = useState('');
     const [schemaText, setSchemaText] = useState('');
     const [status, setStatus] = useState<boolean>(true);
@@ -41,14 +41,33 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
     const jsonEditorRef = useRef<CodeEditorRef>(null);
     const schemaEditorRef = useRef<CodeEditorRef>(null);
 
+    /**
+     * 将 JSON 对象或字符串转换为 JSON 字符串
+     * @param value - 可能是对象、字符串或 null
+     * @returns JSON 字符串，如果为 null 则返回空字符串
+     */
+    const convertToJsonString = useCallback((value: any): string => {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      if (typeof value === 'string') {
+        return value;
+      }
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch (e) {
+        return '';
+      }
+    }, []);
+
     // 使用 useQuery 加载端点列表
     const {
-      data: endpoints = [],
+      data: endpoints,
       isLoading: loadingEndpoints,
     } = useQuery({
       queryKey: ['endpoints', { status: true }],
       queryFn: () => dataModeService.getEndpoints({ status: true }),
-      enabled: open && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
+      enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
     });
 
     // 从端点查询JSON并生成Schema的 mutation
@@ -111,8 +130,8 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       if (open && initialValues) {
         form.setFieldsValue(initialValues);
         setDataSource(initialValues.dataSource || 'database');
-        setSchemaText(initialValues.schemaJson || '');
-        setJsonText(initialValues.sourceJson || '');
+        setSchemaText(convertToJsonString(initialValues.schemaJson));
+        setJsonText(convertToJsonString(initialValues.sourceJson));
         setStatus(initialValues.status ?? true);
       } else if (open) {
         form.resetFields();
@@ -120,8 +139,11 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         setSchemaText('');
         setJsonText('');
         setStatus(true);
+      } else {
+        // 窗口关闭时，立即重置 dataSource 以避免触发不必要的查询
+        setDataSource('database');
       }
-    }, [open, initialValues, form]);
+    }, [open, initialValues, form, convertToJsonString]);
 
     /**
      * 处理数据来源变更
@@ -242,8 +264,9 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
      * 取消回调
      */
     const handleCancel = () => {
-      form.resetFields();
+      // 先重置 dataSource，避免在关闭时触发查询
       setDataSource('database');
+      form.resetFields();
       setSchemaText('');
       setJsonText('');
       setStatus(true);
@@ -358,27 +381,29 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                       className="flex-1 mb-0"
                       rules={[{ required: true, message: '请选择端点' }]}
                     >
-                      <Select
-                        placeholder="请选择端点"
-                        style={{ width: 'calc(100% - 118px)' }}
-                        loading={loadingEndpoints}
-                        options={endpoints.map((ep) => ({
-                          value: ep.id,
-                          label: ep.name,
-                        }))}
-                        showSearch
-                        filterOption={(input, option) =>
-                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                      />
-                      <Button
-                        type="primary"
-                        onClick={handleGenerateFromEndpoint}
-                        loading={queryFromEndpointMutation.isPending}
-                        className="self-end mb-6 ml-4"
-                    >
-                      查询并生成
-                    </Button>
+                      <div>
+                        <Select
+                          placeholder="请选择端点"
+                          style={{ width: 'calc(100% - 118px)' }}
+                          loading={loadingEndpoints}
+                          options={endpoints?.records?.map((ep) => ({
+                            value: ep.id,
+                            label: ep.name,
+                          }))}
+                          showSearch
+                          filterOption={(input, option) =>
+                            (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                          }
+                        />
+                        <Button
+                          type="primary"
+                          onClick={handleGenerateFromEndpoint}
+                          loading={queryFromEndpointMutation.isPending}
+                          className="self-end mb-6 ml-4"
+                      >
+                        查询并生成
+                      </Button>
+                      </div>
                     </Form.Item>
                     
                   </div>

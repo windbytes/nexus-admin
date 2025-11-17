@@ -350,11 +350,11 @@ export const dataModeService = {
   /**
    * 获取端点列表（用于下拉选择）
    */
-  async getEndpoints(params?: { name?: string; status?: boolean }): Promise<EndpointInfo[]> {
-    const response = await HttpRequest.post<EndpointInfo[]>({
+  async getEndpoints(params?: { name?: string; status?: boolean }): Promise<PageResult<EndpointInfo>> {
+    const response = await HttpRequest.post<PageResult<EndpointInfo>>({
       url: DataModeAction.getEndpoints,
       data: { ...params, pageNum: 1, pageSize: 1000 },
-    });
+    }, { successMessageMode: 'none' });
     return response;
   },
 };

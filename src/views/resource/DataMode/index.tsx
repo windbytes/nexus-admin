@@ -358,7 +358,7 @@ const DataMode: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,
