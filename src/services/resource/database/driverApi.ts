@@ -1,5 +1,5 @@
 import { frameworkService } from '@/services/framework/frameworkApi';
-import type { PageQueryParams } from '@/types/global';
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
@@ -41,19 +41,9 @@ export interface DriverFormData {
   databaseType: string;
   fileName?: string;
   filePath?: string;
+  fileSize?: number;
   status?: boolean;
   remark?: string;
-}
-
-/**
- * 分页结果
- */
-export interface PageResult<T> {
-  records: T[];
-  total: number;
-  totalRow?: number;
-  pageNum: number;
-  pageSize: number;
 }
 
 /**
@@ -188,7 +178,7 @@ export const driverService = {
   /**
    * 合并文件分片
    */
-  async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string }> {
+  async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string; fileSize: number }> {
     return frameworkService.mergeChunks(fileName, fileHash);
   },
 

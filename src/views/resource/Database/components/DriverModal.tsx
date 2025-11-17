@@ -24,6 +24,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
   const [form] = Form.useForm();
   const [uploadedFilePath, setUploadedFilePath] = useState<string>('');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const [uploadedFileSize, setUploadedFileSize] = useState<number>(0);
   const chunkedUploadRef = useRef<ChunkedUploadRef>(null);
 
   // 初始化表单数据
@@ -36,6 +37,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
       form.resetFields();
       setUploadedFilePath('');
       setUploadedFileName('');
+      setUploadedFileSize(0);
     }
   }, [open, initialValues, form]);
 
@@ -62,6 +64,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
         id: initialValues?.id,
         filePath: uploadedFilePath || initialValues?.filePath,
         fileName: uploadedFileName || initialValues?.fileName,
+        fileSize: uploadedFileSize || initialValues?.fileSize,
         status: Boolean(values.status),
       };
 
@@ -110,9 +113,10 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
   /**
    * 文件上传成功回调
    */
-  const handleUploadSuccess = (filePath: string, fileName: string) => {
+  const handleUploadSuccess = (filePath: string, fileName: string, fileSize: number) => {
     setUploadedFilePath(filePath);
     setUploadedFileName(fileName);
+    setUploadedFileSize(fileSize);
     form.setFieldValue('fileName', fileName);
     // 清除文件上传错误
     form.setFields([

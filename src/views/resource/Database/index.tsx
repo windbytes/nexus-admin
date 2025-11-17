@@ -77,15 +77,11 @@ const Database: React.FC = () => {
       return driverService.addDriver(data);
     },
     onSuccess: () => {
-      message.success(state.currentRecord?.id ? '编辑成功！' : '新增成功！');
       dispatch({
         modalVisible: false,
         currentRecord: null,
       });
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`操作失败：${error.message}`);
     },
   });
 
@@ -339,7 +335,7 @@ const Database: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

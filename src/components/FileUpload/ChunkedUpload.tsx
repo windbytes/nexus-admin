@@ -8,7 +8,7 @@ import React, { memo, useCallback, useImperativeHandle, useRef, useState } from 
 const { Dragger } = Upload;
 
 interface ChunkedUploadProps {
-  onUploadSuccess: (filePath: string, fileName: string) => void;
+  onUploadSuccess: (filePath: string, fileName: string, fileSize: number) => void;
   onUploadError?: (error: Error) => void;
   accept?: string;
   maxSize?: number; // MB
@@ -128,13 +128,12 @@ const ChunkedUpload = memo(
             // 合并分片
             message.loading({ content: '正在合并文件...', key: 'merging' });
             const result = await driverService.mergeChunks(file.name, fileHash);
-            message.success({ content: '文件上传成功！', key: 'merging' });
 
             // 保存合并后的文件名，用于后续清理
             setMergedFileName(file.name);
 
             // 回调
-            onUploadSuccess(result.filePath, file.name);
+            onUploadSuccess(result.filePath, file.name, result.fileSize);
             setFileList([]);
             setUploadProgress(0);
           } catch (error) {

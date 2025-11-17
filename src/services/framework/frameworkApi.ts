@@ -68,7 +68,7 @@ interface IFrameworkService {
   /**
    * 合并文件分片
    */
-  mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string }>;
+  mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string; fileSize: number }>;
 
   /**
    * 删除已上传的文件（包括分片和合并后的文件）
@@ -176,10 +176,10 @@ export const frameworkService: IFrameworkService = {
    * 合并文件分片
    * @param fileName 文件名
    * @param fileHash 文件哈希值
-   * @returns 合并后的文件路径
+   * @returns 合并后的文件路径和文件大小
    */
-  async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string }> {
-    const response = await HttpRequest.post<{ filePath: string }>({
+  async mergeChunks(fileName: string, fileHash: string): Promise<{ filePath: string; fileSize: number }> {
+    const response = await HttpRequest.post<{ filePath: string; fileSize: number }>({
       url: FrameworkApi.mergeChunks,
       data: { fileName, fileHash },
     });

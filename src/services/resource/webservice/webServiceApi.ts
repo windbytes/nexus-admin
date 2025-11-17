@@ -1,4 +1,4 @@
-import type { PageQueryParams } from '@/types/global';
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
@@ -7,28 +7,28 @@ import { HttpRequest } from '@/utils/request';
 export interface WebService {
   /** Web服务唯一标识符 */
   id: string;
-  
+
   /** Web服务名称 */
   name: string;
-  
+
   /** Web服务编码 */
   code: string;
-  
+
   /** 描述信息 */
   description?: string;
-  
+
   /** 录入方式：manual-图形化编辑，file-上传文件，url-URL获取 */
   inputType: 'manual' | 'file' | 'url';
-  
+
   /** WSDL命名空间 */
   namespace?: string;
-  
+
   /** 服务注解/描述 */
   serviceAnnotation?: string;
-  
+
   /** 操作列表 */
   operations?: WsdlOperation[];
-  
+
   /** WSDL文件信息（仅当inputType为file时） */
   fileInfo?: {
     /** 原始文件名 */
@@ -38,34 +38,34 @@ export interface WebService {
     /** 文件上传时间 */
     uploadTime?: string;
   };
-  
+
   /** WSDL URL（仅当inputType为url时） */
   wsdlUrl?: string;
-  
+
   /** 完整的WSDL内容（XML格式） */
   wsdlContent?: string;
-  
+
   /** 启用状态 */
   status: boolean;
-  
+
   /** 分类 */
   category?: string;
-  
+
   /** 标签 */
   tags?: string[];
-  
+
   /** 创建时间 */
   createTime?: string;
-  
+
   /** 更新时间 */
   updateTime?: string;
-  
+
   /** 创建者 */
   createBy?: string;
-  
+
   /** 更新者 */
   updateBy?: string;
-  
+
   /** 备注 */
   remark?: string;
 }
@@ -76,16 +76,16 @@ export interface WebService {
 export interface WsdlOperation {
   /** 操作ID（临时ID） */
   id?: string;
-  
+
   /** 操作名称 */
   name: string;
-  
+
   /** 操作注解/描述 */
   annotation?: string;
-  
+
   /** 输入参数 */
   inputParameters?: WsdlParameter[];
-  
+
   /** 输出参数 */
   outputParameters?: WsdlParameter[];
 }
@@ -96,16 +96,16 @@ export interface WsdlOperation {
 export interface WsdlParameter {
   /** 参数ID（临时ID） */
   id?: string;
-  
+
   /** 参数名称 */
   name: string;
-  
+
   /** 参数类型 */
   type: string;
-  
+
   /** 是否必填 */
   required?: boolean;
-  
+
   /** 参数描述 */
   description?: string;
 }
@@ -113,19 +113,19 @@ export interface WsdlParameter {
 /**
  * Web服务搜索参数
  */
-export interface WebServiceSearchParams extends PageQueryParams{
+export interface WebServiceSearchParams extends PageQueryParams {
   /** 服务名称（模糊搜索） */
   name?: string;
-  
+
   /** 服务编码（模糊搜索） */
   code?: string;
-  
+
   /** 录入方式筛选 */
   inputType?: 'manual' | 'file' | 'url';
-  
+
   /** 分类筛选 */
   category?: string;
-  
+
   /** 状态筛选 */
   status?: boolean;
 }
@@ -136,65 +136,48 @@ export interface WebServiceSearchParams extends PageQueryParams{
 export interface WebServiceFormData {
   /** 服务ID（编辑时必填） */
   id?: string;
-  
+
   /** 服务名称 */
   name: string;
-  
+
   /** 服务编码 */
   code: string;
-  
+
   /** 描述信息 */
   description?: string;
-  
+
   /** 录入方式 */
   inputType: 'manual' | 'file' | 'url';
-  
+
   /** WSDL命名空间（手动录入时） */
   namespace?: string;
-  
+
   /** 服务注解（手动录入时） */
   serviceAnnotation?: string;
-  
+
   /** 操作列表（手动录入时） */
   operations?: WsdlOperation[];
-  
+
   /** WSDL文件（文件上传时） */
   file?: File;
-  
+
   /** WSDL URL（URL获取时） */
   wsdlUrl?: string;
-  
+
   /** 完整的WSDL内容 */
   wsdlContent?: string;
-  
+
   /** 启用状态 */
   status?: boolean;
-  
+
   /** 分类 */
   category?: string;
-  
+
   /** 标签 */
   tags?: string[];
-  
+
   /** 备注 */
   remark?: string;
-}
-
-/**
- * 分页结果
- */
-export interface PageResult<T> {
-  /** 数据记录列表 */
-  records: T[];
-  
-  /** 总记录数 */
-  total: number;
-  
-  /** 当前页码 */
-  pageNum: number;
-  
-  /** 每页数量 */
-  pageSize: number;
 }
 
 /**
@@ -249,10 +232,13 @@ export const webServiceApi = {
    * 分页查询Web服务列表
    */
   async getWebServiceList(params: WebServiceSearchParams): Promise<PageResult<WebService>> {
-    const response = await HttpRequest.post<PageResult<WebService>>({
-      url: WebServiceAction.list,
-      data: params,
-    }, {successMessageMode: 'none'});
+    const response = await HttpRequest.post<PageResult<WebService>>(
+      {
+        url: WebServiceAction.list,
+        data: params,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -416,4 +402,3 @@ export const webServiceApi = {
     window.URL.revokeObjectURL(url);
   },
 };
-
