@@ -202,6 +202,8 @@ enum DataModeAction {
   validateSchema = '/resource/datamode/validateSchema',
   exportSchema = '/resource/datamode/exportSchema',
   importSchema = '/resource/datamode/importSchema',
+  importDataModeFromFile = '/resource/datamode/importDataModeFromFile',
+  importDataModeFromUrl = '/resource/datamode/importDataModeFromUrl',
   getEndpoints = '/integrated/endpoint/list',
 }
 
@@ -331,7 +333,7 @@ export const dataModeService = {
   },
 
   /**
-   * 导入Schema文件
+   * 导入Schema文件（用于编辑时解析Schema，返回schema字符串）
    */
   async importSchema(file: File): Promise<{ schema: string }> {
     const formData = new FormData();
@@ -340,9 +342,31 @@ export const dataModeService = {
     const response = await HttpRequest.post<{ schema: string }>({
       url: DataModeAction.importSchema,
       data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    });
+    return response;
+  },
+
+  /**
+   * 从文件导入数据模式（直接存储到数据库）
+   */
+  async importDataModeFromFile(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await HttpRequest.post<void>({
+      url: DataModeAction.importDataModeFromFile,
+      data: formData,
+    });
+    return response;
+  },
+
+  /**
+   * 从URL导入数据模式（直接存储到数据库）
+   */
+  async importDataModeFromUrl(url: string): Promise<void> {
+    const response = await HttpRequest.post<void>({
+      url: DataModeAction.importDataModeFromUrl,
+      data: { url },
     });
     return response;
   },
@@ -351,10 +375,13 @@ export const dataModeService = {
    * 获取端点列表（用于下拉选择）
    */
   async getEndpoints(params?: { name?: string; status?: boolean }): Promise<PageResult<EndpointInfo>> {
-    const response = await HttpRequest.post<PageResult<EndpointInfo>>({
-      url: DataModeAction.getEndpoints,
-      data: { ...params, pageNum: 1, pageSize: 1000 },
-    }, { successMessageMode: 'none' });
+    const response = await HttpRequest.post<PageResult<EndpointInfo>>(
+      {
+        url: DataModeAction.getEndpoints,
+        data: { ...params, pageNum: 1, pageSize: 1000 },
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 };

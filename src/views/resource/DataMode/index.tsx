@@ -11,6 +11,7 @@ import DataModeTableActions from './components/DataModeTableActions';
 
 // 懒加载组件
 const DataModeModal = lazy(() => import('./components/DataModeModal'));
+const DataModeImportModal = lazy(() => import('./components/DataModeImportModal'));
 
 /**
  * 页面状态定义
@@ -22,6 +23,7 @@ interface PageState {
   isViewMode: boolean;
   selectedRowKeys: React.Key[];
   selectedRows: JsonDataMode[];
+  importModalVisible: boolean;
 }
 
 /**
@@ -53,6 +55,7 @@ const DataMode: React.FC = () => {
       isViewMode: false,
       selectedRowKeys: [],
       selectedRows: [],
+      importModalVisible: false,
     }
   );
 
@@ -269,6 +272,34 @@ const DataMode: React.FC = () => {
   }, [state.selectedRowKeys, state.selectedRows]);
 
   /**
+   * 处理导入Schema
+   */
+  const handleImportSchema = useCallback(() => {
+    dispatch({
+      importModalVisible: true,
+    });
+  }, []);
+
+  /**
+   * 处理导入成功
+   */
+  const handleImportSuccess = useCallback(() => {
+    dispatch({
+      importModalVisible: false,
+    });
+    refetch();
+  }, [refetch]);
+
+  /**
+   * 处理导入取消
+   */
+  const handleImportCancel = useCallback(() => {
+    dispatch({
+      importModalVisible: false,
+    });
+  }, []);
+
+  /**
    * 处理状态变更
    */
   const handleStatusChange = useCallback(
@@ -332,6 +363,7 @@ const DataMode: React.FC = () => {
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
           onBatchExport={handleBatchExport}
+          onImportSchema={handleImportSchema}
           onRefresh={refetch}
           selectedRowKeys={state.selectedRowKeys}
           loading={tableLoading}
@@ -374,6 +406,13 @@ const DataMode: React.FC = () => {
         isViewMode={state.isViewMode}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
+      />
+
+      {/* 导入Schema弹窗 */}
+      <DataModeImportModal
+        open={state.importModalVisible}
+        onOk={handleImportSuccess}
+        onCancel={handleImportCancel}
       />
     </div>
   );
