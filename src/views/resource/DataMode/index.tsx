@@ -4,11 +4,13 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
-import { useCallback, useReducer, useState } from 'react';
-import DataModeModal from './components/DataModeModal';
+import { lazy, useCallback, useReducer, useState } from 'react';
 import DataModeSearchForm from './components/DataModeSearchForm';
 import DataModeTable from './components/DataModeTable';
 import DataModeTableActions from './components/DataModeTableActions';
+
+// 懒加载组件
+const DataModeModal = lazy(() => import('./components/DataModeModal'));
 
 /**
  * 页面状态定义
@@ -233,7 +235,7 @@ const DataMode: React.FC = () => {
         batchDeleteDataModeMutation.mutate(state.selectedRowKeys as string[]);
       },
     });
-  }, [state.selectedRowKeys, modal, message, batchDeleteDataModeMutation]);
+  }, [state.selectedRowKeys]);
 
   /**
    * 处理导出
@@ -264,14 +266,7 @@ const DataMode: React.FC = () => {
         name: record.name,
       });
     });
-  }, [state.selectedRowKeys, state.selectedRows, message, exportSchemaMutation]);
-
-  /**
-   * 处理刷新
-   */
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
+  }, [state.selectedRowKeys, state.selectedRows]);
 
   /**
    * 处理状态变更
@@ -337,7 +332,7 @@ const DataMode: React.FC = () => {
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
           onBatchExport={handleBatchExport}
-          onRefresh={handleRefresh}
+          onRefresh={refetch}
           selectedRowKeys={state.selectedRowKeys}
           loading={tableLoading}
         />

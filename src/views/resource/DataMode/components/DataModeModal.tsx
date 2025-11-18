@@ -27,6 +27,21 @@ interface DataModeModalProps {
 }
 
 /**
+ * 将 JSON 对象或字符串转换为 JSON 字符串
+ * @param value - 可能是对象、字符串或 null
+ * @returns JSON 字符串，如果为 null 则返回空字符串
+ */
+const convertToJsonString = (value: any): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return JSON.stringify(value, null, 2);
+}
+
+/**
  * 数据模式编辑/新增弹窗组件
  */
 const DataModeModal: React.FC<DataModeModalProps> = memo(
@@ -34,31 +49,12 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
     const { message } = App.useApp();
     const [form] = Form.useForm();
     const [dataSource, setDataSource] = useState<DataSourceType>( initialValues?.dataSource || 'database');
-    const [jsonText, setJsonText] = useState('');
-    const [schemaText, setSchemaText] = useState('');
-    const [status, setStatus] = useState<boolean>(true);
+    const [jsonText, setJsonText] = useState<string>(convertToJsonString(initialValues?.sourceJson));
+    const [schemaText, setSchemaText] = useState<string>(convertToJsonString(initialValues?.schemaJson));
+    const [status, setStatus] = useState<boolean>(initialValues?.status || true);
     
     const jsonEditorRef = useRef<CodeEditorRef>(null);
     const schemaEditorRef = useRef<CodeEditorRef>(null);
-
-    /**
-     * 将 JSON 对象或字符串转换为 JSON 字符串
-     * @param value - 可能是对象、字符串或 null
-     * @returns JSON 字符串，如果为 null 则返回空字符串
-     */
-    const convertToJsonString = useCallback((value: any): string => {
-      if (value === null || value === undefined) {
-        return '';
-      }
-      if (typeof value === 'string') {
-        return value;
-      }
-      try {
-        return JSON.stringify(value, null, 2);
-      } catch (e) {
-        return '';
-      }
-    }, []);
 
     // 使用 useQuery 加载端点列表
     const {
@@ -85,8 +81,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       onSuccess: ({ jsonStr, schema }) => {
         setJsonText(jsonStr);
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('Schema生成成功！');
       },
       onError: (error: any) => {
         message.error(`生成Schema失败：${error.message}`);
@@ -101,8 +95,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       },
       onSuccess: (schema) => {
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('Schema生成成功！');
       },
       onError: (error: any) => {
         message.error(`生成Schema失败：${error.message}`);
@@ -117,8 +109,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       },
       onSuccess: (schema) => {
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('文件上传成功，Schema已加载！');
       },
       onError: (error: any) => {
         message.error(`文件上传失败：${error.message}`);
@@ -127,23 +117,13 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
 
     // 初始化表单数据
     useEffect(() => {
-      if (open && initialValues) {
+      if (!open) return;
+      if (initialValues) {
         form.setFieldsValue(initialValues);
-        setDataSource(initialValues.dataSource || 'database');
-        setSchemaText(convertToJsonString(initialValues.schemaJson));
-        setJsonText(convertToJsonString(initialValues.sourceJson));
-        setStatus(initialValues.status ?? true);
-      } else if (open) {
-        form.resetFields();
-        setDataSource('database');
-        setSchemaText('');
-        setJsonText('');
-        setStatus(true);
       } else {
-        // 窗口关闭时，立即重置 dataSource 以避免触发不必要的查询
-        setDataSource('database');
+        form.resetFields();
       }
-    }, [open, initialValues, form, convertToJsonString]);
+    }, [open, initialValues, form]);
 
     /**
      * 处理数据来源变更
@@ -264,8 +244,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
      * 取消回调
      */
     const handleCancel = () => {
-      // 先重置 dataSource，避免在关闭时触发查询
-      setDataSource('database');
       form.resetFields();
       setSchemaText('');
       setJsonText('');
@@ -313,7 +291,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
           )
         }
         maskClosable={false}
-        destroyOnHidden
+        destroyOnHidden={!isViewMode} // 只在非查看模式下销毁组件
       >
         <Form
           form={form}

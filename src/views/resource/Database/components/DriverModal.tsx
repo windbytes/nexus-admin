@@ -22,22 +22,18 @@ interface DriverModalProps {
  */
 const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, initialValues, onOk, onCancel }) => {
   const [form] = Form.useForm();
-  const [uploadedFilePath, setUploadedFilePath] = useState<string>('');
-  const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [uploadedFileSize, setUploadedFileSize] = useState<number>(0);
+  const [uploadedFilePath, setUploadedFilePath] = useState<string>(initialValues?.filePath || '');
+  const [uploadedFileName, setUploadedFileName] = useState<string>(initialValues?.fileName || '');
+  const [uploadedFileSize, setUploadedFileSize] = useState<number>(initialValues?.fileSize || 0);
   const chunkedUploadRef = useRef<ChunkedUploadRef>(null);
 
-  // 初始化表单数据
+  // 初始化表单数据（由于使用了 destroyOnHidden，每次打开都是新组件，state 初始值已正确）
   useEffect(() => {
-    if (open && initialValues) {
+    if (!open) return;
+    if (initialValues) {
       form.setFieldsValue(initialValues);
-      setUploadedFilePath(initialValues.filePath || '');
-      setUploadedFileName(initialValues.fileName || '');
-    } else if (open) {
+    } else {
       form.resetFields();
-      setUploadedFilePath('');
-      setUploadedFileName('');
-      setUploadedFileSize(0);
     }
   }, [open, initialValues, form]);
 
@@ -107,6 +103,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
     form.resetFields();
     setUploadedFilePath('');
     setUploadedFileName('');
+    setUploadedFileSize(0);
     onCancel();
   };
 
