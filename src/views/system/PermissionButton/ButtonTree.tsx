@@ -1,14 +1,14 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Tree, Input, Spin, Empty, Tag, Space, Button, Card } from 'antd';
-import { SearchOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo, type ReactNode } from 'react';
-import type React from 'react';
-import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { usePermission } from '@/hooks/usePermission';
-import { useTranslation } from 'react-i18next';
-import { addIcon } from '@/utils/optimized-icons';
-import ButtonModal from './ButtonModal';
 import type { MenuModel } from '@/services/system/menu/type';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { addIcon } from '@/utils/optimized-icons';
+import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Card, Empty, Input, Space, Spin, Tag, Tree } from 'antd';
+import type React from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import ButtonModal from './ButtonModal';
 
 // 菜单类型枚举
 const MenuType = {
@@ -231,14 +231,10 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
         </Space>
       }
     >
-      <Input.Search
-        placeholder="请输入按钮名称"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        onSearch={handleSearch}
-        allowClear
-        enterButton={<SearchOutlined />}
-      />
+      <Space.Compact>
+        <Input placeholder='请输入按钮名称' value={searchText} onChange={(e) => setSearchText(e.target.value)} allowClear />
+        <Button type="primary" icon={<SearchOutlined />} onClick={() => handleSearch(searchText)} />
+      </Space.Compact>
 
       <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
         {treeData.length === 0 ? (

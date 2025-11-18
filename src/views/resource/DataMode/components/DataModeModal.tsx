@@ -143,7 +143,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
       
       // 清空相关字段
       if (value !== 'database') {
-        form.setFieldValue('endpointId', undefined);
+        form.resetFields(['endpointId']);
       }
       setJsonText('');
       setSchemaText('');

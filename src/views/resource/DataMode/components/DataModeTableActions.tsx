@@ -59,9 +59,7 @@ const DataModeTableActions: React.FC<DataModeTableActionsProps> = memo(
         </Space>
 
         <Tooltip title="刷新数据">
-          <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-            刷新
-          </Button>
+          <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
         </Tooltip>
       </div>
     );
