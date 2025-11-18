@@ -46,13 +46,9 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
       await dataModeService.importDataModeFromFile(file);
     },
     onSuccess: () => {
-      message.success('文件导入成功！');
       handleReset();
       onOk?.();
-    },
-    onError: (error: any) => {
-      message.error(`文件导入失败：${error.message}`);
-    },
+    }
   });
 
   // URL导入 mutation
@@ -61,13 +57,9 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
       await dataModeService.importDataModeFromUrl(url);
     },
     onSuccess: () => {
-      message.success('URL导入成功！');
       handleReset();
       onOk?.();
-    },
-    onError: (error: any) => {
-      message.error(`URL导入失败：${error.message}`);
-    },
+    }
   });
 
   /**
@@ -139,9 +131,8 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
       return Upload.LIST_IGNORE;
     }
 
-    // 验证文件大小（5M）
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
+    // 验证文件大小（5M = 5 * 1024 * 1024 字节）
+    if (file.size >= (5 << 20)) {
       message.error('文件大小不能超过5M！');
       return Upload.LIST_IGNORE;
     }
