@@ -112,7 +112,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         ellipsis: true,
         render: (value: string) => (
           <div className="flex items-center gap-2">
-            <span className="font-medium text-blue-600">{value}</span>
+            <span className="font-medium">{value}</span>
           </div>
         ),
       },
@@ -121,9 +121,7 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         dataIndex: 'code',
         key: 'code',
         width: 150,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: true,
         render: (value: string) => (
           <Tooltip title={value}>
             <code className="bg-gray-100 px-2 py-1 rounded">{value}</code>

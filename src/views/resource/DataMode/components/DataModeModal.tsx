@@ -10,7 +10,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, Form, Input, Select, Space, Switch, Upload } from 'antd';
 import type React from 'react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DataSourceSelector, { type DataSourceType } from './DataSourceSelector';
 
 const { TextArea } = Input;
@@ -44,13 +44,12 @@ const convertToJsonString = (value: any): string => {
 /**
  * 数据模式编辑/新增弹窗组件
  */
-const DataModeModal: React.FC<DataModeModalProps> = memo(
-  ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
+const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
     const { message } = App.useApp();
     const [form] = Form.useForm();
-    const [dataSource, setDataSource] = useState<DataSourceType>( initialValues?.dataSource || 'database');
-    const [jsonText, setJsonText] = useState<string>(convertToJsonString(initialValues?.sourceJson));
-    const [schemaText, setSchemaText] = useState<string>(convertToJsonString(initialValues?.schemaJson));
+    const [dataSource, setDataSource] = useState<DataSourceType>();
+    const [jsonText, setJsonText] = useState<string>('');
+    const [schemaText, setSchemaText] = useState<string>('');
     const [status, setStatus] = useState<boolean>(initialValues?.status || true);
     
     const jsonEditorRef = useRef<CodeEditorRef>(null);
@@ -115,13 +114,23 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       },
     });
 
-    // 初始化表单数据
+    // 初始化表单数据和 state
     useEffect(() => {
       if (!open) return;
       if (initialValues) {
         form.setFieldsValue(initialValues);
+        // 同步 state 值
+        setDataSource(initialValues.dataSource || 'database');
+        setJsonText(convertToJsonString(initialValues.sourceJson));
+        setSchemaText(convertToJsonString(initialValues.schemaJson));
+        setStatus(initialValues.status ?? true);
       } else {
         form.resetFields();
+        // 重置 state 值
+        setDataSource('database');
+        setJsonText('');
+        setSchemaText('');
+        setStatus(true);
       }
     }, [open, initialValues, form]);
 
@@ -240,23 +249,12 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       }
     };
 
-    /**
-     * 取消回调
-     */
-    const handleCancel = () => {
-      form.resetFields();
-      setSchemaText('');
-      setJsonText('');
-      setStatus(true);
-      onCancel();
-    };
-
     return (
       <DragModal
         centered
         title={title}
         open={open}
-        onCancel={handleCancel}
+        onCancel={onCancel}
         width={1000}
         styles={{
           body: {
@@ -278,7 +276,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                 />
               </div>
               <Space>
-                <Button onClick={handleCancel}>取消</Button>
+                <Button onClick={onCancel}>取消</Button>
                 <Button type="primary" onClick={handleOk} loading={loading}>
                   确定
                 </Button>
@@ -286,12 +284,11 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
             </div>
           ) : (
             <Space>
-              <Button onClick={handleCancel}>关闭</Button>
+              <Button onClick={onCancel}>关闭</Button>
             </Space>
           )
         }
         maskClosable={false}
-        destroyOnHidden={!isViewMode} // 只在非查看模式下销毁组件
       >
         <Form
           form={form}
@@ -390,9 +387,9 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
 
               {/* JSON文本 */}
               {dataSource === 'json' && (
-                <div className="space-y-4">
+                <>
                   <Form.Item label="JSON文本" required>
-                    <div style={{ borderRadius: '8px' }}>
+                    <div className='rounded-lg flex flex-col'>
                       <CodeEditor
                         ref={jsonEditorRef}
                         value={jsonText}
@@ -401,19 +398,17 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                         showMinimap={false}
                         onChange={(value) => setJsonText(value || '')}
                       />
-                    </div>
-                  </Form.Item>
-                  <div className="flex justify-end">
-                    <Button
+                      <Button
                       type="primary"
                       onClick={handleGenerateFromJson}
                       loading={generateFromJsonMutation.isPending}
-                      className='mb-4'
+                      className='mt-2'
                     >
                       生成Schema
                     </Button>
-                  </div>
-                </div>
+                    </div>
+                  </Form.Item>
+                </>
               )}
 
               {/* 文件上传 */}
@@ -459,8 +454,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         </Form>
       </DragModal>
     );
-  },
-);
+  };
 
 DataModeModal.displayName = 'DataModeModal';
 
