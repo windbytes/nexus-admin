@@ -68,7 +68,7 @@ const Notify: React.FC = () => {
     {
       key: 'message',
       label: <>消息({groupData['message']?.length || 0})</>,
-      icon: <MessageOutlined className='ml-2!'/>,
+      icon: <MessageOutlined className='mr-2!'/>,
       children: (
         <MessageList
           data={groupData['message'] || []}
@@ -81,7 +81,7 @@ const Notify: React.FC = () => {
     {
       key: 'notify',
       label: <>通知({groupData['notify']?.length || 0})</>,
-      icon: <NotificationOutlined className='ml-2!'/>,
+      icon: <NotificationOutlined className='mr-2!'/>,
       children: (
         <MessageList
           data={groupData['notify'] || []}
@@ -94,7 +94,7 @@ const Notify: React.FC = () => {
     {
       key: 'todo',
       label: <>待办({groupData['todo']?.length || 0})</>,
-      icon: <ReconciliationOutlined className='ml-2!'/>,
+      icon: <ReconciliationOutlined className='mr-2!'/>,
       children: (
         <MessageList
           data={groupData['todo'] || []}
