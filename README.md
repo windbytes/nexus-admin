@@ -26,7 +26,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 - **Vite** - 快速的前端构建工具
 - **TypeScript** - 类型安全的 JavaScript 超集
 - **Zustand** - 轻量级状态管理
-- **React Router 7.x** - 客户端路由管理
+- **Tanstack Router** - 客户端路由管理
 - **TanStack Query** - 强大的数据获取和缓存
 - **ECharts** - 数据可视化图表库
 - **Sass** - CSS 预处理器
@@ -37,9 +37,8 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 - **JDK 21** - 最新的 Java 开发工具包
 - **MyBatis-Flex** - 灵活的 ORM 框架
 - **Apache Camel** - 企业集成模式框架
-- **Sa-token**   -- 权限校验
-- **Redis**   -- 缓存实现与分布式锁
-
+- **Sa-token** -- 权限校验
+- **Redis** -- 缓存实现与分布式锁
 
 ### 开发工具
 
@@ -50,54 +49,63 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 ## 🖼️ 系统界面展示
 
 ### 登录界面
+
 <div align="center">
   <img src="images/登录.png" alt="登录界面" width="600"/>
   <p><em>安全登录界面，支持多种认证方式</em></p>
 </div>
 
 ### 工作台
+
 <div align="center">
   <img src="images/工作台.png" alt="工作台" width="800"/>
   <p><em>集成工作台，提供流程监控和快速操作</em></p>
 </div>
 
 ### 应用中心
+
 <div align="center">
   <img src="images/应用中心.png" alt="应用中心" width="800"/>
   <p><em>应用管理中心，支持应用的创建、配置和发布</em></p>
 </div>
 
 ### 快捷搜索
+
 <div align="center">
   <img src="images/快捷搜索.png" alt="快捷搜索" width="600"/>
   <p><em>智能搜索功能，快速定位系统资源</em></p>
 </div>
 
 ### 模板中心
+
 <div align="center">
   <img src="images/模板中心.png" alt="模板中心" width="800"/>
   <p><em>丰富的集成模板库，加速开发流程</em></p>
 </div>
 
 ### 用户管理
+
 <div align="center">
   <img src="images/用户管理.png" alt="用户管理" width="800"/>
   <p><em>完整的用户权限管理体系</em></p>
 </div>
 
 ### 角色维护
+
 <div align="center">
   <img src="images/角色维护.png" alt="角色维护" width="800"/>
   <p><em>灵活的角色权限配置</em></p>
 </div>
 
 ### 菜单维护
+
 <div align="center">
   <img src="images/菜单维护.png" alt="菜单维护" width="800"/>
   <p><em>动态菜单配置和管理</em></p>
 </div>
 
 ### 系统参数
+
 <div align="center">
   <img src="images/系统参数.png" alt="系统参数" width="800"/>
   <p><em>系统参数配置和监控</em></p>
@@ -116,7 +124,7 @@ graph TB
     C --> D[Apache Camel 路由引擎]
     D --> E[多种协议适配器]
     E --> F[外部系统]
-    
+
     E --> G[HTTP/HTTPS]
     E --> H[SOAP Web Services]
     E --> I[RPC 调用]
@@ -142,7 +150,7 @@ graph TB
 ```java
 @Component
 public class IntegrationRoute extends RouteBuilder {
-    
+
     @Override
     public void configure() throws Exception {
         // HTTP 到数据库的集成路由
@@ -151,7 +159,7 @@ public class IntegrationRoute extends RouteBuilder {
             .transform().jsonpath("$.data")
             .to("sql:INSERT INTO integration_log (data, timestamp) VALUES (:#data, :#timestamp)")
             .setBody(constant("数据已成功处理"));
-            
+
         // 定时数据同步
         from("timer:sync?period=30000")
             .to("sql:SELECT * FROM source_table WHERE updated_at > :#lastSync")
