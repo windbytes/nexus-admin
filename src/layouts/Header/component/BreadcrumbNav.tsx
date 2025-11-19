@@ -2,12 +2,12 @@ import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { matchRoutePath, type MenuCaches } from '@/utils/utils';
-import { Link, useRouterState } from '@tanstack/react-router';
 import { Breadcrumb } from 'antd';
 import { t } from 'i18next';
 import type React from 'react';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 /**
@@ -16,7 +16,7 @@ import { useShallow } from 'zustand/react/shallow';
  */
 const BreadcrumbNav: React.FC = () => {
   // 获取路由的地址，地址变化的时候去获取对应的菜单项，以此来拼接面包屑
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
   // 从后台获取的路由菜单
   const { menus, caches } = useMenuStore(
     useShallow((state) => ({

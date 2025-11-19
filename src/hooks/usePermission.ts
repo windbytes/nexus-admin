@@ -1,7 +1,7 @@
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { findMenuByPath } from '@/utils/utils';
-import { useRouterState } from '@tanstack/react-router';
+import { useLocation } from 'react-router';
 
 /**
  * 结合当前菜单权限，判断用户是否有权限
@@ -13,7 +13,7 @@ export function usePermission(requiredPermissions: string[], mode: 'AND' | 'OR' 
   const { caches: menuCaches } = useMenuStore();
   const { loginUser } = useUserStore();
   // 当前路由的pathname
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
   // 获取当前菜单的权限（如果传入了 currentMenuKey）
   const currentMenu = findMenuByPath(pathname, menuCaches);
   const menuPermission = currentMenu?.meta?.permissionList || []; // 例如："user:view"

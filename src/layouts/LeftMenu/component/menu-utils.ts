@@ -6,7 +6,7 @@ import type { TFunction } from 'i18next';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { matchRoutePath, type MenuCaches } from '@/utils/utils';
-import { matchPathname } from '@tanstack/react-router';
+import { matchPath } from 'react-router';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -255,12 +255,7 @@ export function resolveMenuSelection(
   let entity = pathMap.get(pathname);
   if (!entity) {
     for (const [candidatePath, candidateEntity] of pathMap.entries()) {
-      if (
-        matchPathname(pathname, {
-          to: candidatePath,
-          caseSensitive: false,
-        })
-      ) {
+      if (matchPath({ path: candidatePath, caseSensitive: false }, pathname)) {
         entity = candidateEntity;
         targetPath = candidatePath;
         break;

@@ -5,10 +5,10 @@ import type { Tag } from '@/services/common/tags/tagsModel';
 import type { App } from '@/services/integrated/apps/app';
 import clsx from '@/utils/classnames';
 import { EllipsisOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { Card } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import AppCardOperations from './AppCardOperations';
 import './apps.scss';
 import DuplicateAppModal from './duplicate-modal';
@@ -40,7 +40,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate({ to: `/integrated/app/${id}/workflow`, params: { appId: id } });
+    navigate(`/integrated/app/${id}/workflow`, { state: { appId: id } });
   };
 
   return (

@@ -1,6 +1,6 @@
 import logo from '@/assets/images/icon-192.png';
 import { usePreferencesStore } from '@/stores/store';
-import { Link } from '@tanstack/react-router';
+import { Link } from 'react-router';
 import { Image } from 'antd';
 import { memo } from 'react';
 

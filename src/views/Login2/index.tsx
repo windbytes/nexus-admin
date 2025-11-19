@@ -1,23 +1,22 @@
-import type React from 'react';
-import { useRef, useState, useEffect } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row, Modal, Typography } from 'antd';
-import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
-import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
-import { useNavigate } from '@tanstack/react-router';
+import logo from '@/assets/images/icon-512.png';
 import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
+import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+import styles from './login.module.css';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
-import { HttpCodeEnum } from '@/enums/httpEnum';
-import { antdUtils } from '@/utils/antdUtil';
-import { useMenuStore } from '@/stores/store';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { commonService } from '@/services/common';
-import { useUserStore } from '@/stores/userStore';
-import { useTranslation } from 'react-i18next';
-import { useTabStore } from '@/stores/tabStore';
 import RoleSelector from '@/components/RoleSelector';
-import { usePreferencesStore } from '@/stores/store';
+import { HttpCodeEnum } from '@/enums/httpEnum';
+import { commonService } from '@/services/common';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
+import { antdUtils } from '@/utils/antdUtil';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -139,7 +138,7 @@ const Login: React.FC = () => {
       });
 
       // 跳转到首页
-      navigate({ to: homePath });
+      navigate(homePath, { replace: true });
     } catch (error) {
       console.error('角色选择失败:', error);
       antdUtils.message?.error('角色选择失败');
@@ -256,7 +255,7 @@ const Login: React.FC = () => {
    * 切换到另一个登录界面
    */
   const switchLoginStyle = () => {
-    navigate({ to: '/login' });
+    navigate('/login', { replace: true });
   };
 
   return (

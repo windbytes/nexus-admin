@@ -4,10 +4,10 @@ import { useUserStore } from '@/stores/userStore';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { DownOutlined } from '@ant-design/icons';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Button, Dropdown, Tabs, type MenuProps, type TabsProps } from 'antd';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import './tabBar.scss';
 
@@ -142,7 +142,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
           setActiveKey(homePath);
         } else {
           // 如果当前路径无效且不是homePath，跳转到homePath
-          navigate({ to: homePath, replace: true });
+          navigate(homePath, { replace: true });
         }
       } else {
         // 页面刷新时，tabs已经存在，需要确保状态正确
@@ -292,7 +292,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
     // 如果当前没有tabs，说明是关闭所有tabs后的情况，需要跳转到首页
     if (tabs.length === 0) {
       if (homePath && pathname !== homePath) {
-        navigate({ to: homePath, replace: true });
+        navigate(homePath, { replace: true });
       }
       return;
     }
@@ -398,7 +398,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
 
       setActiveKey(key);
       // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
-      navigate({ to: key, replace: true });
+      navigate(key, { replace: true });
     },
     [setActiveKey, navigate]
   );
@@ -412,7 +412,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
         const newActiveKey = removeTab(e);
         // 如果关闭的是当前激活的tab，需要跳转到新的激活tab
         if (e === activeKey && newActiveKey) {
-          navigate({ to: newActiveKey, replace: true });
+          navigate(newActiveKey, { replace: true });
           // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
           setTimeout(() => {
             isClosingTabRef.current = false;
@@ -445,7 +445,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const newActiveKey = removeTab(tabKey);
             // 如果关闭的是当前激活的tab，需要跳转到新的激活tab
             if (tabKey === activeKey && newActiveKey) {
-              navigate({ to: newActiveKey, replace: true });
+              navigate(newActiveKey, { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;
@@ -493,7 +493,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const newActiveKey = closeLeftTabs(tabKey, homePath);
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
-              navigate({ to: newActiveKey, replace: true });
+              navigate(newActiveKey, { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;
@@ -514,7 +514,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const newActiveKey = closeRightTabs(tabKey, homePath);
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
-              navigate({ to: newActiveKey, replace: true });
+              navigate(newActiveKey, { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;
@@ -535,7 +535,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             const newActiveKey = closeOtherTabs(tabKey, homePath);
             // 如果当前激活的tab被关闭了，需要跳转到新的激活tab
             if (newActiveKey && newActiveKey !== activeKey) {
-              navigate({ to: newActiveKey, replace: true });
+              navigate(newActiveKey, { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;
@@ -558,7 +558,7 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
             if (newActiveKey) {
               // 如果当前不在homePath，需要跳转到homePath
               if (pathname !== homePath) {
-                navigate({ to: newActiveKey, replace: true });
+                navigate(newActiveKey, { replace: true });
                 // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
                 setTimeout(() => {
                   isClosingTabRef.current = false;
@@ -568,13 +568,13 @@ const TabBar: React.FC<TabBarProps> = ({ className }) => {
                 isClosingTabRef.current = false;
               }
             } else if (homePath) {
-              navigate({ to: homePath, replace: true });
+              navigate(homePath, { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;
               }, 0);
             } else {
-              navigate({ to: '/', replace: true });
+              navigate('/', { replace: true });
               // 延迟重置标记，确保路径变化的useEffect不会在pathname还是旧值时执行
               setTimeout(() => {
                 isClosingTabRef.current = false;

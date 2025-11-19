@@ -2,10 +2,10 @@ import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify/react';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Empty, Menu, Spin, type MenuProps } from 'antd';
 import { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 
 import {
@@ -65,7 +65,7 @@ const MenuComponent = memo(() => {
   const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
     // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
     dispatchMenuState({ type: 'reset-interaction' });
-    navigate({ to: key, replace: true });
+    navigate(key, { replace: true });
   }, []);
 
   const currentSelectedKeys = useMemo(() => selectedKeys, [selectedKeys]);

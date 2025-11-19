@@ -1,6 +1,6 @@
 import { AppstoreOutlined, HistoryOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { Badge, Button, Space, Tag, theme, Tooltip } from 'antd';
+import { useNavigate } from 'react-router';
 import { IconRunHistory } from '../assets/icon-run-history';
 
 /**
@@ -25,7 +25,7 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
           <Tag
             color="green"
             className="text-[16px]! p-1! cursor-pointer!"
-            onClick={() => navigate({ to: `/integrated/apps`, replace: true })}
+            onClick={() => navigate(`/integrated/apps`, { replace: true })}
           >
             {/* 项目名称 */}
             应用ID ：{appId}
