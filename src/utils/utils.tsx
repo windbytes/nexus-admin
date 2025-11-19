@@ -1,8 +1,8 @@
 import { MyIcon } from '@/components/MyIcon/index';
 import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
+import { matchPathname } from '@tanstack/react-router';
 import React from 'react';
-import { matchPath } from 'react-router';
 import { isObject } from './is';
 
 export type MenuEntity = RouteItem & {
@@ -150,8 +150,8 @@ export function transformData(data: any[], expanded: string[], t: (key: string) 
 }
 
 /**
- * 路径匹配函数（React Router v7 版本）
- * 判断路由路径是否与目标路径匹配
+ * 判断路由路径是否与目标路径匹配。
+ *
  * @param routePath - 路由路径
  * @param targetPath - 目标路径
  * @returns 是否匹配
@@ -161,16 +161,12 @@ export const matchRoutePath = (routePath: string | undefined, targetPath: string
     return false;
   }
 
-  // 使用 React Router v7 的 matchPath 函数
-  const matched = matchPath(
-    {
-      path: routePath,
-      caseSensitive: false,
-    },
-    targetPath
-  );
+  const matchedParams = matchPathname(targetPath, {
+    to: routePath,
+    caseSensitive: false,
+  });
 
-  return matched !== null;
+  return matchedParams !== undefined;
 };
 
 /**
@@ -226,7 +222,7 @@ export function findMenuByPath(path: string, caches: MenuCaches): MenuEntity | u
   let entity = pathMap.get(path);
   if (!entity) {
     for (const [candidatePath, candidateEntity] of pathMap.entries()) {
-      if (matchPath({ path: candidatePath, caseSensitive: false }, path)) {
+      if (matchPathname(path, { to: candidatePath, caseSensitive: false })) {
         entity = candidateEntity;
         break;
       }

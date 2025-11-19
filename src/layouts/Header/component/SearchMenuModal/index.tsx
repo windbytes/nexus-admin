@@ -1,18 +1,18 @@
-import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
-import { useMenuStore } from '@/stores/store';
-import { getShortcutLabel } from '@/utils/utils';
 import { SearchOutlined } from '@ant-design/icons';
-import { Empty, Input, Modal } from 'antd';
+import { Input, Modal, Empty } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
-import SearchHistory from './components/SearchHistory';
-import SearchResults from './components/SearchResults';
+import { useNavigate } from '@tanstack/react-router';
+import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
+import { getShortcutLabel } from '@/utils/utils';
+import { useMenuStore } from '@/stores/store';
 import Footer from './footer';
+import Title from './title';
+import styles from './searchMenuModal.module.scss';
 import { useSearch } from './hooks/useSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
-import styles from './searchMenuModal.module.scss';
-import Title from './title';
+import SearchResults from './components/SearchResults';
+import SearchHistory from './components/SearchHistory';
 import type { SearchHistoryItem, SearchResultItem } from './types';
 
 /**
@@ -67,7 +67,7 @@ const SearchMenuModal: React.FC = () => {
   // 处理选择
   const handleSelect = (item: SearchResultItem | SearchHistoryItem) => {
     add({ id: item.id, name: item.name, path: item.path, timestamp: Date.now() });
-    navigate(item.path, { replace: true });
+    navigate({ to: item.path });
     setOpenModal(false);
     setSearchValue('');
     setSelectedIndex(0);
@@ -128,9 +128,9 @@ const SearchMenuModal: React.FC = () => {
         <div className="h-full flex flex-col">
           {showHistory ? (
             <div className="flex-1 overflow-hidden">
-              <div className={styles['searchHeader']}>
+              <div className={styles.searchHeader}>
                 {history.length > 0 && (
-                  <button type="button" onClick={clear} className={styles['clearButton']}>
+                  <button type="button" onClick={clear} className={styles.clearButton}>
                     清空历史
                   </button>
                 )}
@@ -151,8 +151,8 @@ const SearchMenuModal: React.FC = () => {
             </div>
           ) : (
             <div className="flex-1 overflow-hidden">
-                <div className={styles['searchHeader']}>
-                <span className={styles['headerTitle']}>搜索结果 ({searchResults.length})</span>
+              <div className={styles.searchHeader}>
+                <span className={styles.headerTitle}>搜索结果 ({searchResults.length})</span>
               </div>
               <div className="flex-1 overflow-y-auto" ref={listRef as any}>
                 {searchResults.length > 0 ? (

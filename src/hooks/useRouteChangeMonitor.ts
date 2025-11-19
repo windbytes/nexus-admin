@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router';
+import { useRouterState } from '@tanstack/react-router';
 
 interface RouteChangeMetrics {
   from: string;
@@ -28,7 +28,7 @@ export const useRouteChangeMonitor = (options?: {
     threshold = 300, // 默认300ms作为警告阈值
   } = options || {};
 
-  const { pathname } = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const startTimeRef = useRef<number>(Date.now());
   const prevPathnameRef = useRef<string>(pathname);
 

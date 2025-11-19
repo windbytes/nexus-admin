@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router';
+import { useLocation } from '@tanstack/react-router';
 import { Progress } from 'antd';
 import { memo, useEffect, useRef, useState } from 'react';
 import './styles.scss';

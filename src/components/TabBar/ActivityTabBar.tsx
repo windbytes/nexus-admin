@@ -4,10 +4,10 @@ import { useUserStore } from '@/stores/userStore';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { DownOutlined } from '@ant-design/icons';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Button, Dropdown, Tabs, type MenuProps, type TabsProps } from 'antd';
 import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import './tabBar.scss';
 
@@ -28,7 +28,7 @@ interface ActivityTabBarProps {
 const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // 右键菜单状态
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
@@ -146,7 +146,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
               const currentTab = createTabItem(pathname, currentRoute, true);
               addTab(currentTab, { insertAt: 'tail', activate: true });
             } else {
-              navigate(homePath, { replace: true });
+              navigate({ to: homePath, replace: true });
             }
           } else {
             setActiveKey(homePath);
@@ -211,7 +211,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
 
     // tabs 为空时跳转首页
     if (tabs.length === 0 && pathname !== homePath) {
-      navigate(homePath, { replace: true });
+      navigate({ to: homePath, replace: true });
     }
   }, [pathname, tabs.length, activeKey]); // 最小化依赖
 
@@ -261,7 +261,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
 
       // 只在路径不同时才导航
       if (key !== pathname) {
-        navigate(key, { replace: true });
+        navigate({ to: key, replace: true });
       }
     },
     [navigate, pathname]
@@ -274,7 +274,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
         const newActiveKey = removeTab(e);
         // 如果关闭的是当前激活的 tab，跳转到新的激活 tab
         if (e === activeKey && newActiveKey && newActiveKey !== pathname) {
-          navigate(newActiveKey, { replace: true });
+          navigate({ to: newActiveKey, replace: true });
         }
       }
     },
@@ -286,7 +286,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
     closeTab: (tabKey: string) => {
       const newActiveKey = removeTab(tabKey);
       if (tabKey === activeKey && newActiveKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     togglePin: (tabKey: string, isClosable: boolean) => {
@@ -297,27 +297,27 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
     closeLeftTabs: (tabKey: string) => {
       const newActiveKey = closeLeftTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeRightTabs: (tabKey: string) => {
       const newActiveKey = closeRightTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeOtherTabs: (tabKey: string) => {
       const newActiveKey = closeOtherTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeAllTabs: () => {
       const newActiveKey = closeAllTabs(homePath);
       if (newActiveKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       } else if (!newActiveKey && homePath) {
-        navigate(homePath, { replace: true });
+        navigate({ to: homePath, replace: true });
       }
     },
   });
@@ -327,7 +327,7 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
     closeTab: (tabKey: string) => {
       const newActiveKey = removeTab(tabKey);
       if (tabKey === activeKey && newActiveKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     togglePin: (tabKey: string, isClosable: boolean) => {
@@ -338,27 +338,27 @@ const ActivityTabBar: React.FC<ActivityTabBarProps> = memo(({ className }) => {
     closeLeftTabs: (tabKey: string) => {
       const newActiveKey = closeLeftTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeRightTabs: (tabKey: string) => {
       const newActiveKey = closeRightTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeOtherTabs: (tabKey: string) => {
       const newActiveKey = closeOtherTabs(tabKey, homePath);
       if (newActiveKey && newActiveKey !== activeKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       }
     },
     closeAllTabs: () => {
       const newActiveKey = closeAllTabs(homePath);
       if (newActiveKey && newActiveKey !== pathname) {
-        navigate(newActiveKey, { replace: true });
+        navigate({ to: newActiveKey, replace: true });
       } else if (!newActiveKey && homePath) {
-        navigate(homePath, { replace: true });
+        navigate({ to: homePath, replace: true });
       }
     },
   };

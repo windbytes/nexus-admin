@@ -1,11 +1,12 @@
 import type { RouteItem } from '@/types/route';
+import { lazy } from 'react';
 
 /**
- * 动态导入组件（用于 React Router v7）
- * @param moduleName 组件路径（相对于 views 目录）
- * @returns 返回一个异步函数，用于 React Router v7 的 lazy 加载
+ * 动态导入组件
+ * @param componentPath 组件路径（相对于 views 目录）
+ * @returns 懒加载的组件函数（不是 JSX 元素）
  */
-export function lazyLoadComponent(moduleName: string): () => Promise<{ default: React.ComponentType<any> }> {
+export function lazyLoadComponent(moduleName: string) {
   const viteModule = import.meta.glob('../**/*.tsx');
 
   // 组件地址
@@ -21,15 +22,14 @@ export function lazyLoadComponent(moduleName: string): () => Promise<{ default: 
   // 检查组件是否存在
   if (!viteModule[URL]) {
     console.error(`❌ 组件未找到: ${URL}`);
-    return () => import('@/views/error/404');
+    return lazy(() => import('@/views/error/404'));
   }
-
-  // 返回一个异步导入函数，用于 React Router v7 的 lazy 加载
-  return viteModule[URL] as () => Promise<{ default: React.ComponentType<any> }>;
+  // 返回 lazy 组件函数，不是 JSX 元素
+  return lazy(viteModule[URL] as any);
 }
 
 /**
- * 将菜单路径转换为路由路径
+ * 将菜单路径转换为 TanStack Router 可识别的路径
  * @param path 原始路径
  * @returns 转换后的路径
  */
@@ -64,15 +64,15 @@ export function isValidRoute(item: RouteItem): boolean {
  */
 export function flattenRoutes(
   routes: RouteItem[]
-): Array<{ path: string; component: () => Promise<{ default: React.ComponentType<any> }>; menuKey: string; meta?: any }> {
-  const result: Array<{ path: string; component: () => Promise<{ default: React.ComponentType<any> }>; menuKey: string; meta?: any }> = [];
+): Array<{ path: string; component: any; menuKey: string; meta?: any }> {
+  const result: Array<{ path: string; component: any; menuKey: string; meta?: any }> = [];
 
   for (const route of routes) {
     if (isValidRoute(route)) {
-      // 规范化路径
+      // TanStack Router 的子路由路径应该是相对路径（不带父路径前缀）
       const normalizedPath = normalizeRoutePath(route.path);
 
-      // 加载组件（返回的是异步导入函数）
+      // 加载组件（返回的是 lazy 组件函数）
       const component = lazyLoadComponent(route.component);
 
       result.push({

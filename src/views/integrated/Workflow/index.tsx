@@ -6,8 +6,8 @@ import {
   type WorkflowJSON,
 } from '@flowgram.ai/free-layout-editor';
 import '@flowgram.ai/free-layout-editor/index.css';
+import { useParams } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef } from 'react';
-import { useParams } from 'react-router';
 import { useEditorProps } from './hooks/useEditorProps';
 import { initialData } from './init-data';
 import { nodeRegistries } from './nodes';
@@ -23,7 +23,7 @@ import './workflow.scss';
 const Workflow: React.FC = () => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   // 当前应用ID
-  const {appId = ''} = useParams();
+  const { appId } = useParams({ from: '/_authenticated/integrated/app/$appId/workflow' });
   // 获取主题配置
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 
