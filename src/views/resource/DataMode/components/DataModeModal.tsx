@@ -446,8 +446,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                 language="json"
                 height="400px"
                 showMinimap={false}
-                onChange={(value) => setSchemaText(value || '')}
-                readOnly={isViewMode}
+                readOnly
               />
             </div>
           </Form.Item>
