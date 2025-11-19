@@ -30,7 +30,7 @@ export interface JsonDataMode {
   sourceJson?: string;
 
   /** JSON Schema定义内容 */
-  schemaJson: string;
+  schemaJson: Record<string, any>;
 
   /** Schema版本号 */
   schemaVersion: string;
@@ -111,11 +111,14 @@ export interface DataModeFormData {
   /** 端点ID（仅当dataSource为database时有效） */
   endpointId?: string;
 
+  /** 端点名称（仅当dataSource为database时有效） */
+  endpointName?: string;
+
   /** 原始JSON数据（仅当dataSource为json时有效） */
   sourceJson?: string;
 
   /** JSON Schema定义内容 */
-  schemaJson: string;
+  schemaJson: Record<string, any>;
 
   /** Schema版本号 */
   schemaVersion?: string;

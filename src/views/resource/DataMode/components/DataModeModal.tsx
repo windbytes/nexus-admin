@@ -369,6 +369,10 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                           filterOption={(input, option) =>
                             (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
                           }
+                          onChange={(_value, option) => {
+                            const label = Array.isArray(option) ? option[0]?.label : option?.label;
+                            form.setFieldValue('endpointName', label || '');
+                          }}
                         />
                         <Button
                           type="primary"
