@@ -2,6 +2,12 @@ import { Avatar, Button, Empty, List, Space, Tag, Typography } from 'antd';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import styles from './message-box.module.scss';
+
+/**
+ * 消息列表
+ * @param props 
+ * @returns
+ */
 const MessageList: React.FC<MessageListProps> = (props) => {
   const { data, unReadData } = props;
 
@@ -76,7 +82,7 @@ const MessageList: React.FC<MessageListProps> = (props) => {
   ) : (
     <List
       footer={
-        <div className={styles.footer}>
+        <div className={styles['footer']}>
           <div className={styles['footer-item']}>
             <Button type="text" size="small" onClick={onAllBtnClick}>
               全部已读

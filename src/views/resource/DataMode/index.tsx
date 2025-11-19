@@ -84,7 +84,6 @@ const DataMode: React.FC = () => {
       return dataModeService.addDataMode(data);
     },
     onSuccess: () => {
-      message.success(state.currentRecord?.id ? '编辑成功！' : '新增成功！');
       dispatch({
         modalVisible: false,
         currentRecord: null,
@@ -92,60 +91,39 @@ const DataMode: React.FC = () => {
       });
       refetch();
     },
-    onError: (error: any) => {
-      message.error(`操作失败：${error.message}`);
-    },
   });
 
   // 删除数据模式 mutation
   const deleteDataModeMutation = useMutation({
     mutationFn: (id: string) => dataModeService.deleteDataMode(id),
     onSuccess: () => {
-      message.success('删除成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`删除失败：${error.message}`);
-    },
+    }
   });
 
   // 批量删除数据模式 mutation
   const batchDeleteDataModeMutation = useMutation({
     mutationFn: (ids: string[]) => dataModeService.batchDeleteDataMode(ids),
     onSuccess: () => {
-      message.success('批量删除成功！');
       dispatch({
         selectedRowKeys: [],
         selectedRows: [],
       });
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`批量删除失败：${error.message}`);
-    },
+    }
   });
 
   // 更新数据模式状态 mutation
   const updateStatusMutation = useMutation({
     mutationFn: (data: DataModeFormData) => dataModeService.updateDataMode(data),
     onSuccess: () => {
-      message.success('状态更新成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`状态更新失败：${error.message}`);
-    },
+    }
   });
 
   // 导出Schema mutation
   const exportSchemaMutation = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => dataModeService.exportSchema(id, name),
-    onSuccess: () => {
-      message.success('导出成功！');
-    },
-    onError: (error: any) => {
-      message.error(`导出失败：${error.message}`);
-    },
   });
 
   /**

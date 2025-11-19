@@ -1,6 +1,7 @@
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import type { RouteItem } from '@/types/route';
+import { findMenuByPath } from '@/utils/utils';
 import { createRoute, redirect } from '@tanstack/react-router';
 import { authenticatedRoute } from './routes';
 import { generateDynamicRoutes } from './routeUtils';
@@ -33,7 +34,7 @@ class RouteTreeManager {
           // 可以在这里添加 loader 来处理数据加载
           beforeLoad: async ({ location }) => {
             // 路由加载前判断用户是否登录了
-            const { isLogin } = useUserStore.getState();
+            const { isLogin, loginUser } = useUserStore.getState();
             if (!isLogin) {
               throw redirect({
                 to: '/login',
@@ -42,9 +43,35 @@ class RouteTreeManager {
             }
             // 路由权限检查可以在这里进行
             const meta = routeConfig.meta;
-            if (meta?.requiresAuth) {
-              // 如果需要特殊权限，可以在这里检查
-              // 例如检查用户是否有访问该页面的权限
+            // 如果路由不需要权限检查，直接通过
+            if (meta?.ignoreAuth || !meta?.requiresAuth) {
+              return;
+            }
+            // 管理员直接通过
+            if (loginUser === 'admin') {
+              return;
+            }
+            // @TODO 这里后续还需要修改判定规则，需要修改表结构的设计才可行（单一的菜单、权限关联表）
+            // 获取用户当前菜单的权限（从菜单缓存中查找）
+            const { caches } = useMenuStore.getState();
+            const currentMenu = findMenuByPath(location.pathname, caches);
+
+            if (!currentMenu) {
+              throw redirect({
+                to: '/403',
+                search: { from: location.href },
+              });
+            }
+
+            // 检查路由配置中的权限列表
+            const requiredPermissions = meta?.permissionList || [];
+
+            // 如果没有配置权限列表，但有 requiresAuth，说明需要权限但未配置，拒绝访问
+            if (requiredPermissions.length === 0) {
+              throw redirect({
+                to: '/403',
+                search: { from: location.href },
+              });
             }
           },
         });

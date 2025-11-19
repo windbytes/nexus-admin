@@ -21,7 +21,6 @@ export function lazyLoadComponent(moduleName: string) {
 
   // 检查组件是否存在
   if (!viteModule[URL]) {
-    console.error(`❌ 组件未找到: ${URL}`);
     return lazy(() => import('@/views/error/404'));
   }
   // 返回 lazy 组件函数，不是 JSX 元素

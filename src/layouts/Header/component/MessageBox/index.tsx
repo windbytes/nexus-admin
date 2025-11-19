@@ -67,12 +67,12 @@ const Notify: React.FC = () => {
   const tabList: TabsProps['items'] = [
     {
       key: 'message',
-      label: <>消息({groupData.message?.length || ''})</>,
-      icon: <MessageOutlined />,
+      label: <>消息({groupData['message']?.length || 0})</>,
+      icon: <MessageOutlined className='ml-2!'/>,
       children: (
         <MessageList
-          data={groupData.message}
-          unReadData={(groupData.message || []).filter((item) => !item.status)}
+          data={groupData['message'] || []}
+          unReadData={(groupData['message'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
@@ -80,12 +80,12 @@ const Notify: React.FC = () => {
     },
     {
       key: 'notify',
-      label: <>通知({groupData.notify?.length || ''})</>,
-      icon: <NotificationOutlined />,
+      label: <>通知({groupData['notify']?.length || 0})</>,
+      icon: <NotificationOutlined className='ml-2!'/>,
       children: (
         <MessageList
-          data={groupData.notify}
-          unReadData={(groupData.notify || []).filter((item) => !item.status)}
+          data={groupData['notify'] || []}
+          unReadData={(groupData['notify'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
@@ -93,12 +93,12 @@ const Notify: React.FC = () => {
     },
     {
       key: 'todo',
-      label: <>待办({groupData.todo?.length || ''})</>,
-      icon: <ReconciliationOutlined />,
+      label: <>待办({groupData['todo']?.length || 0})</>,
+      icon: <ReconciliationOutlined className='ml-2!'/>,
       children: (
         <MessageList
-          data={groupData.todo}
-          unReadData={(groupData.todo || []).filter((item) => !item.status)}
+          data={groupData['todo'] || []}
+          unReadData={(groupData['todo'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
