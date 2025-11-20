@@ -36,6 +36,7 @@ const GlobalProvider: React.FC = () => {
         cssVar: true,
         token: {
           colorPrimary: colorPrimary,
+          controlHeight: 34
         },
         components: {
           Layout: {
