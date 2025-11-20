@@ -18,10 +18,6 @@ import {
 
 /**
  * 菜单组件
- * 性能优化：
- * 1. 使用 React 19 的 useTransition 优化路由切换
- * 2. 添加导航加载状态，提供即时反馈
- * 3. 优化菜单构建性能
  */
 const MenuComponent = memo(() => {
   const { t } = useTranslation();
@@ -72,7 +68,6 @@ const MenuComponent = memo(() => {
 
   const currentOpenKeys = useMemo(() => computedOpenKeys, [computedOpenKeys]);
 
-  // 【优化】使用 useCallback 优化
   const onOpenChange = useCallback(
     (newOpenKeys: string[]) => {
       let nextOpenKeys = newOpenKeys;
@@ -95,17 +90,14 @@ const MenuComponent = memo(() => {
     [accordion]
   );
 
-  // 【优化】智能合并用户手动操作和自动同步的 openKeys
   const mergedOpenKeys = useMemo(() => {
     // 如果用户手动操作过，完全使用用户的选择
     if (userInteracted) {
       return openKeys;
     }
-    // 否则使用自动计算的 openKeys
     return currentOpenKeys;
   }, [userInteracted, openKeys, currentOpenKeys]);
 
-  // 【优化】合并 pathname 和标题更新逻辑
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route && Object.keys(route).length && dynamicTitle) {

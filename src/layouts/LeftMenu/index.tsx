@@ -8,7 +8,7 @@ import MenuComponent from './component/MenuComponent';
 import SystemLogo from './component/SystemLogo';
 import './leftMenu.scss';
 
-// 提取静态样式对象到组件外部，避免每次渲染都创建新对象
+// 提取静态样式对象到组件外部
 const siderStyles = {
   overflow: 'hidden',
   position: 'relative',
@@ -23,14 +23,8 @@ const containerStyles = {
 
 /**
  * 左边的菜单栏
- * 性能优化：
- * 1. 使用 useShallow 避免不必要的重渲染
- * 2. 使用 useMemo 缓存派生的 mode 值
- * 3. 提取静态样式对象到组件外部
- * 4. 使用 memo 避免父组件变化时的重渲染
  */
 const LeftMenu: React.FC = memo(() => {
-  // 使用 shallow 避免不必要的重渲染
   const { sidebar, mode, semiDarkSidebar } = usePreferencesStore(
     useShallow((state) => ({
       sidebar: state.preferences.sidebar,
@@ -39,11 +33,9 @@ const LeftMenu: React.FC = memo(() => {
     }))
   );
 
-  // 使用 useMemo 缓存派生的 mode 值
   const finalMode = useMemo(() => {
     let currentMode = mode;
     if (currentMode === 'auto') {
-      // 检查 window 对象是否存在，以兼容 SSR (服务端渲染)
       const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
       currentMode = isDarkMode ? 'dark' : 'light';
     }
