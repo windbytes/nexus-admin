@@ -194,20 +194,20 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       setSelectedEndpointTypeConfig(null);
       setFormValues({});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialValues]);
+  }, [open, initialValues, form]);
 
   /**
-   * 当编辑已有数据时，根据 endpointType 加载对应的配置
+   * 当有 endpointType 时，根据 endpointType 加载对应的配置
+   * 支持新增时通过 initialValues 传入 endpointType
    */
   useEffect(() => {
-    if (open && initialValues?.endpointType && endpointTypeListModule?.records && !selectedEndpointTypeConfig) {
+    if (open && initialValues?.endpointType && endpointTypeListModule?.records) {
       const config = endpointTypeListModule.records.find((item) => item.typeName === initialValues.endpointType);
-      if (config) {
+      if (config && !selectedEndpointTypeConfig) {
         setSelectedEndpointTypeConfig(config);
       }
     }
-  }, [open, initialValues, endpointTypeListModule, selectedEndpointTypeConfig]);
+  }, [open, initialValues?.endpointType, endpointTypeListModule, selectedEndpointTypeConfig]);
 
   /**
    * 添加键值对

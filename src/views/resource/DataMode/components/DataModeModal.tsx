@@ -8,7 +8,8 @@ import type {
 import { DATA_MODE_CATEGORIES, dataModeService } from '@/services/resource/datamode/dataModeApi';
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Button, Form, Input, Select, Space, Switch, Upload } from 'antd';
+import { useNavigate } from '@tanstack/react-router';
+import { App, Button, Form, Input, Select, Space, Switch, Upload, type InputRef } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import DataSourceSelector, { type DataSourceType } from './DataSourceSelector';
@@ -54,14 +55,17 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
     
     const jsonEditorRef = useRef<CodeEditorRef>(null);
     const schemaEditorRef = useRef<CodeEditorRef>(null);
+    const focusFieldRef = useRef<InputRef>(null);
+
+    const navigate = useNavigate();
 
     // 使用 useQuery 加载端点列表
     const {
       data: endpoints,
       isLoading: loadingEndpoints,
     } = useQuery({
-      queryKey: ['endpoints', { status: true }],
-      queryFn: () => dataModeService.getEndpoints({ status: true }),
+      queryKey: ['endpoints', { endpointType: 'database', status: true }],
+      queryFn: () => dataModeService.getEndpoints({ endpointType: 'database', status: true }),
       enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
     });
 
@@ -132,6 +136,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         setSchemaText('');
         setStatus(true);
       }
+      focusFieldRef.current?.focus();
     }, [open, initialValues, form]);
 
     /**
@@ -304,18 +309,18 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
           {/* 基本信息 */}
           <Form.Item
             name="name"
-            label="模式名称"
+            label="名称"
             rules={[
               { required: true, message: '请输入模式名称' },
               { max: 100, message: '模式名称不能超过100个字符' },
             ]}
           >
-            <Input autoComplete="off" placeholder="例如：用户信息Schema" />
+            <Input autoComplete="off" ref={focusFieldRef} placeholder="例如：用户信息Schema" />
           </Form.Item>
 
           <Form.Item
             name="code"
-            label="模式编码"
+            label="编码"
             rules={[
               { required: true, message: '请输入模式编码' },
               {
@@ -373,6 +378,19 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                             const label = Array.isArray(option) ? option[0]?.label : option?.label;
                             form.setFieldValue('endpointName', label || '');
                           }}
+                          notFoundContent={
+                            <div>
+                              暂无可用端点
+                              <Button type="link" onClick={() => {
+                                navigate({ 
+                                  to: '/integrated/endpoint',
+                                  search: { type: 'database', action: 'create' }
+                                });
+                              }}>
+                                去创建
+                              </Button>
+                            </div>
+                          }
                         />
                         <Button
                           type="primary"

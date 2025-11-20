@@ -70,11 +70,11 @@ export const useDrawerState = () => {
 
   // Modal操作
   const modalActions = {
-    openAdd: useCallback(() => {
+    openAdd: useCallback((initialValues?: Partial<Endpoint>) => {
       dispatch({
         modalVisible: true,
         modalTitle: '新增端点',
-        currentRecord: null,
+        currentRecord: initialValues || null,
         isViewMode: false,
       });
     }, []),
