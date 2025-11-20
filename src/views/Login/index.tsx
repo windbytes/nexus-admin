@@ -91,9 +91,6 @@ const Login: React.FC = () => {
 
       // 清空缓存
       resetTabs();
-      if ((window as any).__keepAliveClearAllCache) {
-        (window as any).__keepAliveClearAllCache();
-      }
 
       // 获取角色对应的菜单
       const menu = await commonService.getMenuListByRoleId(roleId);

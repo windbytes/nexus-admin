@@ -219,24 +219,9 @@ export const useTabStore = create<TabStore>()(
 
       reloadTab: (targetKey: string) => {
         const { tabs } = get();
-
-        // 1. 清除 KeepAlive 缓存
-        if (typeof window !== 'undefined' && (window as any).__keepAliveClearCache) {
-          (window as any).__keepAliveClearCache(targetKey);
-        }
-
-        // 2. 更新 tab 的 reloadKey，强制重新挂载组件
+        // 1. 更新 tab 的 reloadKey，强制重新挂载组件
         const newTabs = tabs.map((tab) => (tab.key === targetKey ? { ...tab, reloadKey: Date.now() } : tab));
-
         set({ tabs: newTabs });
-
-        // 3. 触发页面重新渲染（如果是当前激活的 tab）
-        // 通过重新导航到同一路径来触发 TanStack Router 的重新加载
-        if (window.location.pathname === targetKey) {
-          // 使用 window.location.reload() 会刷新整个页面，这里我们不需要
-          // TanStack Router 会自动处理组件的重新渲染
-          console.log('🔄 重新加载 tab:', targetKey);
-        }
       },
 
       pinTab: (targetKey: string) => {

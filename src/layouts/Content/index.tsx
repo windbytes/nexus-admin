@@ -1,4 +1,4 @@
-import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
+import KeepAlive from '@/components/KeepAlive';
 import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { Icon } from '@iconify/react';
@@ -56,7 +56,7 @@ const Content = memo(({ children }: ContentProps) => {
     >
       <Suspense fallback={loadingFallback}>
         <ErrorBoundary fallback={errorFallback}>
-          <ActivityKeepAlive>{children}</ActivityKeepAlive>
+          <KeepAlive>{children}</KeepAlive>
         </ErrorBoundary>
       </Suspense>
     </Layout.Content>

@@ -4,7 +4,7 @@ import { memo, Suspense, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
-import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
+import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
 import { lazy } from 'react';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
@@ -142,7 +142,7 @@ const Header = memo(() => {
           {/* 第二行：TabBar区域 */}
           {tabbarEnable && (
             <div className="header-tab-row">
-              <ActivityTabBar />
+              <TabBar />
             </div>
           )}
         </Layout.Header>

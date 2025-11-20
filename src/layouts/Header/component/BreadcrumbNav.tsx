@@ -1,7 +1,7 @@
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { matchRoutePath, type MenuCaches } from '@/utils/utils';
+import { matchPathname, type MenuCaches } from '@/utils/utils';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Breadcrumb } from 'antd';
 import { t } from 'i18next';
@@ -71,7 +71,7 @@ function patchBreadcrumb(
     matchedEntity = pathMap.get(pathname);
   } else {
     for (const [path, entity] of pathMap.entries()) {
-      if (matchRoutePath(path, pathname)) {
+      if (matchPathname(path, pathname)) {
         matchedPath = path;
         matchedEntity = entity;
         break;

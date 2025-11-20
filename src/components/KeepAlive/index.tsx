@@ -1,213 +1,136 @@
-import type React from 'react';
-import { useRef, useEffect, useState, useCallback } from 'react';
 import { useTabStore } from '@/stores/tabStore';
+import React, { Activity, memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { useShallow } from 'zustand/shallow';
 
 interface KeepAliveProps {
   children: React.ReactNode;
 }
 
-interface CacheItem {
-  component: React.ReactElement;
-  scrollTop: number;
-  scrollLeft: number;
-}
+/**
+ * 优化后的 KeepAlive
+ * * 核心改进：
+ * 1. Source of Truth 修正：渲染循环完全由 tabs 数据驱动，而非 cacheRef。
+ * 2. 实时快照：在 Render 阶段实时捕获 active 状态的 children 到缓存。
+ * 3. 滚动恢复：针对 overflow 容器的滚动位置自动管理。
+ * 4. 移除 window 全局污染，改为监听 store 变化或内部生命周期。
+ */
+const KeepAlive: React.FC<KeepAliveProps> = memo(({ children }) => {
+  // 使用 shallow 比较，避免非必要渲染
+  const { tabs, activeKey } = useTabStore(
+    useShallow((state) => ({
+      tabs: state.tabs,
+      activeKey: state.activeKey,
+    }))
+  );
 
-const KeepAlive: React.FC<KeepAliveProps> = ({ children }) => {
-  const { tabs, activeKey } = useTabStore();
-  const cacheRef = useRef<Map<string, CacheItem>>(new Map());
-  const [currentComponent, setCurrentComponent] = useState<React.ReactElement | null>(null);
+  // 缓存已渲染的组件快照 (Map<TabKey, ReactNode>)
+  // 这里存的是 ReactElement，用于在 Tab 处于 hidden 状态时"回放"上次的画面
+  const componentCacheRef = useRef<Map<string, React.ReactNode>>(new Map());
+  
+  // 滚动位置缓存
+  const scrollCacheRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 保存当前页面的滚动位置
-  const saveScrollPosition = (key: string) => {
-    if (containerRef.current) {
-      const scrollTop = containerRef.current.scrollTop;
-      const scrollLeft = containerRef.current.scrollLeft;
-
-      const cached = cacheRef.current.get(key);
-      if (cached) {
-        cached.scrollTop = scrollTop;
-        cached.scrollLeft = scrollLeft;
-      }
-    }
-  };
-
-  // 恢复页面的滚动位置
-  const restoreScrollPosition = (key: string) => {
-    const cached = cacheRef.current.get(key);
-    if (cached && containerRef.current) {
-      // 使用setTimeout确保DOM更新后再设置滚动位置
-      setTimeout(() => {
-        if (containerRef.current) {
-          containerRef.current.scrollTop = cached.scrollTop;
-          containerRef.current.scrollLeft = cached.scrollLeft;
-        }
-      }, 0);
-    }
-  };
-
-  // 清除指定key的缓存
-  const clearCache = useCallback((key: string) => {
-    if (cacheRef.current.has(key)) {
-      cacheRef.current.delete(key);
-    }
-  }, []);
-
-  // 清除所有缓存
-  const clearAllCache = useCallback(() => {
-    cacheRef.current.clear();
-  }, []);
-
-  // 智能清理缓存 - 当缓存数量过多时，清理最久未使用的缓存
-  const smartClearCache = useCallback(() => {
-    const maxCacheSize = 10; // 最大缓存数量
-    if (cacheRef.current.size > maxCacheSize) {
-      const cacheEntries = Array.from(cacheRef.current.entries());
-
-      // 只保留配置了keepalive的页面
-      const keepAliveTabs = tabs.filter((tab) => tab.route?.meta?.keepAlive === true);
-      const keepAliveKeys = keepAliveTabs.map((tab) => tab.key);
-
-      // 过滤出需要保留的缓存（当前活跃页面和最近使用的keepalive页面）
-      const keysToKeep = [
-        activeKey,
-        ...cacheEntries
-          .filter(([key]) => keepAliveKeys.includes(key))
-          .slice(-5)
-          .map(([key]) => key),
-      ];
-
-      const keysToRemove = cacheEntries
-        .map(([key]) => key)
-        .filter((key) => !keysToKeep.includes(key))
-        .slice(0, cacheRef.current.size - maxCacheSize);
-
-      for (const key of keysToRemove) {
-        clearCache(key);
-      }
-    }
-  }, [activeKey, clearCache, tabs]);
-
-  useEffect(() => {
-    if (!activeKey) return;
-
-    // 保存之前页面的滚动位置
-    const previousActiveKey = Object.keys(cacheRef.current).find((key) => key !== activeKey);
-    if (previousActiveKey) {
-      saveScrollPosition(previousActiveKey);
-    }
-
-    // 获取当前激活的tab信息
-    const currentTab = tabs.find((tab) => tab.key === activeKey);
-    const shouldCache = currentTab?.route?.meta?.keepAlive === true;
-
-    if (shouldCache) {
-      // 如果配置了keepalive，检查缓存中是否已有当前页面
-      let cached = cacheRef.current.get(activeKey);
-
-      if (!cached) {
-        // 如果没有缓存，创建新的缓存项
-        cached = {
-          component: children as React.ReactElement,
-          scrollTop: 0,
-          scrollLeft: 0,
-        };
-        cacheRef.current.set(activeKey, cached);
-      }
-
-      // 设置当前显示的组件
-      setCurrentComponent(cached.component);
-
-      // 恢复滚动位置
-      restoreScrollPosition(activeKey);
-    } else {
-      // 如果没有配置keepalive，直接渲染组件，不进行缓存
-      setCurrentComponent(children as React.ReactElement);
-
-      // 如果之前有缓存，清除它
-      if (cacheRef.current.has(activeKey)) {
-        clearCache(activeKey);
-      }
-    }
-
-    // 智能清理缓存
-    smartClearCache();
-  }, [activeKey, children, tabs, clearCache, smartClearCache]);
-
-  // 监听系统刷新事件
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      clearAllCache();
-    };
-
-    // 监听页面刷新/关闭
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [clearAllCache]);
-
-  // 监听用户退出登录事件
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      // 监听 localStorage 变化，检测用户登录状态变化
-      if (e.key === 'user-storage') {
-        try {
-          const userData = JSON.parse(e.newValue || '{}');
-          if (!userData.isLogin) {
-            // 用户退出登录，清空所有缓存
-            clearAllCache();
-          }
-        } catch (error) {
-          // 解析失败，忽略
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [clearAllCache]);
-
-  // 清理不存在的tab对应的缓存
-  useEffect(() => {
-    const tabKeys = tabs.map((tab) => tab.key);
-    const cacheKeys = Array.from(cacheRef.current.keys());
-
-    cacheKeys.forEach((key) => {
-      if (!tabKeys.includes(key)) {
-        // 当tab被关闭时，清除对应的缓存
-        clearCache(key);
-      }
-    });
-  }, [tabs, clearCache]);
-
-  // 暴露清除缓存的方法给外部使用
-  useEffect(() => {
-    // 将清除缓存的方法挂载到 window 对象上，方便调试和外部调用
-    (window as any).__keepAliveClearCache = clearCache;
-    (window as any).__keepAliveClearAllCache = clearAllCache;
-    (window as any).__keepAliveSmartClearCache = smartClearCache;
-
-    return () => {
-      delete (window as any).__keepAliveClearCache;
-      delete (window as any).__keepAliveClearAllCache;
-      delete (window as any).__keepAliveSmartClearCache;
-    };
-  }, [clearCache, clearAllCache, smartClearCache]);
-
-  if (!currentComponent) {
-    return null;
+  // 1. 【关键逻辑】在 Render 过程中更新当前激活页面的缓存
+  // 这样保证了当页面从 visible -> hidden 时，我们手头有最新的组件快照
+  if (activeKey) {
+    componentCacheRef.current.set(activeKey, children);
   }
 
+  // 2. 清理逻辑：当 Tabs 列表发生变化时，清理不再存在的缓存
+  useEffect(() => {
+    const currentKeys = new Set(tabs.map((t) => t.key));
+    
+    // 清理组件缓存
+    for (const key of componentCacheRef.current.keys()) {
+      if (!currentKeys.has(key)) {
+        componentCacheRef.current.delete(key);
+      }
+    }
+    
+    // 清理滚动缓存
+    for (const key of scrollCacheRef.current.keys()) {
+      if (!currentKeys.has(key)) {
+        scrollCacheRef.current.delete(key);
+      }
+    }
+  }, [tabs]);
+
+  // 3. 滚动位置保存 (在切换前保存)
+  // 使用 useRef 记录上一次的 Key，以便在 layoutEffect 中处理
+  const lastActiveKeyRef = useRef<string>(activeKey);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const lastKey = lastActiveKeyRef.current;
+
+    // A. 保存离开页面的滚动位置
+    if (lastKey && lastKey !== activeKey && container) {
+      scrollCacheRef.current.set(lastKey, {
+        x: container.scrollLeft,
+        y: container.scrollTop,
+      });
+    }
+
+    // B. 恢复进入页面的滚动位置
+    if (activeKey && container) {
+      const savedPos = scrollCacheRef.current.get(activeKey);
+      if (savedPos) {
+        container.scrollTo(savedPos.x, savedPos.y);
+      } else {
+        container.scrollTo(0, 0);
+      }
+    }
+
+    lastActiveKeyRef.current = activeKey;
+  }, [activeKey]);
+
   return (
-    <div ref={containerRef} className="h-full relative flex flex-col p-4">
-      {currentComponent}
+    <div 
+      ref={containerRef} 
+      className="h-full w-full relative overflow-auto"
+      // 添加 overscroll-behavior 防止滚动穿透体验不佳
+      style={{ overscrollBehavior: 'contain' }} 
+    >
+      {tabs.map((tab) => {
+        const isActive = tab.key === activeKey;
+        const shouldCache = tab.route?.meta?.keepAlive ?? false;
+        
+        // 如果该页面不需要缓存，且当前不是激活状态，则不渲染任何内容 (彻底卸载)
+        if (!shouldCache && !isActive) {
+          return null;
+        }
+
+        // 计算 key: 加入 reloadKey 以支持强制刷新
+        // 当 tab.reloadKey 变化时，React 会认为这是一个新的 key，从而卸载旧组件并重新挂载
+        const componentKey = tab.reloadKey 
+          ? `${tab.key}-${tab.reloadKey}` 
+          : tab.key;
+
+        // 获取要渲染的内容
+        // 1. 如果是激活状态：直接渲染传入的 children (由 Router 提供的最新组件)
+        // 2. 如果是隐藏状态：从缓存中获取最后一次看到的组件快照
+        const content = isActive 
+          ? children 
+          : componentCacheRef.current.get(tab.key);
+
+        // 既然用了 Activity，我们希望即使是 hidden 状态，DOM 结构也存在
+        // React 19 Activity 会自动处理 hidden 时的优先级和资源释放
+        return (
+          <Activity 
+            key={componentKey} 
+            mode={isActive ? 'visible' : 'hidden'}
+          >
+            <div className="h-full w-full p-2">
+              {content}
+            </div>
+          </Activity>
+        );
+      })}
     </div>
   );
-};
+});
+
+KeepAlive.displayName = 'KeepAlive';
 
 export default KeepAlive;

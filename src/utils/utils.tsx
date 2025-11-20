@@ -1,7 +1,6 @@
 import { MyIcon } from '@/components/MyIcon/index';
 import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
-import { matchPathname } from '@tanstack/react-router';
 import React from 'react';
 import { isObject } from './is';
 
@@ -150,23 +149,57 @@ export function transformData(data: any[], expanded: string[], t: (key: string) 
 }
 
 /**
+ * 模拟 TanStack Router 的路径匹配逻辑
+ * @param routeDef 路由定义路径 (例如: /users/$userId/settings)
+ * @param currentPath 实际当前路径 (例如: /users/123/settings)
+ * @param exact 是否精确匹配 (默认 true，如果为 false，则 /users/$id 可以匹配 /users/123/details)
+ */
+export function matchPathname(routeDef: string, currentPath: string, exact = true): boolean {
+  // 1. 移除末尾的斜杠并分割路径
+  const cleanRoute = routeDef.replace(/\/+$/, '').split('/').filter(Boolean);
+  const cleanCurrent = currentPath?.split('?')?.[0]?.replace(/\/+$/, '').split('/').filter(Boolean) ?? [];
+
+  // 2. 如果是精确匹配，长度必须一致
+  // 如果是非精确匹配（前缀匹配），实际路径长度必须大于等于定义路径
+  if (exact) {
+    if (cleanRoute.length !== cleanCurrent.length) return false;
+  } else {
+    if (cleanCurrent.length < cleanRoute.length) return false;
+  }
+
+  // 3. 逐段比对
+  for (let i = 0; i < cleanRoute.length; i++) {
+    const routeSegment = cleanRoute[i];
+    const currentSegment = cleanCurrent[i];
+
+    // 处理通配符 (splat routes)
+    if (routeSegment === '*') {
+      return true; 
+    }
+
+    // 处理动态参数 ($userId)
+    if (routeSegment && routeSegment.startsWith('$')) {
+      continue; // 只要该位置有值，就视为匹配
+    }
+
+    // 静态段必须完全相等
+    if (routeSegment !== currentSegment) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * 判断路由路径是否与目标路径匹配。
  *
  * @param routePath - 路由路径
  * @param targetPath - 目标路径
  * @returns 是否匹配
  */
-export const matchRoutePath = (routePath: string | undefined, targetPath: string): boolean => {
-  if (!routePath) {
-    return false;
-  }
-
-  const matchedParams = matchPathname(targetPath, {
-    to: routePath,
-    caseSensitive: false,
-  });
-
-  return matchedParams !== undefined;
+export const matchRoutePath = (routePath: string, targetPath: string): boolean => {
+  return matchPathname(routePath, targetPath);
 };
 
 /**
@@ -222,7 +255,7 @@ export function findMenuByPath(path: string, caches: MenuCaches): MenuEntity | u
   let entity = pathMap.get(path);
   if (!entity) {
     for (const [candidatePath, candidateEntity] of pathMap.entries()) {
-      if (matchPathname(path, { to: candidatePath, caseSensitive: false })) {
+      if (matchPathname(candidatePath, path)) {
         entity = candidateEntity;
         break;
       }
