@@ -23,7 +23,7 @@ import './workflow.scss';
 const Workflow: React.FC = () => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   // 当前应用ID
-  const { appId } = useParams({ from: '/_authenticated/integrated/app/$appId/workflow' });
+  const { appId } = useParams({ from: '/nexus/integrated/app/$appId/workflow' });
   // 获取主题配置
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 

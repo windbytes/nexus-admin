@@ -48,7 +48,7 @@ const PAGINATION_CONFIG = {
  */
 const Endpoint: React.FC = () => {
   // 监听路由参数 type 和 action
-  const { type, action } = useSearch({ from: '/integrated/endpoint' });
+  const { type, action } = useSearch({ from: '/nexus/integrated/endpoint' });
   // 搜索参数管理
   const [searchParams, setSearchParams] = useState<EndpointSearchParams>({
     pageNum: 1,
