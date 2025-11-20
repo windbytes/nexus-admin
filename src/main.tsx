@@ -36,7 +36,6 @@ const GlobalProvider: React.FC = () => {
         cssVar: true,
         token: {
           colorPrimary: colorPrimary,
-          controlHeight: 34
         },
         components: {
           Layout: {
@@ -51,10 +50,6 @@ const GlobalProvider: React.FC = () => {
           },
           Menu: {
             itemColor: '#29343D',
-          },
-          Card: {
-            boxShadow: 'none',
-            boxShadowSecondary: 'none',
           }
         },
       }}

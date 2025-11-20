@@ -296,7 +296,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           form={form}
           layout="horizontal"
           labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
+          wrapperCol={{ span: 18 }}
           disabled={isViewMode || false}
           onValuesChange={handleValuesChange}
         >
@@ -348,91 +348,92 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           {endpointTypeName && selectedMode && selectedEndpointTypeConfig && (
             <>
               <Divider orientation="left">配置信息</Divider>
-              <div className="border border-gray-200 rounded p-4">
-                {getSchemaFields.length > 0 ? (
-                  <div className="flex flex-col gap-0">
-                    {getSchemaFields.map((field: SchemaField) => (
-                      <SchemaFormFieldRenderer key={field.field} field={field} formValues={formValues} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-20 text-gray-400">
-                    当前端点类型在【{selectedMode}】模式下暂无配置项
-                  </div>
-                )}
-              </div>
+              {getSchemaFields.length > 0 ? (
+                <div className="flex flex-col gap-0">
+                  {getSchemaFields.map((field: SchemaField) => (
+                    <SchemaFormFieldRenderer key={field.field} field={field} formValues={formValues} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 text-gray-400">
+                  当前端点类型在【{selectedMode}】模式下暂无配置项
+                </div>
+              )}
             </>
           )}
           {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
           {selectedEndpointTypeConfig?.supportRetry && (
             <>
               <Divider orientation="left">重试策略</Divider>
-              <div className="border border-gray-200 rounded p-4">
-                <Form.Item
-                  name="maximumRedeliveries"
-                  label="重试次数"
-                  tooltip="最大重试次数"
-                  rules={[{ required: true, message: '请输入重试次数' }]}
-                >
-                  <InputNumber
-                    className="w-full"
-                    placeholder="请输入重试次数"
-                    min={1}
-                    max={10}
-                    step={1}
-                    addonAfter="次"
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="redeliveryDelay"
-                  label="初始延迟"
-                  tooltip="初始延迟时间"
-                  rules={[{ required: true, message: '请输入初始延迟' }]}
-                >
-                  <InputNumber
-                    className="w-full"
-                    placeholder="请输入初始延迟"
-                    min={50}
-                    max={10000}
-                    step={1000}
-                    addonAfter="ms"
-                  />
-                </Form.Item>
-                <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
-                  <Switch checkedChildren="是" unCheckedChildren="否" />
-                </Form.Item>
-                <Form.Item
-                  name="backOffMultiplier"
-                  label="退避倍数"
-                  tooltip="退避倍数"
-                  rules={[{ required: useExponentialBackoff, message: '请输入退避倍数' }]}
-                >
-                  <InputNumber
-                    disabled={!useExponentialBackoff}
-                    className="w-full"
-                    placeholder="请输入退避倍数"
-                    min={1}
-                    max={10}
-                    step={1}
-                    addonAfter="倍"
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="maximumRedeliveryDelay"
-                  label="最大延迟"
-                  tooltip="最大延迟时间"
-                  rules={[{ required: true, message: '请输入最大延迟' }]}
-                >
+              <Form.Item
+                name="maximumRedeliveries"
+                label="重试次数"
+                tooltip="最大重试次数"
+                rules={[{ required: true, message: '请输入重试次数' }]}
+              >
+                <InputNumber
+                  className="w-full"
+                  placeholder="请输入重试次数"
+                  min={1}
+                  max={10}
+                  step={1}
+                  addonAfter="次"
+                />
+              </Form.Item>
+              <Form.Item
+                name="redeliveryDelay"
+                label="初始延迟"
+                tooltip="初始延迟时间"
+                rules={[{ required: true, message: '请输入初始延迟' }]}
+              >
+                <InputNumber
+                  className="w-full"
+                  placeholder="请输入初始延迟"
+                  min={50}
+                  max={10000}
+                  step={1000}
+                  addonAfter="ms"
+                />
+              </Form.Item>
+              <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
+                <Switch checkedChildren="是" unCheckedChildren="否" />
+              </Form.Item>
+              <Form.Item
+                name="backOffMultiplier"
+                label="退避倍数"
+                tooltip="退避倍数"
+                rules={[{ required: useExponentialBackoff, message: '请输入退避倍数' }]}
+              >
+                <Space.Compact>
+                    <InputNumber
+                      disabled={!useExponentialBackoff}
+                      className="w-full"
+                      placeholder="请输入退避倍数"
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                  <Space.Addon>倍</Space.Addon>
+                </Space.Compact>
+              </Form.Item>
+              <Form.Item
+                name="maximumRedeliveryDelay"
+                label="最大延迟"
+                tooltip="最大延迟时间"
+                rules={[{ required: true, message: '请输入最大延迟' }]}
+              >
+                <Space.Compact>
                   <InputNumber
                     className="w-full"
                     placeholder="请输入最大延迟"
                     min={50}
                     max={60000}
                     step={1000}
-                    addonAfter="ms"
                   />
-                </Form.Item>
-              </div>
+                  <Space.Addon>ms</Space.Addon>
+                </Space.Compact>
+                
+              </Form.Item>
             </>
           )}
         </Form>
