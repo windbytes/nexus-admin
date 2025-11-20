@@ -243,7 +243,6 @@ const TabBar: React.FC<TabBarProps> = memo(({ className }) => {
       <div className="tab-bar-content flex w-full">
         <Tabs
           type="editable-card"
-          tabBarGutter={4}
           activeKey={tabState.activeKey}
           onTabClick={handleTabClick}
           onEdit={handleTabEdit}
