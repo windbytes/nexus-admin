@@ -384,7 +384,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                               <Button type="link" onClick={() => {
                                 navigate({ 
                                   to: '/integrated/endpoint',
-                                  search: { type: 'database', action: 'create' }
+                                  state: { type: 'database', action: 'create' },
                                 });
                               }}>
                                 去创建

@@ -1,7 +1,7 @@
 import type { EndpointFormData, EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
 import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 import { useQuery } from '@tanstack/react-query';
-import { useSearch } from '@tanstack/react-router';
+import { useLocation } from '@tanstack/react-router';
 import { Card, Spin } from 'antd';
 import type React from 'react';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
@@ -34,6 +34,12 @@ const PAGINATION_CONFIG = {
   pageSizeOptions: ['10', '20', '50', '100'],
 };
 
+// 1. 定义状态类型
+type EndpointState = {
+  type: string; // 枚举类型更安全
+  action: 'create' | 'edit' | 'view';
+};
+
 /**
  * 端点维护主页面
  *
@@ -47,8 +53,9 @@ const PAGINATION_CONFIG = {
  * 注意：统计功能已迁移至 /src/views/statics/Endpoint/index.tsx
  */
 const Endpoint: React.FC = () => {
-  // 监听路由参数 type 和 action
-  const { type, action } = useSearch({ from: '/nexus/integrated/endpoint' });
+  const location = useLocation();
+  const routeState = location.state as EndpointState;
+  const { type, action } = routeState;
   // 搜索参数管理
   const [searchParams, setSearchParams] = useState<EndpointSearchParams>({
     pageNum: 1,
@@ -110,12 +117,8 @@ const Endpoint: React.FC = () => {
       // 构建初始值，如果传了 type 参数，则设置 endpointType
       const initialValues = type ? { endpointType: type } : undefined;
       modalActions.openAdd(initialValues);
-      
-      // 使用 window.history.replaceState 清除 URL 参数，不触发路由更新
-      const url = new URL(window.location.href);
-      url.searchParams.delete('action');
-      url.searchParams.delete('type');
-      window.history.replaceState({}, '', url.toString());
+      // 清除state中的type和action
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, [action, type, modalActions]);
 
