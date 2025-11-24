@@ -6,8 +6,8 @@ import {
   ReloadOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { Button, Drawer, Empty, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import type { TablePaginationConfig } from 'antd';
+import { Button, Drawer, Empty, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -203,7 +203,7 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
     <Drawer
       title={`操作日志 - ${endpoint?.name || ''}`}
       placement="right"
-      width={900}
+      size={900}
       open={open}
       onClose={onClose}
     >

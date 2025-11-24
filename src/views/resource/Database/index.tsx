@@ -309,7 +309,9 @@ const Database: React.FC = () => {
       <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
 
       {/* 表格区域 */}
-      <Card className="flex-1">
+      <Card className="flex-1" classNames={{
+        body: 'flex flex-col flex-1 h-full'
+      }}>
         {/* 表格操作按钮 */}
         <DriverTableActions
           onAdd={handleAdd}

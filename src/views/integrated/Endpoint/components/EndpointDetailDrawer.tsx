@@ -78,7 +78,7 @@ const EndpointDetailDrawer: React.FC<EndpointDetailDrawerProps> = ({ open, endpo
   };
 
   return (
-    <Drawer title="端点详情" placement="right" width={720} open={open} onClose={onClose}>
+    <Drawer title="端点详情" placement="right" size={720} open={open} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* 基础信息 */}
         <Card title="基础信息" size="small">

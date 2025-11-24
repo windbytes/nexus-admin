@@ -1,6 +1,6 @@
 import type { WorkflowVersion } from '@/services/integrated/version/model';
 import { useDeleteVersion } from '@/views/integrated/Versions/useVersionQueries';
-import { message } from 'antd';
+import { App } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
 import CreateVersionModal from './CreateVersionModal';
@@ -11,6 +11,7 @@ import VersionList from './VersionList';
  * 版本管理主组件
  */
 const Versions: React.FC = () => {
+  const {message} = App.useApp();
   const [showComparison, setShowComparison] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [comparisonVersions, setComparisonVersions] = useState<{

@@ -19,7 +19,7 @@ interface EndpointDependenciesDrawerProps {
  */
 const EndpointDependenciesDrawer: React.FC<EndpointDependenciesDrawerProps> = ({ open, endpoint, onClose }) => {
   return (
-    <Drawer title="依赖关系图谱" open={open} width={1000} height={600} onClose={onClose}>
+    <Drawer title="依赖关系图谱" open={open} size={1000} onClose={onClose}>
       <div>EndpointDependenciesDrawer</div>
     </Drawer>
   );

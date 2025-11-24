@@ -1,6 +1,5 @@
-import { Avatar, Button, Empty, List, Space, Tag, Typography } from 'antd';
+import { Avatar, Button, Empty, Space, Tag, Typography } from 'antd';
 import type React from 'react';
-import type { ReactNode } from 'react';
 import styles from './message-box.module.scss';
 
 /**
@@ -31,73 +30,66 @@ const MessageList: React.FC<MessageListProps> = (props) => {
     }
   };
 
-  /**
-   * 渲染列表
-   */
-  const renderList = (item: MessageItemData, index: number): ReactNode => {
-    return (
-      <List.Item
-        key={item.id}
-        style={{ opacity: item.status ? 0.5 : 1, cursor: 'pointer', flex: 1 }}
-        onClick={() => onItemClick(item, index)}
-      >
-        <List.Item.Meta
-          avatar={
-            item.avatar && (
-              <Avatar shape="circle" size={36}>
-                <img src={item.avatar} alt="" />
-              </Avatar>
-            )
-          }
-          title={
-            <div className={styles['message-title']}>
-              <Space size={4}>
-                <span>{item.title}</span>
-                <Typography.Text type="secondary">
-                  {item.subTitle}
-                </Typography.Text>
-              </Space>
-              {item.tag?.text ? (
-                <Tag color={item.tag.color}>{item.tag.text}</Tag>
-              ) : null}
-            </div>
-          }
-          description={
-            <div>
-              <Typography.Paragraph style={{ marginBottom: 0 }} ellipsis>
-                {item.content}
-              </Typography.Paragraph>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {item.time}
-              </Typography.Text>
-            </div>
-          }
-        />
-      </List.Item>
-    );
-  };
+  if (!data || data.length === 0) {
+    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无消息" />;
+  }
 
-  return !data || data.length === 0 ? (
-    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无消息" />
-  ) : (
-    <List
-      footer={
-        <div className={styles['footer']}>
-          <div className={styles['footer-item']}>
-            <Button type="text" size="small" onClick={onAllBtnClick}>
-              全部已读
-            </Button>
+  return (
+    <div className={styles['message-list-container']}>
+      <div className={styles['message-list']}>
+        {data.map((item, index) => (
+          <div
+            key={item.id}
+            className={styles['message-item']}
+            style={{ opacity: item.status ? 0.5 : 1 }}
+            onClick={() => onItemClick(item, index)}
+          >
+            <div className={styles['message-item-content']}>
+              {item.avatar && (
+                <div className={styles['message-avatar']}>
+                  <Avatar shape="circle" size={36}>
+                    <img src={item.avatar} alt="" />
+                  </Avatar>
+                </div>
+              )}
+              <div className={styles['message-item-body']}>
+                <div className={styles['message-title']}>
+                  <Space size={4}>
+                    <span>{item.title}</span>
+                    <Typography.Text type="secondary">
+                      {item.subTitle}
+                    </Typography.Text>
+                  </Space>
+                  {item.tag?.text ? (
+                    <Tag color={item.tag.color}>{item.tag.text}</Tag>
+                  ) : null}
+                </div>
+                <div className={styles['message-description']}>
+                  <Typography.Paragraph style={{ marginBottom: 0 }} ellipsis>
+                    {item.content}
+                  </Typography.Paragraph>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {item.time}
+                  </Typography.Text>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className={styles['footer-item']}>
-            <Button type="text" size="small">
-              查看更多
-            </Button>
-          </div>
+        ))}
+      </div>
+      <div className={styles['footer']}>
+        <div className={styles['footer-item']}>
+          <Button type="text" size="small" onClick={onAllBtnClick}>
+            全部已读
+          </Button>
         </div>
-      }
-      dataSource={data}
-      renderItem={renderList}
-    />
+        <div className={styles['footer-item']}>
+          <Button type="text" size="small">
+            查看更多
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 export default MessageList;

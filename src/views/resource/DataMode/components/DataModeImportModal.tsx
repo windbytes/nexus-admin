@@ -153,6 +153,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
   return (
     <DragModal
       open={open}
+      centered
       title="导入Schema"
       width={600}
       onOk={handleOk}
@@ -170,7 +171,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
             children: (
               <Form form={form} layout="vertical">
                 <Form.Item
-                  label="选择JSON文件"
+                  label=""
                   required
                   tooltip="支持拖拽上传，文件大小限制5M，格式限制为JSON"
                 >
@@ -201,7 +202,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
               <Form form={form} layout="vertical">
                 <Form.Item
                   name="url"
-                  label="URL地址"
+                  label=""
                   rules={[
                     { required: true, message: '请输入URL地址！' },
                     { type: 'url', message: '请输入有效的URL地址！' },

@@ -111,28 +111,28 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* 调整整个系统Modal的样式 */
-.ant-modal:not(.ant-modal-confirm) .ant-modal-content {
-  padding: 0;
-}
+// /* 调整整个系统Modal的样式 */
+// .ant-modal:not(.ant-modal-confirm) .ant-modal-content {
+//   padding: 0;
+// }
 
-.ant-modal:not(.ant-modal-confirm) .ant-modal-header {
-  padding: 20px 24px;
-  // display: flex;
-  align-items: center;
-  margin-bottom: 0;
-  border-bottom: 1px solid #e8e8e8;
-}
+// .ant-modal:not(.ant-modal-confirm) .ant-modal-header {
+//   padding: 20px 24px;
+//   // display: flex;
+//   align-items: center;
+//   margin-bottom: 0;
+//   border-bottom: 1px solid #e8e8e8;
+// }
 
-.ant-modal:not(.ant-modal-confirm) .ant-modal-body {
-  padding: 20px 24px;
-}
+// .ant-modal:not(.ant-modal-confirm) .ant-modal-body {
+//   padding: 20px 24px;
+// }
 
-.ant-modal:not(.ant-modal-confirm) .ant-modal-footer {
-  padding: 20px 24px;
-  margin-top: 0 !important;
-  border-top: 1px solid #e8e8e8;
-}
+// .ant-modal:not(.ant-modal-confirm) .ant-modal-footer {
+//   padding: 20px 24px;
+//   margin-top: 0 !important;
+//   border-top: 1px solid #e8e8e8;
+// }
 
 .layout-operation-bar {
   padding-left: 32px;

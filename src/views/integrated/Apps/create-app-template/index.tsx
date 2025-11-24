@@ -1,7 +1,7 @@
 import DragModal from '@/components/modal/DragModal';
 import { SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App, Input } from 'antd';
+import { App, Input, Space } from 'antd';
 import type React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import CategorySidebar from './components/CategorySidebar';
@@ -162,22 +162,26 @@ const TemplateHeaders: React.FC<TemplateHeadersProps> = ({
         <span className="text-lg font-medium">从应用模板创建</span>
       </div>
       <div className="flex-1 max-w-[548px] p-1.5 flex items-center">
-        <Input
-          className="w-full h-10"
-          size="large"
-          placeholder="搜索所有模版..."
-          prefix={<SearchOutlined className="text-gray-400" />}
-          addonBefore={
+        <Space.Compact>
+          <Space.Addon>
             <TemplateTypeDropdown
               selectedTypes={selectedTypes}
               onTypeChange={onTypeChange}
               filterOptions={filterOptions}
             />
-          }
-          value={searchKeyword}
-          onChange={(e) => onSearch(e.target.value)}
-          onPressEnter={(e) => onSearch((e.target as any).value)}
-        />
+          </Space.Addon>
+          <Input
+            className="w-full h-10"
+            size="large"
+            placeholder="搜索所有模版..."
+            prefix={<SearchOutlined className="text-gray-400" />}
+
+            value={searchKeyword}
+            onChange={(e) => onSearch(e.target.value)}
+            onPressEnter={(e) => onSearch((e.target as any).value)}
+          />
+        </Space.Compact>
+        
       </div>
       <div className="w-[180px] h-8" />
     </div>

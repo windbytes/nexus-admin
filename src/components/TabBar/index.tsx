@@ -249,6 +249,7 @@ const TabBar: React.FC<TabBarProps> = memo(({ className }) => {
           items={tabItems}
           size="middle"
           hideAdd
+          tabBarGutter={0}
           className="tab-bar-tabs flex-1"
         />
         

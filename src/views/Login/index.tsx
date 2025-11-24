@@ -105,7 +105,7 @@ const Login: React.FC = () => {
           homePath = (firstRoute as any).path;
         } else {
           antdUtils.notification?.error({
-            message: t('login.loginFail'),
+            title: t('login.loginFail'),
             description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
           });
           return;
@@ -114,7 +114,7 @@ const Login: React.FC = () => {
 
       if (!homePath) {
         antdUtils.notification?.error({
-          message: t('login.loginFail'),
+          title: t('login.loginFail'),
           description: '无法确定首页路径！',
         });
         return;
@@ -129,7 +129,7 @@ const Login: React.FC = () => {
       updatePreferences('widget', 'lockScreenStatus', false);
 
       antdUtils.notification?.success({
-        message: t('login.loginSuccess'),
+        title: t('login.loginSuccess'),
         description: t('login.welcome'),
       });
 

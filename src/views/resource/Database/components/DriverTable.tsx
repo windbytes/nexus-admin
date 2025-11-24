@@ -219,6 +219,9 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         pagination={pagination as TablePaginationConfig}
         scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
         size="middle"
+        classNames={{
+          root: 'full-height-table'
+        }}
       />
     );
   }

@@ -1,8 +1,9 @@
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { CheckCircleOutlined, ExclamationCircleOutlined, RollbackOutlined } from '@ant-design/icons';
-import { Button, Drawer, Empty, List, Modal, Space, Tag, Typography, message } from 'antd';
+import { Button, Drawer, Empty, Modal, Space, Spin, Tag, Typography, message } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import styles from './EndpointVersionDrawer.module.scss';
 
 const { Text, Paragraph } = Typography;
 
@@ -156,69 +157,69 @@ const EndpointVersionDrawer: React.FC<EndpointVersionDrawerProps> = ({ open, end
     <Drawer
       title={`版本管理 - ${endpoint?.name || ''}`}
       placement="right"
-      width={600}
+      size={600}
       open={open}
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">
         {/* 版本列表 */}
-        {versions.length > 0 ? (
-          <List
-            loading={loading}
-            dataSource={versions}
-            renderItem={(version) => (
-              <List.Item
-                key={version.id}
-                className={version.isCurrent ? 'bg-blue-50' : ''}
-                actions={[
-                  <Button
-                    key="view"
-                    type="link"
-                    size="small"
-                    onClick={() => handleViewDetail(version)}
-                  >
-                    查看
-                  </Button>,
-                  !version.isCurrent && onRestore && (
-                    <Button
-                      key="restore"
-                      type="link"
-                      size="small"
-                      icon={<RollbackOutlined />}
-                      loading={restoring}
-                      onClick={() => handleRestore(version)}
-                    >
-                      恢复
-                    </Button>
-                  ),
-                ].filter(Boolean)}
-              >
-                <List.Item.Meta
-                  title={
-                    <Space>
-                      <Text strong>{version.version}</Text>
-                      {version.isCurrent && (
-                        <Tag icon={<CheckCircleOutlined />} color="success">
-                          当前版本
-                        </Tag>
-                      )}
-                    </Space>
-                  }
-                  description={
-                    <div className="flex flex-col gap-1">
-                      <Text type="secondary">{version.description}</Text>
-                      <Text type="secondary" className="text-xs">
-                        {new Date(version.createTime).toLocaleString('zh-CN')} · {version.createBy}
-                      </Text>
+        <Spin spinning={loading}>
+          {versions.length > 0 ? (
+            <div className={styles['version-list']}>
+              {versions.map((version) => (
+                <div
+                  key={version.id}
+                  className={`${styles['version-item']} ${version.isCurrent ? 'bg-blue-50' : ''}`}
+                >
+                  <div className={styles['version-item-content']}>
+                    <div className={styles['version-item-meta']}>
+                      <div className={styles['version-item-title']}>
+                        <Space>
+                          <Text strong>{version.version}</Text>
+                          {version.isCurrent && (
+                            <Tag icon={<CheckCircleOutlined />} color="success">
+                              当前版本
+                            </Tag>
+                          )}
+                        </Space>
+                      </div>
+                      <div className={styles['version-item-description']}>
+                        <div className="flex flex-col gap-1">
+                          <Text type="secondary">{version.description}</Text>
+                          <Text type="secondary" className="text-xs">
+                            {new Date(version.createTime).toLocaleString('zh-CN')} · {version.createBy}
+                          </Text>
+                        </div>
+                      </div>
                     </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        ) : (
-          !loading && <Empty description="暂无版本历史" />
-        )}
+                    <div className={styles['version-item-actions']}>
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={() => handleViewDetail(version)}
+                      >
+                        查看
+                      </Button>
+                      {!version.isCurrent && onRestore && (
+                        <Button
+                          type="link"
+                          size="small"
+                          icon={<RollbackOutlined />}
+                          loading={restoring}
+                          onClick={() => handleRestore(version)}
+                        >
+                          恢复
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            !loading && <Empty description="暂无版本历史" />
+          )}
+        </Spin>
       </div>
     </Drawer>
   );

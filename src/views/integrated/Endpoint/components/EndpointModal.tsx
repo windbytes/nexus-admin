@@ -347,7 +347,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           {/* 配置信息区域 - 只有选择了端点类型和模式后才显示 */}
           {endpointTypeName && selectedMode && selectedEndpointTypeConfig && (
             <>
-              <Divider orientation="left">配置信息</Divider>
+              <Divider titlePlacement="start">配置信息</Divider>
               {getSchemaFields.length > 0 ? (
                 <div className="flex flex-col gap-0">
                   {getSchemaFields.map((field: SchemaField) => (
@@ -364,7 +364,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
           {selectedEndpointTypeConfig?.supportRetry && (
             <>
-              <Divider orientation="left">重试策略</Divider>
+              <Divider titlePlacement="start">重试策略</Divider>
               <Form.Item
                 name="maximumRedeliveries"
                 label="重试次数"

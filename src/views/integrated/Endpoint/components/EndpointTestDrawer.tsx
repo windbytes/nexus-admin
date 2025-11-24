@@ -104,7 +104,7 @@ const EndpointTestDrawer: React.FC<EndpointTestDrawerProps> = ({ open, endpoint,
     <Drawer
       title="端点测试"
       placement="right"
-      width={600}
+      size={600}
       open={open}
       onClose={onClose}
       footer={
@@ -204,7 +204,7 @@ const EndpointTestDrawer: React.FC<EndpointTestDrawerProps> = ({ open, endpoint,
           {/* 测试说明 */}
           {!testResult && (
             <Alert
-              message="测试说明"
+              title="测试说明"
               description={
                 <ul className="mb-0 pl-4">
                   <li>测试将验证端点连接是否正常</li>
