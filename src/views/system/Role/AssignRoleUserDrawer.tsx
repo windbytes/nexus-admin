@@ -131,7 +131,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
           <Popconfirm
             title="移除用户"
             description="确定从该角色下移除当前用户吗？"
-            onConfirm={() => deleteRoleUser(record.id)}
+            onConfirm={() => deleteRoleUser(record['id'])}
             icon={<WarningOutlined style={{ color: colorError }} />}
           >
             <Tooltip title="移除用户">
@@ -258,7 +258,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
     >
       <Drawer
         title="分配用户"
-        width={920}
+        size={920}
         open={open}
         closeIcon={false}
         extra={<Button type="text" icon={<CloseOutlined />} onClick={onCancel} />}
@@ -323,7 +323,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
             className="mt-2"
             size="small"
             columns={columns}
-            dataSource={data?.data || []}
+            dataSource={data?.['data'] || []}
             loading={isLoading}
             bordered
             rowKey="id"
@@ -334,7 +334,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
               hideOnSinglePage: false,
               showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
-              total: data?.total,
+              total: data?.['total'],
               onChange(page, pageSize) {
                 onPageSizeChange(page, pageSize);
               },

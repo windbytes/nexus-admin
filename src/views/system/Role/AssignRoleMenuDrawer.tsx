@@ -1,10 +1,10 @@
-import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { memo, useCallback, useEffect, useState } from 'react';
-import { CloseOutlined, DownOutlined, FolderFilled, FolderOpenFilled } from '@ant-design/icons';
-import { Button, Checkbox, Drawer, Space, Tree, type TreeProps } from 'antd';
 import { roleService } from '@/services/system/role/roleApi';
 import { transformData } from '@/utils/utils';
+import { CloseOutlined, DownOutlined, FolderFilled, FolderOpenFilled } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Button, Checkbox, Drawer, Space, Tree, type TreeProps } from 'antd';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * 角色菜单授权界面
@@ -94,7 +94,7 @@ const RoleMenuDrawer: React.FC<RoleMenuDrawerProps> = ({ open, roleId, onOk, onC
   return (
     <Drawer
       title="授权菜单、按钮权限"
-      width={400}
+      size={400}
       open={open}
       closeIcon={false}
       extra={<Button type="text" icon={<CloseOutlined />} onClick={onCancel} />}

@@ -204,7 +204,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
   return (
     <>
       <Card
-        className="h-full flex flex-col"
+        className="w-80 h-full flex flex-col"
         classNames={{ body: 'flex flex-col h-[calc(100%-58px)] py-0! px-4!', header: 'py-3! px-4!' }}
         title={
           <div className="flex justify-between">

@@ -78,13 +78,12 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         )}
 
         {canExport && (
-          <Dropdown.Button
+          <Dropdown
             menu={{ items: exportMenuItems }}
-            icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}
             placement="bottomLeft"
           >
-            导出
-          </Dropdown.Button>
+            <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}>导出</Button>
+          </Dropdown>
         )}
 
         <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>

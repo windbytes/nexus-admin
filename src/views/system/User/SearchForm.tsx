@@ -90,7 +90,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           {/* 高级搜索 */}
           {showAdvanced && (
             <>
-              <Divider orientation="left" className="text-gray-500">
+              <Divider titlePlacement="start" className="text-gray-500">
                 <Text type="secondary">高级搜索</Text>
               </Divider>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">

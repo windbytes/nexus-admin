@@ -186,12 +186,11 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         )}
 
         {canBatchExport && (
-          <Dropdown.Button
-            menu={{ items: exportItems }}
-            icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}
-          >
-            {t('common.operation.export')}
-          </Dropdown.Button>
+          <Space.Compact>
+            <Dropdown menu={{ items: exportItems }}>
+              <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}>{t('common.operation.export')}</Button>
+            </Dropdown>
+          </Space.Compact>
         )}
 
         {/* 批量操作下拉菜单 */}

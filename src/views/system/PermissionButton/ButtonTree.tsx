@@ -216,7 +216,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   return (
     <Card
       title="按钮列表"
-      className="h-full flex flex-col"
+      className="h-full flex flex-col w-80"
       styles={{ body: { flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 } }}
       extra={
         <Space>

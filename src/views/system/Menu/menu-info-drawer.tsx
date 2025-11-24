@@ -231,7 +231,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
     <Drawer
       title={`${menu ? '编辑' : '新增'}菜单`}
       open={open}
-      width={800}
+      size={800}
       onClose={() => onClose(false, 'view')}
       classNames={{ footer: 'flex justify-end' }}
       closeIcon={false}
@@ -317,13 +317,11 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
                     },
                   ]}
                 >
-                  <Input
-                    allowClear
-                    placeholder="请输入前端组件"
-                    addonBefore="views/"
-                    addonAfter="/index.tsx"
-                    autoComplete="off"
-                  />
+                  <Space.Compact className="w-full">
+                    <Space.Addon>views/</Space.Addon>
+                    <Input allowClear placeholder="请输入前端组件" autoComplete="off" />
+                    <Space.Addon>/index.tsx</Space.Addon>
+                  </Space.Compact>
                 </Form.Item>
                 <Form.Item name="componentName" label="组件名称">
                   <Input allowClear autoComplete="off" />
@@ -334,26 +332,24 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
               </>
             )}
             <Form.Item name="originalIcon" label="菜单图标">
-              <Input
-                allowClear
-                placeholder="请选择菜单图标"
-                autoComplete="off"
-                addonAfter={
-                  <Dropdown
-                    trigger={['click']}
-                    placement="bottom"
-                    popupRender={() => <OptimizedIconPanel onSelect={handleIconSelect} />}
-                    overlayClassName="w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl"
+              <Space.Compact className="w-full">
+                <Input allowClear placeholder="请选择菜单图标" autoComplete="off" />
+                <Dropdown 
+                  trigger={['click']} 
+                  placement="bottom" 
+                  popupRender={() => <OptimizedIconPanel onSelect={handleIconSelect} />}
+                  classNames={{
+                    root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
+                  }}
                   >
-                    <SettingOutlined className="cursor-pointer" />
-                  </Dropdown>
-                }
-              />
+                  <Button icon={<SettingOutlined className="cursor-pointer" />} />
+                </Dropdown>
+              </Space.Compact>
             </Form.Item>
           </>
         )}
         <Form.Item name="sortNo" label="排序">
-          <InputNumber min={0} autoComplete="off" />
+          <InputNumber min={0} autoComplete="off" mode='spinner'/>
         </Form.Item>
 
         {/* 添加路由参数配置项目 */}

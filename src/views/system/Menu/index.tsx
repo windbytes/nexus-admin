@@ -1,19 +1,19 @@
 import { menuService } from '@/services/system/menu/menuApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { App, Layout, theme } from 'antd';
+import { App } from 'antd';
 import type React from 'react';
-import { useCallback, useReducer } from 'react';
+import { lazy, useCallback, useReducer } from 'react';
 import MenuDetail from './menu-detail';
-import MenuInfoDrawer from './menu-info-drawer';
 import MenuInterfacePermission from './menu-interface-permission';
 import MenuTree from './menu-tree';
+
+const MenuInfoDrawer = lazy(() => import('./menu-info-drawer'));
 
 /**
  *
  * @returns 菜单
  */
 const Menu: React.FC = () => {
-  const { token } = theme.useToken();
   const { message, modal } = App.useApp();
   const queryClient = useQueryClient();
 
@@ -165,12 +165,11 @@ const Menu: React.FC = () => {
 
   return (
     <>
-      <Layout>
-        <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
-          {/* 左边菜单列表 */}
-          <MenuTree onSelectMenu={onSelectMenu} onOpenDrawer={onOpenDrawer} />
-        </Layout.Sider>
-        <Layout.Content className="flex flex-col ml-2 gap-2">
+      <div className="flex gap-2 h-full w-full">
+        {/* 左边菜单列表 */}
+        <MenuTree onSelectMenu={onSelectMenu} onOpenDrawer={onOpenDrawer} />
+        {/* 右侧内容区域 */}
+        <div className="flex flex-col flex-1 gap-2 h-full min-w-0">
           {/* 菜单详情 */}
           <MenuDetail
             menu={state.currentMenu}
@@ -180,8 +179,8 @@ const Menu: React.FC = () => {
           />
           {/* 菜单接口权限列表 */}
           <MenuInterfacePermission menu={state.currentMenu} />
-        </Layout.Content>
-      </Layout>
+        </div>
+      </div>
       <MenuInfoDrawer
         menu={state.currentMenu}
         operation={state.operation}

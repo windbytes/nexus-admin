@@ -52,7 +52,7 @@ const WebServiceSearchForm: React.FC<WebServiceSearchFormProps> = memo(({ onSear
 
   return (
     <Card>
-      <Form form={form} layout="horizontal" labelCol={{ span: 4 }} onFinish={handleSearch}>
+      <Form form={form} layout="horizontal" labelCol={{ span: 6 }} onFinish={handleSearch}>
         <Row gutter={16}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Form.Item name="name" label="服务名称" className="mb-0">
