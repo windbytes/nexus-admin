@@ -1,4 +1,4 @@
-import { Layout } from 'antd';
+import { Layout, theme } from 'antd';
 import type React from 'react';
 import { memo, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
@@ -17,14 +17,13 @@ const siderStyles = {
   borderRight: '1px solid #00000012',
 } as const;
 
-const containerStyles = {
-  overflow: 'hidden',
-} as const;
-
 /**
  * 左边的菜单栏
  */
 const LeftMenu: React.FC = memo(() => {
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
   const { sidebar, mode, semiDarkSidebar } = usePreferencesStore(
     useShallow((state) => ({
       sidebar: state.preferences.sidebar,
@@ -47,18 +46,17 @@ const LeftMenu: React.FC = memo(() => {
 
   return (
     <Layout.Sider
+      className='nexus-layout-sider'
       trigger={null}
       collapsedWidth={64}
-      style={siderStyles}
+      style={{ ...siderStyles, backgroundColor: finalMode === 'dark' ?  'var(--ant-layout-sider-bg)' : colorBgContainer }}
       collapsible
       width={sidebar.width}
       theme={finalMode}
       collapsed={sidebar.collapsed}
     >
-      <div className="flex flex-col h-full" style={containerStyles}>
-        <SystemLogo />
-        <MenuComponent />
-      </div>
+      <SystemLogo />
+      <MenuComponent />
     </Layout.Sider>
   );
 });

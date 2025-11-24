@@ -1,7 +1,7 @@
 import '@/styles/global.scss';
-import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntdApp, ConfigProvider } from 'antd';
+import 'antd/dist/antd.css';
 import enUS from 'antd/es/locale/en_US';
 import zhCN from 'antd/es/locale/zh_CN';
 import dayjs from 'dayjs';
@@ -33,7 +33,8 @@ const GlobalProvider: React.FC = () => {
   return (
     <ConfigProvider
       theme={{
-        cssVar: true,
+        hashed: false,
+        zeroRuntime: true,
         token: {
           colorPrimary: colorPrimary,
         },

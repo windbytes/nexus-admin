@@ -14,7 +14,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@flowgram.ai/free-auto-layout-plugin": "^1.0.2",
     "@flowgram.ai/free-container-plugin": "^1.0.2",
     "@flowgram.ai/free-group-plugin": "^1.0.2",
@@ -28,10 +27,10 @@
     "@flowgram.ai/shortcuts-plugin": "^1.0.2",
     "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.90.10",
-    "@tanstack/react-router": "^1.139.0",
+    "@tanstack/react-router": "^1.139.3",
     "@zxcvbn-ts/core": "^3.0.4",
     "ahooks": "^3.9.6",
-    "antd": "^5.29.1",
+    "antd": "^6.0.0",
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
@@ -57,7 +56,7 @@
     "@eslint/js": "^9.39.1",
     "@iconify/react": "^6.0.2",
     "@tailwindcss/vite": "^4.1.17",
-    "@tanstack/react-router-devtools": "^1.139.0",
+    "@tanstack/react-router-devtools": "^1.139.3",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.19.1",
@@ -83,7 +82,7 @@
     "typescript": "~5.9.3",
     "vite": "npm:rolldown-vite@latest",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-mock-dev-server": "^2.0.3"
+    "vite-plugin-mock-dev-server": "^2.0.4"
   },
   "engines": {
     "node": ">=22.12.0",

@@ -315,7 +315,11 @@ const UserDropdown: React.FC = () => {
       menu={{ items, triggerSubMenuAction: 'hover' }}
       popupRender={renderDropdown}
       placement="bottomLeft"
-      overlayStyle={{ width: 240 }}
+      styles={{
+        root: {
+          width: 240,
+        }
+      }}
     >
       <div className="login-user flex items-center cursor-pointer justify-between h-[50] transition-all duration-300">
         <Avatar size="default" src={avatar} />
