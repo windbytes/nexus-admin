@@ -1,11 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, Row, Col, Statistic, Table, DatePicker, Button, Space, Spin, Empty } from 'antd';
-import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo } from 'react';
-import type React from 'react';
-import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
-import type { TableProps } from 'antd';
 import { useECharts } from '@/hooks/useECharts';
+import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
+import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import type { TableProps } from 'antd';
+import { Button, Card, Col, DatePicker, Empty, Row, Space, Spin, Statistic, Table } from 'antd';
+import type React from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 /**
  * 使用统计组件
@@ -230,22 +230,22 @@ const UsageStatistics: React.FC = () => {
       <Row gutter={16}>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="总按钮数" value={statistics?.totalButtons || 0} valueStyle={{ color: '#1890ff' }} />
+            <Statistic title="总按钮数" value={statistics?.totalButtons || 0} styles={{content: {color: '#1890ff'}}}/>
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="启用按钮数" value={statistics?.activeButtons || 0} valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="启用按钮数" value={statistics?.activeButtons || 0} styles={{content: {color: '#52c41a'}}} />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="总接口数" value={statistics?.totalInterfaces || 0} valueStyle={{ color: '#722ed1' }} />
+            <Statistic title="总接口数" value={statistics?.totalInterfaces || 0} styles={{content: {color: '#722ed1'}}} />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="使用接口数" value={statistics?.usedInterfaces || 0} valueStyle={{ color: '#faad14' }} />
+            <Statistic title="使用接口数" value={statistics?.usedInterfaces || 0} styles={{content: {color: '#faad14'}}} />
           </Card>
         </Col>
       </Row>
