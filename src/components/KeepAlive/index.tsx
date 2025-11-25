@@ -123,7 +123,7 @@ const KeepAlive: React.FC<KeepAliveProps> = memo(({ children }) => {
   return (
     <div 
       ref={containerRef} 
-      className="h-full w-full relative overflow-auto"
+      className="h-full relative flex flex-col p-2"
       // 添加 overscroll-behavior 防止滚动穿透体验不佳
       style={{ overscrollBehavior: 'contain' }} 
     >

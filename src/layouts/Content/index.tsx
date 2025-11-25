@@ -50,9 +50,6 @@ const Content = memo(({ children }: ContentProps) => {
   return (
     <Layout.Content
       className="overflow-x-hidden overflow-y-auto"
-      style={{
-        position: 'relative',
-      }}
     >
       <Suspense fallback={loadingFallback}>
         <ErrorBoundary fallback={errorFallback}>
