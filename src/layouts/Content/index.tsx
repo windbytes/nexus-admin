@@ -49,7 +49,8 @@ const Content = memo(({ children }: ContentProps) => {
 
   return (
     <Layout.Content
-      className="overflow-x-hidden overflow-y-auto"
+      className="overflow-x-hidden overflow-y-auto h-full relative flex flex-col p-2"
+      style={{ overscrollBehavior: 'contain' }}
     >
       <Suspense fallback={loadingFallback}>
         <ErrorBoundary fallback={errorFallback}>

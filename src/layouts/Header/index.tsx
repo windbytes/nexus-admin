@@ -141,9 +141,7 @@ const Header = memo(() => {
 
           {/* 第二行：TabBar区域 */}
           {tabbarEnable && (
-            <div className="header-tab-row">
-              <TabBar />
-            </div>
+            <TabBar />
           )}
         </Layout.Header>
       ) : (

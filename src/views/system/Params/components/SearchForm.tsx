@@ -110,26 +110,24 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading = false, onTo
           </div>
 
           {/* 操作按钮区域 */}
-          <div className="flex justify-end">
-            <Space>
-              <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={handleToggleExpand}>
-                {expanded ? '收起' : '展开'}
-              </Button>
-              <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
-                重置
-              </Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                className="bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
-              >
-                搜索
-              </Button>
-            </Space>
-          </div>
+          <Space className="flex justify-end mt-4 w-full">
+            <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={handleToggleExpand}>
+              {expanded ? '收起' : '展开'}
+            </Button>
+            <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+              className="bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
+            >
+              搜索
+            </Button>
+          </Space>
         </Form>
       </Card>
     </ConfigProvider>

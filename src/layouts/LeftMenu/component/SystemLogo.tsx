@@ -24,7 +24,6 @@ const SystemLogo = () => {
               Nexus
             </span>
           </div>
-          <div className="card-glow"></div>
         </section>
       </Link>
     </div>

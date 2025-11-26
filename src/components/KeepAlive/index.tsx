@@ -1,6 +1,6 @@
 import { useTabStore } from '@/stores/tabStore';
 import KeepAlive, { useKeepAliveRef, type KeepAliveRef } from 'keepalive-for-react';
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 interface KeepAliveProps {
@@ -19,7 +19,6 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
   );
 
   const aliveRef = useKeepAliveRef();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Filter tabs that should be kept alive
   const keepAliveIncludes = useMemo(() => {
@@ -54,23 +53,15 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
   }, [tabs]);
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full relative flex flex-col p-2 overflow-auto"
-      style={{ overscrollBehavior: 'contain' }}
-    >
       <KeepAlive
         aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
         activeCacheKey={activeKey}
         include={keepAliveIncludes}
         max={20} // Default max, can be configured
-        customContainerRef={containerRef as React.RefObject<HTMLDivElement>}
         cacheNodeClassName="h-full w-full" // Ensure cached nodes take full height/width if needed
-        containerClassName="hidden"
       >
         {children}
       </KeepAlive>
-    </div>
   );
 });
 

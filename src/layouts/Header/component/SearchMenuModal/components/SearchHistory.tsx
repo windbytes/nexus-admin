@@ -63,7 +63,7 @@ const SearchHistory: React.FC<Props> = ({ items, selectedIndex, onSelect, onRemo
             </div>
           </div>
           <DeleteOutlined
-            className="text-gray-400 hover:text-red-500"
+            className="text-red-500! text-lg! cursor-pointer!"
             onClick={(e) => {
               e.stopPropagation();
               onRemove(item.id);

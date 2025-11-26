@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../searchMenuModal.module.scss';
+import '../searchMenuModal.scss';
 
 interface Props {
   text: string;
@@ -22,7 +22,7 @@ const HighlightText: React.FC<Props> = ({ text, keyword }) => {
     if (!part) continue;
     if (regex.test(part)) {
       nodes.push(
-        <mark key={`h-${text}-${part}-${i}`} className={styles.highlightText}>
+        <mark key={`h-${text}-${part}-${i}`} className="highlightText">
           {part}
         </mark>,
       );

@@ -11,6 +11,10 @@
   flex: 1;
   overflow-y: auto;
 
+  .ant-menu-inline .ant-menu-sub.ant-menu-inline {
+    border-radius: var(--ant-border-radius);
+  }
+
   // 左侧菜单滚动条隐藏样式
   // 隐藏滚动条但保持滚动功能
   &::-webkit-scrollbar {
@@ -35,7 +39,7 @@
 
 // 协调系统主题的logo卡片风格
 .system-logo-card {
-  height: 64px;
+  height: 40px;
   margin: 8px 12px;
   position: relative;
   border-radius: 12px;
@@ -61,8 +65,8 @@
 
   // logo背景
   .logo-background {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -72,7 +76,6 @@
   .logo-image {
     border-radius: 8px;
     transition: all 0.3s ease;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
   }
 
   // 系统名称
@@ -91,26 +94,6 @@
     font-style: italic;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     margin-left: 12px;
-  }
-
-  // 发光效果
-  .card-glow {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 14px;
-    background: linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.1) 0%,
-      rgba(147, 197, 253, 0.05) 50%,
-      rgba(59, 130, 246, 0.1) 100%
-    );
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 0;
-    filter: blur(4px);
   }
 }
 

@@ -9,6 +9,7 @@ import type React from 'react';
 import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
+import '../header.scss';
 
 /**
  * 面包屑
@@ -39,7 +40,7 @@ const BreadcrumbNav: React.FC = () => {
   }, [pathname, menus, caches, breadcrumb, t, i18n.language]);
 
   // 组件的DOM内容
-  return <Breadcrumb items={items} className="flex justify-between items-center" style={{ marginLeft: '10px' }} />;
+  return <Breadcrumb items={items} className="flex justify-between items-center nexus-breadcrumb" style={{ marginLeft: '16px' }} />;
 };
 export default memo(BreadcrumbNav);
 
@@ -100,8 +101,8 @@ function patchBreadcrumb(
     const isLast = index === breadcrumbPaths.length - 1;
     const iconNode = joinIcon && menu.meta?.icon ? getIcon(menu.meta.icon) : null;
     const titleContent = t(menu.meta?.title as string);
-
-    const title = isLast ? (
+    const isNotRoute = menu.meta?.menuType !== 2;
+    const title = (isLast || isNotRoute) ? (
       <>
         {iconNode}
         <span style={{ padding: '0 4px' }}>{titleContent}</span>
