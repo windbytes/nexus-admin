@@ -60,7 +60,6 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
       style={{ overscrollBehavior: 'contain' }}
     >
       <KeepAlive
-        viewTransition
         aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
         activeCacheKey={activeKey}
         include={keepAliveIncludes}

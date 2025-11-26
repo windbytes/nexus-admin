@@ -3,7 +3,6 @@ import { usePreferencesStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { Layout, Skeleton } from 'antd';
-import { motion } from 'motion/react';
 import { lazy, Suspense } from 'react';
 
 // 懒加载组件
@@ -52,15 +51,7 @@ export const authenticatedRoute = createRoute({
 
             <Suspense fallback={<Skeleton active />}>
               <Content>
-                <motion.div
-                    className='w-full h-full'
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                  <Outlet />
-                </motion.div>
+                <Outlet />
               </Content>
             </Suspense>
 

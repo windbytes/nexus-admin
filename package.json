@@ -41,7 +41,6 @@
     "jsencrypt": "^3.5.4",
     "keepalive-for-react": "^5.0.2",
     "lodash-es": "^4.17.21",
-    "motion": "^12.23.24",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-draggable": "^4.5.0",
