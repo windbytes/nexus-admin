@@ -33,8 +33,8 @@
 
       // 默认文字颜色
       .ant-tabs-tab-btn {
-        color: #666;
-        font-size: 13px;
+        // color: #666;
+        // font-size: 13px;
         transition: color 0.3s;
       }
 
@@ -53,7 +53,7 @@
 
         // 激活态文字颜色
         .ant-tabs-tab-btn {
-          color: #1677ff !important; // Antd Primary Blue
+          color: var(--ant-color-primary) !important; // Antd Primary Blue
           font-weight: 500;
           text-shadow: none !important;
         }
@@ -63,7 +63,7 @@
           color: rgba(22, 119, 255, 0.6) !important;
 
           &:hover {
-            color: #1677ff !important;
+            color: var(--ant-color-primary) !important;
             background: rgba(22, 119, 255, 0.15);
           }
         }

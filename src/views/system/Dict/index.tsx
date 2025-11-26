@@ -1,4 +1,3 @@
-import useParentSize from '@/hooks/useParentSize';
 import type { DictSearchParams, DictState } from '@/services/system/dict/type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card, type TableProps } from 'antd';
@@ -12,8 +11,6 @@ import TableActionButtons from './TableActionButtons';
 // 数据字典模块
 const Dict: React.FC = () => {
   const { modal, message } = App.useApp();
-  // 容器高度计算（表格）
-  const { parentRef, height } = useParentSize();
 
   // 定义状态
   const [state, dispatch] = useReducer(
@@ -46,7 +43,10 @@ const Dict: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_dict', searchParams],
-    queryFn: () => {},
+    queryFn: () => ({
+      records: [],
+      totalRow: 0,
+    }),
   });
 
   // 处理搜索
@@ -134,7 +134,7 @@ const Dict: React.FC = () => {
         {/* 搜索表单 */}
         <DictSearchForm onSearch={handleSearch} />
         {/* 查询表格 */}
-        <Card style={{ flex: 1, marginTop: '8px', minHeight: 0 }} styles={{ body: { height: '100%' } }} ref={parentRef}>
+        <Card style={{ flex: 1, marginTop: '8px', minHeight: 0 }} styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
           {/* 操作按钮 */}
           <TableActionButtons
             handleAdd={handleAdd}
@@ -145,12 +145,11 @@ const Dict: React.FC = () => {
 
           {/* 表格数据 */}
           <DictTable
-            tableData={result?.data || []}
+            tableData={result?.records || []}
             loading={isLoading}
             columns={columns}
             onRow={onRow}
             rowSelection={rowSelection}
-            height={height}
             pagination={{
               pageSize: searchParams.pageSize,
               current: searchParams.pageNum,
@@ -158,7 +157,7 @@ const Dict: React.FC = () => {
               hideOnSinglePage: false,
               showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
-              total: result?.total || 0,
+              total: result?.totalRow || 0,
               onChange(page, pageSize) {
                 setSearchParams({
                   ...searchParams,

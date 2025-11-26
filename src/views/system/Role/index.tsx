@@ -1,4 +1,3 @@
-import useParentSize from '@/hooks/useParentSize';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleSearchParams, RoleState } from '@/services/system/role/type';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -19,8 +18,6 @@ import getRoleTableColumns from './RoleTableColumns';
  * @returns
  */
 const Role: React.FC = () => {
-  // 容器高度计算（表格）
-  const { parentRef, height } = useParentSize();
 
   // 定义状态（合并的状态）
   const [state, dispatch] = useReducer(
@@ -212,7 +209,7 @@ const Role: React.FC = () => {
         {/* 菜单检索条件栏 */}
         <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
         {/* 查询表格 */}
-        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%' } }} ref={parentRef}>
+        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }} >
           {/* 操作按钮 */}
           <RoleActionButtons
             onAddRoleClick={onAddRoleClick}
@@ -226,7 +223,6 @@ const Role: React.FC = () => {
             columns={columns}
             onRow={onRow}
             rowSelection={rowSelection}
-            height={height}
             pagination={{
               pageSize: searchParams.pageSize,
               current: searchParams.pageNum,
