@@ -1,15 +1,15 @@
+import DragModal from '@/components/modal/DragModal';
+import type { UserModel } from '@/services/system/user/type';
+import { userService } from '@/services/system/user/userApi';
+import { useMutation } from '@tanstack/react-query';
+import { zxcvbn } from '@zxcvbn-ts/core';
+import { App, Col, Form, Input, Progress, Row, type InputRef } from 'antd';
+import { keys, values } from 'lodash-es';
 import type React from 'react';
 import { memo, useEffect, useRef } from 'react';
-import { zxcvbn } from '@zxcvbn-ts/core';
-import { Input, Form, Progress, Row, Col, App, type InputRef } from 'antd';
-import { keys, values } from 'lodash-es';
-import type { UserModel } from '@/services/system/user/type';
-import { useMutation } from '@tanstack/react-query';
-import { userService } from '@/services/system/user/userApi';
-import DragModal from '@/components/modal/DragModal';
-import styles from './strengthMeter.module.scss';
-import { strengthMeterOptions } from './config';
 import { useTranslation } from 'react-i18next';
+import { strengthMeterOptions } from '../config';
+import styles from '../strengthMeter.module.scss';
 
 interface UserPasswordModalProps {
   open: boolean;
