@@ -56,16 +56,9 @@ export function Router() {
   // 如果路由还未初始化，显示加载状态
   if (!routerInstance) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          minHeight: '400px',
-        }}
+      <div className='h-full flex items-center justify-center min-h-[400px]'
       >
-        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} fullscreen />
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" fullscreen />
       </div>
     );
   }

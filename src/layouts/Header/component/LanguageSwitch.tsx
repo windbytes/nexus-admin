@@ -37,7 +37,7 @@ const LanguageSwitch = () => {
     <Dropdown menu={{ items: menuItems }} placement="bottom">
       <MyIcon
         type="nexus-language"
-        style={{ cursor: "pointer", fontSize: "18px" }}
+        className="text-[18px] cursor-pointer"
       />
     </Dropdown>
   );

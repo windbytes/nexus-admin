@@ -13,14 +13,7 @@ const CollapseSwitch: React.FC = () => {
   );
   return (
     <span
-      style={{
-        cursor: "pointer",
-        fontSize: "16px",
-        marginLeft: "6px",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="text-[16px] cursor-pointer ml-[6px] inline-flex items-center justify-center"
       onClick={() => updatePreferences("sidebar", "collapsed", !collapsed)}
     >
       {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

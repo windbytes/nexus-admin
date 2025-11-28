@@ -105,7 +105,7 @@ const SearchMenuModal: React.FC = () => {
         readOnly
         placeholder={t('common.operation.search')}
         suffix={<div className="bg-white rounded-sm px-2" onClick={() => setOpenModal(true)}>{getShortcutLabel(shortcut)}</div>}
-        prefix={<SearchOutlined style={{ cursor: 'pointer', fontSize: '18px' }} />}
+        prefix={<SearchOutlined className='text-[18px] cursor-pointer' />}
         onClick={() => setOpenModal(true)}
       />
       <Modal
@@ -114,9 +114,9 @@ const SearchMenuModal: React.FC = () => {
         title={
           <Title searchValue={searchValue} onSearch={handleSearch} onKeyDown={handleKeyDown} inputRef={inputRef} />
         }
-        styles={{
-          footer: { padding: '8px' },
-          body: { height: '400px', overflowY: 'scroll' },
+        classNames={{
+          footer: 'p-2',
+          body: 'h-[400px] overflow-y-scroll',
         }}
         onCancel={() => {
           setOpenModal(false);

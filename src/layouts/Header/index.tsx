@@ -19,21 +19,6 @@ import './header.scss';
 
 const Setting = lazy(() => import('./component/Setting'));
 
-// 提取静态样式对象，避免每次渲染都创建新对象
-const headerStyles = {
-  padding: 0,
-} as const;
-
-const iconStyles = {
-  cursor: 'pointer',
-  fontSize: '18px',
-} as const;
-
-const floatButtonStyles = {
-  right: 24,
-  bottom: 24,
-} as const;
-
 /**
  * 顶部布局内容
  * 性能优化：
@@ -94,7 +79,7 @@ const Header = memo(() => {
   return (
     <>
       {headerEnable ? (
-        <Layout.Header className="ant-layout-header header-container h-auto!" style={headerStyles}>
+        <Layout.Header className="ant-layout-header header-container h-auto! p-0">
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}
@@ -107,28 +92,28 @@ const Header = memo(() => {
               {/* 全局搜索 */}
               {globalSearch && <SearchMenuModal />}
               <Tooltip placement="bottom" title="github">
-                <GithubOutlined style={iconStyles} onClick={routeGitHub} />
+                <GithubOutlined className='text-[18px] cursor-pointer' onClick={routeGitHub} />
               </Tooltip>
               {/* 锁屏 */}
               {lockScreen && (
                 <Tooltip placement="bottom" title={t('layout.header.lock')}>
-                  <LockOutlined style={iconStyles} onClick={handleLockScreen} />
+                  <LockOutlined className='text-[18px] cursor-pointer' onClick={handleLockScreen} />
                 </Tooltip>
               )}
               {/* 邮件 */}
               <Badge count={5}>
-                <MailOutlined style={iconStyles} />
+                <MailOutlined className='text-[18px] cursor-pointer' />
               </Badge>
               {/* 通知 */}
               {notification && (
                 <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
                   <Badge count={5}>
-                    <BellOutlined style={iconStyles} />
+                    <BellOutlined className='text-[18px] cursor-pointer' />
                   </Badge>
                 </Dropdown>
               )}
               <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
-                <SettingOutlined className="my-spin" style={iconStyles} onClick={handleOpenSetting} />
+                <SettingOutlined className="my-spin text-[18px] cursor-pointer" onClick={handleOpenSetting} />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
@@ -146,9 +131,9 @@ const Header = memo(() => {
         </Layout.Header>
       ) : (
         <FloatButton
+          className='right-24 bottom-24'
           icon={<SettingOutlined className="my-spin" />}
           tooltip={<span>{t('layout.header.setting')}</span>}
-          style={floatButtonStyles}
           onClick={handleOpenSetting}
         />
       )}

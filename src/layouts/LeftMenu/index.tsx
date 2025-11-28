@@ -8,15 +8,6 @@ import MenuComponent from './component/MenuComponent';
 import SystemLogo from './component/SystemLogo';
 import './leftMenu.scss';
 
-// 提取静态样式对象到组件外部
-const siderStyles = {
-  overflow: 'hidden',
-  position: 'relative',
-  transition: 'width .2s cubic-bezier(.34,.69,.1,1)',
-  zIndex: 999,
-  borderRight: '1px solid #00000012',
-} as const;
-
 /**
  * 左边的菜单栏
  */
@@ -49,7 +40,7 @@ const LeftMenu: React.FC = memo(() => {
       className='nexus-layout-sider'
       trigger={null}
       collapsedWidth={64}
-      style={{ ...siderStyles, backgroundColor: finalMode === 'dark' ?  'var(--ant-layout-sider-bg)' : colorBgContainer }}
+      style={{ backgroundColor: finalMode === 'dark' ?  'var(--ant-layout-sider-bg)' : colorBgContainer }}
       collapsible
       width={sidebar.width}
       theme={finalMode}

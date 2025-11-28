@@ -28,7 +28,7 @@ const Title: React.FC<TitleProps> = ({
         value={searchValue}
         onChange={(e) => onSearch(e.target.value)}
         onKeyDown={onKeyDown}
-        prefix={<SearchOutlined style={{ cursor: 'pointer', fontSize: '18px' }} />}
+        prefix={<SearchOutlined className='text-[18px] cursor-pointer' />}
         allowClear
       />
     </div>

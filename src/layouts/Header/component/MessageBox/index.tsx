@@ -107,17 +107,19 @@ const Notify: React.FC = () => {
   ];
 
   return (
-    <Card className={styles['message-box']} styles={{ body: { height: '100%', padding: '12px' } }}>
+    <Card className={styles['message-box']} classNames={{
+      body: 'h-full p-3',
+    }}>
       <Spin
         spinning={loading}
         indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-        style={{ display: 'block' }}
+        className="block"
       >
         <Tabs
           items={tabList}
           defaultActiveKey="message"
           size="small"
-          style={{ height: '100%' }}
+          className="h-full"
           tabBarExtraContent={
             <Button
               type="link"

@@ -56,7 +56,7 @@ const GlobalProvider: React.FC = () => {
       }}
       locale={locale === 'zh-CN' ? zhCN : enUS}
     >
-      <AntdApp style={{ height: '100%' }}>
+      <AntdApp className='h-full'>
         <App />
       </AntdApp>
     </ConfigProvider>

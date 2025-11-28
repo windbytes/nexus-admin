@@ -34,16 +34,13 @@ const FullScreen: React.FC = () => {
     <Tooltip title={t('layout.header.fullScreen')} placement="bottom">
         {fullScreen ? (
           <FullscreenExitOutlined
-            style={{ cursor: 'pointer', fontSize: '18px' }}
-            onClick={handleFullScreen}
-          />
-        ) : (
-          <FullscreenOutlined
-            style={{ cursor: 'pointer', fontSize: '18px' }}
-            onClick={handleFullScreen}
-          />
-        )}
-      </Tooltip>
+            className="text-[18px] cursor-pointer"
+          onClick={handleFullScreen}
+        />
+      ) : (
+        <FullscreenOutlined className="text-[18px] cursor-pointer" onClick={handleFullScreen} />
+      )}
+    </Tooltip>
   );
 };
 export default FullScreen;

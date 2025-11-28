@@ -1,7 +1,7 @@
 import type { BasicOptions } from '@/types/global';
 import { Select } from 'antd';
-import clsx from 'clsx';
 import "./switchItem.scss";
+import classNames from '@/utils/classnames';
 
 /**
  * 选择项
@@ -12,22 +12,15 @@ const SelectItem: React.FC<SelectItemProps> = (props) => {
 
   return (
     <div
-      className={clsx('select-item', {
+      className={classNames('select-item', {
         'pointer-events-none opacity-50': disabled,
       })}
     >
-      <span
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '14px',
-          lineHeight: '20px',
-        }}
-      >
+      <span className='flex items-center text-sm leading-5'>
         {title}
       </span>
       {/* Select组件 */}
-      <Select options={items} disabled={disabled} placeholder={placeholder} style={{width: '165px'}}/>
+      <Select options={items} disabled={disabled} placeholder={placeholder} className='w-[165px]'/>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
-import { Empty, Menu, Spin, type MenuProps } from 'antd';
+import { Menu, Spin, type MenuProps } from 'antd';
 import { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
@@ -142,34 +142,28 @@ const MenuComponent = memo(() => {
   }, [menus, locale, t]);
 
   return (
-    <Spin
-      wrapperClassName="side-menu"
-      indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-      spinning={loading}
-      tip={loading ? '加载中...' : '加载菜单'}
-    >
-      {menuList.length > 0 ? (
-        <Menu
-          style={{
-            borderRight: 0,
-            height: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: '0 8px',
-          }}
-          mode="inline"
-          theme={mode}
-          inlineCollapsed={collapsed}
-          selectedKeys={currentSelectedKeys}
-          {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
-          items={menuList}
-          onClick={clickMenu}
-          onOpenChange={onOpenChange}
-        />
-      ) : (
-        <Empty description={<>暂无菜单，请检查用户角色是否具有菜单！</>} />
-      )}
-    </Spin>
+    <>
+      {
+        loading ?(<Spin
+        indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
+        spinning
+      >
+      </Spin>) : (
+          <Menu
+            className='side-menu'
+            mode="inline"
+            theme={mode}
+            inlineCollapsed={collapsed}
+            selectedKeys={currentSelectedKeys}
+            {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
+            items={menuList}
+            onClick={clickMenu}
+            onOpenChange={onOpenChange}
+          />
+        )
+      }
+    </>
+    
   );
 });
 

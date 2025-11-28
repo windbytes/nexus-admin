@@ -40,7 +40,7 @@ const BreadcrumbNav: React.FC = () => {
   }, [pathname, menus, caches, breadcrumb, t, i18n.language]);
 
   // 组件的DOM内容
-  return <Breadcrumb items={items} className="flex justify-between items-center nexus-breadcrumb" style={{ marginLeft: '16px' }} />;
+  return <Breadcrumb items={items} className="flex justify-between items-center ml-[16px]! nexus-breadcrumb" />;
 };
 export default memo(BreadcrumbNav);
 
@@ -105,7 +105,7 @@ function patchBreadcrumb(
     const title = (isLast || isNotRoute) ? (
       <>
         {iconNode}
-        <span style={{ padding: '0 4px' }}>{titleContent}</span>
+        <span className="px-1">{titleContent}</span>
       </>
     ) : (
       <>

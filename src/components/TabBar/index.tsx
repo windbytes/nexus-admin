@@ -11,10 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import './tabBar.scss';
 
-interface TabBarProps {
-  className?: string;
-}
-
 /**
  * 优化后的 ActivityTabBar
  * 1. 使用 useMemo 扁平化菜单结构，实现 O(1) 路由查找
@@ -22,7 +18,7 @@ interface TabBarProps {
  * 3. 合并初始化与路由同步逻辑
  * 4. 规范化 Context Menu 处理
  */
-const TabBar: React.FC<TabBarProps> = memo(({ className }) => {
+const TabBar: React.FC = memo(() => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   // 仅订阅 pathname，避免不必要的重新渲染
@@ -239,33 +235,31 @@ const TabBar: React.FC<TabBarProps> = memo(({ className }) => {
   if (!tabState.tabs.length) return null;
 
   return (
-    <div className={`tab-bar ${className || ''}`}>
-      <div className="tab-bar-content flex w-full">
-        <Tabs
-          type="editable-card"
-          activeKey={tabState.activeKey}
-          onTabClick={handleTabClick}
-          onEdit={handleTabEdit}
-          items={tabItems}
-          size="middle"
-          hideAdd
-          tabBarGutter={0}
-          className="tab-bar-tabs flex-1"
-        />
-        
-        {/* 右侧功能区：下拉菜单操作当前激活的 Tab */}
-        <div className="tab-bar-actions w-[40px] flex items-center justify-center border-l border-gray-200">
-          <Dropdown 
-            menu={{ 
-              items: getMenuItems(tabState.activeKey), 
-              onClick: ({ key }) => handleMenuAction(key, tabState.activeKey) 
-            }} 
-            placement="bottomRight" 
-            trigger={['click', 'hover']}
-          >
-            <Button type="text" size="small" icon={<DownOutlined />} className="flex items-center justify-center" />
-          </Dropdown>
-        </div>
+    <div className="tab-bar flex w-full">
+      <Tabs
+        type="editable-card"
+        activeKey={tabState.activeKey}
+        onTabClick={handleTabClick}
+        onEdit={handleTabEdit}
+        items={tabItems}
+        size="middle"
+        hideAdd
+        tabBarGutter={0}
+        className="tab-bar-tabs flex-1"
+      />
+      
+      {/* 右侧功能区：下拉菜单操作当前激活的 Tab */}
+      <div className="tab-bar-actions w-[40px] flex items-center justify-center border-l border-gray-200">
+        <Dropdown 
+          menu={{ 
+            items: getMenuItems(tabState.activeKey), 
+            onClick: ({ key }) => handleMenuAction(key, tabState.activeKey) 
+          }} 
+          placement="bottomRight" 
+          trigger={['click', 'hover']}
+        >
+          <Button type="text" size="small" icon={<DownOutlined />} className="flex items-center justify-center" />
+        </Dropdown>
       </div>
     </div>
   );

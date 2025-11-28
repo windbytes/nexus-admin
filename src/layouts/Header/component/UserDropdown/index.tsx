@@ -4,6 +4,7 @@ import { frameworkService } from '@/services/framework/frameworkApi';
 import { usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
+import classNames from '@/utils/classnames';
 import {
   ExclamationCircleOutlined,
   FileMarkdownOutlined,
@@ -282,16 +283,6 @@ const UserDropdown: React.FC = () => {
       },
     },
   ];
-
-  /**
-   * 内容样式
-   */
-  const contentStyle: React.CSSProperties = {
-    backgroundColor: token.colorBgElevated,
-    borderRadius: token.borderRadiusLG,
-    boxShadow: token.boxShadowSecondary,
-  };
-
   /**
    * 自定义渲染
    * @param menus 菜单
@@ -299,11 +290,15 @@ const UserDropdown: React.FC = () => {
    */
   const renderDropdown = (menus: ReactNode) => {
     return (
-      <div className="dropdownContent" style={contentStyle}>
+      <div className={classNames('dropdownContent', {
+        backgroundColor: token.colorBgElevated,
+        borderRadius: token.borderRadiusLG,
+        boxShadow: token.boxShadowSecondary,
+      })}>
         <div className="avatar flex items-center p-3">
           <Avatar size="large" src={avatar} />
         </div>
-        <Divider style={{ margin: '2px 0' }} />
+        <Divider className='my-0.5 mx-0' />
         {menus}
       </div>
     );
@@ -315,15 +310,13 @@ const UserDropdown: React.FC = () => {
       menu={{ items, triggerSubMenuAction: 'hover' }}
       popupRender={renderDropdown}
       placement="bottomLeft"
-      styles={{
-        root: {
-          width: 240,
-        }
+      classNames={{
+        root: 'w-[240px]',
       }}
     >
       <div className="login-user flex items-center cursor-pointer justify-between h-[50] transition-all duration-300">
         <Avatar size="default" src={avatar} />
-        <span style={{ margin: '0 0 0 6px' }}>{userStore.loginUser}</span>
+        <span className="m-0 ml-1.5">{userStore.loginUser}</span>
       </div>
     </Dropdown>
   );

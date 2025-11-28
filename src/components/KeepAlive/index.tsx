@@ -54,10 +54,11 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
 
   return (
       <KeepAlive
+        viewTransition
         aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
         activeCacheKey={activeKey}
         include={keepAliveIncludes}
-        max={20} // Default max, can be configured
+        max={10} // Default max, can be configured
         cacheNodeClassName="h-full w-full" // Ensure cached nodes take full height/width if needed
       >
         {children}

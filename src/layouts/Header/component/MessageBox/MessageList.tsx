@@ -1,6 +1,7 @@
 import { Avatar, Button, Empty, Space, Tag, Typography } from 'antd';
 import type React from 'react';
 import styles from './message-box.module.scss';
+import classNames from '@/utils/classnames';
 
 /**
  * 消息列表
@@ -40,8 +41,7 @@ const MessageList: React.FC<MessageListProps> = (props) => {
         {data.map((item, index) => (
           <div
             key={item.id}
-            className={styles['message-item']}
-            style={{ opacity: item.status ? 0.5 : 1 }}
+            className={classNames(styles['message-item'], item.status && 'opacity-50')}
             onClick={() => onItemClick(item, index)}
           >
             <div className={styles['message-item-content']}>
@@ -65,10 +65,10 @@ const MessageList: React.FC<MessageListProps> = (props) => {
                   ) : null}
                 </div>
                 <div className={styles['message-description']}>
-                  <Typography.Paragraph style={{ marginBottom: 0 }} ellipsis>
+                  <Typography.Paragraph className="mb-0" ellipsis>
                     {item.content}
                   </Typography.Paragraph>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  <Typography.Text type="secondary" className="text-xs">
                     {item.time}
                   </Typography.Text>
                 </div>

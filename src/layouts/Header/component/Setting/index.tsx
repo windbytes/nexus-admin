@@ -118,27 +118,13 @@ const Setting: React.FC<SettingProps> = ({ open, setOpen }) => {
     <Drawer
       title={
         <div
-          className="title"
-          style={{ fontSize: "16px", fontWeight: "normal" }}
+          className="title text-[16px] font-normal"
         >
-          <h2
-            style={{
-              margin: 0,
-              textAlign: "left",
-              fontSize: "inherit",
-              fontWeight: "500",
-            }}
-          >
+          <h2 className="m-0 text-left font-500">
             偏好设置
           </h2>
           <p
-            className="subTitle"
-            style={{
-              fontSize: ".75rem",
-              lineHeight: "1rem",
-              marginTop: ".25rem",
-              marginBottom: "0",
-            }}
+            className="subTitle text-xs leading-4 mt-1 mb-0"
           >
             自定义偏好设置 & 实时预览
           </p>
@@ -150,7 +136,10 @@ const Setting: React.FC<SettingProps> = ({ open, setOpen }) => {
           <CloseOutlined onClick={() => setOpen(false)} />
         </Space>
       }
-      styles={{ header: { padding: "12px 16px" }, body: { padding: "12px" } }}
+      classNames={{
+        header: 'px-3! py-4!',
+        body: 'p-3!'
+      }}
       placement="right"
       open={open}
       closeIcon={false}

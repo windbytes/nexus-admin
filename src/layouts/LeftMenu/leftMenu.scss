@@ -1,4 +1,10 @@
 .nexus-layout-sider {
+  overflow: hidden;
+  position: relative;
+  transition: width .2s cubic-bezier(.34, .69, .1, 1);
+  z-index: 999;
+  border-right: 1px solid #00000012;
+
   .ant-layout-sider-children {
     display: flex;
     flex-direction: column;
@@ -10,6 +16,11 @@
 .side-menu {
   flex: 1;
   overflow-y: auto;
+  border-right: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 8px;
 
   .ant-menu-inline .ant-menu-sub.ant-menu-inline {
     border-radius: var(--ant-border-radius);

@@ -2,12 +2,8 @@
   width: 100%;
   padding: 6px 16px 0; // 顶部留一点空隙，两侧留空
   background-color: #fff; // 确保背景色统一
-
-  .tab-bar-content {
-    display: flex;
-    width: 100%;
-    align-items: flex-end; // 底部对齐
-  }
+  display: flex;
+  align-items: flex-end; // 底部对齐
 
   .tab-bar-tabs {
     flex: 1;
@@ -41,6 +37,7 @@
       // 悬停效果
       &:hover {
         background-color: rgba(0, 0, 0, 0.02) !important;
+
         .ant-tabs-tab-btn {
           color: #333;
         }
@@ -119,6 +116,7 @@
 
     .ant-btn {
       color: #666;
+
       &:hover {
         color: var(--ant-color-primary);
         background: rgba(22, 119, 255, 0.1);
