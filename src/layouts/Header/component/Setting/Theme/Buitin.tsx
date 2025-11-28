@@ -66,7 +66,7 @@ const Buitin: React.FC = () => {
                 </div>
               ) : (
                 <div
-                  className="bg-color w-5 h-5 m-2 rounded-md"
+                  className="bg-color w-5 h-5 my-2 mx-10 rounded-md"
                   style={{ backgroundColor: item.color }}
                 />
               )}
