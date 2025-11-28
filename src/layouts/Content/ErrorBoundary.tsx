@@ -1,13 +1,18 @@
 import { Button, Result } from 'antd';
-import { useErrorBoundary } from 'react-error-boundary';
+
+interface ErrorFallbackProps {
+  error: any;
+  resetBoundary?: () => void;
+  resetErrorBoundary?: () => void;
+}
 
 /**
  * 错误边界的响应
  * @param param0
  * @returns
  */
-export function ErrorFallback({ error }: any) {
-  const { resetBoundary } = useErrorBoundary();
+export function ErrorFallback({ error, resetBoundary, resetErrorBoundary }: ErrorFallbackProps) {
+  const reset = resetBoundary || resetErrorBoundary || (() => window.location.reload());
 
   return (
     <Result
@@ -20,7 +25,7 @@ export function ErrorFallback({ error }: any) {
         </>
       }
       extra={
-        <Button type="primary" onClick={resetBoundary}>
+        <Button type="primary" onClick={reset}>
           重试
         </Button>
       }

@@ -9,6 +9,21 @@ import type { Preferences } from './storeState';
 export type Category = keyof Preferences;
 export type SettingKey<T extends Category> = keyof Preferences[T];
 
+/**
+ * 获取 preferences 中的值
+ * @param preferences - 全局状态库中的 preferences
+ * @param category - 类别
+ * @param key - 设置键
+ * @returns 设置值
+ */
+const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
+  preferences: Preferences,
+  category: T,
+  pKey: K
+): Preferences[T][K] => {
+  return preferences[category][pKey];
+};
+
 interface MenuStore {
   menus: RouteItem[];
   caches: MenuCaches;
@@ -78,4 +93,4 @@ const usePreferencesStore = create<PreferencesStore>()(
   )
 );
 
-export { useMenuStore, usePreferencesStore };
+export { useMenuStore, usePreferencesStore, getPreferenceValue };

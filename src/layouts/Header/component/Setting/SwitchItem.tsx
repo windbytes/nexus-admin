@@ -2,6 +2,7 @@ import { Switch } from "antd";
 import type { ReactNode } from "react";
 import {
   type Category,
+  getPreferenceValue,
   type SettingKey,
   usePreferencesStore,
 } from "@/stores/store";
@@ -10,20 +11,7 @@ import "./switchItem.scss";
 import { useShallow } from "zustand/shallow";
 import classNames from "@/utils/classnames";
 
-/**
- * 获取 preferences 中的值
- * @param preferences - 全局状态库中的 preferences
- * @param category - 类别
- * @param key - 设置键
- * @returns 设置值
- */
-const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
-  preferences: Preferences,
-  category: T,
-  pKey: K
-): Preferences[T][K] => {
-  return preferences[category][pKey];
-};
+
 
 /**
  * 切换组件

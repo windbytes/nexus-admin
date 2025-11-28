@@ -10,7 +10,7 @@ const General: React.FC = () => {
   return (
     <>
       {/* 语言 */}
-      <SelectItem title="语言" items={SUPPORT_LANGUAGES} disabled />
+      <SelectItem title="语言" category="app" pKey="locale" items={SUPPORT_LANGUAGES} />
       {/* 动态标题 */}
       <SwitchItem title="动态标题" category="app" pKey="dynamicTitle" />
       {/* 水印 */}

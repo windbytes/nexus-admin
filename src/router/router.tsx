@@ -47,7 +47,7 @@ export function Router() {
       defaultPreload: 'intent', // 预加载策略
       defaultPreloadDelay: 100, // 预加载延迟
       // 添加默认的错误处理
-      defaultErrorComponent: ({ error }) => <ErrorFallback error={error} />,
+      defaultErrorComponent: ({ error, reset }) => <ErrorFallback error={error} resetBoundary={reset} />,
     });
 
     setRouterInstance(router);

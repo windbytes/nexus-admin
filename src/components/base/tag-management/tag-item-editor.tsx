@@ -43,11 +43,11 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
       setIsEditing(false);
       notification.success({
-        message: t('common.updateSuccess'),
+        title: t('common.updateSuccess'),
       });
     } catch (err: any) {
       notification.error({
-        message: t('common.updateFailed') + err.message,
+        title: t('common.updateFailed') + err.message,
       });
     } finally {
       setPending(false);
@@ -65,11 +65,11 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
       // 更新 react-query 缓存
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
       notification.success({
-        message: t('common.deleteSuccess'),
+        title: t('common.deleteSuccess'),
       });
     } catch (err: any) {
       notification.error({
-        message: t('common.deleteFailed') + err.message,
+        title: t('common.deleteFailed') + err.message,
       });
     } finally {
       setPending(false);

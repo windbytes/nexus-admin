@@ -1,5 +1,5 @@
 import { Select } from 'antd';
-import { useMemo, memo } from 'react';
+import { memo } from 'react';
 import type React from 'react';
 import type { RoleOption } from './types';
 
@@ -54,11 +54,11 @@ const BaseRoleSelector: React.FC<BaseRoleSelectorProps> = memo(({
       onChange={onChange}
       loading={loading}
       disabled={disabled}
-      showSearch={showSearch}
+      showSearch={showSearch && {
+        filterOption: (input, option) => 
+          (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
+      }}
       className={className}
-      filterOption={(input, option) => 
-        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-      }
       options={options}
     />
   );

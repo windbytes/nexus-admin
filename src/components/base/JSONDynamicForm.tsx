@@ -13,22 +13,22 @@ const JSONDynamicForm: React.FC<{
   properties?: any;
 }> = ({ properties = {} }) => {
   return (
-    <Card size="small" style={{ margin: 0 }}>
+    <Card size="small" className='m-0'>
       <Text strong>JSON 数据编辑</Text>
 
       <Form.List name="fields">
         {(fields, { add, remove }) => (
           <>
             {fields.map(({ key, name, ...restField }) => (
-              <Card key={key} size="small" style={{ marginBottom: 8 }}>
-                <Space style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+              <Card key={key} size="small" className='mb-2'>
+                <Space className='flex mb-2' align="baseline">
                   <Form.Item
                     {...restField}
                     name={[name, 'key']}
                     rules={[{ required: true, message: '请输入字段名' }]}
-                    style={{ marginBottom: 0 }}
+                    className='mb-0'
                   >
-                    <Input placeholder="字段名" disabled={properties.disabled} style={{ width: 120 }} />
+                    <Input placeholder="字段名" disabled={properties.disabled} className='w-30' />
                   </Form.Item>
                   <Form.Item
                     {...restField}
@@ -46,7 +46,7 @@ const JSONDynamicForm: React.FC<{
                         },
                       },
                     ]}
-                    style={{ marginBottom: 0, flex: 1 }}
+                    className='mb-0 flex-1'
                   >
                     <Input placeholder="请输入值" disabled={properties.disabled} />
                   </Form.Item>
@@ -63,7 +63,7 @@ const JSONDynamicForm: React.FC<{
             ))}
 
             {fields.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+              <div className='text-center p-5 text-[#999]'>
                 暂无数据，点击"添加字段"开始编辑
               </div>
             )}

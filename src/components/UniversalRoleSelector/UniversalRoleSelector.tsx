@@ -4,12 +4,7 @@ import type { RoleModel } from '@/services/system/role/type';
 import BaseRoleSelector from './BaseRoleSelector';
 import RoleSelectorBar from './RoleSelectorBar';
 import MultipleRoleSelector from './MultipleRoleSelector';
-import type { 
-  UniversalRoleSelectorProps, 
-  SingleRoleSelectorProps, 
-  MultipleRoleSelectorProps, 
-  SelectWithRefreshRoleSelectorProps 
-} from './types';
+import type { UniversalRoleSelectorProps } from './types';
 
 /**
  * 通用角色选择组件

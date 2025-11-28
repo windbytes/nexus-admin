@@ -81,17 +81,7 @@ const RouteLoadingBar = memo(() => {
   if (opacity === 0 && progress === 0) return null;
 
   return (
-    <div 
-      className="route-loading-bar"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999, // 确保在所有层级之上（包括 Modal）
-        pointerEvents: 'none', // 避免遮挡鼠标点击
-      }}
-    >
+    <div className="fixed top-0 left-0 right-0 z-9999 pointer-events-none">
       <div
         style={{
           height: '2px', // 极细线条，比 Antd Progress 更精致

@@ -22,7 +22,7 @@ const TabBar: React.FC = () => {
       {/* 显示最大化按钮 */}
       <SwitchItem title="显示最大化按钮" category="tabbar" pKey="showMaximize" />
       {/* 标签页风格 */}
-      <SelectItem title="标签页风格" />
+      <SelectItem category="tabbar" pKey="styleType" title="标签页风格" />
     </>
   );
 };

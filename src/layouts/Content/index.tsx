@@ -1,6 +1,5 @@
 import KeepAlive from '@/components/KeepAlive';
-import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
-import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
+import { ErrorFallback } from './ErrorBoundary';
 import { Icon } from '@iconify/react';
 import { Layout, Spin } from 'antd';
 import { memo, Suspense, useMemo, type ReactNode } from 'react';
@@ -20,26 +19,12 @@ interface ContentProps {
 }
 
 const Content = memo(({ children }: ContentProps) => {
-  // 【性能监控】监控路由切换性能
-  useRouteChangeMonitor({
-    enabled: false,
-    threshold: 300,
-  });
-
-  // 缓存 ErrorFallback 组件
-  const errorFallback = useMemo(() => <ErrorFallback />, []);
 
   // 【优化】使用更明显的加载指示器
   const loadingFallback = useMemo(
     () => (
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          minHeight: '400px',
-        }}
+        className='h-full flex items-center justify-center min-h-[400px]'
       >
         <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" />
       </div>
@@ -53,7 +38,7 @@ const Content = memo(({ children }: ContentProps) => {
       style={{ overscrollBehavior: 'contain' }}
     >
       <Suspense fallback={loadingFallback}>
-        <ErrorBoundary fallback={errorFallback}>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
           <KeepAlive>{children}</KeepAlive>
         </ErrorBoundary>
       </Suspense>

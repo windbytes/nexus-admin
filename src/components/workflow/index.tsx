@@ -21,6 +21,7 @@ import './workflow.scss';
 /**
  * 流程编排组件
  */
+// @Deprecated
 const Workflow: React.FC<WorkflowProps> = (props) => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   // 根据应用ID查询流程数据

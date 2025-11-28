@@ -145,7 +145,7 @@ const TableSelect = <T extends Record<string, any> = any>({
       case 'Enter':
         e.preventDefault();
         if (state.selectedRowIndex >= 0 && state.filteredData[state.selectedRowIndex]) {
-          handleSelect(state.filteredData[state.selectedRowIndex], 'keyboard');
+          handleSelect(state.filteredData[state.selectedRowIndex] as T, 'keyboard');
         }
         break;
       case 'Escape':
@@ -252,7 +252,7 @@ const TableSelect = <T extends Record<string, any> = any>({
     selectedRowKeys: value ? [value[keyField]] : [],
     onChange: (_selectedRowKeys: React.Key[], selectedRows: T[]) => {
       if (selectedRows.length > 0) {
-        handleSelect(selectedRows[0], 'click');
+        handleSelect(selectedRows[0] as T, 'click');
       }
     },
   }), [value, keyField, handleSelect]);
@@ -272,8 +272,8 @@ const TableSelect = <T extends Record<string, any> = any>({
     const isCurrentValue = value && record[keyField] === value[keyField];
     
     return cn(
-      isSelected && styles.selected,
-      isCurrentValue && styles.currentValue,
+      isSelected && styles['selected'],
+      isCurrentValue && styles['currentValue'],
     );
   }, [state.selectedRowIndex, value, keyField]);
 
@@ -350,7 +350,7 @@ const TableSelect = <T extends Record<string, any> = any>({
     <div
       ref={dropdownRef}
       className={cn(
-        styles.dropdown,
+        styles['dropdown'],
         classNames?.dropdown,
       )}
       style={{
@@ -359,7 +359,7 @@ const TableSelect = <T extends Record<string, any> = any>({
         ...customStyles?.dropdown,
       }}
     >
-      <div className={styles.tableSection}>
+      <div className={styles['tableSection']}>
         <Table<T>
           bordered
           columns={tableColumns}
@@ -373,7 +373,7 @@ const TableSelect = <T extends Record<string, any> = any>({
             onClick: () => handleRowClick(record),
           })}
           scroll={{ y: dropdownHeight - (pagination ? 100 : 48), x: 'max-content' }}
-          className={cn(styles.table, classNames?.table)}
+          className={cn(styles['table'], classNames?.table)}
           loading={state.loading}
           style={customStyles?.table}
         />
@@ -382,7 +382,7 @@ const TableSelect = <T extends Record<string, any> = any>({
   );
 
   return (
-    <div className={styles.tableSelect}>
+    <div className={styles['tableSelect']}>
       <Input
         ref={inputRef}
         value={displayValue}
@@ -390,7 +390,7 @@ const TableSelect = <T extends Record<string, any> = any>({
         disabled={disabled}
         allowClear={allowClear}
         style={customStyles?.input}
-        className={cn(styles.input, classNames?.input)}
+        className={cn(styles['input'], classNames?.input)}
         onKeyDown={handleKeyDown}
         onClick={handleInputClick}
         onFocus={handleInputFocus}
@@ -398,7 +398,7 @@ const TableSelect = <T extends Record<string, any> = any>({
         onClear={handleInputClear}
         onChange={handleInputChange}
         suffix={
-          <span className={cn(styles.suffixIcon, state.open && styles.open)}>
+          <span className={cn(styles['suffixIcon'], state.open && styles['open'])}>
             ▼
           </span>
         }
