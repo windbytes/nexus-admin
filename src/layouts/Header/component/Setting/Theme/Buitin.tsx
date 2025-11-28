@@ -51,7 +51,7 @@ const Buitin: React.FC = () => {
             >
               {item.type === "custom" ? (
                 <div
-                  className="w-full h-full p-2"
+                  className="w-5 h-5 my-2 mx-10 rounded-md"
                 >
                   <div
                     className="flex items-center justify-center relative w-4 h-4 rounded-md"
