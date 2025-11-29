@@ -1,4 +1,5 @@
 import SwitchItem from '../SwitchItem';
+import { getShortcutLabel } from '@/utils/utils';
 
 /**
  * 快捷键
@@ -11,28 +12,28 @@ const Shortcut: React.FC = () => {
       {/* 全局搜索 */}
       <SwitchItem
         title="全局搜索"
-        shortcut="⌘ + K"
+        shortcut={getShortcutLabel("Ctrl K")}
         category="shortcut"
         pKey="globalSearch"
       />
       {/* 偏好设置 */}
       <SwitchItem
         title="偏好设置"
-        shortcut="⌘ + ,"
+        shortcut={getShortcutLabel("Ctrl ,")}
         category="shortcut"
         pKey="globalPreferences"
       />
       {/* 退出登录 */}
       <SwitchItem
         title="退出登录"
-        shortcut="⌥ + Q"
+        shortcut={getShortcutLabel("Alt Q")}
         category="shortcut"
         pKey="globalLogout"
       />
       {/* 锁定屏幕 */}
       <SwitchItem
         title="锁定屏幕"
-        shortcut="⌥ + L"
+        shortcut={getShortcutLabel("Alt L")}
         category="shortcut"
         pKey="globalLockScreen"
       />
