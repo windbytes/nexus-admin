@@ -2,7 +2,7 @@ import useTableScroll from '@/hooks/useTableScroll';
 import type { UserModel } from '@/services/system/user/type';
 import { Table } from 'antd';
 import { memo, useMemo } from 'react';
-import type { MenuProps } from 'antd';
+import type { MenuProps, TableProps } from 'antd';
 import { getColumns } from '../columns';
 import { useTranslation } from 'react-i18next';
 import { usePreferencesStore } from '@/stores/store';
@@ -15,7 +15,7 @@ interface UserTableProps {
     pageSize: number;
   };
   total: number;
-  selectedRowKeys: string[];
+  selectedRowKeys: React.Key[];
   selectedRows: UserModel[];
   onSelectionChange: (keys: string[], rows: UserModel[]) => void;
   onPageChange: (page: number, pageSize?: number) => void;
@@ -97,7 +97,7 @@ const UserTable = memo<UserTableProps>(
           columns={columns || []}
           dataSource={data}
           rowKey="id"
-          rowSelection={rowSelection}
+          rowSelection={rowSelection as TableProps<UserModel>['rowSelection']}
           pagination={pagination}
           loading={loading}
           size="middle"
