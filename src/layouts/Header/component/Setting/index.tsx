@@ -29,7 +29,7 @@ import Animation from "./Common/Animation";
  */
 export interface SettingProps {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
 }
 
 /* 系统配置界面 */

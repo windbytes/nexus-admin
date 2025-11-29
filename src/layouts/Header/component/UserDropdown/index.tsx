@@ -16,12 +16,12 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { App, Avatar, Divider, Dropdown, type MenuProps, message, theme } from 'antd';
+import { Avatar, Divider, Dropdown, type MenuProps, message, theme } from 'antd';
 import type React from 'react';
 import { memo, type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
+import { useLogout } from "@/hooks/useLogout"
 
 /**
  * 用户信息下拉框
@@ -36,7 +36,6 @@ const UserDropdown: React.FC = () => {
       currentRoleId: state.currentRoleId,
       roleCode: state.roleCode,
       switchRole: state.switchRole,
-      logout: state.logout,
     }))
   );
   const { resetTabs } = useTabStore(
@@ -45,11 +44,11 @@ const UserDropdown: React.FC = () => {
     }))
   );
   const { token } = theme.useToken();
-  const { modal } = App.useApp();
   const { t } = useTranslation();
 
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const handleLogout = useLogout();
 
   // 使用 React Query 获取用户角色列表
   const {
@@ -257,30 +256,7 @@ const UserDropdown: React.FC = () => {
       icon: <LogoutOutlined />,
       disabled: false,
       danger: true,
-      onClick: () => {
-        modal.confirm({
-          title: t('layout.header.userDropdown.logout'),
-          icon: <ExclamationCircleOutlined />,
-          content: t('login.confirmLogout'),
-          onOk: () => {
-            // 清除后端的信息
-            commonService.logout().then((res: boolean) => {
-              if (res) {
-                // 清空所有tab
-                resetTabs();
-                // 清理角色相关的缓存
-                queryClient.removeQueries({ queryKey: ['user-roles'] });
-                // 清理用户信息
-                userStore.logout();
-                // 修改回document.title
-                document.title = 'nexus';
-                // 退出到登录页面
-                navigate({ to: '/login', replace: true });
-              }
-            });
-          },
-        });
-      },
+      onClick: handleLogout,
     },
   ];
   /**

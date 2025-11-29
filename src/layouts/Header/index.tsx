@@ -1,6 +1,6 @@
 import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
-import { memo, Suspense, useCallback, useMemo, useState } from 'react';
+import { memo, Suspense, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
@@ -16,6 +16,7 @@ import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
 import UserDropdown from './component/UserDropdown';
 import './header.scss';
+import useGlobalUIStore from '@/stores/globalUIStore';
 
 const Setting = lazy(() => import('./component/Setting'));
 
@@ -28,7 +29,6 @@ const Setting = lazy(() => import('./component/Setting'));
  * 4. 优化 Dropdown 的 dropdownRender
  */
 const Header = memo(() => {
-  const [openSetting, setOpenSetting] = useState<boolean>(false);
 
   // 使用 useShallow 优化选择器，避免不必要的重渲染
   const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
@@ -37,6 +37,13 @@ const Header = memo(() => {
       headerEnable: state.preferences.header.enable,
       tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
+    }))
+  );
+  // 设置窗口
+  const { settingMenuModalOpen, setSettingMenuModalOpen } = useGlobalUIStore(
+    useShallow((state) => ({
+      settingMenuModalOpen: state.settingMenuModalOpen,
+      setSettingMenuModalOpen: state.setSettingMenuModalOpen,
     }))
   );
 
@@ -61,14 +68,7 @@ const Header = memo(() => {
    * 打开设置面板 - 使用 useCallback 缓存
    */
   const handleOpenSetting = useCallback(() => {
-    setOpenSetting(true);
-  }, []);
-
-  /**
-   * 关闭设置面板 - 使用 useCallback 缓存
-   */
-  const handleCloseSetting = useCallback(() => {
-    setOpenSetting(false);
+    setSettingMenuModalOpen(true);
   }, []);
 
   /**
@@ -139,7 +139,7 @@ const Header = memo(() => {
       )}
       {/* 系统设置界面 */}
       <Suspense fallback={<Skeleton />}>
-        <Setting open={openSetting} setOpen={handleCloseSetting} />
+        <Setting open={settingMenuModalOpen} setOpen={setSettingMenuModalOpen} />
       </Suspense>
     </>
   );

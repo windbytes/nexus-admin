@@ -15,6 +15,13 @@ const Shortcut: React.FC = () => {
         category="shortcut"
         pKey="globalSearch"
       />
+      {/* 偏好设置 */}
+      <SwitchItem
+        title="偏好设置"
+        shortcut="⌘ + ,"
+        category="shortcut"
+        pKey="globalPreferences"
+      />
       {/* 退出登录 */}
       <SwitchItem
         title="退出登录"

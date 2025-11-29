@@ -1,4 +1,3 @@
-import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
 import { useMenuStore } from '@/stores/store';
 import { getShortcutLabel } from '@/utils/utils';
 import { SearchOutlined } from '@ant-design/icons';
@@ -14,6 +13,8 @@ import { useSearchHistory } from './hooks/useSearchHistory';
 import './searchMenuModal.scss';
 import Title from './title';
 import type { SearchHistoryItem, SearchResultItem } from './types';
+import useGlobalUIStore from '@/stores/globalUIStore';
+import { useShallow } from 'zustand/shallow';
 
 /**
  * 搜索菜单模态框组件
@@ -23,7 +24,14 @@ const SearchMenuModal: React.FC = () => {
   const navigate = useNavigate();
   const { menus } = useMenuStore();
 
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  // 获取全局 UI 状态
+  const { searchMenuModalOpen, setSearchMenuModalOpen } = useGlobalUIStore(
+    useShallow((state) => ({
+      searchMenuModalOpen: state.searchMenuModalOpen,
+      setSearchMenuModalOpen: state.setSearchMenuModalOpen,
+    }))
+  );
+
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [showHistory, setShowHistory] = useState<boolean>(true);
@@ -34,21 +42,11 @@ const SearchMenuModal: React.FC = () => {
   const searchResults = useSearch(menus, searchValue);
   const { history, add, remove, clear, formatTime } = useSearchHistory();
 
-  // 绑定快捷键
-  const shortcut = usePlatformHotkey({
-    mac: 'meta+k',
-    windows: 'ctrl+k',
-    handler: (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setOpenModal(true);
-    },
-  });
 
   // 打开时聚焦
   useEffect(() => {
-    if (openModal) setTimeout(() => inputRef.current?.focus(), 80);
-  }, [openModal]);
+    if (searchMenuModalOpen) setTimeout(() => inputRef.current?.focus(), 80);
+  }, [searchMenuModalOpen]);
 
   // 滚动到选中项
   useEffect(() => {
@@ -68,7 +66,7 @@ const SearchMenuModal: React.FC = () => {
   const handleSelect = (item: SearchResultItem | SearchHistoryItem) => {
     add({ id: item.id, name: item.name, path: item.path, timestamp: Date.now() });
     navigate({ to: item.path });
-    setOpenModal(false);
+    setSearchMenuModalOpen(false);
     setSearchValue('');
     setSelectedIndex(0);
   };
@@ -90,7 +88,7 @@ const SearchMenuModal: React.FC = () => {
         if (current.length > 0) handleSelect(current[selectedIndex] as any);
         break;
       case 'Escape':
-        setOpenModal(false);
+        setSearchMenuModalOpen(false);
         setSearchValue('');
         setSelectedIndex(0);
         break;
@@ -104,12 +102,12 @@ const SearchMenuModal: React.FC = () => {
         className="w-40!"
         readOnly
         placeholder={t('common.operation.search')}
-        suffix={<div className="bg-white rounded-sm px-2" onClick={() => setOpenModal(true)}>{getShortcutLabel(shortcut)}</div>}
+        suffix={<div className="bg-white rounded-sm px-2" onClick={() => setSearchMenuModalOpen(true)}>{getShortcutLabel('ctrl+key')}</div>}
         prefix={<SearchOutlined className='text-[18px] cursor-pointer' />}
-        onClick={() => setOpenModal(true)}
+        onClick={() => setSearchMenuModalOpen(true)}
       />
       <Modal
-        open={openModal}
+        open={searchMenuModalOpen}
         footer={<Footer />}
         title={
           <Title searchValue={searchValue} onSearch={handleSearch} onKeyDown={handleKeyDown} inputRef={inputRef} />
@@ -119,7 +117,7 @@ const SearchMenuModal: React.FC = () => {
           body: 'h-[400px] overflow-y-scroll',
         }}
         onCancel={() => {
-          setOpenModal(false);
+          setSearchMenuModalOpen(false);
           setSearchValue('');
           setSelectedIndex(0);
         }}

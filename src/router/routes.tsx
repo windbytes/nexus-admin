@@ -1,4 +1,5 @@
 import RouteLoadingBar from '@/components/RouteLoadingBar';
+import HotKeyProvider from '@/components/HotKeyProvider';
 import { usePreferencesStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
@@ -37,7 +38,7 @@ export const authenticatedRoute = createRoute({
     const lockScreenStatus = usePreferencesStore((state) => state.preferences.widget.lockScreenStatus);
 
     return (
-      <>
+      <HotKeyProvider>
         <RouteLoadingBar />
         <Layout className="h-full">
           <Suspense fallback={<Skeleton active />}>
@@ -66,7 +67,7 @@ export const authenticatedRoute = createRoute({
             <ScreenLock />
           </Suspense>
         )}
-      </>
+      </HotKeyProvider>
     );
   },
   beforeLoad: async ({ location }) => {
