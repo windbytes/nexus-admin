@@ -3,18 +3,24 @@ import { commonService } from '@/services/common';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
-import { Icon } from '@iconify-icon/react';
-import { useQuery } from '@tanstack/react-query';
+import { Icon } from '@iconify/react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { App as AntdApp, Spin } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 /**
  * 主应用
  * 负责菜单数据加载和路由渲染
  */
 const App: React.FC = () => {
-  const { setMenus } = useMenuStore();
+  const { setMenus } = useMenuStore(
+    useShallow((state) => ({
+      setMenus: state.setMenus,
+    }))
+  );
+  const queryClient = useQueryClient();
   const { roleId = '', isLogin } = useUserStore();
   const { notification, message, modal } = AntdApp.useApp();
 
@@ -37,7 +43,12 @@ const App: React.FC = () => {
 
     // 如果已登录，加载菜单数据
     if (isLogin && roleId) {
-      refetch();
+      const cachedMenu = queryClient.getQueryData(['menuData', roleId]);
+      if (cachedMenu) {
+        setMenus(cachedMenu as any);
+      } else {
+        refetch();
+      }
     }
   }, [isLogin, roleId]);
 

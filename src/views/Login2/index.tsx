@@ -1,23 +1,22 @@
-import type React from 'react';
-import { useRef, useState, useEffect } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row, Modal, Typography } from 'antd';
-import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
-import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
-import { useNavigate } from '@tanstack/react-router';
+import logo from '@/assets/images/icon-512.png';
 import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
+import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from '@tanstack/react-router';
+import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import styles from './login.module.css';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
-import { HttpCodeEnum } from '@/enums/httpEnum';
-import { antdUtils } from '@/utils/antdUtil';
-import { useMenuStore } from '@/stores/store';
-import { useQuery } from '@tanstack/react-query';
-import { commonService } from '@/services/common';
-import { useUserStore } from '@/stores/userStore';
-import { useTranslation } from 'react-i18next';
-import { useTabStore } from '@/stores/tabStore';
 import RoleSelector from '@/components/RoleSelector';
-import { usePreferencesStore } from '@/stores/store';
+import { HttpCodeEnum } from '@/enums/httpEnum';
+import { commonService } from '@/services/common';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
+import { antdUtils } from '@/utils/antdUtil';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -34,6 +33,7 @@ const Login: React.FC = () => {
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
   const { updatePreferences } = usePreferencesStore();
+  const queryClient = useQueryClient();
   
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
@@ -77,13 +77,7 @@ const Login: React.FC = () => {
       }
 
        // 更新用户存储
-      userStore.login(
-        currentLoginData.username, 
-        currentLoginData.accessToken, 
-        currentLoginData.refreshToken, 
-        selectedRole.id,
-        selectedRole.roleCode
-      );
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels = rolesToUse.map(role => ({
@@ -98,13 +92,11 @@ const Login: React.FC = () => {
 
       // 清空缓存
       resetTabs();
-      if ((window as any).__keepAliveClearAllCache) {
-        (window as any).__keepAliveClearAllCache();
-      }
 
       // 获取角色对应的菜单
-      const menu = await commonService.getMenuListByRoleId(roleId, currentLoginData.accessToken);
+      const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
+      queryClient.setQueryData(['menuData', roleId], menu);
 
       // 确定首页路径
       let homePath = currentLoginData.homePath;
@@ -114,7 +106,7 @@ const Login: React.FC = () => {
           homePath = (firstRoute as any).path;
         } else {
           antdUtils.notification?.error({
-            message: t('login.loginFail'),
+            title: t('login.loginFail'),
             description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
           });
           return;
@@ -123,7 +115,7 @@ const Login: React.FC = () => {
       
       if (!homePath) {
         antdUtils.notification?.error({
-          message: t('login.loginFail'),
+          title: t('login.loginFail'),
           description: '无法确定首页路径！',
         });
         return;
@@ -138,7 +130,7 @@ const Login: React.FC = () => {
       updatePreferences("widget", "lockScreenStatus", false);
       
       antdUtils.notification?.success({
-        message: t('login.loginSuccess'),
+        title: t('login.loginSuccess'),
         description: t('login.welcome'),
       });
 

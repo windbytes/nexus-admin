@@ -1,10 +1,10 @@
 import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
-import { memo, Suspense, useCallback, useMemo, useState } from 'react';
+import { memo, Suspense, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
-import ActivityTabBar from '@/components/TabBar/ActivityTabBar';
+import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
 import { lazy } from 'react';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
@@ -16,24 +16,9 @@ import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
 import UserDropdown from './component/UserDropdown';
 import './header.scss';
+import useGlobalUIStore from '@/stores/globalUIStore';
 
 const Setting = lazy(() => import('./component/Setting'));
-
-// 提取静态样式对象，避免每次渲染都创建新对象
-const headerStyles = {
-  borderBottom: '1px solid #e9edf0',
-  padding: 0,
-} as const;
-
-const iconStyles = {
-  cursor: 'pointer',
-  fontSize: '18px',
-} as const;
-
-const floatButtonStyles = {
-  right: 24,
-  bottom: 24,
-} as const;
 
 /**
  * 顶部布局内容
@@ -44,7 +29,6 @@ const floatButtonStyles = {
  * 4. 优化 Dropdown 的 dropdownRender
  */
 const Header = memo(() => {
-  const [openSetting, setOpenSetting] = useState<boolean>(false);
 
   // 使用 useShallow 优化选择器，避免不必要的重渲染
   const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
@@ -55,6 +39,13 @@ const Header = memo(() => {
       widgetConfig: state.preferences.widget,
     }))
   );
+  // 设置窗口
+  const { settingMenuModalOpen, setSettingMenuModalOpen } = useGlobalUIStore(
+    useShallow((state) => ({
+      settingMenuModalOpen: state.settingMenuModalOpen,
+      setSettingMenuModalOpen: state.setSettingMenuModalOpen,
+    }))
+  );
 
   const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
   const { t } = useTranslation();
@@ -63,7 +54,7 @@ const Header = memo(() => {
    * 跳转到github - 使用 useCallback 缓存
    */
   const routeGitHub = useCallback(() => {
-    window.open('https://github.com/yecongling/nexus-admin', '_blank');
+    window.open('https://github.com/windbytes/nexus-admin', '_blank');
   }, []);
 
   /**
@@ -77,14 +68,7 @@ const Header = memo(() => {
    * 打开设置面板 - 使用 useCallback 缓存
    */
   const handleOpenSetting = useCallback(() => {
-    setOpenSetting(true);
-  }, []);
-
-  /**
-   * 关闭设置面板 - 使用 useCallback 缓存
-   */
-  const handleCloseSetting = useCallback(() => {
-    setOpenSetting(false);
+    setSettingMenuModalOpen(true);
   }, []);
 
   /**
@@ -92,20 +76,10 @@ const Header = memo(() => {
    */
   const messageBoxContent = useMemo(() => <MessageBox />, []);
 
-  /**
-   * 设置按钮提示文本 - 使用 useMemo 缓存
-   */
-  const settingTooltip = useMemo(() => t('layout.header.setting'), [t]);
-
-  /**
-   * 锁屏按钮提示文本 - 使用 useMemo 缓存
-   */
-  const lockTooltip = useMemo(() => t('layout.header.lock'), [t]);
-
   return (
     <>
       {headerEnable ? (
-        <Layout.Header className="ant-layout-header header-container h-auto!" style={headerStyles}>
+        <Layout.Header className="ant-layout-header header-container h-auto! p-0">
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}
@@ -118,28 +92,28 @@ const Header = memo(() => {
               {/* 全局搜索 */}
               {globalSearch && <SearchMenuModal />}
               <Tooltip placement="bottom" title="github">
-                <GithubOutlined style={iconStyles} onClick={routeGitHub} />
+                <GithubOutlined className='text-[18px] cursor-pointer' onClick={routeGitHub} />
               </Tooltip>
               {/* 锁屏 */}
               {lockScreen && (
-                <Tooltip placement="bottom" title={lockTooltip}>
-                  <LockOutlined style={iconStyles} onClick={handleLockScreen} />
+                <Tooltip placement="bottom" title={t('layout.header.lock')}>
+                  <LockOutlined className='text-[18px] cursor-pointer' onClick={handleLockScreen} />
                 </Tooltip>
               )}
               {/* 邮件 */}
               <Badge count={5}>
-                <MailOutlined style={iconStyles} />
+                <MailOutlined className='text-[18px] cursor-pointer' />
               </Badge>
               {/* 通知 */}
               {notification && (
                 <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
                   <Badge count={5}>
-                    <BellOutlined style={iconStyles} />
+                    <BellOutlined className='text-[18px] cursor-pointer' />
                   </Badge>
                 </Dropdown>
               )}
-              <Tooltip placement="bottomRight" title={settingTooltip}>
-                <SettingOutlined style={iconStyles} onClick={handleOpenSetting} />
+              <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
+                <SettingOutlined className="my-spin text-[18px] cursor-pointer" onClick={handleOpenSetting} />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
@@ -152,22 +126,20 @@ const Header = memo(() => {
 
           {/* 第二行：TabBar区域 */}
           {tabbarEnable && (
-            <div className="header-tab-row">
-              <ActivityTabBar />
-            </div>
+            <TabBar />
           )}
         </Layout.Header>
       ) : (
         <FloatButton
-          icon={<SettingOutlined />}
-          tooltip={<span>{settingTooltip}</span>}
-          style={floatButtonStyles}
+          className='right-24 bottom-24'
+          icon={<SettingOutlined className="my-spin" />}
+          tooltip={<span>{t('layout.header.setting')}</span>}
           onClick={handleOpenSetting}
         />
       )}
       {/* 系统设置界面 */}
       <Suspense fallback={<Skeleton />}>
-        <Setting open={openSetting} setOpen={handleCloseSetting} />
+        <Setting open={settingMenuModalOpen} setOpen={setSettingMenuModalOpen} />
       </Suspense>
     </>
   );

@@ -40,8 +40,6 @@ const EndpointConfig: React.FC = () => {
     pageNum: 1,
     pageSize: 10,
   });
-  // 用于标记是否是第一次加载数据
-  const isFirstLoad = useRef(true);
 
   /**
    * 查询端点类型列表和详情（合并查询）
@@ -52,7 +50,13 @@ const EndpointConfig: React.FC = () => {
     refetch: refetchList,
   } = useQuery({
     queryKey: ['endpoint_config_list', queryParams],
-    queryFn: () => endpointConfigService.getEndpointTypeList(queryParams),
+    queryFn: async () => {
+      const configData = await endpointConfigService.getEndpointTypeList(queryParams);
+      if (configData?.records?.[0] && !selectedType) {
+        setSelectedType(configData.records[0]);
+      }
+      return configData;
+    },
   });
 
   /**
@@ -67,8 +71,13 @@ const EndpointConfig: React.FC = () => {
     },
     onSuccess: () => {
       setIsEditing(false);
-      // 清除之前保存的数据
-      setPreviousSelectedType(null);
+      // 如果新增的则清除选择，默认选择到第一个去
+      if (!selectedType?.id) {
+        setPreviousSelectedType(null);
+        setSelectedType(null);
+      } else {
+        setPreviousSelectedType(selectedType);
+      }
       // 刷新列表
       refetchList();
     },
@@ -172,6 +181,7 @@ const EndpointConfig: React.FC = () => {
           schemaVersion: basicValues.schemaVersion,
           schemaFields: latestFields,
           status: basicValues.status ?? true,
+          supportRetry: basicValues.supportRetry ?? false,
         };
 
         // 临时将预览配置存储到 selectedType 中
@@ -385,17 +395,6 @@ const EndpointConfig: React.FC = () => {
   }, [selectedType?.id, isEditing, basicForm]);
 
   /**
-   * 首次加载列表数据后，自动选中第一条记录
-   */
-  React.useEffect(() => {
-    // 只在第一次加载且有数据时执行
-    if (configListData?.records?.[0] && !selectedType && isFirstLoad.current) {
-      isFirstLoad.current = false;
-      setSelectedType(configListData.records[0]);
-    }
-  }, [configListData, selectedType]);
-
-  /**
    * 缓存列表数据，避免子组件不必要的重渲染
    */
   const listData = useMemo(() => configListData?.records || [], [configListData?.records]);
@@ -417,10 +416,10 @@ const EndpointConfig: React.FC = () => {
     () => ({
       current: queryParams.pageNum || 1,
       pageSize: queryParams.pageSize || 10,
-      total: configListData?.total || 0,
+      total: configListData?.totalRow || 0,
       onChange: handlePaginationChange,
     }),
-    [queryParams.pageNum, queryParams.pageSize, configListData?.total, handlePaginationChange]
+    [queryParams.pageNum, queryParams.pageSize, configListData?.totalRow, handlePaginationChange]
   );
 
   /**
@@ -451,66 +450,67 @@ const EndpointConfig: React.FC = () => {
   }, [previewVisible, isEditing, selectedType, basicForm]);
 
   return (
-    <div className="h-full flex gap-4">
-      {/* 左侧：端点类型列表 */}
-      <EndpointTypeList
-        data={listData}
-        loading={listLoading}
-        {...(selectedType?.id && { selectedId: selectedType.id })}
-        onSelect={handleSelectType}
-        onAdd={handleAdd}
-        onSearch={handleSearch}
-        onBatchExport={handleBatchExport}
-        onImport={handleImport}
-        pagination={paginationConfig}
-      />
-
-      {/* 右侧：配置详情 */}
-      <Card
-        className="flex-1 min-w-0"
-        styles={{
-          body: {
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-        loading={listLoading}
-      >
-        {/* 基础信息 */}
-        <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
-
-        {/* Schema配置 */}
-        <SchemaFieldsTable
+    <>
+      <div className="h-full flex gap-2">
+        {/* 左侧：端点类型列表 */}
+        <EndpointTypeList
+          data={listData}
           loading={listLoading}
-          ref={schemaFieldsTableRef}
-          fields={editingSchemaFields}
-          disabled={!isEditing}
-          onChange={handleSchemaFieldsChange}
-        />
-
-        {/* 底部操作按钮 */}
-        <ActionButtons
-          isEditing={isEditing}
-          hasSelected={!!selectedType}
-          saveLoading={saveConfigMutation.isPending}
-          onPreview={handlePreview}
-          onEdit={handleEdit}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          onDelete={handleDelete}
-          onExport={handleExport}
+          {...(selectedType?.id && { selectedId: selectedType.id })}
+          onSelect={handleSelectType}
+          onAdd={handleAdd}
+          onSearch={handleSearch}
+          onBatchExport={handleBatchExport}
           onImport={handleImport}
+          pagination={paginationConfig}
         />
-      </Card>
 
+        {/* 右侧：配置详情 */}
+        <Card
+          className="flex-1 min-w-0"
+          styles={{
+            body: {
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          }}
+          loading={listLoading}
+        >
+          {/* 基础信息 */}
+          <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
+
+          {/* Schema配置 */}
+          <SchemaFieldsTable
+            loading={listLoading}
+            ref={schemaFieldsTableRef}
+            fields={editingSchemaFields}
+            disabled={!isEditing}
+            onChange={handleSchemaFieldsChange}
+          />
+
+          {/* 底部操作按钮 */}
+          <ActionButtons
+            isEditing={isEditing}
+            hasSelected={!!selectedType}
+            saveLoading={saveConfigMutation.isPending}
+            onPreview={handlePreview}
+            onEdit={handleEdit}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onDelete={handleDelete}
+            onExport={handleExport}
+            onImport={handleImport}
+          />
+        </Card>
+      </div>
       {/* 预览弹窗 - 使用 Suspense 包裹懒加载组件 */}
       {previewVisible && (
         <Suspense fallback={<Skeleton active />}>
           <PreviewModal visible={previewVisible} config={previewConfig} onClose={() => setPreviewVisible(false)} />
         </Suspense>
       )}
-    </div>
+    </>
   );
 };
 

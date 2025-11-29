@@ -1,10 +1,10 @@
-import { PlusOutlined, ExclamationCircleFilled, ImportOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify-icon/react';
+import { ExclamationCircleFilled, ImportOutlined, PlusOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { App, Button, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
 import type React from 'react';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface RoleActionButtonsProps {
   onAddRoleClick: () => void;

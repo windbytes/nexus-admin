@@ -1,3 +1,4 @@
+import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
@@ -6,58 +7,58 @@ import { HttpRequest } from '@/utils/request';
 export interface JsonDataMode {
   /** 数据模式唯一标识符 */
   id: string;
-  
+
   /** 数据模式显示名称 */
   name: string;
-  
+
   /** 数据模式编码，用于程序内部引用 */
   code: string;
-  
+
   /** 数据模式描述信息 */
   description?: string;
-  
+
   /** 数据来源类型：database-数据库查询，json-JSON文本，file-文件上传 */
   dataSource: 'database' | 'json' | 'file';
-  
+
   /** 关联的端点ID（仅当dataSource为database时有效） */
   endpointId?: string;
-  
+
   /** 端点显示名称（仅当dataSource为database时有效） */
   endpointName?: string;
-  
+
   /** 原始JSON数据（仅当dataSource为json时有效） */
   sourceJson?: string;
-  
+
   /** JSON Schema定义内容 */
-  schemaJson: string;
-  
+  schemaJson: Record<string, any>;
+
   /** Schema版本号 */
   schemaVersion: string;
-  
+
   /** Schema中定义的字段数量 */
   fields: number;
-  
+
   /** 启用状态：true-启用，false-禁用 */
   status: boolean;
-  
+
   /** 数据模式分类：api-API接口，database-数据库表，message-消息队列，file-文件数据，custom-自定义，other-其他 */
   category?: string;
-  
+
   /** 标签数组，用于多维度分类和搜索 */
   tags?: string[];
-  
+
   /** 创建时间 */
   createTime?: string;
-  
+
   /** 最后更新时间 */
   updateTime?: string;
-  
+
   /** 创建者 */
   createBy?: string;
-  
+
   /** 最后更新者 */
   updateBy?: string;
-  
+
   /** 备注信息 */
   remark?: string;
 }
@@ -68,22 +69,22 @@ export interface JsonDataMode {
 export interface DataModeSearchParams {
   /** 模式名称（模糊搜索） */
   name?: string;
-  
+
   /** 模式编码（模糊搜索） */
   code?: string;
-  
+
   /** 分类筛选 */
   category?: string;
-  
+
   /** 数据来源筛选 */
   dataSource?: 'database' | 'json' | 'file';
-  
+
   /** 状态筛选 */
   status?: boolean;
-  
+
   /** 页码 */
   pageNum: number;
-  
+
   /** 每页数量 */
   pageSize: number;
 }
@@ -94,40 +95,43 @@ export interface DataModeSearchParams {
 export interface DataModeFormData {
   /** 数据模式ID（编辑时必填） */
   id?: string;
-  
+
   /** 模式名称 */
   name: string;
-  
+
   /** 模式编码 */
   code: string;
-  
+
   /** 描述信息 */
   description?: string;
-  
+
   /** 数据来源类型 */
   dataSource: 'database' | 'json' | 'file';
-  
+
   /** 端点ID（仅当dataSource为database时有效） */
   endpointId?: string;
-  
+
+  /** 端点名称（仅当dataSource为database时有效） */
+  endpointName?: string;
+
   /** 原始JSON数据（仅当dataSource为json时有效） */
   sourceJson?: string;
-  
+
   /** JSON Schema定义内容 */
-  schemaJson: string;
-  
+  schemaJson: Record<string, any>;
+
   /** Schema版本号 */
   schemaVersion?: string;
-  
+
   /** 启用状态 */
   status?: boolean;
-  
+
   /** 分类 */
   category?: string;
-  
+
   /** 标签数组 */
   tags?: string[];
-  
+
   /** 备注信息 */
   remark?: string;
 }
@@ -138,38 +142,18 @@ export interface DataModeFormData {
 export interface EndpointInfo {
   /** 端点唯一标识符 */
   id: string;
-  
+
   /** 端点名称 */
   name: string;
-  
+
   /** 端点URL地址 */
   url?: string;
-  
+
   /** 端点类型 */
   type?: string;
-  
+
   /** 端点状态 */
   status?: boolean;
-}
-
-/**
- * 分页结果
- */
-export interface PageResult<T> {
-  /** 数据记录列表 */
-  records: T[];
-  
-  /** 总记录数 */
-  total: number;
-  
-  /** 总行数（兼容字段） */
-  totalRow?: number;
-  
-  /** 当前页码 */
-  pageNum: number;
-  
-  /** 每页数量 */
-  pageSize: number;
 }
 
 /**
@@ -178,7 +162,7 @@ export interface PageResult<T> {
 export interface GenerateSchemaRequest {
   /** JSON数据内容 */
   json: string;
-  
+
   /** 可选的Schema名称 */
   name?: string;
 }
@@ -189,7 +173,7 @@ export interface GenerateSchemaRequest {
 export interface QueryJsonFromEndpointRequest {
   /** 端点ID */
   endpointId: string;
-  
+
   /** 查询参数（可选） */
   params?: Record<string, any>;
 }
@@ -221,6 +205,8 @@ enum DataModeAction {
   validateSchema = '/resource/datamode/validateSchema',
   exportSchema = '/resource/datamode/exportSchema',
   importSchema = '/resource/datamode/importSchema',
+  importDataModeFromFile = '/resource/datamode/importDataModeFromFile',
+  importDataModeFromUrl = '/resource/datamode/importDataModeFromUrl',
   getEndpoints = '/integrated/endpoint/list',
 }
 
@@ -232,10 +218,13 @@ export const dataModeService = {
    * 分页查询数据模式列表
    */
   async getDataModeList(params: DataModeSearchParams): Promise<PageResult<JsonDataMode>> {
-    const response = await HttpRequest.post<PageResult<JsonDataMode>>({
-      url: DataModeAction.list,
-      data: params,
-    }, { successMessageMode: 'none' });
+    const response = await HttpRequest.post<PageResult<JsonDataMode>>(
+      {
+        url: DataModeAction.list,
+        data: params,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -307,9 +296,7 @@ export const dataModeService = {
   /**
    * 从端点查询JSON数据
    */
-  async queryJsonFromEndpoint(
-    request: QueryJsonFromEndpointRequest,
-  ): Promise<{ json: string; data: any }> {
+  async queryJsonFromEndpoint(request: QueryJsonFromEndpointRequest): Promise<{ json: string; data: any }> {
     const response = await HttpRequest.post<{ json: string; data: any }>({
       url: DataModeAction.queryJsonFromEndpoint,
       data: request,
@@ -349,7 +336,7 @@ export const dataModeService = {
   },
 
   /**
-   * 导入Schema文件
+   * 导入Schema文件（用于编辑时解析Schema，返回schema字符串）
    */
   async importSchema(file: File): Promise<{ schema: string }> {
     const formData = new FormData();
@@ -358,9 +345,31 @@ export const dataModeService = {
     const response = await HttpRequest.post<{ schema: string }>({
       url: DataModeAction.importSchema,
       data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    });
+    return response;
+  },
+
+  /**
+   * 从文件导入数据模式（直接存储到数据库）
+   */
+  async importDataModeFromFile(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await HttpRequest.post<void>({
+      url: DataModeAction.importDataModeFromFile,
+      data: formData,
+    });
+    return response;
+  },
+
+  /**
+   * 从URL导入数据模式（直接存储到数据库）
+   */
+  async importDataModeFromUrl(url: string): Promise<void> {
+    const response = await HttpRequest.post<void>({
+      url: DataModeAction.importDataModeFromUrl,
+      data: { url },
     });
     return response;
   },
@@ -368,12 +377,18 @@ export const dataModeService = {
   /**
    * 获取端点列表（用于下拉选择）
    */
-  async getEndpoints(params?: { name?: string; status?: boolean }): Promise<EndpointInfo[]> {
-    const response = await HttpRequest.post<EndpointInfo[]>({
-      url: DataModeAction.getEndpoints,
-      data: { ...params, pageNum: 1, pageSize: 1000 },
-    });
+  async getEndpoints(params?: {
+    endpointType: string;
+    name?: string;
+    status?: boolean;
+  }): Promise<PageResult<EndpointInfo>> {
+    const response = await HttpRequest.post<PageResult<EndpointInfo>>(
+      {
+        url: DataModeAction.getEndpoints,
+        data: { ...params, pageNum: 1, pageSize: 1000 },
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 };
-

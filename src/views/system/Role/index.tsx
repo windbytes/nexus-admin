@@ -1,16 +1,15 @@
-import { isEqual } from 'lodash-es';
-import { Card, type TableProps } from 'antd';
-import type React from 'react';
-import { useReducer, useState } from 'react';
-import useParentSize from '@/hooks/useParentSize';
+import { roleService } from '@/services/system/role/roleApi';
 import type { RoleSearchParams, RoleState } from '@/services/system/role/type';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { roleService } from '@/services/system/role/roleApi';
-import RoleInfoModal from './RoleInfoModal';
+import { Card, type TableProps } from 'antd';
+import { isEqual } from 'lodash-es';
+import type React from 'react';
+import { useReducer, useState } from 'react';
 import RoleMenuDrawer from './AssignRoleMenuDrawer';
 import RoleUserDrawer from './AssignRoleUserDrawer';
-import RoleSearchForm from './RoleSearchForm';
 import RoleActionButtons from './RoleActionButtons';
+import RoleInfoModal from './RoleInfoModal';
+import RoleSearchForm from './RoleSearchForm';
 import RoleTable from './RoleTable';
 import getRoleTableColumns from './RoleTableColumns';
 
@@ -19,8 +18,6 @@ import getRoleTableColumns from './RoleTableColumns';
  * @returns
  */
 const Role: React.FC = () => {
-  // 容器高度计算（表格）
-  const { parentRef, height } = useParentSize();
 
   // 定义状态（合并的状态）
   const [state, dispatch] = useReducer(
@@ -41,7 +38,7 @@ const Role: React.FC = () => {
       selectedRows: [],
       // 当前操作
       action: '',
-    },
+    }
   );
 
   // 查询参数（包含分页参数）
@@ -203,47 +200,48 @@ const Role: React.FC = () => {
   const columns = getRoleTableColumns({
     dispatch,
     logicDeleteUserMutation,
-    toggleRoleStatusMutation
+    toggleRoleStatusMutation,
   });
 
   return (
     <>
-      {/* 菜单检索条件栏 */}
-      <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
-      {/* 查询表格 */}
-      <Card className='flex-1 mt-4!' styles={{ body: { height: '100%' } }} ref={parentRef}>
-        {/* 操作按钮 */}
-        <RoleActionButtons
-          onAddRoleClick={onAddRoleClick}
-          selRows={state.selectedRows}
-          logicDeleteUserMutation={logicDeleteUserMutation}
-        />
-        {/* 表格数据 */}
-        <RoleTable
-          tableData={tableData?.records || []}
-          loading={isLoading}
-          columns={columns}
-          onRow={onRow}
-          rowSelection={rowSelection}
-          height={height}
-          pagination={{
-            pageSize: searchParams.pageSize,
-            current: searchParams.pageNum,
-            showQuickJumper: true,
-            hideOnSinglePage: false,
-            showSizeChanger: true,
-            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: tableData?.totalRow || 0,
-            onChange(page, pageSize) {
-              setSearchParams({
-                ...searchParams,
-                pageNum: page,
-                pageSize: pageSize,
-              });
-            },
-          }}
-        />
-      </Card>
+      <div className="h-full flex flex-col gap-2">
+        {/* 菜单检索条件栏 */}
+        <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
+        {/* 查询表格 */}
+        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }} >
+          {/* 操作按钮 */}
+          <RoleActionButtons
+            onAddRoleClick={onAddRoleClick}
+            selRows={state.selectedRows}
+            logicDeleteUserMutation={logicDeleteUserMutation}
+          />
+          {/* 表格数据 */}
+          <RoleTable
+            tableData={tableData?.records || []}
+            loading={isLoading}
+            columns={columns}
+            onRow={onRow}
+            rowSelection={rowSelection}
+            pagination={{
+              pageSize: searchParams.pageSize,
+              current: searchParams.pageNum,
+              showQuickJumper: true,
+              hideOnSinglePage: false,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条`,
+              total: tableData?.totalRow || 0,
+              onChange(page, pageSize) {
+                setSearchParams({
+                  ...searchParams,
+                  pageNum: page,
+                  pageSize: pageSize,
+                });
+              },
+            }}
+          />
+        </Card>
+      </div>
 
       {/* 编辑弹窗 */}
       <RoleInfoModal params={state} onCancel={onCancel} onOk={onEditOk} />

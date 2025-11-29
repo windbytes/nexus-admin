@@ -45,7 +45,7 @@ const IconPanel: React.FC<IconPanelProps> = (props) => {
               }`}
               onClick={() => handleIconClick(icon.displayName)}
             >
-              {React.createElement(icon, { style: { fontSize: '18px' } })}
+              {React.createElement(icon, { className: 'text-[18px]!' })}
             </div>
           );
         })}

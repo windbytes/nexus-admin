@@ -1,8 +1,8 @@
 import type {
+  FlowNodeEntity,
   WorkflowNodeJSON as FlowNodeJsonDefault,
   WorkflowNodeRegistry as FlowNodeRegistryDefault,
   FreeLayoutPluginContext,
-  FlowNodeEntity,
   WorkflowEdgeJSON,
   WorkflowNodeMeta,
 } from '@flowgram.ai/free-layout-editor';

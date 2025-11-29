@@ -1,11 +1,11 @@
+import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
 import { Button, Card, Spin, Tabs, type TabsProps } from 'antd';
+import { groupBy } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { Icon } from '@iconify-icon/react';
 import styles from './message-box.module.scss';
 import MessageList, { type MessageListType } from './MessageList';
-import { groupBy } from 'lodash-es';
-import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
 /**
  * 通知模块
  */
@@ -67,12 +67,12 @@ const Notify: React.FC = () => {
   const tabList: TabsProps['items'] = [
     {
       key: 'message',
-      label: <>消息({groupData.message?.length || ''})</>,
-      icon: <MessageOutlined />,
+      label: <>消息({groupData['message']?.length || 0})</>,
+      icon: <MessageOutlined className='mr-2!'/>,
       children: (
         <MessageList
-          data={groupData.message}
-          unReadData={(groupData.message || []).filter((item) => !item.status)}
+          data={groupData['message'] || []}
+          unReadData={(groupData['message'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
@@ -80,12 +80,12 @@ const Notify: React.FC = () => {
     },
     {
       key: 'notify',
-      label: <>通知({groupData.notify?.length || ''})</>,
-      icon: <NotificationOutlined />,
+      label: <>通知({groupData['notify']?.length || 0})</>,
+      icon: <NotificationOutlined className='mr-2!'/>,
       children: (
         <MessageList
-          data={groupData.notify}
-          unReadData={(groupData.notify || []).filter((item) => !item.status)}
+          data={groupData['notify'] || []}
+          unReadData={(groupData['notify'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
@@ -93,12 +93,12 @@ const Notify: React.FC = () => {
     },
     {
       key: 'todo',
-      label: <>待办({groupData.todo?.length || ''})</>,
-      icon: <ReconciliationOutlined />,
+      label: <>待办({groupData['todo']?.length || 0})</>,
+      icon: <ReconciliationOutlined className='mr-2!'/>,
       children: (
         <MessageList
-          data={groupData.todo}
-          unReadData={(groupData.todo || []).filter((item) => !item.status)}
+          data={groupData['todo'] || []}
+          unReadData={(groupData['todo'] || []).filter((item) => !item.status)}
           onItemClick={(item) => readMessage([item])}
           onAllBtnClick={(unReadData) => readMessage(unReadData)}
         />
@@ -107,17 +107,19 @@ const Notify: React.FC = () => {
   ];
 
   return (
-    <Card className={styles['message-box']} styles={{ body: { height: '100%', padding: '12px' } }}>
+    <Card className={styles['message-box']} classNames={{
+      body: 'h-full p-3',
+    }}>
       <Spin
         spinning={loading}
         indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-        style={{ display: 'block' }}
+        className="block"
       >
         <Tabs
           items={tabList}
           defaultActiveKey="message"
           size="small"
-          style={{ height: '100%' }}
+          className="h-full"
           tabBarExtraContent={
             <Button
               type="link"

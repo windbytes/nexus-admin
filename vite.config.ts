@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
-import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
+// import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -14,7 +14,14 @@ export default defineConfig(({ mode }) => {
       react({
         // 启用 React 编译器优化
         babel: {
-          plugins: [['babel-plugin-react-compiler']],
+          plugins: [
+            // 装饰器插件
+            ['@babel/plugin-proposal-decorators', { legacy: true }],
+            // 类属性插件
+            ['@babel/plugin-proposal-class-properties', { loose: true }],
+            // React 编译器插件
+            ['babel-plugin-react-compiler'],
+          ],
         },
       }),
       tailwindcss(),
@@ -25,9 +32,9 @@ export default defineConfig(({ mode }) => {
         algorithm: 'gzip',
         ext: '.gz',
       }),
-      mockDevServerPlugin({
-        prefix: '/api',
-      }),
+      // mockDevServerPlugin({
+      //   prefix: '/api',
+      // }),
     ],
     // 配置分包
     build: {
@@ -58,7 +65,7 @@ export default defineConfig(({ mode }) => {
       target: 'es2015',
       // 设置 chunk 大小警告限制
       chunkSizeWarningLimit: 1000,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           // 使用更安全的文件命名，不暴露库名
           chunkFileNames: 'static/js/[hash].js',
@@ -69,31 +76,35 @@ export default defineConfig(({ mode }) => {
           advancedChunks: {
             groups: [
               {
-                name: 'react-vendor',
-                test: /node_modules[\\/](react|react-dom|react-router)/,
+                name: 'lib-react',
+                test: /node_modules[\\/](react|react-dom)/,
               },
               {
-                name: 'utils-vendor',
+                name: 'lib-router',
+                test: /node_modules[\\/]@tanstack[\\/]react-router/,
+              },
+              {
+                name: 'lib-utils',
                 test: /node_modules[\\/](lodash-es|dayjs|crypto-js|jsencrypt)/,
               },
               {
-                name: 'network-vendor',
+                name: 'lib-network',
                 test: /node_modules[\\/]axios/,
               },
               {
-                name: 'chart-vendor',
+                name: 'lib-chart',
                 test: /node_modules[\\/]echarts/,
               },
               {
-                name: 'antd-vendor',
+                name: 'lib-antd',
                 test: /node_modules[\\/]antd/,
               },
               {
-                name: 'antd-icons-vendor',
+                name: 'lib-antd-icons',
                 test: /node_modules[\\/]@ant-design\/icons/,
               },
               {
-                name: 'other-vendor',
+                name: 'lib-other',
                 test: /node_modules[\\/](classnames|@iconify-icon|i18next)/,
               },
             ],
@@ -110,7 +121,17 @@ export default defineConfig(({ mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
+      include: [
+        'react',
+        'react-dom',
+        'antd',
+        'lodash-es',
+        'dayjs',
+        'axios',
+        'echarts',
+        '@ant-design/icons',
+        '@iconify/react',
+      ],
     },
     // css预处理器
     css: {

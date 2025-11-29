@@ -1,4 +1,4 @@
-import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SolutionOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SearchOutlined, SolutionOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 
 import TagManagementModal from '@/components/base/tag-management';
@@ -8,16 +8,15 @@ import type { App, AppSearchParams } from '@/services/integrated/apps/app';
 import { appsService } from '@/services/integrated/apps/appsApi';
 import { useTagStore } from '@/stores/useTagStore.ts';
 import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useDebounceFn } from 'ahooks';
-import { Checkbox, Input, Segmented, Spin, type InputRef, type SegmentedProps } from 'antd';
+import { Button, Checkbox, Input, Segmented, Space, Spin, type InputRef, type SegmentedProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AppCard from './AppCard';
 import './apps.scss';
-const { Search } = Input;
 /**
  * 应用设计
  */
@@ -141,20 +140,26 @@ const Apps: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col h-full pt-2 pr-4 pl-4 bg-[#f5f6f7]">
+      <div className="flex flex-col h-full pt-2 pr-4 pl-4">
         {/* 卡片列表和筛选框 */}
         <div className="mb-[8px]">
           <div className="w-[600px] my-4 mx-auto">
             {/* 检索 */}
-            <Search
-              enterButton
-              allowClear
-              placeholder={t('common.placeholder')}
-              ref={searchRef}
-              size="large"
-              loading={isLoading}
-              onSearch={handleSearch}
-            />
+            <Space.Compact style={{ width: '100%' }}>
+              <Input
+                size="large"
+                ref={searchRef}
+                placeholder={t('common.placeholder')}
+                onPressEnter={(e: any) => handleSearch(e.target.value)}
+              />
+              <Button
+                size="large"
+                type="primary"
+                style={{ width: '60px' }}
+                icon={<SearchOutlined />}
+                onClick={() => handleSearch(searchRef.current?.input?.value || '')}
+              />
+            </Space.Compact>
           </div>
           <div className="w-full flex justify-between items-center">
             <Segmented<number>

@@ -1,8 +1,21 @@
+import { usePermission } from '@/hooks/usePermission';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
-import { DeleteOutlined, EditOutlined, ExportOutlined, EyeOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  CopyOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  EditOutlined,
+  ExportOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  HistoryOutlined,
+  LinkOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
-import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import { Button, Dropdown, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import React from 'react';
 
 interface EndpointTableProps {
@@ -24,6 +37,16 @@ interface EndpointTableProps {
   onExport: (record: Endpoint) => void;
   /** 测试回调 */
   onTest: (record: Endpoint) => void;
+  /** 克隆回调 */
+  onClone: (record: Endpoint) => void;
+  /** 版本管理回调 */
+  onVersion: (record: Endpoint) => void;
+  /** 日志查看回调 */
+  onLog: (record: Endpoint) => void;
+  /** 调用链路追踪回调 */
+  onCallChainTrace: (record: Endpoint) => void;
+  /** 依赖关系图谱回调 */
+  onDependencies: (record: Endpoint) => void;
   /** 状态变更回调 */
   onStatusChange: (record: Endpoint, checked: boolean) => void;
   /** 分页配置 */
@@ -43,9 +66,19 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   onDelete,
   onExport,
   onTest,
+  onClone,
+  onVersion,
+  onLog,
+  onCallChainTrace,
+  onDependencies,
   onStatusChange,
   pagination,
 }) => {
+  // 是否有编辑、导出、删除权限
+  const canEdit = usePermission(['integrated:endpoint:edit']);
+  const canExport = usePermission(['integrated:endpoint:export']);
+  const canDelete = usePermission(['integrated:endpoint:delete']);
+
   /**
    * 获取端点类型标签颜色
    */
@@ -69,15 +102,87 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
     return option?.label || type;
   };
 
+  /**
+   * 生成更多操作菜单
+   */
+  const getMoreMenuItems = (record: Endpoint) => {
+    const items = [
+      {
+        key: 'clone',
+        label: '克隆',
+        icon: <CopyOutlined />,
+        onClick: () => onClone(record),
+        disabled: !canEdit,
+      },
+      {
+        key: 'test',
+        label: '测试',
+        icon: <ThunderboltOutlined />,
+        onClick: () => onTest(record),
+      },
+      {
+        key: 'version',
+        label: '版本管理',
+        icon: <HistoryOutlined />,
+        onClick: () => onVersion(record),
+      },
+      {
+        key: 'log',
+        label: '操作日志',
+        icon: <FileTextOutlined />,
+        onClick: () => onLog(record),
+      },
+      {
+        type: 'divider' as const,
+      },
+      {
+        key: 'callChainTrace',
+        label: '调用链路追踪',
+        icon: <LinkOutlined />,
+        onClick: () => {
+          onCallChainTrace(record);
+        },
+      },
+      {
+        key: 'dependencies',
+        label: '依赖关系图谱',
+        icon: <ApiOutlined />,
+        onClick: () => {
+          onDependencies(record);
+        },
+      },
+      {
+        type: 'divider' as const,
+      },
+      {
+        key: 'export',
+        label: '导出配置',
+        icon: <ExportOutlined />,
+        onClick: () => onExport(record),
+        disabled: !canExport,
+      },
+      {
+        key: 'delete',
+        label: '删除',
+        icon: <DeleteOutlined />,
+        onClick: () => onDelete(record),
+        danger: true,
+        disabled: !canDelete,
+      },
+    ];
+
+    return items;
+  };
+
   const columns: TableProps<Endpoint>['columns'] = [
     {
-      title: '端点名称',
+      title: '名称',
       dataIndex: 'name',
       key: 'name',
       width: 200,
       fixed: 'left',
       ellipsis: {
-        showTitle: false,
+        showTitle: true,
       },
       render: (name) => (
         <Tooltip placement="topLeft" title={name}>
@@ -86,24 +191,31 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       ),
     },
     {
-      title: '端点类型',
+      title: '类型',
       dataIndex: 'endpointType',
       key: 'endpointType',
-      width: 150,
+      width: 120,
       render: (type: string) => <Tag color={getEndpointTypeColor(type)}>{getEndpointTypeName(type)}</Tag>,
     },
     {
-      title: '端点分类',
+      title: '分类',
       dataIndex: 'category',
       key: 'category',
       width: 120,
       render: (category) => category || '-',
     },
     {
+      title: '模式',
+      dataIndex: 'mode',
+      key: 'mode',
+      width: 80,
+      align: 'center',
+    },
+    {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
-      width: 250,
+      width: 220,
       ellipsis: {
         showTitle: false,
       },
@@ -134,13 +246,14 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       key: 'createTime',
       align: 'center',
       width: 180,
+      sorter: (a: Endpoint, b: Endpoint) => (a.createTime || '').localeCompare(b.createTime || ''),
       render: (time) => time || '-',
     },
     {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 280,
+      width: 120,
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
@@ -148,21 +261,17 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
             查看
           </Button>
 
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
-            编辑
-          </Button>
+          {canEdit && (
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
+              编辑
+            </Button>
+          )}
 
-          <Button type="link" size="small" icon={<ThunderboltOutlined />} onClick={() => onTest(record)}>
-            测试
-          </Button>
-
-          <Button type="link" size="small" icon={<ExportOutlined />} onClick={() => onExport(record)}>
-            导出
-          </Button>
-
-          <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(record)}>
-            删除
-          </Button>
+          <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['hover']}>
+            <Button type="link" size="small">
+              更多 <DownOutlined />
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
@@ -177,11 +286,14 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       dataSource={data}
       loading={loading}
       pagination={pagination}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 'max-content' }}
       rowSelection={{
         selectedRowKeys,
         onChange: onSelectionChange,
       }}
+      onRow={(record) => ({
+        onDoubleClick: () => onView(record),
+      })}
     />
   );
 };

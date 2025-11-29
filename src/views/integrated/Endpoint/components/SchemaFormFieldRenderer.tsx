@@ -1,8 +1,8 @@
+import JSONDynamicForm from '@/components/base/JSONDynamicForm';
 import CodeEditor from '@/components/CodeEditor';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
 import React, { memo } from 'react';
-import JSONDynamicForm from '../../EndpointCfg/preview/JSONDynamicForm';
 
 const { TextArea, Password } = Input;
 

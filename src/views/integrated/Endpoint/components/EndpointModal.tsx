@@ -1,3 +1,4 @@
+import DragModal from '@/components/modal/DragModal';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { ENDPOINT_CATEGORIES } from '@/services/integrated/endpoint/endpointApi';
 import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -5,7 +6,7 @@ import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpo
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { CollapseProps, TabsProps } from 'antd';
-import { Button, Card, Collapse, Divider, Form, Input, Modal, Select, Space, Tabs } from 'antd';
+import { Button, Card, Collapse, Divider, Form, Input, InputNumber, Select, Space, Switch, Tabs } from 'antd';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import SchemaFormFieldRenderer from './SchemaFormFieldRenderer';
 
@@ -54,7 +55,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({ title, children, defa
     {
       key: '1',
       label: title,
-      children: <Card bordered={false}>{children}</Card>,
+      children: <Card variant="borderless">{children}</Card>,
     },
   ];
 
@@ -83,6 +84,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   // 监听端点类型和模式变化
   const endpointTypeName = Form.useWatch('endpointType', form);
   const selectedMode = Form.useWatch('mode', form);
+  // 监听是否启用指数退避策略
+  const useExponentialBackoff = Form.useWatch('useExponentialBackoff', form);
 
   /**
    * 获取所有启用的端点类型配置列表
@@ -136,12 +139,12 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
 
     if (config) {
       setSelectedEndpointTypeConfig(config);
-      // 类型改变时，清空 model 字段
+      // 类型改变时，清空 mode 字段
       form.setFieldValue('mode', undefined);
     } else {
       setSelectedEndpointTypeConfig(null);
     }
-  }, [endpointTypeName, endpointTypeListModule, form]);
+  }, [endpointTypeName, endpointTypeListModule]);
 
   /**
    * 获取Schema字段列表（根据选择的 mode 过滤并排序）
@@ -194,16 +197,17 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   }, [open, initialValues, form]);
 
   /**
-   * 当编辑已有数据时，根据 endpointType 加载对应的配置
+   * 当有 endpointType 时，根据 endpointType 加载对应的配置
+   * 支持新增时通过 initialValues 传入 endpointType
    */
   useEffect(() => {
-    if (open && initialValues?.endpointType && endpointTypeListModule?.records && !selectedEndpointTypeConfig) {
+    if (open && initialValues?.endpointType && endpointTypeListModule?.records) {
       const config = endpointTypeListModule.records.find((item) => item.typeName === initialValues.endpointType);
-      if (config) {
+      if (config && !selectedEndpointTypeConfig) {
         setSelectedEndpointTypeConfig(config);
       }
     }
-  }, [open, initialValues, endpointTypeListModule, selectedEndpointTypeConfig]);
+  }, [open, initialValues?.endpointType, endpointTypeListModule, selectedEndpointTypeConfig]);
 
   /**
    * 添加键值对
@@ -292,7 +296,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           form={form}
           layout="horizontal"
           labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
+          wrapperCol={{ span: 18 }}
           disabled={isViewMode || false}
           onValuesChange={handleValuesChange}
         >
@@ -301,21 +305,6 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
             <Form.Item name="name" label="端点名称" rules={[{ required: true, message: '请输入端点名称' }]}>
               <Input placeholder="请输入端点名称" />
             </Form.Item>
-
-            <Form.Item
-              name="code"
-              label="端点编码"
-              rules={[
-                { required: true, message: '请输入端点编码' },
-                {
-                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
-                  message: '编码必须以字母开头，只能包含字母、数字和下划线',
-                },
-              ]}
-            >
-              <Input placeholder="请输入端点编码" disabled={!!initialValues?.id} />
-            </Form.Item>
-
             <Form.Item name="endpointType" label="端点类型" rules={[{ required: true, message: '请选择端点类型' }]}>
               <Select
                 placeholder="请选择端点类型"
@@ -358,22 +347,93 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
           {/* 配置信息区域 - 只有选择了端点类型和模式后才显示 */}
           {endpointTypeName && selectedMode && selectedEndpointTypeConfig && (
             <>
-              <Divider orientation="left" plain>
-                配置信息
-              </Divider>
-              <div className="border border-gray-200 rounded p-4">
-                {getSchemaFields.length > 0 ? (
-                  <div className="flex flex-col gap-0">
-                    {getSchemaFields.map((field: SchemaField) => (
-                      <SchemaFormFieldRenderer key={field.field} field={field} formValues={formValues} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-20 text-gray-400">
-                    当前端点类型在【{selectedMode}】模式下暂无配置项
-                  </div>
-                )}
-              </div>
+              <Divider titlePlacement="start">配置信息</Divider>
+              {getSchemaFields.length > 0 ? (
+                <div className="flex flex-col gap-0">
+                  {getSchemaFields.map((field: SchemaField) => (
+                    <SchemaFormFieldRenderer key={field.field} field={field} formValues={formValues} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 text-gray-400">
+                  当前端点类型在【{selectedMode}】模式下暂无配置项
+                </div>
+              )}
+            </>
+          )}
+          {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
+          {selectedEndpointTypeConfig?.supportRetry && (
+            <>
+              <Divider titlePlacement="start">重试策略</Divider>
+              <Form.Item
+                name="maximumRedeliveries"
+                label="重试次数"
+                tooltip="最大重试次数"
+                rules={[{ required: true, message: '请输入重试次数' }]}
+              >
+                <InputNumber
+                  className="w-full"
+                  placeholder="请输入重试次数"
+                  min={1}
+                  max={10}
+                  step={1}
+                  addonAfter="次"
+                />
+              </Form.Item>
+              <Form.Item
+                name="redeliveryDelay"
+                label="初始延迟"
+                tooltip="初始延迟时间"
+                rules={[{ required: true, message: '请输入初始延迟' }]}
+              >
+                <InputNumber
+                  className="w-full"
+                  placeholder="请输入初始延迟"
+                  min={50}
+                  max={10000}
+                  step={1000}
+                  addonAfter="ms"
+                />
+              </Form.Item>
+              <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
+                <Switch checkedChildren="是" unCheckedChildren="否" />
+              </Form.Item>
+              <Form.Item
+                name="backOffMultiplier"
+                label="退避倍数"
+                tooltip="退避倍数"
+                rules={[{ required: useExponentialBackoff, message: '请输入退避倍数' }]}
+              >
+                <Space.Compact>
+                    <InputNumber
+                      disabled={!useExponentialBackoff}
+                      className="w-full"
+                      placeholder="请输入退避倍数"
+                      min={1}
+                      max={10}
+                      step={1}
+                    />
+                  <Space.Addon>倍</Space.Addon>
+                </Space.Compact>
+              </Form.Item>
+              <Form.Item
+                name="maximumRedeliveryDelay"
+                label="最大延迟"
+                tooltip="最大延迟时间"
+                rules={[{ required: true, message: '请输入最大延迟' }]}
+              >
+                <Space.Compact>
+                  <InputNumber
+                    className="w-full"
+                    placeholder="请输入最大延迟"
+                    min={50}
+                    max={60000}
+                    step={1000}
+                  />
+                  <Space.Addon>ms</Space.Addon>
+                </Space.Compact>
+                
+              </Form.Item>
             </>
           )}
         </Form>
@@ -454,7 +514,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   ];
 
   return (
-    <Modal
+    <DragModal
       title={title}
       open={open}
       onOk={handleOk}
@@ -470,8 +530,8 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
         },
       }}
     >
-      <Tabs defaultActiveKey="config" items={tabItems} />
-    </Modal>
+      <Tabs defaultActiveKey="config" type="card" items={tabItems} />
+    </DragModal>
   );
 };
 

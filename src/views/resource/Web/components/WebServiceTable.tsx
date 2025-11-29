@@ -1,10 +1,9 @@
+import type { WebService } from '@/services/resource/webservice/webServiceApi';
+import { DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons';
+import type { TablePaginationConfig, TableProps } from 'antd';
+import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
-import { Table, Button, Space, Tag, Tooltip, Switch } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined, DownloadOutlined, FileTextOutlined } from '@ant-design/icons';
-import type { TableProps, TablePaginationConfig } from 'antd';
-import type { WebService } from '@/services/resource/webservice/webServiceApi';
-import dayjs from 'dayjs';
 
 interface WebServiceTableProps {
   data: WebService[];
@@ -83,7 +82,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         },
         render: (value: string) => (
           <Tooltip placement="topLeft" title={value}>
-            <span className="font-medium text-blue-600">{value}</span>
+            <span className="text-blue-600">{value}</span>
           </Tooltip>
         ),
       },
@@ -95,11 +94,6 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         ellipsis: {
           showTitle: false,
         },
-        render: (value: string) => (
-          <Tooltip placement="topLeft" title={value}>
-            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{value}</code>
-          </Tooltip>
-        ),
       },
       {
         title: '录入方式',
@@ -117,11 +111,6 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         ellipsis: {
           showTitle: false,
         },
-        render: (value: string) => (
-          <Tooltip placement="topLeft" title={value}>
-            <span className="text-xs text-gray-600">{value || '-'}</span>
-          </Tooltip>
-        ),
       },
       {
         title: '操作数量',
@@ -129,9 +118,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         key: 'operationCount',
         width: 100,
         align: 'center',
-        render: (operations: any[]) => (
-          <Tag color="cyan">{operations?.length || 0}</Tag>
-        ),
+        render: (operations: any[]) => <Tag color="cyan">{operations?.length || 0}</Tag>,
       },
       {
         title: '文件信息',
@@ -144,14 +131,10 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
                 <div className="flex items-center gap-1">
                   <FileTextOutlined className="text-blue-500" />
                   <Tooltip title={record.fileInfo.fileName}>
-                    <span className="text-gray-700 truncate max-w-[120px]">
-                      {record.fileInfo.fileName}
-                    </span>
+                    <span className="text-gray-700 truncate max-w-[120px]">{record.fileInfo.fileName}</span>
                   </Tooltip>
                 </div>
-                <div className="text-gray-500 mt-1">
-                  {formatFileSize(record.fileInfo.fileSize)}
-                </div>
+                <div className="text-gray-500 mt-1">{formatFileSize(record.fileInfo.fileSize)}</div>
               </div>
             );
           }
@@ -215,7 +198,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         },
         render: (value: string) => (
           <Tooltip placement="topLeft" title={value}>
-            <span className="text-xs text-gray-600">{value || '-'}</span>
+            <span>{value || '-'}</span>
           </Tooltip>
         ),
       },
@@ -224,22 +207,12 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         dataIndex: 'createTime',
         key: 'createTime',
         width: 160,
-        render: (value: string) => (
-          <span className="text-xs text-gray-600">
-            {value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'}
-          </span>
-        ),
       },
       {
         title: '更新时间',
         dataIndex: 'updateTime',
         key: 'updateTime',
         width: 160,
-        render: (value: string) => (
-          <span className="text-xs text-gray-600">
-            {value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'}
-          </span>
-        ),
       },
       {
         title: '操作',
@@ -253,7 +226,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EyeOutlined className="text-purple-500! hover:text-purple-600!"/>}
+                icon={<EyeOutlined className="text-purple-500! hover:text-purple-600!" />}
                 onClick={() => onView(record)}
               />
             </Tooltip>
@@ -261,7 +234,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!"/>}
+                icon={<EditOutlined className="text-blue-500! hover:text-blue-600!" />}
                 onClick={() => onEdit(record)}
               />
             </Tooltip>
@@ -269,7 +242,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!"/>}
+                icon={<DownloadOutlined className="text-green-500! hover:text-green-600!" />}
                 onClick={() => onExport(record)}
               />
             </Tooltip>
@@ -277,7 +250,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
               <Button
                 type="text"
                 size="small"
-                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!"/>}
+                icon={<DeleteOutlined className="text-red-500! hover:text-red-600!" />}
                 onClick={() => onDelete(record)}
               />
             </Tooltip>
@@ -305,10 +278,9 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         size="middle"
       />
     );
-  },
+  }
 );
 
 WebServiceTable.displayName = 'WebServiceTable';
 
 export default WebServiceTable;
-

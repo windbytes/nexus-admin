@@ -1,18 +1,16 @@
-import { useState, useCallback } from 'react';
-import { Layout, theme } from 'antd';
+import type { MenuModel } from '@/services/system/menu/type';
 import type React from 'react';
-import ButtonTree from './ButtonTree';
+import { useCallback, useState } from 'react';
 import ButtonDetail from './ButtonDetail';
 import ButtonInterfacePermission from './ButtonInterfacePermission';
+import ButtonTree from './ButtonTree';
 import './permissionButton.scss';
-import type { MenuModel } from '@/services/system/menu/type';
 
 /**
  * 按钮列表主组件
  * 提供权限按钮的树形展示和详情查看功能
  */
 const PermissionButton: React.FC = () => {
-  const { token } = theme.useToken();
   const [selectedButton, setSelectedButton] = useState<MenuModel | null>(null);
 
   /**
@@ -24,23 +22,16 @@ const PermissionButton: React.FC = () => {
   }, []);
 
   return (
-    <Layout>
-      <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
+    <div className="flex gap-2 h-full w-full">
         {/* 左侧按钮树 */}
-        <ButtonTree
-          onSelectButton={handleSelectButton}
-          selectedButtonId={selectedButton ? selectedButton.id : ''}
-        />
-      </Layout.Sider>
-      <Layout.Content className="flex flex-col ml-4 gap-4">
+      <ButtonTree onSelectButton={handleSelectButton} selectedButtonId={selectedButton ? selectedButton.id : ''} />
+      <div className="flex flex-col flex-1 gap-2 h-full min-w-0">
         {/* 按钮详情 */}
-        <ButtonDetail 
-          button={selectedButton} 
-        />
+        <ButtonDetail button={selectedButton} />
         {/* 按钮接口权限列表 */}
         <ButtonInterfacePermission button={selectedButton} />
-      </Layout.Content>
-    </Layout>
+      </div>
+    </div>
   );
 };
 

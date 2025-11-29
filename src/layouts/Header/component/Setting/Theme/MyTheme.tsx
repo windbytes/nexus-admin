@@ -1,9 +1,9 @@
-import clsx from "clsx";
 import { THEME_PRESET } from "@/enums/constants";
 import { usePreferencesStore } from "@/stores/store";
 import "./theme.scss";
 import SwitchItem from "../SwitchItem";
 import { useShallow } from "zustand/shallow";
+import clsx from "clsx";
 
 /**
  * 主题
@@ -18,50 +18,29 @@ const MyTheme: React.FC = () => {
   );
   return (
     <div
-      style={{
-        display: "flex",
-        width: "100%",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-      }}
+      className="flex w-full flex-wrap justify-between"
     >
       {THEME_PRESET.map((item) => {
         return (
           <div
             key={item.name}
-            style={{
-              height: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            className="flex items-center justify-center h-full"
           >
             <div
-              style={{
-                display: "flex",
-                cursor: "pointer",
-                flexDirection: "column",
-              }}
+              className="flex flex-col cursor-pointer"
               onClick={() => {
                 updatePreferences("theme", "mode", item.name);
               }}
             >
               <div
-                className={clsx("outline-box", {
+                className={clsx("outline-box pt-4! pb-4!", {
                   "outline-box-active": item.name === mode,
                 })}
-                style={{ paddingTop: "1rem", paddingBottom: "1rem" }}
               >
                 {item.icon}
               </div>
               <div
-                style={{
-                  textAlign: "center",
-                  fontSize: "12px",
-                  lineHeight: "16px",
-                  color: "rgb(113, 113, 122)",
-                  marginTop: "8px",
-                }}
+                className="text-center text-xs leading-4 text-gray-500 mt-2"
               >
                 {item.name}
               </div>
@@ -71,7 +50,7 @@ const MyTheme: React.FC = () => {
       })}
       {/* 深色侧边栏 */}
       <SwitchItem
-        style={{ marginTop: "1.5rem" }}
+        className="mt-6"
         title="深色侧边栏"
         category="theme"
         disabled={false}

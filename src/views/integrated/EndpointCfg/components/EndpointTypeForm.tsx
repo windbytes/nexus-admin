@@ -50,7 +50,7 @@ const formTheme = {
 /**
  * Form 的初始值配置 - 移到组件外部
  */
-const formInitialValues = { status: true, schemaVersion: '1.0.0' };
+const formInitialValues = { status: true, schemaVersion: '1.0.0', supportRetry: false };
 
 interface EndpointTypeFormProps {
   /** 表单实例 */
@@ -161,6 +161,10 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
 
             <Form.Item name="status" label="状态" valuePropName="checked">
               <Switch checkedChildren="启用" unCheckedChildren="禁用" />
+            </Form.Item>
+
+            <Form.Item name="supportRetry" label="支持重试" valuePropName="checked">
+              <Switch checkedChildren="是" unCheckedChildren="否" />
             </Form.Item>
           </div>
 

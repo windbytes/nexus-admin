@@ -1,8 +1,8 @@
-import type React from 'react';
-import { Form, Input, Select, Button, Space } from 'antd';
-import { SearchOutlined, RedoOutlined } from '@ant-design/icons';
 import type { DataModeSearchParams } from '@/services/resource/datamode/dataModeApi';
 import { DATA_MODE_CATEGORIES } from '@/services/resource/datamode/dataModeApi';
+import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
+import type React from 'react';
 import { memo } from 'react';
 
 interface DataModeSearchFormProps {
@@ -37,8 +37,16 @@ const DataModeSearchForm: React.FC<DataModeSearchFormProps> = memo(({ onSearch, 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-      <div className="p-4">
+    <ConfigProvider
+      theme={{
+        components: {
+          Form: {
+            itemMarginBottom: 0,
+          },
+        },
+      }}
+    >
+      <Card>
         <Form
           form={form}
           initialValues={{
@@ -96,12 +104,11 @@ const DataModeSearchForm: React.FC<DataModeSearchFormProps> = memo(({ onSearch, 
             </Space>
           </div>
         </Form>
-      </div>
-    </div>
+      </Card>
+    </ConfigProvider>
   );
 });
 
 DataModeSearchForm.displayName = 'DataModeSearchForm';
 
 export default DataModeSearchForm;
-

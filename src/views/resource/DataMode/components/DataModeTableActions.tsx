@@ -1,12 +1,13 @@
-import type React from 'react';
+import { DeleteOutlined, DownloadOutlined, ImportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
+import type React from 'react';
 import { memo } from 'react';
 
 interface DataModeTableActionsProps {
   onAdd: () => void;
   onBatchDelete: () => void;
   onBatchExport: () => void;
+  onImportSchema: () => void;
   onRefresh: () => void;
   selectedRowKeys: React.Key[];
   loading?: boolean;
@@ -16,7 +17,7 @@ interface DataModeTableActionsProps {
  * 数据模式表格操作按钮组件
  */
 const DataModeTableActions: React.FC<DataModeTableActionsProps> = memo(
-  ({ onAdd, onBatchDelete, onBatchExport, onRefresh, selectedRowKeys, loading = false }) => {
+  ({ onAdd, onBatchDelete, onBatchExport, onImportSchema, onRefresh, selectedRowKeys, loading = false }) => {
     const hasSelection = selectedRowKeys.length > 0;
 
     return (
@@ -50,12 +51,15 @@ const DataModeTableActions: React.FC<DataModeTableActionsProps> = memo(
               批量导出
             </Button>
           </Tooltip>
+          <Tooltip title="导入Schema">
+            <Button icon={<ImportOutlined />} onClick={onImportSchema}>
+              导入Schema
+            </Button>
+          </Tooltip>
         </Space>
 
         <Tooltip title="刷新数据">
-          <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-            刷新
-          </Button>
+          <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
         </Tooltip>
       </div>
     );

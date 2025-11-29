@@ -54,20 +54,13 @@ const NumberItem: React.FC<NumberItemProps> = (props) => {
         'pointer-events-none opacity-50': disabled,
       })}
     >
-      <span
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '14px',
-          lineHeight: '20px',
-        }}
-      >
+      <span className='flex items-center text-sm leading-5'>
         {title}
       </span>
       <InputNumber
         disabled={disabled}
         placeholder={placeholder}
-        style={{ width: '165px' }}
+        className='w-[165px]'
         value={value}
         onChange={changePreferences}
       />

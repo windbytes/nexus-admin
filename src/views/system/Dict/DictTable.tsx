@@ -1,3 +1,4 @@
+import useTableScroll from "@/hooks/useTableScroll";
 import { Table, type TableProps } from "antd";
 
 // 定义表格需要的参数
@@ -12,8 +13,6 @@ interface DictTableProps {
   onRow: (record: any) => any;
   // 行选择事件
   rowSelection: TableProps<any>['rowSelection'];
-  // 表格高度
-  height: number;
   // 分页配置
   pagination?: TableProps<any>['pagination'];
 }
@@ -29,23 +28,26 @@ const DictTable: React.FC<DictTableProps> = ({
   columns,
   onRow,
   rowSelection,
-  height,
   pagination
 }) => {
+  const { scrollConfig, tableWrapperRef } = useTableScroll('max-content');
   return (
-    <Table
-      size="small"
-      onRow={onRow}
-      style={{ marginTop: '8px' }}
-      bordered
-      pagination={pagination}
-      dataSource={tableData}
-      columns={columns}
-      loading={loading}
-      rowKey="id"
-      scroll={{ x: 'max-content', y: height - 128 }}
-      rowSelection={{ ...rowSelection }}
-    />
+    <div className='flex-1 min-h-0' ref={tableWrapperRef}>
+      <Table
+        size="small"
+        onRow={onRow}
+        style={{ marginTop: '8px' }}
+        bordered
+        pagination={pagination}
+        dataSource={tableData}
+        columns={columns}
+        loading={loading}
+        rowKey="id"
+        scroll={scrollConfig}
+        rowSelection={{ ...rowSelection }}
+      />
+    </div>
+    
   );
 };
 export default DictTable;

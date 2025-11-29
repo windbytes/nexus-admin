@@ -4,6 +4,19 @@ import * as Icons from '@ant-design/icons';
 import React from 'react';
 import { isObject } from './is';
 
+export type MenuEntity = RouteItem & {
+  id: string;
+  path: string;
+  parentId?: string | null;
+  children?: MenuEntity[];
+};
+
+export type MenuCaches = {
+  pathMap: Map<string, MenuEntity>;
+  ancestorsMap: Map<string, string[]>;
+  routeToMenuPathMap: Map<string, string>;
+};
+
 /**
  * Add the object as a parameter to the URL
  * @param baseUrl url
@@ -81,61 +94,6 @@ export const addIcon = (name: string | undefined | null) => {
 };
 
 /**
- * @description 根据菜单结构获取需要展开的 subMenu
- * @param {String} path 当前访问地址
- * @param {Array} menus 菜单列表
- * @returns array
- */
-export const getOpenKeys = (path: string, menus: RouteItem[] = []) => {
-  const openKeys: string[] = [];
-
-  /**
-   * 递归查找路径对应的菜单项，并收集所有父级菜单的路径
-   * @param menuList 菜单列表
-   * @param targetPath 目标路径
-   * @param parentPaths 父级路径数组
-   * @returns 是否找到目标路径
-   */
-  const findMenuPath = (menuList: RouteItem[], targetPath: string, parentPaths: string[] = []): boolean => {
-    for (const menu of menuList) {
-      // 跳过隐藏的菜单项
-      if (menu.hidden || menu.meta?.menuType === 2 || menu.meta?.menuType === 3) {
-        continue;
-      }
-
-      // 如果找到目标路径
-      if (menu.path === targetPath) {
-        // 将当前路径的所有父级路径添加到 openKeys
-        openKeys.push(...parentPaths);
-        return true;
-      }
-
-      // 如果有子菜单，递归查找
-      if (menu.children && menu.children.length > 0) {
-        const currentParentPaths = [...parentPaths, menu.path];
-        if (findMenuPath(menu.children, targetPath, currentParentPaths)) {
-          return true;
-        }
-      }
-
-      // 如果有子路由，也递归查找
-      if (menu.childrenRoute && menu.childrenRoute.length > 0) {
-        const currentParentPaths = [...parentPaths, menu.path];
-        if (findMenuPath(menu.childrenRoute, targetPath, currentParentPaths)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  // 在菜单中查找目标路径
-  findMenuPath(menus, path);
-
-  return openKeys;
-};
-
-/**
  * 将后台拿到的数据映射成包含key的数据，用于react相关组件
  * @param data 数据
  * @param key 数据中的唯一字段
@@ -188,4 +146,120 @@ export function transformData(data: any[], expanded: string[], t: (key: string) 
 
     return newItem;
   });
+}
+
+/**
+ * 模拟 TanStack Router 的路径匹配逻辑
+ * @param routeDef 路由定义路径 (例如: /users/$userId/settings)
+ * @param currentPath 实际当前路径 (例如: /users/123/settings)
+ * @param exact 是否精确匹配 (默认 true，如果为 false，则 /users/$id 可以匹配 /users/123/details)
+ */
+export function matchPathname(routeDef: string, currentPath: string, exact = true): boolean {
+  // 1. 移除末尾的斜杠并分割路径
+  const cleanRoute = routeDef.replace(/\/+$/, '').split('/').filter(Boolean);
+  const cleanCurrent = currentPath?.split('?')?.[0]?.replace(/\/+$/, '').split('/').filter(Boolean) ?? [];
+
+  // 2. 如果是精确匹配，长度必须一致
+  // 如果是非精确匹配（前缀匹配），实际路径长度必须大于等于定义路径
+  if (exact) {
+    if (cleanRoute.length !== cleanCurrent.length) return false;
+  } else {
+    if (cleanCurrent.length < cleanRoute.length) return false;
+  }
+
+  // 3. 逐段比对
+  for (let i = 0; i < cleanRoute.length; i++) {
+    const routeSegment = cleanRoute[i];
+    const currentSegment = cleanCurrent[i];
+
+    // 处理通配符 (splat routes)
+    if (routeSegment === '*') {
+      return true; 
+    }
+
+    // 处理动态参数 ($userId)
+    if (routeSegment && routeSegment.startsWith('$')) {
+      continue; // 只要该位置有值，就视为匹配
+    }
+
+    // 静态段必须完全相等
+    if (routeSegment !== currentSegment) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * 判断路由路径是否与目标路径匹配。
+ *
+ * @param routePath - 路由路径
+ * @param targetPath - 目标路径
+ * @returns 是否匹配
+ */
+export const matchRoutePath = (routePath: string, targetPath: string): boolean => {
+  return matchPathname(routePath, targetPath);
+};
+
+/**
+ * 构建菜单缓存：
+ * - pathMap：path -> 菜单实体
+ * - ancestorsMap：path -> 父级 path 链（用于 openKeys）
+ * - routeToMenuPathMap：路由 path -> 可见菜单 path（menuType === 3 时会用到）
+ */
+export function buildMenuCaches(menuList: MenuEntity[]): MenuCaches {
+  const pathMap = new Map<string, MenuEntity>();
+  const ancestorsMap = new Map<string, string[]>();
+  const routeToMenuPathMap = new Map<string, string>();
+
+  const dfs = (node: MenuEntity, parentVisibleAncestors: string[]) => {
+    const isPureRoute = node.meta?.menuType === 2;
+
+    // 可见菜单：自身 path 是 key；隐藏/纯路由：仅记录 pathMap 方便匹配
+    pathMap.set(node.path, node);
+
+    if (!isPureRoute && !node.hidden) {
+      ancestorsMap.set(node.path, [...parentVisibleAncestors]);
+    }
+
+    if (isPureRoute) {
+      // 路由节点指向最近的可见菜单
+      const nearestVisible = parentVisibleAncestors[parentVisibleAncestors.length - 1];
+      if (nearestVisible) {
+        routeToMenuPathMap.set(node.path, nearestVisible);
+      }
+    }
+
+    // 计算下一层可见菜单的父链
+    const nextVisibleAncestors =
+      isPureRoute || node.hidden ? parentVisibleAncestors : [...parentVisibleAncestors, node.path];
+
+    node.children?.forEach((child) => dfs(child, nextVisibleAncestors));
+    node.childrenRoute?.forEach((child) => dfs(child as MenuEntity, nextVisibleAncestors));
+  };
+
+  menuList.forEach((root) => dfs(root, []));
+
+  return { pathMap, ancestorsMap, routeToMenuPathMap };
+}
+
+/**
+ * 根据路径查找菜单
+ * @param path 路径
+ * @param caches 菜单缓存
+ * @returns 找到的菜单对象或 undefined
+ */
+export function findMenuByPath(path: string, caches: MenuCaches): MenuEntity | undefined {
+  const { pathMap } = caches;
+  let entity = pathMap.get(path);
+  if (!entity) {
+    for (const [candidatePath, candidateEntity] of pathMap.entries()) {
+      if (matchPathname(candidatePath, path)) {
+        entity = candidateEntity;
+        break;
+      }
+    }
+  }
+  return entity;
 }

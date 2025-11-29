@@ -1,4 +1,4 @@
-import type { PageQueryParams } from '@/types/global';
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
@@ -201,17 +201,6 @@ export interface EndpointFormData {
 }
 
 /**
- * 分页结果
- */
-export interface PageResult<T> {
-  records: T[];
-  total: number;
-  totalRow?: number;
-  pageNum: number;
-  pageSize: number;
-}
-
-/**
  * 端点测试请求
  */
 export interface EndpointTestRequest {
@@ -265,16 +254,49 @@ export interface EndpointConfigSchema {
  * 端点API路径
  */
 enum EndpointAction {
+  /**
+   * 分页查询端点列表
+   */
   list = '/integrated/endpoint/list',
+  /**
+   * 新增端点
+   */
   add = '/integrated/endpoint/add',
+  /**
+   * 更新端点
+   */
   update = '/integrated/endpoint/update',
+  /**
+   * 删除端点
+   */
   delete = '/integrated/endpoint/delete',
+  /**
+   * 批量删除端点
+   */
   batchDelete = '/integrated/endpoint/batchDelete',
+  /**
+   * 获取端点详情
+   */
   detail = '/integrated/endpoint/detail',
+  /**
+   * 测试端点
+   */
   test = '/integrated/endpoint/test',
+  /**
+   * 验证端点配置
+   */
   validateConfig = '/integrated/endpoint/validateConfig',
+  /**
+   * 导出端点配置
+   */
   exportConfig = '/integrated/endpoint/exportConfig',
+  /**
+   * 导入端点配置
+   */
   importConfig = '/integrated/endpoint/importConfig',
+  /**
+   * 获取端点配置Schema
+   */
   getConfigSchema = '/integrated/endpoint/getConfigSchema',
 }
 
@@ -381,12 +403,11 @@ export const endpointService = {
    * 导出端点配置
    */
   async exportConfig(id: string, name: string): Promise<void> {
-    const response = await HttpRequest.postDownload<Blob>({
+    const response = await HttpRequest.getDownload<Blob>({
       url: `${EndpointAction.exportConfig}/${id}`,
-      responseType: 'blob',
     });
 
-    const url = window.URL.createObjectURL(new Blob([response]));
+    const url = window.URL.createObjectURL(response);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `${name}_endpoint.json`);

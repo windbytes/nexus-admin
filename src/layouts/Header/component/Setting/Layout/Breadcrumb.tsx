@@ -21,7 +21,7 @@ const Breadcrumb: React.FC = () => {
       {/* 显示首页按钮 */}
       <SwitchItem title="显示首页按钮" category="breadcrumb" pKey="showHome" />
       {/* 面包屑风格 */}
-      <SelectItem title="面包屑风格" />
+      <SelectItem category="breadcrumb" pKey="styleType" title="面包屑风格" />
     </>
   );
 };

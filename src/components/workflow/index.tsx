@@ -1,26 +1,27 @@
+import { useEditorProps } from '@/hooks/workflow/use-editor-props';
 import { DownOutlined, HistoryOutlined, OrderedListOutlined } from '@ant-design/icons';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
-  type WorkflowJSON,
   type FreeLayoutPluginContext,
+  type WorkflowJSON,
 } from '@flowgram.ai/free-layout-editor';
 import '@flowgram.ai/free-layout-editor/index.css';
-import { Card, Space, Button } from 'antd';
+import { Button, Card, Space } from 'antd';
 import { useCallback, useRef } from 'react';
-import { useEditorProps } from '@/hooks/workflow/use-editor-props';
+import { initialData } from './init-data';
+import ModalRenderer from './node-modal/modal-renderer';
+import { NodeModalProvider } from './node-modal/node-modal-provider';
+import { nodeRegistries } from './nodes';
 import { SidebarProvider } from './sidebar/sidebar-provider';
 import SidebarRenderer from './sidebar/sidebar-renderer';
 import WorkflowTools from './tools';
-import { NodeModalProvider } from './node-modal/node-modal-provider';
-import ModalRenderer from './node-modal/modal-renderer';
-import { nodeRegistries } from './nodes';
-import { initialData } from './init-data';
 import './workflow.scss';
 
 /**
  * 流程编排组件
  */
+// @Deprecated
 const Workflow: React.FC<WorkflowProps> = (props) => {
   const ref = useRef<FreeLayoutPluginContext | null>(null);
   // 根据应用ID查询流程数据
@@ -54,14 +55,14 @@ const Workflow: React.FC<WorkflowProps> = (props) => {
         classNames={{ body: 'w-full h-full p-2! flex flex-col' }}
       >
         <Space>
-          <Button icon={<OrderedListOutlined />} />
-          <Button type="primary" size="middle" onClick={handleSaveClick}>
+          <Button size="small" icon={<OrderedListOutlined />} />
+          <Button type="primary" size="small" onClick={handleSaveClick}>
             保存
           </Button>
-          <Button type="primary" icon={<DownOutlined />}>
+          <Button type="primary" size="small" icon={<DownOutlined />}>
             发布
           </Button>
-          <Button icon={<HistoryOutlined />}></Button>
+          <Button size="small" icon={<HistoryOutlined />}></Button>
         </Space>
       </Card>
       {/* 右边设计部分 */}
@@ -72,6 +73,7 @@ const Workflow: React.FC<WorkflowProps> = (props) => {
               <div className="workflow-container">
                 <EditorRenderer className="workflow-editor" />
               </div>
+              {/* 工具栏 */}
               <WorkflowTools />
               {/* 侧边栏 */}
               <SidebarRenderer />

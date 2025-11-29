@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Space, Card, Tooltip, Radio, Switch, Select, App } from 'antd';
-import { PlusOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { CodeEditor } from '@/components/CodeEditor';
 import DragModal from '@/components/modal/DragModal';
+import { DeleteOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { App, Button, Card, Form, Input, Radio, Select, Space, Switch, Tooltip } from 'antd';
+import React, { useEffect, useState } from 'react';
 
 /**
  * Ant Design Form 支持的验证类型
@@ -522,34 +522,39 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium w-24 text-right">长度范围：</span>
                         <div className="flex-1 grid grid-cols-2 gap-3">
-                          <Input
-                            placeholder="最小值 (min)"
-                            type="number"
-                            value={rule.min}
-                            onChange={(e) => handleUpdateRule(index, 'min', e.target.value ? Number(e.target.value) : undefined)}
-                            addonBefore="≥"
-                          />
-                          <Input
-                            placeholder="最大值 (max)"
-                            type="number"
-                            value={rule.max}
-                            onChange={(e) => handleUpdateRule(index, 'max', e.target.value ? Number(e.target.value) : undefined)}
-                            addonBefore="≤"
-                          />
+                          <Space.Compact className="w-full">
+                            <Space.Addon>≥</Space.Addon>
+                            <Input
+                              placeholder="最小值 (min)"
+                              type="number"
+                              value={rule.min}
+                              onChange={(e) => handleUpdateRule(index, 'min', e.target.value ? Number(e.target.value) : undefined)}
+                            />
+                          </Space.Compact>
+                          <Space.Compact>
+                            <Space.Addon>≤</Space.Addon>
+                              <Input
+                                placeholder="最大值 (max)"
+                                type="number"
+                                value={rule.max}
+                                onChange={(e) => handleUpdateRule(index, 'max', e.target.value ? Number(e.target.value) : undefined)}
+                              />
+                          </Space.Compact>
                         </div>
                       </div>
 
                       {/* 正则表达式 */}
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium w-24 text-right">正则表达式：</span>
-                        <Input
-                          className="flex-1"
-                          placeholder="如: ^[a-zA-Z0-9]+$"
-                          value={rule.pattern}
-                          onChange={(e) => handleUpdateRule(index, 'pattern', e.target.value)}
-                          addonBefore="/"
-                          addonAfter="/"
-                        />
+                        <Space.Compact className="flex-1">
+                          <Space.Addon>/</Space.Addon>
+                          <Input
+                            placeholder="如: ^[a-zA-Z0-9]+$"
+                            value={rule.pattern}
+                            onChange={(e) => handleUpdateRule(index, 'pattern', e.target.value)}
+                          />
+                          <Space.Addon>/</Space.Addon>
+                        </Space.Compact>
                       </div>
                     </div>
                     <Button

@@ -1,7 +1,7 @@
-import { ManOutlined, WomanOutlined } from '@ant-design/icons';
-import { Button, Space, Image, Dropdown, type TableProps, type MenuProps, Tooltip, Switch } from 'antd';
 import type { UserModel } from '@/services/system/user/type';
-import { Icon } from '@iconify-icon/react';
+import { ManOutlined, WomanOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
+import { Button, Dropdown, Image, type MenuProps, Space, Switch, type TableProps, Tooltip } from 'antd';
 
 /**
  * 获取表格列
@@ -19,7 +19,7 @@ export const getColumns = (
   colorPrimary: string,
   handleMore: (record: UserModel) => MenuProps['items'],
   onStatusChange?: (record: UserModel, checked: boolean) => void,
-  canUpdateStatus: boolean = false,
+  canUpdateStatus: boolean = false
 ): TableProps<UserModel>['columns'] => [
   {
     dataIndex: 'id',
@@ -136,11 +136,7 @@ export const getColumns = (
             onClick={() => handleEdit(record)}
           />
         </Tooltip>
-        <Dropdown
-          menu={{ items: handleMore(record) ?? [] }}
-          placement="bottomRight"
-          trigger={['click']}
-        >
+        <Dropdown menu={{ items: handleMore(record) ?? [] }} placement="bottomRight" trigger={['click']}>
           <Tooltip title={t('common.operation.more')}>
             <Button type="text" icon={<Icon icon="fluent:more-vertical-16-filled" className="text-xl block" />} />
           </Tooltip>

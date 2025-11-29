@@ -39,10 +39,6 @@ export interface UserRole {
  * 登录响应数据
  */
 export interface LoginResponse {
-  /** 访问令牌 */
-  accessToken: string;
-  /** 刷新令牌 */
-  refreshToken: string;
   /** 用户ID */
   userId: string;
   /** 用户名 */
@@ -100,7 +96,7 @@ export const loginService: ILoginService = {
         url: LoginApi.login,
         data: params,
       },
-      { isTransformResponse: false },
+      { isTransformResponse: false }
     );
   },
 
@@ -117,7 +113,7 @@ export const loginService: ILoginService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return { key, code };
   },

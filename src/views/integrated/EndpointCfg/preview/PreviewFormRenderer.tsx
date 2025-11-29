@@ -1,15 +1,15 @@
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import type { FormInstance } from 'antd';
-import { Form } from 'antd';
+import { Divider, Form, InputNumber, Switch } from 'antd';
 import React, { memo, useState } from 'react';
 import PreviewFormField from './PreviewFormField';
 
 interface PreviewFormRendererProps {
   /** 表单实例 */
   form: FormInstance;
-  /** 字段配置列表 */
-  fields: SchemaField[];
+  /** 端点配置 */
+  config: EndpointTypeConfig;
   /** 作用模式 */
   mode?: string;
   /** 初始值 */
@@ -21,7 +21,8 @@ interface PreviewFormRendererProps {
  * 根据字段配置动态渲染整个表单
  * 使用 memo 避免不必要的重渲染
  */
-const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields, mode, initialValues = {} }) => {
+const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config, mode = 'IN', initialValues = {} }) => {
+  const { schemaFields: fields = [], supportRetry = false } = config;
   /**
    * 合并字段的默认值到初始值中
    */
@@ -39,7 +40,8 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields,
   }, [fields, initialValues]);
 
   const [formValues, setFormValues] = useState<Record<string, any>>(mergedInitialValues);
-
+  /** 监听是否启用指数退避策略 */
+  const useExponentialBackoff = Form.useWatch('useExponentialBackoff', form);
   /**
    * 表单值变化回调 - 使用 useCallback 优化
    */
@@ -95,6 +97,69 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, fields,
       {sortedFields.map((field: SchemaField) => (
         <PreviewFormField key={field.field} field={field} formValues={formValues} />
       ))}
+      {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
+      {supportRetry && (
+        <>
+          <Divider orientation="left">重试策略</Divider>
+          <Form.Item
+            name="maximumRedeliveries"
+            label="重试次数"
+            tooltip="最大重试次数"
+            rules={[{ required: true, message: '请输入重试次数' }]}
+          >
+            <InputNumber className="w-full" placeholder="请输入重试次数" min={1} max={10} step={1} addonAfter="次" />
+          </Form.Item>
+          <Form.Item
+            name="redeliveryDelay"
+            label="初始延迟"
+            tooltip="初始延迟时间"
+            rules={[{ required: true, message: '请输入初始延迟' }]}
+          >
+            <InputNumber
+              className="w-full"
+              placeholder="请输入初始延迟"
+              min={50}
+              max={10000}
+              step={1000}
+              addonAfter="ms"
+            />
+          </Form.Item>
+          <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
+            <Switch checkedChildren="是" unCheckedChildren="否" />
+          </Form.Item>
+          <Form.Item
+            name="backOffMultiplier"
+            label="退避倍数"
+            tooltip="退避倍数"
+            rules={[{ required: useExponentialBackoff, message: '请输入退避倍数' }]}
+          >
+            <InputNumber
+              disabled={!useExponentialBackoff}
+              className="w-full"
+              placeholder="请输入退避倍数"
+              min={1}
+              max={10}
+              step={1}
+              addonAfter="倍"
+            />
+          </Form.Item>
+          <Form.Item
+            name="maximumRedeliveryDelay"
+            label="最大延迟"
+            tooltip="最大延迟时间"
+            rules={[{ required: true, message: '请输入最大延迟' }]}
+          >
+            <InputNumber
+              className="w-full"
+              placeholder="请输入最大延迟"
+              min={50}
+              max={60000}
+              step={1000}
+              addonAfter="ms"
+            />
+          </Form.Item>
+        </>
+      )}
     </Form>
   );
 };
@@ -106,7 +171,7 @@ export default memo(PreviewFormRenderer, (prevProps, nextProps) => {
   // 只有当关键属性真正改变时才重新渲染
   return (
     prevProps.form === nextProps.form &&
-    prevProps.fields === nextProps.fields &&
+    prevProps.config.schemaFields === nextProps.config.schemaFields &&
     prevProps.mode === nextProps.mode &&
     prevProps.initialValues === nextProps.initialValues
   );

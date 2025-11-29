@@ -52,7 +52,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
     },
     onError: (err) => {
       notification.error({
-        message: t('common.createFailed') + err.message,
+        title: t('common.createFailed') + err.message,
       });
       setPending(false);
     },
@@ -65,7 +65,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
       setName('');
       setPending(false);
       notification.success({
-        message: t('common.createSuccess'),
+        title: t('common.createSuccess'),
       });
     },
   });
@@ -82,7 +82,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
 
   return (
     <DragModal
-      className="!w-[600px] !max-w-[600px] px-8 py-6"
+      className="w-[600px]! max-w-[600px]! px-8 py-6"
       centered
       open={show}
       title={t('common.tag.manageTags')}
@@ -92,7 +92,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
       <div className="flex flex-wrap gap-2">
         <Input
           value={name}
-          className="!w-[100px]"
+          className="w-[100px]!"
           size="small"
           onChange={(e) => setName(e.target.value)}
           placeholder={t('common.tag.addNew')}

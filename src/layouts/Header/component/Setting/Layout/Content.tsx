@@ -22,10 +22,10 @@ const PRESET = [
  */
 const Content: React.FC = () => {
   return (
-    <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
+    <div className='flex w-full gap-5'>
       {PRESET.map((item) => (
-        <div key={item.name} style={{ width: '100px', cursor: 'pointer', flexDirection: 'column' }}>
-          <div className="outline-box" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div key={item.name} className='w-24 cursor-pointer flex flex-col'>
+          <div className="outline-box flex items-center justify-center">
             {(() => {
               const Comp = item.type;
               return <Comp />;

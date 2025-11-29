@@ -1,8 +1,8 @@
-import { PlusOutlined, DeleteOutlined, ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Button, Space, Upload, Dropdown } from 'antd';
-import { Icon } from '@iconify-icon/react';
-import type React from 'react';
 import { usePermission } from '@/hooks/usePermission';
+import { DeleteOutlined, DownloadOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Icon } from '@iconify/react';
+import { Button, Dropdown, Space, Upload } from 'antd';
+import type React from 'react';
 
 interface TableActionButtonsProps {
   onAdd: () => void;
@@ -78,13 +78,12 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         )}
 
         {canExport && (
-          <Dropdown.Button
+          <Dropdown
             menu={{ items: exportMenuItems }}
-            icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}
             placement="bottomLeft"
           >
-            导出
-          </Dropdown.Button>
+            <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}>导出</Button>
+          </Dropdown>
         )}
 
         <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>

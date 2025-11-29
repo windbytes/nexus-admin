@@ -1,5 +1,5 @@
+import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
-import type { PageQueryParams } from '@/types/global';
 
 /**
  * 组件类型选项
@@ -77,6 +77,10 @@ export interface EndpointTypeConfig {
   schemaFields: SchemaField[];
   /** 状态 */
   status: boolean;
+  /** 支持重试 */
+  supportRetry?: boolean;
+  /** 删除标记 */
+  delFlag?: boolean;
   /** 创建时间 */
   createTime?: string;
   /** 更新时间 */
@@ -86,7 +90,6 @@ export interface EndpointTypeConfig {
   /** 更新人 */
   updateBy?: string;
 }
-
 
 /**
  * 端点类型搜索参数
@@ -113,17 +116,6 @@ export interface EndpointTypeFormData {
 }
 
 /**
- * 分页结果
- */
-export interface PageResult<T> {
-  records: T[];
-  total: number;
-  totalRow?: number;
-  pageNum: number;
-  pageSize: number;
-}
-
-/**
  * 端点配置API路径
  */
 enum EndpointConfigAction {
@@ -144,13 +136,12 @@ export const endpointConfigService = {
   /**
    * 分页查询端点类型配置列表
    */
-  async getEndpointTypeList(
-    params: EndpointTypeSearchParams
-  ): Promise<PageResult<EndpointTypeConfig>> {
+  async getEndpointTypeList(params: EndpointTypeSearchParams): Promise<PageResult<EndpointTypeConfig>> {
     const response = await HttpRequest.post<PageResult<EndpointTypeConfig>>(
       {
         url: EndpointConfigAction.list,
         data: params,
+        adapter: 'fetch',
       },
       { successMessageMode: 'none' }
     );
@@ -161,9 +152,12 @@ export const endpointConfigService = {
    * 获取端点类型配置详情
    */
   async getEndpointTypeDetail(id: string): Promise<EndpointTypeConfig> {
-    const response = await HttpRequest.get<EndpointTypeConfig>({
-      url: `${EndpointConfigAction.detail}/${id}`,
-    }, { successMessageMode: 'none' });
+    const response = await HttpRequest.get<EndpointTypeConfig>(
+      {
+        url: `${EndpointConfigAction.detail}/${id}`,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -215,12 +209,13 @@ export const endpointConfigService = {
    * 导出Schema配置
    */
   async exportSchema(id: string, typeName: string): Promise<void> {
-    const response = await HttpRequest.postDownload<Blob>({
+    // getDownload已经在axios封装层统一处理了错误情况
+    const blob = await HttpRequest.getDownload<Blob>({
       url: `${EndpointConfigAction.exportSchema}/${id}`,
-      responseType: 'blob',
     });
 
-    const url = window.URL.createObjectURL(new Blob([response]));
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `${typeName}_schema.json`);
@@ -247,4 +242,3 @@ export const endpointConfigService = {
     return response;
   },
 };
-

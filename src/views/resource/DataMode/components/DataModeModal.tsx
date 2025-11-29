@@ -1,17 +1,18 @@
-import type React from 'react';
-import { useEffect, useState, memo, useCallback, useRef } from 'react';
-import { Form, Input, Select, Switch, Space, Button, Upload, App } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import type { CodeEditorRef } from '@/components/CodeEditor';
+import { CodeEditor } from '@/components/CodeEditor';
 import DragModal from '@/components/modal/DragModal';
 import type {
-  JsonDataMode,
   DataModeFormData,
+  JsonDataMode,
 } from '@/services/resource/datamode/dataModeApi';
 import { DATA_MODE_CATEGORIES, dataModeService } from '@/services/resource/datamode/dataModeApi';
+import { InboxOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { App, Button, Form, Input, Select, Space, Switch, Upload, type InputRef } from 'antd';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DataSourceSelector, { type DataSourceType } from './DataSourceSelector';
-import { CodeEditor } from '@/components/CodeEditor';
-import type { CodeEditorRef } from '@/components/CodeEditor';
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -27,28 +28,45 @@ interface DataModeModalProps {
 }
 
 /**
+ * 将 JSON 对象或字符串转换为 JSON 字符串
+ * @param value - 可能是对象、字符串或 null
+ * @returns JSON 字符串，如果为 null 则返回空字符串
+ */
+const convertToJsonString = (value: any): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return JSON.stringify(value, null, 2);
+}
+
+/**
  * 数据模式编辑/新增弹窗组件
  */
-const DataModeModal: React.FC<DataModeModalProps> = memo(
-  ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
+const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
     const { message } = App.useApp();
     const [form] = Form.useForm();
-    const [dataSource, setDataSource] = useState<DataSourceType>('database');
-    const [jsonText, setJsonText] = useState('');
-    const [schemaText, setSchemaText] = useState('');
-    const [status, setStatus] = useState<boolean>(true);
+    const [dataSource, setDataSource] = useState<DataSourceType>();
+    const [jsonText, setJsonText] = useState<string>('');
+    const [schemaText, setSchemaText] = useState<string>('');
+    const [status, setStatus] = useState<boolean>(initialValues?.status || true);
     
     const jsonEditorRef = useRef<CodeEditorRef>(null);
     const schemaEditorRef = useRef<CodeEditorRef>(null);
+    const focusFieldRef = useRef<InputRef>(null);
+
+    const navigate = useNavigate();
 
     // 使用 useQuery 加载端点列表
     const {
-      data: endpoints = [],
+      data: endpoints,
       isLoading: loadingEndpoints,
     } = useQuery({
-      queryKey: ['endpoints', { status: true }],
-      queryFn: () => dataModeService.getEndpoints({ status: true }),
-      enabled: open && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
+      queryKey: ['endpoints', { endpointType: 'database', status: true }],
+      queryFn: () => dataModeService.getEndpoints({ endpointType: 'database', status: true }),
+      enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
     });
 
     // 从端点查询JSON并生成Schema的 mutation
@@ -66,8 +84,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       onSuccess: ({ jsonStr, schema }) => {
         setJsonText(jsonStr);
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('Schema生成成功！');
       },
       onError: (error: any) => {
         message.error(`生成Schema失败：${error.message}`);
@@ -82,8 +98,6 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       },
       onSuccess: (schema) => {
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('Schema生成成功！');
       },
       onError: (error: any) => {
         message.error(`生成Schema失败：${error.message}`);
@@ -98,29 +112,31 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       },
       onSuccess: (schema) => {
         setSchemaText(schema);
-        schemaEditorRef.current?.setValue(schema);
-        message.success('文件上传成功，Schema已加载！');
       },
       onError: (error: any) => {
         message.error(`文件上传失败：${error.message}`);
       },
     });
 
-    // 初始化表单数据
+    // 初始化表单数据和 state
     useEffect(() => {
-      if (open && initialValues) {
+      if (!open) return;
+      if (initialValues) {
         form.setFieldsValue(initialValues);
+        // 同步 state 值
         setDataSource(initialValues.dataSource || 'database');
-        setSchemaText(initialValues.schemaJson || '');
-        setJsonText(initialValues.sourceJson || '');
+        setJsonText(convertToJsonString(initialValues.sourceJson));
+        setSchemaText(convertToJsonString(initialValues.schemaJson));
         setStatus(initialValues.status ?? true);
-      } else if (open) {
+      } else {
         form.resetFields();
+        // 重置 state 值
         setDataSource('database');
-        setSchemaText('');
         setJsonText('');
+        setSchemaText('');
         setStatus(true);
       }
+      focusFieldRef.current?.focus();
     }, [open, initialValues, form]);
 
     /**
@@ -132,7 +148,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       
       // 清空相关字段
       if (value !== 'database') {
-        form.setFieldValue('endpointId', undefined);
+        form.resetFields(['endpointId']);
       }
       setJsonText('');
       setSchemaText('');
@@ -238,24 +254,12 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
       }
     };
 
-    /**
-     * 取消回调
-     */
-    const handleCancel = () => {
-      form.resetFields();
-      setDataSource('database');
-      setSchemaText('');
-      setJsonText('');
-      setStatus(true);
-      onCancel();
-    };
-
     return (
       <DragModal
         centered
         title={title}
         open={open}
-        onCancel={handleCancel}
+        onCancel={onCancel}
         width={1000}
         styles={{
           body: {
@@ -277,7 +281,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                 />
               </div>
               <Space>
-                <Button onClick={handleCancel}>取消</Button>
+                <Button onClick={onCancel}>取消</Button>
                 <Button type="primary" onClick={handleOk} loading={loading}>
                   确定
                 </Button>
@@ -285,12 +289,11 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
             </div>
           ) : (
             <Space>
-              <Button onClick={handleCancel}>关闭</Button>
+              <Button onClick={onCancel}>关闭</Button>
             </Space>
           )
         }
         maskClosable={false}
-        destroyOnHidden
       >
         <Form
           form={form}
@@ -306,18 +309,18 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
           {/* 基本信息 */}
           <Form.Item
             name="name"
-            label="模式名称"
+            label="名称"
             rules={[
               { required: true, message: '请输入模式名称' },
               { max: 100, message: '模式名称不能超过100个字符' },
             ]}
           >
-            <Input autoComplete="off" placeholder="例如：用户信息Schema" />
+            <Input autoComplete="off" ref={focusFieldRef} placeholder="例如：用户信息Schema" />
           </Form.Item>
 
           <Form.Item
             name="code"
-            label="模式编码"
+            label="编码"
             rules={[
               { required: true, message: '请输入模式编码' },
               {
@@ -358,27 +361,46 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                       className="flex-1 mb-0"
                       rules={[{ required: true, message: '请选择端点' }]}
                     >
-                      <Select
-                        placeholder="请选择端点"
-                        style={{ width: 'calc(100% - 118px)' }}
-                        loading={loadingEndpoints}
-                        options={endpoints.map((ep) => ({
-                          value: ep.id,
-                          label: ep.name,
-                        }))}
-                        showSearch
-                        filterOption={(input, option) =>
-                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                      />
-                      <Button
-                        type="primary"
-                        onClick={handleGenerateFromEndpoint}
-                        loading={queryFromEndpointMutation.isPending}
-                        className="self-end mb-6 ml-4"
-                    >
-                      查询并生成
-                    </Button>
+                      <div>
+                        <Select
+                          placeholder="请选择端点"
+                          style={{ width: 'calc(100% - 118px)' }}
+                          loading={loadingEndpoints}
+                          options={endpoints?.records?.map((ep) => ({
+                            value: ep.id,
+                            label: ep.name,
+                          }))}
+                          showSearch
+                          filterOption={(input, option) =>
+                            (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                          }
+                          onChange={(_value, option) => {
+                            const label = Array.isArray(option) ? option[0]?.label : option?.label;
+                            form.setFieldValue('endpointName', label || '');
+                          }}
+                          notFoundContent={
+                            <div>
+                              暂无可用端点
+                              <Button type="link" onClick={() => {
+                                navigate({ 
+                                  to: '/integrated/endpoint',
+                                  state: { type: 'database', action: 'create' },
+                                });
+                              }}>
+                                去创建
+                              </Button>
+                            </div>
+                          }
+                        />
+                        <Button
+                          type="primary"
+                          onClick={handleGenerateFromEndpoint}
+                          loading={queryFromEndpointMutation.isPending}
+                          className="self-end mb-6 ml-4"
+                      >
+                        查询并生成
+                      </Button>
+                      </div>
                     </Form.Item>
                     
                   </div>
@@ -387,9 +409,9 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
 
               {/* JSON文本 */}
               {dataSource === 'json' && (
-                <div className="space-y-4">
+                <>
                   <Form.Item label="JSON文本" required>
-                    <div style={{ borderRadius: '8px' }}>
+                    <div className='rounded-lg flex flex-col'>
                       <CodeEditor
                         ref={jsonEditorRef}
                         value={jsonText}
@@ -398,19 +420,17 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                         showMinimap={false}
                         onChange={(value) => setJsonText(value || '')}
                       />
-                    </div>
-                  </Form.Item>
-                  <div className="flex justify-end">
-                    <Button
+                      <Button
                       type="primary"
                       onClick={handleGenerateFromJson}
                       loading={generateFromJsonMutation.isPending}
-                      className='mb-4'
+                      className='mt-2'
                     >
                       生成Schema
                     </Button>
-                  </div>
-                </div>
+                    </div>
+                  </Form.Item>
+                </>
               )}
 
               {/* 文件上传 */}
@@ -444,8 +464,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                 language="json"
                 height="400px"
                 showMinimap={false}
-                onChange={(value) => setSchemaText(value || '')}
-                readOnly={isViewMode}
+                readOnly
               />
             </div>
           </Form.Item>
@@ -456,8 +475,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
         </Form>
       </DragModal>
     );
-  },
-);
+  };
 
 DataModeModal.displayName = 'DataModeModal';
 

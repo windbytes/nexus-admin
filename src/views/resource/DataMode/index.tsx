@@ -1,18 +1,17 @@
-import type React from 'react';
-import { useState, useReducer, useCallback } from 'react';
-import { Card, App } from 'antd';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import type {
-  JsonDataMode,
-  DataModeSearchParams,
-  DataModeFormData,
-} from '@/services/resource/datamode/dataModeApi';
+import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import { dataModeService } from '@/services/resource/datamode/dataModeApi';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card } from 'antd';
+import type React from 'react';
+import { lazy, useCallback, useReducer, useState } from 'react';
 import DataModeSearchForm from './components/DataModeSearchForm';
-import DataModeTableActions from './components/DataModeTableActions';
 import DataModeTable from './components/DataModeTable';
-import DataModeModal from './components/DataModeModal';
+import DataModeTableActions from './components/DataModeTableActions';
+
+// 懒加载组件
+const DataModeModal = lazy(() => import('./components/DataModeModal'));
+const DataModeImportModal = lazy(() => import('./components/DataModeImportModal'));
 
 /**
  * 页面状态定义
@@ -24,6 +23,7 @@ interface PageState {
   isViewMode: boolean;
   selectedRowKeys: React.Key[];
   selectedRows: JsonDataMode[];
+  importModalVisible: boolean;
 }
 
 /**
@@ -55,7 +55,8 @@ const DataMode: React.FC = () => {
       isViewMode: false,
       selectedRowKeys: [],
       selectedRows: [],
-    },
+      importModalVisible: false,
+    }
   );
 
   // 搜索参数管理
@@ -83,7 +84,6 @@ const DataMode: React.FC = () => {
       return dataModeService.addDataMode(data);
     },
     onSuccess: () => {
-      message.success(state.currentRecord?.id ? '编辑成功！' : '新增成功！');
       dispatch({
         modalVisible: false,
         currentRecord: null,
@@ -91,61 +91,39 @@ const DataMode: React.FC = () => {
       });
       refetch();
     },
-    onError: (error: any) => {
-      message.error(`操作失败：${error.message}`);
-    },
   });
 
   // 删除数据模式 mutation
   const deleteDataModeMutation = useMutation({
     mutationFn: (id: string) => dataModeService.deleteDataMode(id),
     onSuccess: () => {
-      message.success('删除成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`删除失败：${error.message}`);
-    },
+    }
   });
 
   // 批量删除数据模式 mutation
   const batchDeleteDataModeMutation = useMutation({
     mutationFn: (ids: string[]) => dataModeService.batchDeleteDataMode(ids),
     onSuccess: () => {
-      message.success('批量删除成功！');
       dispatch({
         selectedRowKeys: [],
         selectedRows: [],
       });
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`批量删除失败：${error.message}`);
-    },
+    }
   });
 
   // 更新数据模式状态 mutation
   const updateStatusMutation = useMutation({
     mutationFn: (data: DataModeFormData) => dataModeService.updateDataMode(data),
     onSuccess: () => {
-      message.success('状态更新成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`状态更新失败：${error.message}`);
-    },
+    }
   });
 
   // 导出Schema mutation
   const exportSchemaMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
-      dataModeService.exportSchema(id, name),
-    onSuccess: () => {
-      message.success('导出成功！');
-    },
-    onError: (error: any) => {
-      message.error(`导出失败：${error.message}`);
-    },
+    mutationFn: ({ id, name }: { id: string; name: string }) => dataModeService.exportSchema(id, name),
   });
 
   /**
@@ -159,7 +137,7 @@ const DataMode: React.FC = () => {
         pageSize: searchParams.pageSize,
       });
     },
-    [searchParams.pageSize],
+    [searchParams.pageSize]
   );
 
   /**
@@ -215,7 +193,7 @@ const DataMode: React.FC = () => {
         },
       });
     },
-    [modal, deleteDataModeMutation],
+    [modal, deleteDataModeMutation]
   );
 
   /**
@@ -238,7 +216,7 @@ const DataMode: React.FC = () => {
         batchDeleteDataModeMutation.mutate(state.selectedRowKeys as string[]);
       },
     });
-  }, [state.selectedRowKeys, modal, message, batchDeleteDataModeMutation]);
+  }, [state.selectedRowKeys]);
 
   /**
    * 处理导出
@@ -250,7 +228,7 @@ const DataMode: React.FC = () => {
         name: record.name,
       });
     },
-    [exportSchemaMutation],
+    [exportSchemaMutation]
   );
 
   /**
@@ -269,14 +247,35 @@ const DataMode: React.FC = () => {
         name: record.name,
       });
     });
-  }, [state.selectedRowKeys, state.selectedRows, message, exportSchemaMutation]);
+  }, [state.selectedRowKeys, state.selectedRows]);
 
   /**
-   * 处理刷新
+   * 处理导入Schema
    */
-  const handleRefresh = useCallback(() => {
+  const handleImportSchema = useCallback(() => {
+    dispatch({
+      importModalVisible: true,
+    });
+  }, []);
+
+  /**
+   * 处理导入成功
+   */
+  const handleImportSuccess = useCallback(() => {
+    dispatch({
+      importModalVisible: false,
+    });
     refetch();
   }, [refetch]);
+
+  /**
+   * 处理导入取消
+   */
+  const handleImportCancel = useCallback(() => {
+    dispatch({
+      importModalVisible: false,
+    });
+  }, []);
 
   /**
    * 处理状态变更
@@ -288,21 +287,18 @@ const DataMode: React.FC = () => {
         status: checked,
       });
     },
-    [updateStatusMutation],
+    [updateStatusMutation]
   );
 
   /**
    * 处理选择变更
    */
-  const handleSelectionChange = useCallback(
-    (selectedRowKeys: React.Key[], selectedRows: JsonDataMode[]) => {
-      dispatch({
-        selectedRowKeys,
-        selectedRows,
-      });
-    },
-    [],
-  );
+  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: JsonDataMode[]) => {
+    dispatch({
+      selectedRowKeys,
+      selectedRows,
+    });
+  }, []);
 
   /**
    * 处理弹窗确认
@@ -311,7 +307,7 @@ const DataMode: React.FC = () => {
     (values: DataModeFormData) => {
       saveDataModeMutation.mutate(values);
     },
-    [saveDataModeMutation],
+    [saveDataModeMutation]
   );
 
   /**
@@ -334,7 +330,7 @@ const DataMode: React.FC = () => {
     exportSchemaMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <DataModeSearchForm onSearch={handleSearch} loading={isLoading} />
 
@@ -345,7 +341,8 @@ const DataMode: React.FC = () => {
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
           onBatchExport={handleBatchExport}
-          onRefresh={handleRefresh}
+          onImportSchema={handleImportSchema}
+          onRefresh={refetch}
           selectedRowKeys={state.selectedRowKeys}
           loading={tableLoading}
         />
@@ -366,7 +363,7 @@ const DataMode: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,
@@ -387,6 +384,13 @@ const DataMode: React.FC = () => {
         isViewMode={state.isViewMode}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
+      />
+
+      {/* 导入Schema弹窗 */}
+      <DataModeImportModal
+        open={state.importModalVisible}
+        onOk={handleImportSuccess}
+        onCancel={handleImportCancel}
       />
     </div>
   );

@@ -1,18 +1,14 @@
-import type React from 'react';
-import { useState, useReducer, useCallback } from 'react';
-import { Card, App } from 'antd';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import type {
-  DatabaseDriver,
-  DriverSearchParams,
-  DriverFormData,
-} from '@/services/resource/database/driverApi';
+import type { DatabaseDriver, DriverFormData, DriverSearchParams } from '@/services/resource/database/driverApi';
 import { driverService } from '@/services/resource/database/driverApi';
-import DriverSearchForm from './components/DriverSearchForm';
-import DriverTableActions from './components/DriverTableActions';
-import DriverTable from './components/DriverTable';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card } from 'antd';
+import type React from 'react';
+import { useCallback, useReducer, useState } from 'react';
 import DriverModal from './components/DriverModal';
+import DriverSearchForm from './components/DriverSearchForm';
+import DriverTable from './components/DriverTable';
+import DriverTableActions from './components/DriverTableActions';
 
 /**
  * 页面状态定义
@@ -53,7 +49,7 @@ const Database: React.FC = () => {
       currentRecord: null,
       selectedRowKeys: [],
       selectedRows: [],
-    },
+    }
   );
 
   // 搜索参数管理
@@ -81,15 +77,11 @@ const Database: React.FC = () => {
       return driverService.addDriver(data);
     },
     onSuccess: () => {
-      message.success(state.currentRecord?.id ? '编辑成功！' : '新增成功！');
       dispatch({
         modalVisible: false,
         currentRecord: null,
       });
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`操作失败：${error.message}`);
     },
   });
 
@@ -135,14 +127,7 @@ const Database: React.FC = () => {
 
   // 下载驱动 mutation
   const downloadDriverMutation = useMutation({
-    mutationFn: ({ id, fileName }: { id: string; fileName: string }) =>
-      driverService.downloadDriver(id, fileName),
-    onSuccess: () => {
-      message.success('下载成功！');
-    },
-    onError: (error: any) => {
-      message.error(`下载失败：${error.message}`);
-    },
+    mutationFn: ({ id, fileName }: { id: string; fileName: string }) => driverService.downloadDriver(id, fileName),
   });
 
   // 批量下载驱动 mutation
@@ -167,7 +152,7 @@ const Database: React.FC = () => {
         pageSize: searchParams.pageSize,
       });
     },
-    [searchParams.pageSize],
+    [searchParams.pageSize]
   );
 
   /**
@@ -209,7 +194,7 @@ const Database: React.FC = () => {
         },
       });
     },
-    [modal, deleteDriverMutation],
+    [modal, deleteDriverMutation]
   );
 
   /**
@@ -244,7 +229,7 @@ const Database: React.FC = () => {
         fileName: record.fileName,
       });
     },
-    [downloadDriverMutation],
+    [downloadDriverMutation]
   );
 
   /**
@@ -276,21 +261,18 @@ const Database: React.FC = () => {
         status: checked,
       });
     },
-    [updateStatusMutation],
+    [updateStatusMutation]
   );
 
   /**
    * 处理选择变更
    */
-  const handleSelectionChange = useCallback(
-    (selectedRowKeys: React.Key[], selectedRows: DatabaseDriver[]) => {
-      dispatch({
-        selectedRowKeys,
-        selectedRows,
-      });
-    },
-    [],
-  );
+  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: DatabaseDriver[]) => {
+    dispatch({
+      selectedRowKeys,
+      selectedRows,
+    });
+  }, []);
 
   /**
    * 处理弹窗确认
@@ -299,7 +281,7 @@ const Database: React.FC = () => {
     (values: DriverFormData) => {
       saveDriverMutation.mutate(values);
     },
-    [saveDriverMutation],
+    [saveDriverMutation]
   );
 
   /**
@@ -322,12 +304,14 @@ const Database: React.FC = () => {
     batchDownloadDriverMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
 
       {/* 表格区域 */}
-      <Card className="flex-1">
+      <Card className="flex-1" classNames={{
+        body: 'flex flex-col flex-1 h-full'
+      }}>
         {/* 表格操作按钮 */}
         <DriverTableActions
           onAdd={handleAdd}
@@ -353,7 +337,7 @@ const Database: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

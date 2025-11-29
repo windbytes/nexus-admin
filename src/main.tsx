@@ -1,9 +1,9 @@
 import '@/styles/global.scss';
-import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntdApp, ConfigProvider } from 'antd';
-import enUS from 'antd/locale/en_US';
-import zhCN from 'antd/locale/zh_CN';
+import 'antd/dist/antd.css';
+import enUS from 'antd/es/locale/en_US';
+import zhCN from 'antd/es/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
@@ -33,11 +33,10 @@ const GlobalProvider: React.FC = () => {
   return (
     <ConfigProvider
       theme={{
-        cssVar: true,
+        hashed: false,
+        zeroRuntime: true,
         token: {
           colorPrimary: colorPrimary,
-          controlHeight: 36,
-          borderRadius: 8,
         },
         components: {
           Layout: {
@@ -52,12 +51,12 @@ const GlobalProvider: React.FC = () => {
           },
           Menu: {
             itemColor: '#29343D',
-          },
+          }
         },
       }}
       locale={locale === 'zh-CN' ? zhCN : enUS}
     >
-      <AntdApp style={{ height: '100%' }}>
+      <AntdApp className='h-full'>
         <App />
       </AntdApp>
     </ConfigProvider>

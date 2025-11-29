@@ -4,15 +4,8 @@
  */
 const Block: React.FC<BlockProps> = ({ title, children }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
-      <h3
-        style={{
-          letterSpacing: '-0.4px',
-          lineHeight: 1,
-          fontWeight: 600,
-          margin: '0 0 12px 0',
-        }}
-      >
+    <div className="flex flex-col py-4 px-0">
+      <h3 className="letter-spacing-[-0.4px] font-bold m-0 mb-3">
         {title}
       </h3>
       {children}

@@ -1,8 +1,8 @@
-import type React from 'react';
-import { Form, Input, Select, Button, Space } from 'antd';
-import { SearchOutlined, RedoOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import type { SysParamSearchParams } from '@/services/system/params';
 import { CATEGORY_OPTIONS } from '@/services/system/params';
+import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
+import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
+import type React from 'react';
 
 interface SearchFormProps {
   onSearch: (values: SysParamSearchParams) => void;
@@ -11,12 +11,7 @@ interface SearchFormProps {
   expanded?: boolean;
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({
-  onSearch,
-  loading = false,
-  onToggleExpand,
-  expanded = false,
-}) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading = false, onToggleExpand, expanded = false }) => {
   const [form] = Form.useForm();
 
   const handleSearch = () => {
@@ -36,8 +31,16 @@ const SearchForm: React.FC<SearchFormProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-      <div className="p-4">
+    <ConfigProvider
+      theme={{
+        components: {
+          Form: {
+            itemMarginBottom: 0,
+          },
+        },
+      }}
+    >
+      <Card>
         <Form
           form={form}
           initialValues={{
@@ -61,15 +64,15 @@ const SearchForm: React.FC<SearchFormProps> = ({
               <Select allowClear placeholder="请选择参数分类" options={CATEGORY_OPTIONS} />
             </Form.Item>
             <Form.Item name="status" label="状态" colon={false} className="mb-0">
-                <Select
-                  allowClear
-                  placeholder="请选择状态"
-                  options={[
-                    { value: 1, label: '启用' },
-                    { value: 0, label: '禁用' },
-                  ]}
-                />
-              </Form.Item>
+              <Select
+                allowClear
+                placeholder="请选择状态"
+                options={[
+                  { value: 1, label: '启用' },
+                  { value: 0, label: '禁用' },
+                ]}
+              />
+            </Form.Item>
           </div>
 
           {/* 高级搜索条件 */}
@@ -107,29 +110,27 @@ const SearchForm: React.FC<SearchFormProps> = ({
           </div>
 
           {/* 操作按钮区域 */}
-          <div className="flex justify-end">
-            <Space>
-              <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={handleToggleExpand}>
-                {expanded ? '收起' : '展开'}
-              </Button>
-              <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
-                重置
-              </Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                className="bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
-              >
-                搜索
-              </Button>
-            </Space>
-          </div>
+          <Space className="flex justify-end mt-4 w-full">
+            <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={handleToggleExpand}>
+              {expanded ? '收起' : '展开'}
+            </Button>
+            <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+              className="bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
+            >
+              搜索
+            </Button>
+          </Space>
         </Form>
-      </div>
-    </div>
+      </Card>
+    </ConfigProvider>
   );
 };
 

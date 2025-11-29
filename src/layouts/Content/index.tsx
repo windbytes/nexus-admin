@@ -1,8 +1,6 @@
-import ActivityKeepAlive from '@/components/KeepAlive/ActivityKeepAlive';
-import { useRouteChangeMonitor } from '@/hooks/useRouteChangeMonitor';
-import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
-import { Icon } from '@iconify-icon/react';
-import { useRouterState } from '@tanstack/react-router';
+import KeepAlive from '@/components/KeepAlive';
+import { ErrorFallback } from './ErrorBoundary';
+import { Icon } from '@iconify/react';
 import { Layout, Spin } from 'antd';
 import { memo, Suspense, useMemo, type ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -21,34 +19,14 @@ interface ContentProps {
 }
 
 const Content = memo(({ children }: ContentProps) => {
-  const location = useRouterState({ select: (s) => s.location });
-
-  // 【性能监控】监控路由切换性能
-  useRouteChangeMonitor({
-    enabled: import.meta.env.MODE === 'development',
-    threshold: 300,
-  });
-
-  // 缓存 ErrorFallback 组件
-  const errorFallback = useMemo(() => <ErrorFallback />, []);
 
   // 【优化】使用更明显的加载指示器
   const loadingFallback = useMemo(
     () => (
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          minHeight: '400px',
-        }}
+        className='h-full flex items-center justify-center min-h-[400px]'
       >
-        <Spin
-          indicator={<Icon icon="eos-icons:bubble-loading" width={48} />}
-          size="large"
-          tip={<div style={{ marginTop: 16, fontSize: 16, color: '#1890ff' }}>页面加载中...</div>}
-        />
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" />
       </div>
     ),
     []
@@ -56,16 +34,12 @@ const Content = memo(({ children }: ContentProps) => {
 
   return (
     <Layout.Content
-      className="overflow-x-hidden overflow-y-auto"
-      style={{
-        position: 'relative',
-        // 添加最小高度，确保加载指示器居中显示
-        minHeight: 'calc(100vh - 64px)',
-      }}
+      className="overflow-x-hidden overflow-y-auto h-full relative flex flex-col p-2"
+      style={{ overscrollBehavior: 'contain' }}
     >
       <Suspense fallback={loadingFallback}>
-        <ErrorBoundary key={location.pathname} fallback={errorFallback}>
-          <ActivityKeepAlive>{children}</ActivityKeepAlive>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <KeepAlive>{children}</KeepAlive>
         </ErrorBoundary>
       </Suspense>
     </Layout.Content>

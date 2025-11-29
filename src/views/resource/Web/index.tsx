@@ -1,20 +1,15 @@
-import type React from 'react';
-import { useState, useReducer, useCallback } from 'react';
-import { Card, App, Modal } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
   WebService,
-  WebServiceSearchParams,
   WebServiceFormData,
+  WebServiceSearchParams,
 } from '@/services/resource/webservice/webServiceApi';
 import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
-import {
-  WebServiceSearchForm,
-  WebServiceTableActions,
-  WebServiceTable,
-  WebServiceModal,
-} from './components';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App, Card, Modal } from 'antd';
+import type React from 'react';
+import { useCallback, useReducer, useState } from 'react';
+import { WebServiceModal, WebServiceSearchForm, WebServiceTable, WebServiceTableActions } from './components';
 
 const { confirm } = Modal;
 
@@ -70,7 +65,7 @@ const Web: React.FC = () => {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(reducer, initialState);
-  
+
   // 搜索参数
   const [searchParams, setSearchParams] = useState<WebServiceSearchParams>({
     pageNum: 1,
@@ -203,7 +198,7 @@ const Web: React.FC = () => {
         },
       });
     },
-    [deleteWebServiceMutation],
+    [deleteWebServiceMutation]
   );
 
   /**
@@ -235,7 +230,7 @@ const Web: React.FC = () => {
     (record: WebService) => {
       exportWsdlMutation.mutate({ id: record.id, name: record.name });
     },
-    [exportWsdlMutation],
+    [exportWsdlMutation]
   );
 
   /**
@@ -249,7 +244,7 @@ const Web: React.FC = () => {
       };
       saveWebServiceMutation.mutate(updatedRecord);
     },
-    [saveWebServiceMutation],
+    [saveWebServiceMutation]
   );
 
   /**
@@ -262,12 +257,9 @@ const Web: React.FC = () => {
   /**
    * 处理表格行选择
    */
-  const handleSelectionChange = useCallback(
-    (selectedRowKeys: React.Key[], selectedRows: WebService[]) => {
-      dispatch({ selectedRowKeys, selectedRows });
-    },
-    [],
-  );
+  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: WebService[]) => {
+    dispatch({ selectedRowKeys, selectedRows });
+  }, []);
 
   /**
    * 处理弹窗确认
@@ -276,7 +268,7 @@ const Web: React.FC = () => {
     (values: WebServiceFormData) => {
       saveWebServiceMutation.mutate(values);
     },
-    [saveWebServiceMutation],
+    [saveWebServiceMutation]
   );
 
   /**
@@ -300,7 +292,7 @@ const Web: React.FC = () => {
     exportWsdlMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <WebServiceSearchForm onSearch={handleSearch} loading={isLoading} />
 

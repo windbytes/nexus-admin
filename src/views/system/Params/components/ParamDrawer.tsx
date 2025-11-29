@@ -1,8 +1,8 @@
+import type { SysParam, SysParamFormData } from '@/services/system/params';
+import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
+import { Button, Drawer, Form, Input, Select, Space, Switch } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
-import { Drawer, Form, Input, Select, Switch, Button, Space } from 'antd';
-import type { SysParam, SysParamFormData } from '@/services/system/params';
-import { DATA_TYPE_OPTIONS, CATEGORY_OPTIONS } from '@/services/system/params';
 
 const { TextArea } = Input;
 
@@ -65,7 +65,7 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
       title={title}
       open={open}
       onClose={handleCancel}
-      width={700}
+      size={700}
       className="param-drawer"
       styles={{
         footer: {

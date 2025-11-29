@@ -1,30 +1,41 @@
-import { LeftOutlined } from '@ant-design/icons';
-import { useNavigate, useParams } from '@tanstack/react-router';
-import { Button, Card } from 'antd';
-import { useEffect } from 'react';
-
-import WorkflowEditor from '@/components/workflow';
 import { usePreferencesStore } from '@/stores/store';
-import NodeAddPanel from './node-add-panel';
-import './workflow.module.scss';
+import {
+  EditorRenderer,
+  FreeLayoutEditorProvider,
+  FreeLayoutPluginContext,
+  type WorkflowJSON,
+} from '@flowgram.ai/free-layout-editor';
+import '@flowgram.ai/free-layout-editor/index.css';
+import { useParams } from '@tanstack/react-router';
+import { useCallback, useEffect, useRef } from 'react';
+import { useEditorProps } from './hooks/useEditorProps';
+import { initialData } from './init-data';
+import { nodeRegistries } from './nodes';
+import BottomToolbar from './tools/BottomToolbar';
+import LeftToolbar from './tools/LeftToolbar';
+import TopToolbar from './tools/TopToolbar';
+import './workflow.scss';
 
 /**
- * 流程编排
+ * 流程编辑器
  * @returns
  */
 const Workflow: React.FC = () => {
+  const ref = useRef<FreeLayoutPluginContext | null>(null);
+  // 当前应用ID
+  const { appId } = useParams({ from: '/nexus/integrated/app/$appId/workflow' });
   // 获取主题配置
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 
-  // 获取路由参数（应用ID）
-  const appId = useParams({ from: '/_authenticated/integrated/app/$appId/workflow' });
+  // 处理保存流程数据
+  const handleSave = useCallback((data: WorkflowJSON) => {
+    // 保存数据前需要先进行验证和处理
+    // TODO: 保存流程数据
+    console.log('Saving workflow data...', data);
+  }, []);
 
-  // 路由跳转
-  const navigate = useNavigate();
-
-  const redirectApps = () => {
-    navigate({ to: '/integrated/apps' });
-  };
+  // 定义流程编辑器属性
+  const editorProps = useEditorProps(initialData, nodeRegistries, handleSave);
 
   useEffect(() => {
     // 监听主题变化
@@ -33,24 +44,21 @@ const Workflow: React.FC = () => {
   }, [colorPrimary]);
 
   return (
-    <div className="w-full flex h-full">
-      <Card
-        className="w-[220px] h-full flex flex-col justify-between bg-white"
-        classNames={{ body: 'w-full h-full p-2! flex flex-col' }}
-      >
-        <div className="flex justify-center align-middle">
-          <Button type="default" onClick={redirectApps} icon={<LeftOutlined />}>
-            应用中心
-          </Button>
+    <div className="workflow-feature-overview -m-2">
+      <FreeLayoutEditorProvider ref={ref} {...editorProps}>
+        {/* 顶部工具栏 */}
+        <TopToolbar appId={appId} />
+        {/* 左侧工具栏 */}
+        <LeftToolbar />
+        {/* 底部工具栏 */}
+        <BottomToolbar />
+        {/* 画布区域 */}
+        <div className="workflow-container">
+          <EditorRenderer className="workflow-editor" />
         </div>
-        <NodeAddPanel />
-      </Card>
-
-      <div className="w-full flex flex-auto relative">
-        {/* 画布 */}
-        <WorkflowEditor id={appId} />
-      </div>
+      </FreeLayoutEditorProvider>
     </div>
   );
 };
+
 export default Workflow;

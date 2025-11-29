@@ -6,6 +6,7 @@ import type { App } from '@/services/integrated/apps/app';
 import clsx from '@/utils/classnames';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
+import { Card } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import AppCardOperations from './AppCardOperations';
@@ -44,9 +45,15 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
 
   return (
     <>
-      <div
+      <Card
+        hoverable
         onClick={(e) => redirectWorkflow(e)}
-        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer bg-[#fcfcfd] border-white flex-col rounded-xl border border-solid shadow-sm transition-all duration-200 ease-in-out hover:shadow-lg"
+        className="group relative col-span-1 inline-flex h-[160px] cursor-pointer flex-col"
+        styles={{
+          body: {
+            padding: 0,
+          },
+        }}
       >
         <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
           {/* icon */}
@@ -145,7 +152,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
             </>
           )}
         </div>
-      </div>
+      </Card>
       {/* 编辑框 */}
       {showEditModal && (
         <EditAppModal

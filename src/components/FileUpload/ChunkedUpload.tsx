@@ -1,29 +1,48 @@
-import { App, Progress, Upload, type UploadFile, type UploadProps } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import type React from 'react';
-import { useState, useCallback, memo } from 'react';
+import { frameworkService } from '@/services/framework/frameworkApi';
 import { driverService } from '@/services/resource/database/driverApi';
+import { InboxOutlined } from '@ant-design/icons';
+import { App, Progress, Upload, type UploadFile, type UploadProps } from 'antd';
 import CryptoJS from 'crypto-js';
+import { memo, useCallback, useImperativeHandle, useRef, useState, type Ref } from 'react';
 
 const { Dragger } = Upload;
 
 interface ChunkedUploadProps {
-  onUploadSuccess: (filePath: string, fileName: string) => void;
+  onUploadSuccess: (filePath: string, fileName: string, fileSize: number) => void;
   onUploadError?: (error: Error) => void;
   accept?: string;
   maxSize?: number; // MB
   chunkSize?: number; // MB
+  ref?: Ref<ChunkedUploadRef>;
+}
+
+export interface ChunkedUploadRef {
+  /**
+   * 获取当前上传的文件哈希值
+   */
+  getFileHash: () => string | null;
+  /**
+   * 取消上传并清理文件
+   */
+  cancelUpload: () => Promise<void>;
+  /**
+   * 清理已上传的文件
+   */
+  cleanupUploadedFile: () => Promise<void>;
 }
 
 /**
  * 文件分片上传组件（支持断点续传、大文件上传）
  */
-const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
-  ({ onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2 }) => {
+const ChunkedUpload = memo(
+  ({ onUploadSuccess, onUploadError, accept = '.jar', maxSize = 500, chunkSize = 2, ref }: ChunkedUploadProps) => {
     const { message } = App.useApp();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [currentFileHash, setCurrentFileHash] = useState<string | null>(null);
+    const [mergedFileName, setMergedFileName] = useState<string | null>(null);
+    const isCancelledRef = useRef(false);
 
     /**
      * 计算文件哈希值（用于断点续传标识）
@@ -49,10 +68,20 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
       async (file: File) => {
         setUploading(true);
         setUploadProgress(0);
+        isCancelledRef.current = false;
+        // 清理之前的状态
+        setMergedFileName(null);
 
         try {
           // 计算文件哈希
           const fileHash = await calculateFileHash(file);
+          setCurrentFileHash(fileHash);
+
+          // 检查是否已取消
+          if (isCancelledRef.current) {
+            return;
+          }
+
           const chunkSizeBytes = chunkSize * 1024 * 1024; // 转换为字节
           const totalChunks = Math.ceil(file.size / chunkSizeBytes);
 
@@ -61,6 +90,11 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
 
           // 上传每个分片
           for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            // 检查是否已取消
+            if (isCancelledRef.current) {
+              throw new Error('上传已取消');
+            }
+
             // 检查该分片是否已上传（断点续传）
             const isChunkUploaded = await driverService.checkChunk(fileHash, chunkIndex);
 
@@ -77,27 +111,36 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
             const chunk = file.slice(start, end);
 
             // 上传分片
-            await driverService.uploadChunk(chunk, chunkIndex, totalChunks, file.name, fileHash, (progress) => {
+            await frameworkService.uploadChunk(chunk, chunkIndex, totalChunks, file.name, fileHash, (progress) => {
               // 计算总进度
-              const totalProgress = Math.round(
-                ((uploadedChunks + progress / 100) / totalChunks) * 100,
-              );
+              const totalProgress = Math.round(((uploadedChunks + progress / 100) / totalChunks) * 100);
               setUploadProgress(totalProgress);
             });
 
             uploadedChunks++;
           }
 
+          // 检查是否已取消
+          if (isCancelledRef.current) {
+            throw new Error('上传已取消');
+          }
+
           // 合并分片
           message.loading({ content: '正在合并文件...', key: 'merging' });
           const result = await driverService.mergeChunks(file.name, fileHash);
-          message.success({ content: '文件上传成功！', key: 'merging' });
+
+          // 保存合并后的文件名，用于后续清理
+          setMergedFileName(file.name);
 
           // 回调
-          onUploadSuccess(result.filePath, file.name);
+          onUploadSuccess(result.filePath, file.name, result.fileSize);
           setFileList([]);
           setUploadProgress(0);
         } catch (error) {
+          // 如果是取消操作，不显示错误提示
+          if (isCancelledRef.current) {
+            return;
+          }
           message.error('文件上传失败，请重试！');
           if (onUploadError && error instanceof Error) {
             onUploadError(error);
@@ -105,10 +148,63 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
           console.error('文件上传失败:', error);
         } finally {
           setUploading(false);
+          message.destroy('merging');
         }
       },
-      [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError],
+      [calculateFileHash, chunkSize, message, onUploadSuccess, onUploadError]
     );
+
+    /**
+     * 取消上传并清理文件
+     */
+    const cancelUpload = useCallback(async () => {
+      isCancelledRef.current = true;
+      setUploading(false);
+      setFileList([]);
+      setUploadProgress(0);
+
+      // 如果有已上传的文件，清理它们（包括分片和合并后的文件）
+      if (currentFileHash) {
+        try {
+          // 如果有合并后的文件名，说明文件已经合并，需要同时清理合并后的文件
+          await driverService.deleteUploadedFile(currentFileHash, mergedFileName || undefined);
+          setCurrentFileHash(null);
+          setMergedFileName(null);
+        } catch (error) {
+          console.error('清理上传文件失败:', error);
+        }
+      }
+    }, [currentFileHash, mergedFileName]);
+
+    /**
+     * 清理已上传的文件（不取消正在进行的上传）
+     */
+    const cleanupUploadedFile = useCallback(async () => {
+      if (currentFileHash) {
+        try {
+          // 如果有合并后的文件名，说明文件已经合并，需要同时清理合并后的文件
+          await driverService.deleteUploadedFile(currentFileHash, mergedFileName || undefined);
+          setCurrentFileHash(null);
+          setMergedFileName(null);
+        } catch (error) {
+          console.error('清理上传文件失败:', error);
+        }
+      }
+    }, [currentFileHash, mergedFileName]);
+
+    /**
+     * 获取当前上传的文件哈希值
+     */
+    const getFileHash = useCallback(() => {
+      return currentFileHash;
+    }, [currentFileHash]);
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+      getFileHash,
+      cancelUpload,
+      cleanupUploadedFile,
+    }));
 
     /**
      * 上传前的文件校验
@@ -136,7 +232,7 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
 
         return false; // 阻止自动上传
       },
-      [accept, maxSize, message, uploadFileInChunks],
+      [accept, maxSize, message, uploadFileInChunks]
     );
 
     /**
@@ -155,6 +251,8 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
     const handleRemove = useCallback(() => {
       setFileList([]);
       setUploadProgress(0);
+      // 清理状态
+      setMergedFileName(null);
     }, []);
 
     return (
@@ -187,8 +285,9 @@ const ChunkedUpload: React.FC<ChunkedUploadProps> = memo(
         )}
       </div>
     );
-  },
+  }
 );
 
-export default ChunkedUpload;
+ChunkedUpload.displayName = 'ChunkedUpload';
 
+export default ChunkedUpload;

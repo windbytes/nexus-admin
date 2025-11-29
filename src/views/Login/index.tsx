@@ -1,23 +1,22 @@
-import type React from 'react';
-import { useRef, useState, useEffect } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row, Modal, Typography } from 'antd';
-import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined, SwapOutlined } from '@ant-design/icons';
-import styles from './login.module.css';
 import filing from '@/assets/images/filing.png';
-import { useNavigate } from '@tanstack/react-router';
+import logo from '@/assets/images/icon-512.png';
 import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
+import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from '@tanstack/react-router';
+import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import styles from './login.module.css';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
-import { HttpCodeEnum } from '@/enums/httpEnum';
-import { antdUtils } from '@/utils/antdUtil';
-import { useMenuStore } from '@/stores/store';
-import { useQuery } from '@tanstack/react-query';
-import { commonService } from '@/services/common';
-import { useUserStore } from '@/stores/userStore';
-import { useTranslation } from 'react-i18next';
-import { useTabStore } from '@/stores/tabStore';
 import RoleSelector from '@/components/RoleSelector';
-import { usePreferencesStore } from '@/stores/store';
+import { HttpCodeEnum } from '@/enums/httpEnum';
+import { commonService } from '@/services/common';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
+import { antdUtils } from '@/utils/antdUtil';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -34,7 +33,8 @@ const Login: React.FC = () => {
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
   const { updatePreferences } = usePreferencesStore();
-  
+  const queryClient = useQueryClient();
+
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
   // 角色选择相关状态
@@ -43,7 +43,7 @@ const Login: React.FC = () => {
   const [loginData, setLoginData] = useState<LoginResponse | null>(null);
   // 动画状态
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-  
+
   // 验证码
   const { data, refetch } = useQuery<{ key: string; code: any }>({
     queryKey: ['getCode'],
@@ -65,27 +65,21 @@ const Login: React.FC = () => {
 
     try {
       setLoading(true);
-      
+
       // 使用传入的角色数据或当前状态中的角色数据
       const rolesToUse = roleData || userRoles;
-      
+
       // 查找选中的角色
-      const selectedRole = rolesToUse.find(role => role.id === roleId);
+      const selectedRole = rolesToUse.find((role) => role.id === roleId);
       if (!selectedRole) {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
       // 更新用户存储
-      userStore.login(
-        currentLoginData.username, 
-        currentLoginData.accessToken, 
-        currentLoginData.refreshToken, 
-        selectedRole.id,
-        selectedRole.roleCode
-      );
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
-      const roleModels = rolesToUse.map(role => ({
+      const roleModels = rolesToUse.map((role) => ({
         id: role.id,
         roleCode: role.roleType, // 使用roleType作为roleCode
         roleName: role.roleName,
@@ -97,13 +91,11 @@ const Login: React.FC = () => {
 
       // 清空缓存
       resetTabs();
-      if ((window as any).__keepAliveClearAllCache) {
-        (window as any).__keepAliveClearAllCache();
-      }
 
       // 获取角色对应的菜单
-      const menu = await commonService.getMenuListByRoleId(roleId, currentLoginData.accessToken);
+      const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
+      queryClient.setQueryData(['menuData', roleId], menu);
 
       // 确定首页路径
       let homePath = currentLoginData.homePath;
@@ -113,31 +105,31 @@ const Login: React.FC = () => {
           homePath = (firstRoute as any).path;
         } else {
           antdUtils.notification?.error({
-            message: t('login.loginFail'),
+            title: t('login.loginFail'),
             description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
           });
           return;
         }
       }
-      
+
       if (!homePath) {
         antdUtils.notification?.error({
-          message: t('login.loginFail'),
+          title: t('login.loginFail'),
           description: '无法确定首页路径！',
         });
         return;
       }
-      
+
       userStore.setHomePath(homePath);
 
       // 关闭角色选择弹窗
       setShowRoleSelector(false);
-      
+
       // 直接解锁屏幕
-      updatePreferences("widget", "lockScreenStatus", false);
-      
+      updatePreferences('widget', 'lockScreenStatus', false);
+
       antdUtils.notification?.success({
-        message: t('login.loginSuccess'),
+        title: t('login.loginSuccess'),
         description: t('login.welcome'),
       });
 
@@ -159,7 +151,7 @@ const Login: React.FC = () => {
     // 加入验证码校验key
     values.checkKey = data?.key || '';
     setLoading(true);
-    
+
     try {
       const { code, data: loginResponse, message } = await loginService.login(values);
 
@@ -200,7 +192,7 @@ const Login: React.FC = () => {
           {
             // 保存登录数据
             setLoginData(loginResponse);
-            
+
             // 检查角色信息
             if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
               // 没有角色信息，提示错误
@@ -267,16 +259,19 @@ const Login: React.FC = () => {
       {/* 标题 */}
       <div className="h-[80px] flex items-center justify-between px-40">
         <div className="flex items-center">
-          <img 
-            className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`} 
-            width="40" 
-            src={logo} 
-            alt="logo" 
+          <img
+            className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`}
+            width="40"
+            src={logo}
+            alt="logo"
           />
           <span
             className="ml-5 text-3xl text-[#000000]"
             style={{
-              fontFamily: '微软雅黑 Bold, 微软雅黑 Regular, 微软雅黑, sans-serif',
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '32px',
+              fontStyle: 'italic',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
               fontWeight: 700,
             }}
           >
@@ -288,7 +283,7 @@ const Login: React.FC = () => {
           type="text"
           icon={<SwapOutlined />}
           onClick={switchLoginStyle}
-          className={styles['switch-btn-traditional'] || ""}
+          className={styles['switch-btn-traditional'] || ''}
           title="切换到现代登录界面"
         />
       </div>
@@ -300,8 +295,11 @@ const Login: React.FC = () => {
               <p className="text-[24px] m-0 mb-2">
                 <span
                   style={{
-                    fontFamily: '微软雅黑 Bold, 微软雅黑 Regular, 微软雅黑, sans-serif',
+                    fontFamily: 'Arial, sans-serif',
                     fontWeight: 700,
+                    fontSize: '28px',
+                    fontStyle: 'italic',
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {t('login.description')}
@@ -319,8 +317,8 @@ const Login: React.FC = () => {
             </div>
             <div className={`form ${isAnimating ? styles['form-animated'] : ''}`} style={{ marginTop: '40px' }}>
               <Form form={form} name="login" labelCol={{ span: 5 }} size="large" autoComplete="off" onFinish={submit}>
-                <Form.Item 
-                  name="username" 
+                <Form.Item
+                  name="username"
                   rules={[{ required: true, message: t('login.enterUsername') }]}
                   className={isAnimating ? styles['form-item-animated'] || '' : ''}
                 >
@@ -334,8 +332,8 @@ const Login: React.FC = () => {
                     prefix={<UserOutlined />}
                   />
                 </Form.Item>
-                <Form.Item 
-                  name="password" 
+                <Form.Item
+                  name="password"
                   rules={[{ required: true, message: t('login.enterPassword') }]}
                   className={isAnimating ? styles['form-item-animated'] || '' : ''}
                 >
@@ -367,8 +365,8 @@ const Login: React.FC = () => {
                   </Row>
                 </Form.Item>
                 {/* 记住密码 */}
-                <Form.Item 
-                  name="remember" 
+                <Form.Item
+                  name="remember"
                   valuePropName="checked"
                   className={isAnimating ? styles['form-item-animated'] || '' : ''}
                 >
@@ -386,7 +384,7 @@ const Login: React.FC = () => {
       </div>
       {/* 底部版权信息 */}
       <div className={styles['login-footer']}>
-        <Text className={styles['copyright'] || ""}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
+        <Text className={styles['copyright'] || ''}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
         <div className={styles['filing-info']}>
           <a
             target="_blank"
@@ -395,15 +393,10 @@ const Login: React.FC = () => {
             className={styles['filing-link']}
           >
             <img src={filing} alt="备案图标" />
-            <Text className={styles['filing-text'] || ""}>川公网安备51012202001944</Text>
+            <Text className={styles['filing-text'] || ''}>川公网安备51012202001944</Text>
           </a>
-          <a
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            rel="noreferrer"
-            className={styles['icp-link']}
-          >
-            <Text className={styles['icp-text'] || ""}>蜀ICP备2023022276号-2</Text>
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" className={styles['icp-link']}>
+            <Text className={styles['icp-text'] || ''}>蜀ICP备2023022276号-2</Text>
           </a>
         </div>
       </div>
@@ -418,13 +411,7 @@ const Login: React.FC = () => {
         width={600}
         centered
       >
-        {userRoles.length > 0 && (
-          <RoleSelector
-            roles={userRoles}
-            onSelect={handleRoleSelect}
-            loading={loading}
-          />
-        )}
+        {userRoles.length > 0 && <RoleSelector roles={userRoles} onSelect={handleRoleSelect} loading={loading} />}
       </Modal>
     </div>
   );

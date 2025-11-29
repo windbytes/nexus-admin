@@ -1,12 +1,9 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import {
-  useNodeRender,
-  type FlowNodeEntity,
-} from '@flowgram.ai/free-layout-editor';
-import { ConfigProvider } from 'antd';
 import { NodeRenderContext } from '@/context/workflow/node-render-context';
-import NodeWrapper from './node-wrapper';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { useNodeRender, type FlowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { ConfigProvider } from 'antd';
 import { useCallback } from 'react';
+import NodeWrapper from './node-wrapper';
 
 /**
  * 节点渲染方法（所有节点渲染的入口）
@@ -29,9 +26,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   }, []);
 
   return (
-    <ConfigProvider
-      getPopupContainer={() => getPopupContainer(node.renderData.node)}
-    >
+    <ConfigProvider getPopupContainer={() => getPopupContainer(node.renderData.node)}>
       <NodeRenderContext value={nodeRender}>
         <NodeWrapper>
           {form?.state.invalid && (
@@ -50,6 +45,9 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
           {form?.render()}
         </NodeWrapper>
       </NodeRenderContext>
+      {/* <WorkflowNodeRenderer node={node}>
+        {form?.render()}
+      </WorkflowNodeRenderer> */}
     </ConfigProvider>
   );
 };

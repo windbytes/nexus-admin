@@ -2,40 +2,47 @@
  * axios中对数据的中转处理
  */
 /* 数据处理 */
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios';
+import { HttpCodeEnum, RequestEnum } from '@/enums/httpEnum';
+import { commonService } from '@/services/common';
+import { useUserStore } from '@/stores/userStore';
 import type { RequestOptions } from '@/types/axios';
 import type { Response } from '@/types/global';
-import { antdUtils } from '../antdUtil';
-import { joinTimestamp } from './helper';
-import { HttpCodeEnum, RequestEnum } from '@/enums/httpEnum';
-import { setObjToUrlParams } from '../utils';
-import { isString } from '../is';
-import { encrypt } from '../encrypt';
-import type React from 'react';
-import { useUserStore } from '@/stores/userStore';
-import { HttpRequest } from '.';
-import { commonService } from '@/services/common';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { t } from 'i18next';
+import type React from 'react';
+import { HttpRequest } from '.';
+import { antdUtils } from '../antdUtil';
+import { encrypt } from '../encrypt';
+import { isString } from '../is';
+import { setObjToUrlParams } from '../utils';
+import { joinTimestamp } from './helper';
 
 // 标记是否正在刷新token
 let isRefreshing = false;
 // 存储等待的请求
-let refreshSubscribers: ((token: string) => void)[] = [];
+interface RefreshSubscriber {
+  resolve: () => void;
+  reject: (error: unknown) => void;
+}
 
-function onTokenRefreshed(newToken: string) {
-  for (const callback of refreshSubscribers) {
-    callback(newToken);
+let refreshSubscribers: RefreshSubscriber[] = [];
+
+function onTokenRefreshed() {
+  for (const subscriber of refreshSubscribers) {
+    subscriber.resolve();
   }
   refreshSubscribers = [];
 }
 
-function addSubscriber(callback: (token: string) => void) {
-  refreshSubscribers.push(callback);
+function onTokenRefreshFailed(error: unknown) {
+  for (const subscriber of refreshSubscribers) {
+    subscriber.reject(error);
+  }
+  refreshSubscribers = [];
+}
+
+function addSubscriber(subscriber: RefreshSubscriber) {
+  refreshSubscribers.push(subscriber);
 }
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
@@ -53,34 +60,22 @@ export abstract class AxiosTransform {
   /**
    * @description: Process configuration before request
    */
-  beforeRequestHook?: (
-    config: AxiosRequestConfig,
-    options: RequestOptions,
-  ) => AxiosRequestConfig;
+  beforeRequestHook?: (config: AxiosRequestConfig, options: RequestOptions) => AxiosRequestConfig;
 
   /**
    * 响应数据转换
    */
-  transformResponseHook?: (
-    res: AxiosResponse<Response>,
-    options: RequestOptions,
-  ) => any;
+  transformResponseHook?: (res: AxiosResponse<Response>, options: RequestOptions) => any;
 
   /**
    * @description: 请求失败处理
    */
-  requestCatchHook?: (
-    e: Error | AxiosError,
-    options: RequestOptions,
-  ) => Promise<any>;
+  requestCatchHook?: (e: Error | AxiosError, options: RequestOptions) => Promise<any>;
 
   /**
    * @description: 请求之前的拦截器
    */
-  requestInterceptors?: (
-    config: InternalAxiosRequestConfig,
-    options: CreateAxiosOptions,
-  ) => InternalAxiosRequestConfig;
+  requestInterceptors?: (config: InternalAxiosRequestConfig, options: CreateAxiosOptions) => InternalAxiosRequestConfig;
 
   /**
    * @description: 请求之后的拦截器
@@ -107,10 +102,7 @@ export const transform: AxiosTransform = {
    * @param res
    * @param options
    */
-  transformResponseHook: (
-    res: AxiosResponse<Response>,
-    options: RequestOptions,
-  ) => {
+  transformResponseHook: (res: AxiosResponse<Response>, options: RequestOptions) => {
     const { isTransformResponse, isReturnNativeResponse } = options;
     // 是否返回原生响应头
     if (isReturnNativeResponse) {
@@ -127,8 +119,7 @@ export const transform: AxiosTransform = {
     }
     const { code, data: rtn, message: msg } = data;
     // 系统默认200状态码为正常成功请求，可在枚举中配置自己的
-    const hasSuccess =
-      data && Reflect.has(data, 'code') && code === HttpCodeEnum.SUCCESS;
+    const hasSuccess = data && Reflect.has(data, 'code') && code === HttpCodeEnum.SUCCESS;
     if (hasSuccess) {
       if (msg && options.successMessageMode === 'success') {
         // 信息成功提示
@@ -150,13 +141,13 @@ export const transform: AxiosTransform = {
 
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
-    const {
-      apiUrl,
-      joinPrefix,
-      joinParamsToUrl,
-      joinTime = true,
-      urlPrefix,
-    } = options;
+    const { apiUrl, joinPrefix, joinParamsToUrl, joinTime = true, urlPrefix } = options;
+    // 如果数据是 FormData，提前处理 headers，确保删除 Content-Type
+    // 这样可以让 axios 自动设置正确的 multipart/form-data; boundary=...
+    if (config.data instanceof FormData) {
+      config.headers = config.headers || {};
+    }
+
     if (joinPrefix) {
       config.url = `${urlPrefix}${config.url}`;
     }
@@ -165,16 +156,10 @@ export const transform: AxiosTransform = {
     }
     const params = config.params || {};
     const data = config.data || false;
-    if (
-      config.method?.toUpperCase() === RequestEnum.GET ||
-      config.method?.toUpperCase() === RequestEnum.DELETE
-    ) {
+    if (config.method?.toUpperCase() === RequestEnum.GET || config.method?.toUpperCase() === RequestEnum.DELETE) {
       if (!isString(params)) {
         // 给get请求加上事件戳参数，避免从缓存中拿数据
-        config.params = Object.assign(
-          params || {},
-          joinTimestamp(joinTime, false),
-        );
+        config.params = Object.assign(params || {}, joinTimestamp(joinTime, false));
       } else {
         // 兼容restful风格
         config.url = `${config.url + params}${joinTimestamp(joinTime, true)}`;
@@ -183,9 +168,8 @@ export const transform: AxiosTransform = {
     } else {
       if (!isString(params)) {
         if (
-          Reflect.has(config, 'data') &&
-          config.data &&
-          Object.keys(config.data).length > 0
+          (Reflect.has(config, 'data') && config.data && Object.keys(config.data).length > 0) ||
+          config.data instanceof FormData
         ) {
           config.data = data;
           config.params = params;
@@ -195,10 +179,7 @@ export const transform: AxiosTransform = {
           config.params = undefined;
         }
         if (joinParamsToUrl) {
-          config.url = setObjToUrlParams(
-            config.url as string,
-            Object.assign({}, config.params, config.data),
-          );
+          config.url = setObjToUrlParams(config.url as string, Object.assign({}, config.params, config.data));
         }
       } else {
         // 兼容restful风格
@@ -210,14 +191,33 @@ export const transform: AxiosTransform = {
   },
 
   /**
-   * 请求拦截器处理（主要用于处理如token的传入，授权信息等，或请求头里的一些特殊参数）
+   * 请求拦截器处理
    * @param config
    * @param options
    */
   requestInterceptors: (config, options) => {
-    const userStore = useUserStore.getState();
-    const token = options?.requestOptions?.token || userStore.token;
+    config.headers = config.headers || {};
     const cpt = options?.requestOptions?.encrypt;
+
+    // 如果数据是 FormData，删除 Content-Type 让 axios 自动设置（包含 boundary）
+    // 同时 FormData 不应该被加密处理
+    if (config.data instanceof FormData) {
+      // 确保删除所有可能的 Content-Type 设置（包括 common、post 等）
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+      if (config.headers['common']) {
+        delete (config.headers['common'] as any)['Content-Type'];
+        delete (config.headers['common'] as any)['content-type'];
+      }
+      if (config.headers['post']) {
+        delete (config.headers['post'] as any)['Content-Type'];
+        delete (config.headers['post'] as any)['content-type'];
+      }
+      // FormData 不需要加密，直接返回
+      config.headers['X-Encrypted'] = 0;
+      return config;
+    }
+
     // 进行数据加密
     if (config.data && cpt === 1) {
       // 判定json数据需要转为json字符串才能加密
@@ -237,8 +237,6 @@ export const transform: AxiosTransform = {
     }
     // 将加密配置放到请求头里面
     config.headers['X-Encrypted'] = cpt;
-    // 处理token
-    config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
 
@@ -273,13 +271,75 @@ export const transform: AxiosTransform = {
   responseInterceptors: async (res: AxiosResponse) => {
     const userStore = useUserStore.getState();
     const config = res.config;
+
+    // 处理下载请求（responseType为blob）的错误响应
+    // 当后端返回错误时，全局异常拦截器会返回 JSON 格式的错误信息
+    if (config.responseType === 'blob' && res.data instanceof Blob) {
+      const contentType = res.headers['content-type'] || '';
+      const contentDisposition = res.headers['content-disposition'] || '';
+
+      // 判断是否为错误响应：Content-Type 是 JSON 且没有 Content-Disposition
+      // 正常文件下载会有 Content-Disposition 头
+      const isErrorResponse = contentType.includes('application/json') && !contentDisposition;
+
+      if (isErrorResponse) {
+        try {
+          // 将 Blob 转换为文本，解析错误信息
+          const text = await res.data.text();
+          const errorData = JSON.parse(text);
+
+          // 对于 401 错误，构造错误对象但不要立即 reject，让后续的 401 处理逻辑能够捕获并进行 token 刷新
+          // 构造标准的错误响应，包含在 response.data 中，以便后续的 401 检查逻辑能够识别
+          if (errorData.code === HttpCodeEnum.RC401 || res.status === 401) {
+            // 401 错误需要特殊处理，构造错误对象并设置 response.data，让后续逻辑能够识别并处理
+            const error: any = new Error(errorData.message || t('login.loginValid'));
+            error.response = {
+              data: errorData,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            };
+            error.status = res.status;
+            error.config = config;
+            // 将错误信息存储到 res.data 中，以便后续的 401 检查能够识别
+            res.data = errorData as any;
+            // 返回 res，让后续的 401 检查逻辑能够处理
+            // 后续的代码会检查 responseCode === HttpCodeEnum.RC401，所以需要确保 result.code 存在
+            // 这里不 reject，而是让错误继续到后续的 401 处理逻辑
+          } else {
+            // 非 401 错误，直接 reject 并显示错误信息
+            const error: any = new Error(errorData.message || '操作失败');
+            error.response = {
+              data: errorData,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            };
+            error.status = res.status;
+            return Promise.reject(error);
+          }
+        } catch (e) {
+          // JSON 解析失败
+          if (e instanceof SyntaxError) {
+            const error: any = new Error('服务器返回了无效的响应格式');
+            error.response = res;
+            error.status = res.status;
+            return Promise.reject(error);
+          }
+          return Promise.reject(e);
+        }
+      }
+    }
+
     const result = res.data;
-    const { code: responseCode } = result;
+    const { code: responseCode } = result || {};
     // 判断是否跳过请求
-    if (
-      (config as CreateAxiosOptions).requestOptions?.skipAuthInterceptor &&
-      responseCode === HttpCodeEnum.RC401
-    ) {
+    const axiosConfig = config as CreateAxiosOptions;
+    const requestOptions = axiosConfig.requestOptions ?? {};
+
+    if (requestOptions?.skipAuthInterceptor && responseCode === HttpCodeEnum.RC401) {
       antdUtils.modal?.confirm({
         title: t('login.loginValid'),
         content: t('login.retryLogin'),
@@ -292,36 +352,26 @@ export const transform: AxiosTransform = {
       return Promise.reject(t('login.loginValid'));
     }
     // 判断responseCode是否为401(即token失效),添加_retry属性防止重复刷新token
-    if (
-      responseCode === HttpCodeEnum.RC401 &&
-      !(config as CreateAxiosOptions)._retry
-    ) {
-      (config as CreateAxiosOptions)._retry = true;
+    if (responseCode === HttpCodeEnum.RC401 && !axiosConfig._retry) {
+      axiosConfig._retry = true;
       // 判断是否正在刷新token
       if (!isRefreshing) {
         isRefreshing = true;
         try {
           // 调用刷新token的接口
-          const newToken = await commonService.refreshToken(
-            userStore.refreshToken,
-          );
-          if (!newToken) {
-            throw new Error('refresh token failed');
-          }
-          // 更新token到store
-          userStore.setToken(newToken);
+          await commonService.refreshToken();
           // 执行等待的请求
-          onTokenRefreshed(newToken);
+          onTokenRefreshed();
           // 重新发起原始请求(这里需要注意一点的是，内部的url可能是有前缀的，所以需要把前缀去掉)
           if (config.url?.startsWith('/api')) {
             config.url = config.url.slice(4);
           }
-          const response = await HttpRequest.request(
-            { ...config },
-            { token: newToken, isReturnNativeResponse: true },
-          );
+          // 使用 isReturnNativeResponse: true 确保能够正确处理响应（包括 blob 响应）
+          const retryOptions = { ...requestOptions, isReturnNativeResponse: true };
+          const response = await HttpRequest.request({ ...config }, retryOptions);
           return response;
         } catch (refreshError) {
+          onTokenRefreshFailed(refreshError);
           // 刷新 token 失败，跳转登录页
           antdUtils.modal?.confirm({
             title: t('login.loginValid'),
@@ -339,17 +389,21 @@ export const transform: AxiosTransform = {
       } else {
         // 正在刷新token，将请求加入队列
         return new Promise((resolve, reject) => {
-          addSubscriber((token: string) => {
-            // 重新发起原始请求
-            if (config.url?.startsWith('/api')) {
-              config.url = config.url.slice(4);
-            }
-            HttpRequest.request(
-              { ...config },
-              { token: token, isReturnNativeResponse: true },
-            )
-              .then(resolve)
-              .catch(reject);
+          addSubscriber({
+            resolve: () => {
+              // 重新发起原始请求
+              if (config.url?.startsWith('/api')) {
+                config.url = config.url.slice(4);
+              }
+              // 使用 isReturnNativeResponse: true 确保能够正确处理响应（包括 blob 响应）
+              const retryOptions = { ...requestOptions, isReturnNativeResponse: true };
+              HttpRequest.request({ ...config }, retryOptions)
+                .then(resolve)
+                .catch(reject);
+            },
+            reject: (error) => {
+              reject(error);
+            },
           });
         });
       }
@@ -364,14 +418,15 @@ export const transform: AxiosTransform = {
   responseInterceptorsCatch: (error: any) => {
     const err: string = error?.toString?.() ?? '';
     const result = error.response?.data ?? {};
+    const status = error.status;
     const { code: responseCode, message: responseMessage } = result;
 
     const { code, message } = error || {};
     let errMessage: string | React.ReactNode = '';
-    if (responseCode === HttpCodeEnum.RC404 && responseMessage) {
+    if ((status === 404 || responseCode === HttpCodeEnum.RC404) && (responseMessage || message)) {
       errMessage = (
         <>
-          <div>错误信息：{responseMessage}</div>
+          <div>错误信息：{responseMessage || message}</div>
           <div>请求路径：{error.config.url}</div>
         </>
       );
@@ -379,8 +434,8 @@ export const transform: AxiosTransform = {
       errMessage = t('common.errorMsg.requestTimeout');
     } else if (err?.includes('Network Error')) {
       errMessage = t('common.errorMsg.networkException');
-    } else if (responseCode !== HttpCodeEnum.RC401 && responseMessage) {
-      errMessage = responseMessage;
+    } else if (responseCode !== HttpCodeEnum.RC401 && (responseMessage || message)) {
+      errMessage = responseMessage || message;
     }
 
     if (errMessage) {

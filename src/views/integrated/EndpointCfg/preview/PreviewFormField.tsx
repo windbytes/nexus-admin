@@ -1,8 +1,8 @@
 import CodeEditor from '@/components/CodeEditor';
+import JSONDynamicForm from '@/components/base/JSONDynamicForm';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
 import React, { memo } from 'react';
-import JSONDynamicForm from './JSONDynamicForm';
 
 const { TextArea, Password } = Input;
 
@@ -21,8 +21,42 @@ interface PreviewFormFieldProps {
 const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formValues = {} }) => {
   const { message } = App.useApp();
   /**
+   * 安全地解析条件字符串，移除潜在的危险代码
+   * 只允许安全的操作符和表达式
+   */
+  const sanitizeCondition = React.useCallback((condition: string): string => {
+    // 移除潜在危险的关键字和操作
+    const dangerousPatterns = [
+      /\beval\b/gi,
+      /\bFunction\b/gi,
+      /\bsetTimeout\b/gi,
+      /\bsetInterval\b/gi,
+      /\bwindow\b/gi,
+      /\bdocument\b/gi,
+      /\blocation\b/gi,
+      /\bimport\b/gi,
+      /\brequire\b/gi,
+      /\b__proto__\b/gi,
+      /\bconstructor\b/gi,
+    ];
+
+    let sanitized = condition.trim();
+
+    // 检查是否包含危险模式
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(sanitized)) {
+        console.warn(`⚠️ 检测到潜在危险的表达式: ${pattern}`);
+        throw new Error(`条件表达式包含不允许的操作: ${pattern.source}`);
+      }
+    }
+
+    return sanitized;
+  }, []);
+
+  /**
    * 创建并缓存显示条件函数
    * 只有当 field.showCondition 改变时才重新创建
+   * 使用 new Function 替代 eval，避免安全风险
    */
   const conditionFunc = React.useMemo(() => {
     if (!field.showCondition) return null;
@@ -30,33 +64,38 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
     try {
       const condition = field.showCondition.trim();
 
-      // 判断是否为函数字符串（包含 function 关键字或箭头函数 =>）
-      const isFunctionString = condition.includes('function') || /^\s*\(.*\)\s*=>/.test(condition);
+      // 安全检查
+      const sanitized = sanitizeCondition(condition);
 
-      if (isFunctionString) {
-        // 方式1：作为函数字符串执行
-        // 例如：function(formValues) { return formValues.needAuth; }
-        // 或者：(formValues) => formValues.needAuth
-        try {
-          // 使用 eval 执行函数字符串并调用（仅在创建时执行一次）
-          const func = eval(`(${condition})`);
-          if (typeof func === 'function') {
-            return func;
-          }
-        } catch (evalError: any) {
-          message.error(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行: ${evalError}`);
+      // 判断是否为箭头函数形式
+      const isArrowFunction = /^\s*\(.*\)\s*=>/.test(sanitized);
+
+      if (isArrowFunction) {
+        // 箭头函数形式：(formValues) => formValues.needAuth
+        // 提取函数体
+        const match = sanitized.match(/^\s*\((.*?)\)\s*=>\s*(.+)$/);
+        if (match) {
+          const params = match[1]?.trim() || 'formValues';
+          const body = match[2]?.trim() || 'true';
+
+          // 使用 new Function 安全地创建函数
+          return new Function(params, `return ${body}`);
         }
+      } else if (sanitized.includes('function')) {
+        // 不支持 function 关键字形式，提示用户使用箭头函数
+        throw new Error('请使用箭头函数语法，例如: (formValues) => formValues.needAuth');
       }
 
-      // 方式2：作为 JS 表达式执行（默认方式）
+      // 默认方式：作为 JS 表达式执行
       // 例如：formValues.needAuth === true
-      // 使用 new Function 替代 eval，安全性更好且性能更优（仅创建一次）
-      return new Function('formValues', `return ${condition}`);
+      // 使用 new Function，将 formValues 作为参数传入
+      return new Function('formValues', `return ${sanitized}`);
     } catch (error: any) {
-      message.error(`字段 ${field.field} 的显示条件创建失败: ${error}`);
+      console.error(`字段 ${field.field} 的显示条件创建失败:`, error);
+      message.error(`字段 ${field.field} 的显示条件创建失败: ${error.message}`);
       return null; // 创建失败返回 null
     }
-  }, [field.showCondition, field.field]);
+  }, [field.showCondition, field.field, sanitizeCondition, message]);
 
   /**
    * 检查字段是否应该显示

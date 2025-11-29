@@ -1,9 +1,9 @@
-import type React from 'react';
-import { memo } from 'react';
-import { Form, Input, Button, App } from 'antd';
+import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
 import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
+import { App, Button, Form, Input, Space } from 'antd';
+import type React from 'react';
+import { memo } from 'react';
 
 interface UrlFetchEditorProps {
   disabled: boolean;
@@ -62,35 +62,35 @@ const UrlFetchEditor: React.FC<UrlFetchEditorProps> = memo(({ disabled, onWsdlFe
           { type: 'url', message: '请输入有效的URL地址' },
         ]}
       >
-        <Input
-          placeholder="例如：http://example.com/services/userService?wsdl"
-          prefix={<LinkOutlined />}
-          disabled={disabled}
-        />
+        <Space.Compact style={{ width: '100%' }}>
+          <Input
+            placeholder="例如：http://example.com/services/userService?wsdl"
+            prefix={<LinkOutlined />}
+            disabled={disabled}
+          />
+          {!disabled && (
+            <Button
+              type="primary"
+              icon={<SyncOutlined />}
+              onClick={handleFetchWsdl}
+              loading={fetchWsdlMutation.isPending}
+            >
+              获取WSDL
+            </Button>
+          )}
+        </Space.Compact>
       </Form.Item>
-
-      {!disabled && (
-        <div className="flex justify-end mb-4">
-          <Button
-            type="primary"
-            icon={<SyncOutlined />}
-            onClick={handleFetchWsdl}
-            loading={fetchWsdlMutation.isPending}
-          >
-            获取WSDL
-          </Button>
+      <Form.Item label="  ">
+        {/* 提示信息 */}
+        <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
+          <div className="font-medium text-blue-700 mb-1">提示：</div>
+          <ul className="list-disc list-inside space-y-1">
+            <li>请确保URL可以正常访问</li>
+            <li>URL应该指向有效的WSDL文档</li>
+            <li>点击"获取WSDL"按钮从URL加载内容</li>
+          </ul>
         </div>
-      )}
-
-      {/* 提示信息 */}
-      <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
-        <div className="font-medium text-blue-700 mb-1">提示：</div>
-        <ul className="list-disc list-inside space-y-1">
-          <li>请确保URL可以正常访问</li>
-          <li>URL应该指向有效的WSDL文档</li>
-          <li>点击"获取WSDL"按钮从URL加载内容</li>
-        </ul>
-      </div>
+      </Form.Item>
     </div>
   );
 });
@@ -98,4 +98,3 @@ const UrlFetchEditor: React.FC<UrlFetchEditorProps> = memo(({ disabled, onWsdlFe
 UrlFetchEditor.displayName = 'UrlFetchEditor';
 
 export default UrlFetchEditor;
-

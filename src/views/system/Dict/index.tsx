@@ -1,19 +1,16 @@
-import { App, Card, type TableProps } from 'antd';
-import DictSearchForm from './SearchForm';
 import type { DictSearchParams, DictState } from '@/services/system/dict/type';
-import { useReducer, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import useParentSize from '@/hooks/useParentSize';
-import TableActionButtons from './TableActionButtons';
+import { App, Card, type TableProps } from 'antd';
+import { isEqual } from 'lodash-es';
+import { useReducer, useState } from 'react';
 import DictTable from './DictTable';
 import getDictTableColumns from './DictTableColumn';
-import { isEqual } from 'lodash-es';
+import DictSearchForm from './SearchForm';
+import TableActionButtons from './TableActionButtons';
 
 // 数据字典模块
 const Dict: React.FC = () => {
   const { modal, message } = App.useApp();
-  // 容器高度计算（表格）
-  const { parentRef, height } = useParentSize();
 
   // 定义状态
   const [state, dispatch] = useReducer(
@@ -30,7 +27,7 @@ const Dict: React.FC = () => {
       selectRow: [],
       // 当前操作
       action: '',
-    },
+    }
   );
 
   // 查询参数（包含分页参数）
@@ -46,7 +43,10 @@ const Dict: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_dict', searchParams],
-    queryFn: () => {},
+    queryFn: () => ({
+      records: [],
+      totalRow: 0,
+    }),
   });
 
   // 处理搜索
@@ -130,48 +130,45 @@ const Dict: React.FC = () => {
 
   return (
     <>
-      {/* 搜索表单 */}
-      <DictSearchForm onSearch={handleSearch} />
-      {/* 查询表格 */}
-      <Card
-        style={{ flex: 1, marginTop: '8px', minHeight: 0 }}
-        styles={{ body: { height: '100%' } }}
-        ref={parentRef}
-      >
-        {/* 操作按钮 */}
-        <TableActionButtons
-          handleAdd={handleAdd}
-          handleBatchDelete={handleBatchDelete}
-          refetch={refetch}
-          selectedRows={[]}
-        />
+      <div className="h-full flex flex-col gap-2">
+        {/* 搜索表单 */}
+        <DictSearchForm onSearch={handleSearch} />
+        {/* 查询表格 */}
+        <Card style={{ flex: 1, marginTop: '8px', minHeight: 0 }} styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
+          {/* 操作按钮 */}
+          <TableActionButtons
+            handleAdd={handleAdd}
+            handleBatchDelete={handleBatchDelete}
+            refetch={refetch}
+            selectedRows={[]}
+          />
 
-        {/* 表格数据 */}
-        <DictTable
-          tableData={result?.data || []}
-          loading={isLoading}
-          columns={columns}
-          onRow={onRow}
-          rowSelection={rowSelection}
-          height={height}
-          pagination={{
-            pageSize: searchParams.pageSize,
-            current: searchParams.pageNum,
-            showQuickJumper: true,
-            hideOnSinglePage: false,
-            showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条`,
-            total: result?.total || 0,
-            onChange(page, pageSize) {
-              setSearchParams({
-                ...searchParams,
-                pageNum: page,
-                pageSize: pageSize,
-              });
-            },
-          }}
-        />
-      </Card>
+          {/* 表格数据 */}
+          <DictTable
+            tableData={result?.records || []}
+            loading={isLoading}
+            columns={columns}
+            onRow={onRow}
+            rowSelection={rowSelection}
+            pagination={{
+              pageSize: searchParams.pageSize,
+              current: searchParams.pageNum,
+              showQuickJumper: true,
+              hideOnSinglePage: false,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条`,
+              total: result?.totalRow || 0,
+              onChange(page, pageSize) {
+                setSearchParams({
+                  ...searchParams,
+                  pageNum: page,
+                  pageSize: pageSize,
+                });
+              },
+            }}
+          />
+        </Card>
+      </div>
     </>
   );
 };

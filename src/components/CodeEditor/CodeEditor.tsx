@@ -1,9 +1,9 @@
-import { useImperativeHandle, useRef, useCallback, useEffect, useState } from 'react';
-import type { OnMount, OnChange, OnValidate } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
+import type { OnChange, OnMount, OnValidate } from '@monaco-editor/react';
 import { Editor } from '@monaco-editor/react';
-import type { CodeEditorProps, CodeEditorRef } from './types';
+import type { editor } from 'monaco-editor';
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import './index.scss';
+import type { CodeEditorProps, CodeEditorRef } from './types';
 
 /**
  * 代码编辑器组件
@@ -35,7 +35,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   ref,
 }) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const [currentValue, setCurrentValue] = useState(value);
+  const [currentValue, setCurrentValue] = useState('');
   const [currentLanguage, setCurrentLanguage] = useState(language);
   const [currentTheme, setCurrentTheme] = useState(theme);
   const [isReadOnly, setIsReadOnly] = useState(readOnly);
@@ -345,6 +345,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       }
     };
   }, []);
+
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value]);
 
   return (
     <div 

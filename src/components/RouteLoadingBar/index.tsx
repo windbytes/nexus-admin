@@ -1,112 +1,96 @@
-import { useLocation } from '@tanstack/react-router';
-import { Progress } from 'antd';
+import { useRouterState } from '@tanstack/react-router';
+import { theme } from 'antd';
 import { memo, useEffect, useRef, useState } from 'react';
-import './styles.scss';
 
 /**
- * 全局路由加载进度条
+ * 全局路由加载进度条 (优化版)
  *
- * 功能：
- * 1. 在路由切换时显示顶部进度条
- * 2. 监听 location 变化触发进度条
- * 3. 模拟进度增长效果
- * 4. 完成后自动隐藏
- *
- * 优化：
- * - 不使用 useNavigation（需要数据路由支持）
- * - 直接监听 useLocation 变化
- * - 使用 useTransition 状态（由 MenuComponent 提供）
+ * 核心改进：
+ * 1. 数据源：从 useLocation (路由变后) 改为 useRouterState.isLoading (路由变前)
+ * 2. 动画：使用 "Trickle" 算法（快速到30%，慢速到90%，结束冲刺100%）
+ * 3. 性能：原生 DOM 渲染，移除不必要的重渲染和复杂的 Timer 数组管理
  */
 const RouteLoadingBar = memo(() => {
-  const location = useLocation();
+  const { token } = theme.useToken();
+  
+  // 1. 精准订阅路由的加载状态
+  // select 确保只有当 isLoading 变化时才触发重渲染
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
+  
   const [progress, setProgress] = useState(0);
-  const [visible, setVisible] = useState(false);
-  const prevPathnameRef = useRef(location.pathname);
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
-
-  // 清理所有定时器
-  const clearAllTimers = () => {
-    timersRef.current.forEach((timer) => clearTimeout(timer));
-    timersRef.current = [];
-  };
+  const [opacity, setOpacity] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // 检测路由是否真的变化了
-    if (prevPathnameRef.current === location.pathname) {
-      return;
-    }
-
-    // 清理之前的定时器
-    clearAllTimers();
-
-    // 路由开始变化，显示进度条
-    setVisible(true);
-    setProgress(10);
-
-    // 模拟进度增长
-    const timer1 = setTimeout(() => setProgress(30), 50);
-    const timer2 = setTimeout(() => setProgress(50), 150);
-    const timer3 = setTimeout(() => setProgress(70), 300);
-    const timer4 = setTimeout(() => setProgress(90), 500);
-
-    timersRef.current = [timer1, timer2, timer3, timer4];
-
-    // 设置最大等待时间，避免进度条一直显示
-    const maxWaitTimer = setTimeout(() => {
-      setProgress(100);
-      const hideTimer = setTimeout(() => {
-        setVisible(false);
-        setProgress(0);
-        prevPathnameRef.current = location.pathname;
-      }, 400);
-      timersRef.current.push(hideTimer);
-    }, 2000); // 最多显示2秒
-
-    timersRef.current.push(maxWaitTimer);
-
-    return () => {
-      clearAllTimers();
-    };
-  }, [location.pathname]);
-
-  // 监听页面加载完成（通过 window.performance）
-  useEffect(() => {
-    if (!visible) return;
-
-    // 使用 requestIdleCallback 或 setTimeout 检测页面是否加载完成
-    const checkComplete = () => {
-      // 简单判断：如果路径已经变化了，认为加载完成
-      if (progress < 100) {
-        setProgress(100);
-        const hideTimer = setTimeout(() => {
-          setVisible(false);
-          setProgress(0);
-          prevPathnameRef.current = location.pathname;
-        }, 300);
-        timersRef.current.push(hideTimer);
+    // 清理函数：组件卸载或状态变化时停止之前的计时器
+    const clearTicker = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
 
-    // 延迟检查，给页面渲染一些时间
-    const timer = setTimeout(checkComplete, 800);
-    timersRef.current.push(timer);
+    if (isLoading) {
+      // === 阶段一：开始加载 ===
+      clearTicker();
+      setOpacity(1);
+      setProgress(0);
 
-    return () => clearTimeout(timer);
-  }, [visible, progress, location.pathname]);
+      // 启动"虚假进度"定时器：模拟进度不断增加，但永远不到 100%
+      intervalRef.current = setInterval(() => {
+        setProgress((prev) => {
+          // 如果已经到了 90%，就停在那里等待真正的加载完成
+          if (prev >= 90) return prev;
+          
+          // 随机增加一点进度，模拟非线性加载，越往后越慢
+          const diff = Math.max(0, (90 - prev) / 10); 
+          // 保证每次至少加 1%，且带有随机性
+          const step = Math.random() * 2 + 1; 
+          
+          return Math.min(prev + Math.max(step, diff), 90);
+        });
+      }, 100);
 
-  if (!visible) return null;
+    } else {
+      // === 阶段二：加载完成 ===
+      clearTicker();
+
+      // 只有当进度条当前是显示状态（或者有进度）时，才执行完成动画
+      // 避免页面初始化时 isLoading 为 false 导致的闪烁
+      if (opacity > 0 || progress > 0) {
+        setProgress(100); // 瞬间冲刺到 100%
+
+        // 延迟消失，让用户看到 100% 的状态
+        const hideTimer = setTimeout(() => {
+          setOpacity(0);
+          
+          // 动画结束后重置（配合 CSS transition duration）
+          setTimeout(() => {
+            setProgress(0);
+          }, 300); 
+        }, 200);
+
+        return () => clearTimeout(hideTimer);
+      }
+    }
+
+    return clearTicker;
+  }, [isLoading]); // 仅依赖 isLoading 变化
+
+  // 如果完全不可见且进度归零，不渲染 DOM
+  if (opacity === 0 && progress === 0) return null;
 
   return (
-    <div className="route-loading-bar">
-      <Progress
-        percent={progress}
-        showInfo={false}
-        strokeColor={{
-          '0%': '#108ee9',
-          '100%': '#87d068',
+    <div className="fixed top-0 left-0 right-0 z-9999 pointer-events-none">
+      <div
+        style={{
+          height: '2px', // 极细线条，比 Antd Progress 更精致
+          background: token.colorPrimary, // 保持使用 Antd 主题色
+          width: `${progress}%`,
+          opacity: opacity,
+          transition: 'width 200ms ease-out, opacity 300ms ease-out', // 丝滑动画关键
+          boxShadow: `0 0 10px ${token.colorPrimary}`, // 增加一点发光效果，看起来更高级
         }}
-        size={3}
-        status="active"
       />
     </div>
   );

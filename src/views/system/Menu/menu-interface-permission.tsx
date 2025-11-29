@@ -606,7 +606,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
 
   return (
     <Card
-      className="flex-1 max-h-full flex flex-col"
+      className="flex-1 max-h-full flex flex-col min-w-0"
       title="接口权限列表"
       styles={{ body: { flex: 1, maxHeight:0 } }}
       extra={

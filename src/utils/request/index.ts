@@ -11,6 +11,7 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
     deepMerge(
       {
         authenticationScheme: '',
+        withCredentials: true,
         timeout: 0,
         headers: { 'Content-Type': ContentTypeEnum.JSON },
         // 数据处理方式
@@ -43,8 +44,8 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
           encrypt: import.meta.env.MODE === 'development' ? 0 : 1,
         },
       },
-      opts || {},
-    ),
+      opts || {}
+    )
   );
 }
 

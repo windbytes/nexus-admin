@@ -1,5 +1,8 @@
+import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { useMenuStore } from '@/stores/store';
+import { Icon } from '@iconify/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { authenticatedRoute, baseRoutes, rootRoute } from './routes';
 import { routeTreeManager } from './routeTree';
@@ -33,8 +36,6 @@ export function Router() {
 
     if (menus && menus.length > 0) {
       dynamicRoutes = routeTreeManager.generateRoutes(menus);
-    } else {
-      console.log('⚠️ 没有菜单数据，只加载基础路由');
     }
 
     // 创建路由树（即使没有动态路由，也要创建基础路由）
@@ -46,12 +47,7 @@ export function Router() {
       defaultPreload: 'intent', // 预加载策略
       defaultPreloadDelay: 100, // 预加载延迟
       // 添加默认的错误处理
-      defaultErrorComponent: ({ error }) => (
-        <div style={{ padding: '20px' }}>
-          <h2>发生错误</h2>
-          <pre>{error.message}</pre>
-        </div>
-      ),
+      defaultErrorComponent: ({ error, reset }) => <ErrorFallback error={error} resetBoundary={reset} />,
     });
 
     setRouterInstance(router);
@@ -60,15 +56,9 @@ export function Router() {
   // 如果路由还未初始化，显示加载状态
   if (!routerInstance) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
+      <div className='h-full flex items-center justify-center min-h-[400px]'
       >
-        正在初始化路由...
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" fullscreen />
       </div>
     );
   }
