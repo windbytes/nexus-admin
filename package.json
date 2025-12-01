@@ -39,7 +39,7 @@
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
     "echarts": "^6.0.0",
-    "i18next": "^25.6.3",
+    "i18next": "^25.7.0",
     "jsencrypt": "^3.5.4",
     "keepalive-for-react": "^5.0.2",
     "lodash-es": "^4.17.21",
