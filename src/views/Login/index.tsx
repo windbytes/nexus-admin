@@ -1,22 +1,22 @@
-import filing from '@/assets/images/filing.png';
-import logo from '@/assets/images/icon-512.png';
-import { loginService, type LoginParams, type LoginResponse, type UserRole } from '@/services/login/loginApi';
 import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import styles from './login.module.css';
+import { useTranslation } from 'react-i18next';
+import filing from '@/assets/images/filing.png';
+import logo from '@/assets/images/icon-512.png';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
 import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
+import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import styles from './login.module.css';
 
 const { Text } = Typography;
 
@@ -61,7 +61,9 @@ const Login: React.FC = () => {
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
     const currentLoginData = loginResponseData || loginData;
-    if (!currentLoginData) return;
+    if (!currentLoginData) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -96,7 +98,6 @@ const Login: React.FC = () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
-
       // 确定首页路径
       let homePath = currentLoginData.homePath;
       if (!homePath) {
@@ -431,7 +432,9 @@ function findMenuByRoute(menus: any[]): any | null {
     }
     if (menu.children) {
       const found = findMenuByRoute(menu.children);
-      if (found) return found; // 递归查找子菜单
+      if (found) {
+        return found; // 递归查找子菜单
+      }
     }
   }
   return null;

@@ -1,9 +1,9 @@
-import { usePlatformHotkey } from "@/hooks/usePlatformHotkey"
-import { useLogout } from "@/hooks/useLogout"
-import useGlobalUIStore from "@/stores/globalUIStore"
-import { type ReactNode } from "react"
-import { useShallow } from "zustand/shallow"
-import { usePreferencesStore } from "@/stores/store"
+import type { ReactNode } from 'react';
+import { useShallow } from 'zustand/shallow';
+import { useLogout } from '@/hooks/useLogout';
+import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
+import useGlobalUIStore from '@/stores/globalUIStore';
+import { usePreferencesStore } from '@/stores/store';
 
 /**
  * 快捷键提供者
@@ -11,13 +11,12 @@ import { usePreferencesStore } from "@/stores/store"
  * @returns 子组件
  */
 const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { children: ReactNode }) => {
-
   const { setSearchMenuModalOpen, setSettingMenuModalOpen } = useGlobalUIStore(
     useShallow((state) => ({
       setSearchMenuModalOpen: state.setSearchMenuModalOpen,
       setSettingMenuModalOpen: state.setSettingMenuModalOpen,
     }))
-  )
+  );
 
   const { globalLogout, globalLockScreen, globalPreferences, enable, updatePreferences } = usePreferencesStore(
     useShallow((state) => ({
@@ -27,7 +26,7 @@ const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { child
       enable: state.preferences.shortcut.enable,
       updatePreferences: state.updatePreferences,
     }))
-  )
+  );
 
   const handleLogout = useLogout();
 
@@ -45,7 +44,7 @@ const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { child
 
   // 始终注册全局快捷键（偏好设置），通过 enabled 控制是否启用
   usePlatformHotkey({
-    mac: 'meta+,',
+    mac: 'alt+,',
     windows: 'ctrl+alt+s',
     handler: (event) => {
       event.preventDefault();
@@ -57,7 +56,7 @@ const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { child
 
   // 始终注册全局快捷键（退出登录），通过 enabled 控制是否启用
   usePlatformHotkey({
-    mac: 'option+q',
+    mac: 'alt+q',
     windows: 'alt+q',
     handler: (event) => {
       event.preventDefault();
@@ -69,7 +68,7 @@ const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { child
 
   // 快捷键锁屏
   usePlatformHotkey({
-    mac: 'option+l',
+    mac: 'alt+l',
     windows: 'alt+l',
     handler: (event) => {
       event.preventDefault();
@@ -81,6 +80,6 @@ const HotKeyProvider: React.FC<{ children: ReactNode }> = ({ children }: { child
 
   // 直接返回 children 即可
   return children;
-}
+};
 
 export default HotKeyProvider;

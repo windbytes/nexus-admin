@@ -34,11 +34,12 @@ const Workbench: React.FC = () => {
       {/* 统计卡片 */}
       <StatisticCards />
 
-      <Row gutter={[16, 24]} className="mt-2">
+      <Row gutter={[12, 12]} className="mt-3">
         {/* 左侧主要内容区域 - 调整为更大的比例 */}
         <Col xs={24} xl={18} lg={16} className="flex! flex-col gap-2">
           {/* 流程运行时间趋势图 */}
           <Card
+            hoverable
             loading={isLoading}
             title="流程运行时间趋势图 (近7日)"
             className="mainCard"
@@ -52,27 +53,27 @@ const Workbench: React.FC = () => {
           </Card>
 
           {/* 热门流程 TOP5 */}
-          <Card loading={isLoading} title="热门流程 TOP5" className="mainCard">
+          <Card hoverable loading={isLoading} title="热门流程 TOP5" className="mainCard">
             <HotFlowsTable />
           </Card>
 
           {/* 失败流程列表 */}
-          <Card loading={isLoading} title="失败流程列表" className="mainCard">
+          <Card hoverable loading={isLoading} title="失败流程列表" className="mainCard">
             <FailedFlowsList />
           </Card>
 
           {/* 等待人工处理的流程 */}
-          <Card loading={isLoading} title="等待人工处理的流程" className="mainCard">
+          <Card hoverable loading={isLoading} title="等待人工处理的流程" className="mainCard">
             <PendingFlowsList />
           </Card>
 
           {/* 流程类别占比 - 移动到左侧 */}
-          <Card loading={isLoading} title="流程类别分布" className="mainCard">
+          <Card hoverable loading={isLoading} title="流程类别分布" className="mainCard">
             <FlowCategoryChart />
           </Card>
 
           {/* 项目介绍 */}
-          <Card loading={isLoading} className="mainCard">
+          <Card hoverable loading={isLoading} className="mainCard">
             <ProjectDescription />
           </Card>
         </Col>
@@ -81,6 +82,7 @@ const Workbench: React.FC = () => {
         <Col xs={24} xl={6} lg={8} className="flex! flex-col gap-2">
           {/* 快捷入口 */}
           <Card
+            hoverable
             loading={isLoading}
             title="快捷入口"
             className="sidebarCard"
@@ -90,22 +92,34 @@ const Workbench: React.FC = () => {
           </Card>
 
           {/* 最近访问 */}
-          <Card loading={isLoading} title="最近访问" className="sidebarCard">
+          <Card hoverable loading={isLoading} title="最近访问" className="sidebarCard">
             <RecentVisits />
           </Card>
 
           {/* 待办提醒 / 异常警报 */}
-          <Card loading={isLoading} title="待办提醒 / 异常警报" className="sidebarCard">
+          <Card hoverable loading={isLoading} title="待办提醒 / 异常警报" className="sidebarCard">
             <TodoReminders />
           </Card>
 
           {/* 公告 */}
-          <Card loading={isLoading} title="公告" className="sidebarCard" extra={<a href="/announcements">查看更多</a>}>
+          <Card
+            hoverable
+            loading={isLoading}
+            title="公告"
+            className="sidebarCard"
+            extra={<a href="/announcements">查看更多</a>}
+          >
             <Announcements />
           </Card>
 
           {/* 帮助文档 */}
-          <Card loading={isLoading} title="帮助文档" className="mainCard" extra={<a href="/help">查看更多</a>}>
+          <Card
+            hoverable
+            loading={isLoading}
+            title="帮助文档"
+            className="mainCard"
+            extra={<a href="/help">查看更多</a>}
+          >
             <HelpDocuments />
           </Card>
         </Col>

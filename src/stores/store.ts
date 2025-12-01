@@ -44,7 +44,7 @@ interface PreferencesStore {
   // 系统配置状态
   preferences: Preferences;
   // 更新全局状态
-  updatePreferences: (category: Category, key: SettingKey<Category>, value: any) => void;
+  updatePreferences: (category: Category, key: string, value: any) => void;
   // 重置全局状态
   resetPreferences: () => void;
 }
@@ -67,7 +67,7 @@ const usePreferencesStore = create<PreferencesStore>()(
       // 系统配置状态
       preferences: defaultPreferences,
       // 更新全局状态
-      updatePreferences: (category: Category, key: SettingKey<Category>, value: any) =>
+      updatePreferences: (category: Category, key: string, value: any) =>
         set((state) => ({
           preferences: {
             ...state.preferences,

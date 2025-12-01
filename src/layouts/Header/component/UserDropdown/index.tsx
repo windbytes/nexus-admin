@@ -1,10 +1,3 @@
-import avatar from '@/assets/images/avatar.png';
-import { commonService } from '@/services/common';
-import { frameworkService } from '@/services/framework/frameworkApi';
-import { usePreferencesStore } from '@/stores/store';
-import { useTabStore } from '@/stores/tabStore';
-import { useUserStore } from '@/stores/userStore';
-import classNames from '@/utils/classnames';
 import {
   ExclamationCircleOutlined,
   FileMarkdownOutlined,
@@ -16,12 +9,18 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Avatar, Divider, Dropdown, type MenuProps, message, theme } from 'antd';
+import { Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
-import { memo, type ReactNode, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-import { useLogout } from "@/hooks/useLogout"
+import avatar from '@/assets/images/avatar.png';
+import { useLogout } from '@/hooks/useLogout';
+import { commonService } from '@/services/common';
+import { frameworkService } from '@/services/framework/frameworkApi';
+import { usePreferencesStore } from '@/stores/store';
+import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
 
 /**
  * 用户信息下拉框
@@ -43,7 +42,6 @@ const UserDropdown: React.FC = () => {
       resetTabs: state.resetTabs,
     }))
   );
-  const { token } = theme.useToken();
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
@@ -108,6 +106,18 @@ const UserDropdown: React.FC = () => {
 
   // 菜单栏
   const items: MenuProps['items'] = [
+    {
+      key: 'avatar',
+      label: (
+        <div className="avatar flex items-center">
+          <Avatar size="large" src={avatar} />
+        </div>
+      ),
+    },
+    {
+      key: 'divider',
+      type: 'divider',
+    },
     {
       key: 'doc',
       label: t('layout.header.userDropdown.doc'),
@@ -259,32 +269,10 @@ const UserDropdown: React.FC = () => {
       onClick: handleLogout,
     },
   ];
-  /**
-   * 自定义渲染
-   * @param menus 菜单
-   * @returns
-   */
-  const renderDropdown = (menus: ReactNode) => {
-    return (
-      <div className={classNames('dropdownContent', {
-        backgroundColor: token.colorBgElevated,
-        borderRadius: token.borderRadiusLG,
-        boxShadow: token.boxShadowSecondary,
-      })}>
-        <div className="avatar flex items-center p-3">
-          <Avatar size="large" src={avatar} />
-        </div>
-        <Divider className='my-0.5 mx-0' />
-        {menus}
-      </div>
-    );
-  };
-
   return (
     <Dropdown
       trigger={['hover']}
       menu={{ items, triggerSubMenuAction: 'hover' }}
-      popupRender={renderDropdown}
       placement="bottomLeft"
       classNames={{
         root: 'w-[240px]',

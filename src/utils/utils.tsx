@@ -1,7 +1,7 @@
-import { MyIcon } from '@/components/MyIcon/index';
-import type { RouteItem } from '@/types/route';
 import * as Icons from '@ant-design/icons';
 import React from 'react';
+import { MyIcon } from '@/components/MyIcon/index';
+import type { RouteItem } from '@/types/route';
 import { isObject } from './is';
 
 export type MenuEntity = RouteItem & {
@@ -56,7 +56,9 @@ export function deepMerge<T = object>(src: Record<string, any> = {}, target: any
  */
 export const searchRoute = (path: string, routes: RouteItem[] = []): RouteItem | null => {
   for (const item of routes) {
-    if (item.path === path) return item;
+    if (item.path === path) {
+      return item;
+    }
     if (item.children) {
       const res = searchRoute(path, item.children);
       if (res) {
@@ -115,7 +117,7 @@ export const addKeyToData = (data: any[], key: string) => {
  * @returns 格式化后的快捷键标签
  */
 export function getShortcutLabel(shortcut: string): string {
-  const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const isMac = (navigator as any).userAgentData?.platform === 'macOS';
   return shortcut
     .replace('ctrl', isMac ? '⌘' : 'Ctrl')
     .replace('shift', isMac ? '⇧' : 'Shift')
@@ -162,9 +164,13 @@ export function matchPathname(routeDef: string, currentPath: string, exact = tru
   // 2. 如果是精确匹配，长度必须一致
   // 如果是非精确匹配（前缀匹配），实际路径长度必须大于等于定义路径
   if (exact) {
-    if (cleanRoute.length !== cleanCurrent.length) return false;
+    if (cleanRoute.length !== cleanCurrent.length) {
+      return false;
+    }
   } else {
-    if (cleanCurrent.length < cleanRoute.length) return false;
+    if (cleanCurrent.length < cleanRoute.length) {
+      return false;
+    }
   }
 
   // 3. 逐段比对
@@ -174,7 +180,7 @@ export function matchPathname(routeDef: string, currentPath: string, exact = tru
 
     // 处理通配符 (splat routes)
     if (routeSegment === '*') {
-      return true; 
+      return true;
     }
 
     // 处理动态参数 ($userId)
@@ -235,11 +241,17 @@ export function buildMenuCaches(menuList: MenuEntity[]): MenuCaches {
     const nextVisibleAncestors =
       isPureRoute || node.hidden ? parentVisibleAncestors : [...parentVisibleAncestors, node.path];
 
-    node.children?.forEach((child) => dfs(child, nextVisibleAncestors));
-    node.childrenRoute?.forEach((child) => dfs(child as MenuEntity, nextVisibleAncestors));
+    node.children?.forEach((child) => {
+      dfs(child, nextVisibleAncestors);
+    });
+    node.childrenRoute?.forEach((child) => {
+      dfs(child as MenuEntity, nextVisibleAncestors);
+    });
   };
 
-  menuList.forEach((root) => dfs(root, []));
+  menuList.forEach((root) => {
+    dfs(root, []);
+  });
 
   return { pathMap, ancestorsMap, routeToMenuPathMap };
 }

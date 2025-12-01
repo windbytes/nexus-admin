@@ -16,11 +16,11 @@ type PlatformHotkeyOptions = {
  * @returns 返回当前使用的快捷键
  */
 export const usePlatformHotkey = ({ mac, windows, handler, enabled = true }: PlatformHotkeyOptions) => {
-  const isMacOS = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-  const hotkey = isMacOS ? mac : windows;
+  const isMacOS = (navigator as any).userAgentData?.platform === 'macOS';
+  const hotkey = isMacOS ? mac.replace('l', 'KeyL').replace('k', 'KeyK').replace(',', 'KeyComma') : windows;
 
   // 使用 enabled 选项控制快捷键是否启用
-  useHotkeys(hotkey, handler, { enabled });
+  useHotkeys(hotkey, handler, { enabled, enableOnContentEditable: false });
 
   return hotkey;
 };

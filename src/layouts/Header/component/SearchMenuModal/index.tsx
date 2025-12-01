@@ -115,8 +115,13 @@ const SearchMenuModal: React.FC = () => {
         readOnly
         placeholder={`${t('common.operation.search')}菜单`}
         suffix={
-          <Button type="text" className="bg-white rounded-sm px-2" onClick={() => setSearchMenuModalOpen(true)}>
-            {getShortcutLabel('Ctrl k')}
+          <Button
+            size="small"
+            variant="outlined"
+            className="bg-white rounded-sm px-2 border-0!"
+            onClick={() => setSearchMenuModalOpen(true)}
+          >
+            {getShortcutLabel('ctrl k')}
           </Button>
         }
         prefix={<SearchOutlined className="text-[18px] cursor-pointer" />}
