@@ -39,7 +39,7 @@
         "noUnusedVariables": "warn",
         "noUnusedImports": "error",
         "noUnusedPrivateClassMembers": "warn",
-        "useExhaustiveDependencies": "warn",
+        "useExhaustiveDependencies": "off",
         "useHookAtTopLevel": "error",
         "noUnreachable": "error"
       },

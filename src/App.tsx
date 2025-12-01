@@ -8,6 +8,7 @@ import { Router } from '@/router';
 import { commonService } from '@/services/common';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
+import type { RouteItem } from '@/types/route';
 import { antdUtils } from '@/utils/antdUtil';
 
 /**
@@ -45,7 +46,7 @@ const App: React.FC = () => {
     if (isLogin && roleId) {
       const cachedMenu = queryClient.getQueryData(['menuData', roleId]);
       if (cachedMenu) {
-        setMenus(cachedMenu as any);
+        setMenus(cachedMenu as RouteItem[]);
       } else {
         refetch();
       }

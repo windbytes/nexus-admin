@@ -1,8 +1,8 @@
+import { create } from 'zustand';
+import { type PersistOptions, persist } from 'zustand/middleware';
 import { defaultPreferences } from '@/config/defaultPreferences';
 import type { RouteItem } from '@/types/route';
 import { buildMenuCaches, type MenuCaches } from '@/utils/utils';
-import { create } from 'zustand';
-import { persist, type PersistOptions } from 'zustand/middleware';
 import type { Preferences } from './storeState';
 
 // 定义category和key的类型
@@ -24,12 +24,6 @@ const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
   return preferences[category][pKey];
 };
 
-interface MenuStore {
-  menus: RouteItem[];
-  caches: MenuCaches;
-  setMenus: (menus: RouteItem[]) => void;
-}
-
 const emptyCaches: MenuCaches = {
   pathMap: new Map(),
   ancestorsMap: new Map(),
@@ -50,7 +44,7 @@ interface PreferencesStore {
   // 系统配置状态
   preferences: Preferences;
   // 更新全局状态
-  updatePreferences: (category: Category, key: any, value: any) => void;
+  updatePreferences: (category: Category, key: SettingKey<Category>, value: any) => void;
   // 重置全局状态
   resetPreferences: () => void;
 }
@@ -73,7 +67,7 @@ const usePreferencesStore = create<PreferencesStore>()(
       // 系统配置状态
       preferences: defaultPreferences,
       // 更新全局状态
-      updatePreferences: (category: Category, key: any, value: any) =>
+      updatePreferences: (category: Category, key: SettingKey<Category>, value: any) =>
         set((state) => ({
           preferences: {
             ...state.preferences,
