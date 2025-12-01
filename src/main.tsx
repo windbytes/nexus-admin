@@ -40,23 +40,19 @@ const GlobalProvider: React.FC = () => {
         },
         components: {
           Layout: {
-            headerPadding: '0 16px 0 0',
-            headerHeight: '50px',
-            headerBg: '#fff',
+            headerPadding: '0',
+            headerHeight: 'auto',
           },
           Tree: {
             directoryNodeSelectedBg: '#e6f4ff',
             indentSize: 12,
             directoryNodeSelectedColor: 'rgba(0, 0, 0, 0.88)',
           },
-          Menu: {
-            itemColor: '#29343D',
-          }
         },
       }}
       locale={locale === 'zh-CN' ? zhCN : enUS}
     >
-      <AntdApp className='h-full'>
+      <AntdApp className="h-full">
         <App />
       </AntdApp>
     </ConfigProvider>

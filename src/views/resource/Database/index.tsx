@@ -304,7 +304,7 @@ const Database: React.FC = () => {
     batchDownloadDriverMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-2">
+    <div className="h-full flex flex-col gap-3">
       {/* 搜索表单 */}
       <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
 
