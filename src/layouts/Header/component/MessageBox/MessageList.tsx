@@ -1,11 +1,11 @@
 import { Avatar, Button, Empty, Space, Tag, Typography } from 'antd';
 import type React from 'react';
-import styles from './message-box.module.scss';
 import classNames from '@/utils/classnames';
+import styles from './message-box.module.scss';
 
 /**
  * 消息列表
- * @param props 
+ * @param props
  * @returns
  */
 const MessageList: React.FC<MessageListProps> = (props) => {
@@ -56,13 +56,9 @@ const MessageList: React.FC<MessageListProps> = (props) => {
                 <div className={styles['message-title']}>
                   <Space size={4}>
                     <span>{item.title}</span>
-                    <Typography.Text type="secondary">
-                      {item.subTitle}
-                    </Typography.Text>
+                    <Typography.Text type="secondary">{item.subTitle}</Typography.Text>
                   </Space>
-                  {item.tag?.text ? (
-                    <Tag color={item.tag.color}>{item.tag.text}</Tag>
-                  ) : null}
+                  {item.tag?.text ? <Tag color={item.tag.color}>{item.tag.text}</Tag> : null}
                 </div>
                 <div className={styles['message-description']}>
                   <Typography.Paragraph className="mb-0" ellipsis>
@@ -126,8 +122,5 @@ interface MessageListProps {
   // 点击事件
   onItemClick?: (item: MessageItemData, index: number) => void;
   // 全部已读
-  onAllBtnClick?: (
-    unReadData: MessageItemData[],
-    data: MessageItemData[],
-  ) => void;
+  onAllBtnClick?: (unReadData: MessageItemData[], data: MessageItemData[]) => void;
 }

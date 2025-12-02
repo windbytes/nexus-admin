@@ -4,8 +4,9 @@ import { Button, Card, Spin, Tabs, type TabsProps } from 'antd';
 import { groupBy } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import styles from './message-box.module.scss';
 import MessageList, { type MessageListType } from './MessageList';
+import styles from './message-box.module.scss';
+
 /**
  * 通知模块
  */
@@ -68,7 +69,7 @@ const Notify: React.FC = () => {
     {
       key: 'message',
       label: <>消息({groupData['message']?.length || 0})</>,
-      icon: <MessageOutlined className='mr-2!'/>,
+      icon: <MessageOutlined className="mr-2!" />,
       children: (
         <MessageList
           data={groupData['message'] || []}
@@ -81,7 +82,7 @@ const Notify: React.FC = () => {
     {
       key: 'notify',
       label: <>通知({groupData['notify']?.length || 0})</>,
-      icon: <NotificationOutlined className='mr-2!'/>,
+      icon: <NotificationOutlined className="mr-2!" />,
       children: (
         <MessageList
           data={groupData['notify'] || []}
@@ -94,7 +95,7 @@ const Notify: React.FC = () => {
     {
       key: 'todo',
       label: <>待办({groupData['todo']?.length || 0})</>,
-      icon: <ReconciliationOutlined className='mr-2!'/>,
+      icon: <ReconciliationOutlined className="mr-2!" />,
       children: (
         <MessageList
           data={groupData['todo'] || []}
@@ -107,14 +108,13 @@ const Notify: React.FC = () => {
   ];
 
   return (
-    <Card className={styles['message-box']} classNames={{
-      body: 'h-full p-3',
-    }}>
-      <Spin
-        spinning={loading}
-        indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-        className="block"
-      >
+    <Card
+      className={styles['message-box']}
+      classNames={{
+        body: 'h-full p-3',
+      }}
+    >
+      <Spin spinning={loading} indicator={<Icon icon="eos-icons:bubble-loading" width={24} />} className="block">
         <Tabs
           items={tabList}
           defaultActiveKey="message"
