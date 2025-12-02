@@ -1,12 +1,10 @@
-import { BellOutlined, GithubOutlined, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
-import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip } from 'antd';
-import { memo, Suspense, useCallback, useMemo } from 'react';
+import { BellOutlined, GithubOutlined, LockOutlined, SettingOutlined } from '@ant-design/icons';
+import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip, theme } from 'antd';
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-
 import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
-import { lazy } from 'react';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import CollapseSwitch from './component/CollapseSwitch';
 import FullScreen from './component/FullScreen';
@@ -28,7 +26,10 @@ const Setting = lazy(() => import('./component/Setting'));
  * 3. 使用 useMemo 缓存 MessageBox 组件
  * 4. 优化 Dropdown 的 dropdownRender
  */
-const Header = memo(() => {
+const Header = () => {
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
 
   // 使用 useShallow 优化选择器，避免不必要的重渲染
   const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
@@ -53,33 +54,21 @@ const Header = memo(() => {
   /**
    * 跳转到github - 使用 useCallback 缓存
    */
-  const routeGitHub = useCallback(() => {
+  const routeGitHub = () => {
     window.open('https://github.com/windbytes/nexus-admin', '_blank');
-  }, []);
+  };
 
   /**
    * 开启锁屏 - 使用 useCallback 缓存
    */
-  const handleLockScreen = useCallback(() => {
+  const handleLockScreen = () => {
     updatePreferences('widget', 'lockScreenStatus', true);
-  }, [updatePreferences]);
-
-  /**
-   * 打开设置面板 - 使用 useCallback 缓存
-   */
-  const handleOpenSetting = useCallback(() => {
-    setSettingMenuModalOpen(true);
-  }, []);
-
-  /**
-   * MessageBox 组件 - 使用 useMemo 缓存，避免 Dropdown 重渲染
-   */
-  const messageBoxContent = useMemo(() => <MessageBox />, []);
+  };
 
   return (
     <>
       {headerEnable ? (
-        <Layout.Header className="ant-layout-header header-container h-auto! p-0">
+        <Layout.Header className="ant-layout-header header-container" style={{ backgroundColor: colorBgContainer }}>
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}
@@ -92,28 +81,27 @@ const Header = memo(() => {
               {/* 全局搜索 */}
               {globalSearch && <SearchMenuModal />}
               <Tooltip placement="bottom" title="github">
-                <GithubOutlined className='text-[18px] cursor-pointer' onClick={routeGitHub} />
+                <GithubOutlined className="text-[18px] cursor-pointer" onClick={routeGitHub} />
               </Tooltip>
               {/* 锁屏 */}
               {lockScreen && (
                 <Tooltip placement="bottom" title={t('layout.header.lock')}>
-                  <LockOutlined className='text-[18px] cursor-pointer' onClick={handleLockScreen} />
+                  <LockOutlined className="text-[18px] cursor-pointer" onClick={handleLockScreen} />
                 </Tooltip>
               )}
-              {/* 邮件 */}
-              <Badge count={5}>
-                <MailOutlined className='text-[18px] cursor-pointer' />
-              </Badge>
               {/* 通知 */}
               {notification && (
-                <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
+                <Dropdown placement="bottom" popupRender={() => <MessageBox />}>
                   <Badge count={5}>
-                    <BellOutlined className='text-[18px] cursor-pointer' />
+                    <BellOutlined className="text-[18px] cursor-pointer" />
                   </Badge>
                 </Dropdown>
               )}
               <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
-                <SettingOutlined className="my-spin text-[18px] cursor-pointer" onClick={handleOpenSetting} />
+                <SettingOutlined
+                  className="my-spin text-[18px] cursor-pointer"
+                  onClick={() => setSettingMenuModalOpen(true)}
+                />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
@@ -125,16 +113,14 @@ const Header = memo(() => {
           </div>
 
           {/* 第二行：TabBar区域 */}
-          {tabbarEnable && (
-            <TabBar />
-          )}
+          {tabbarEnable && <TabBar />}
         </Layout.Header>
       ) : (
         <FloatButton
-          className='right-24 bottom-24'
+          className="right-24 bottom-24"
           icon={<SettingOutlined className="my-spin" />}
           tooltip={<span>{t('layout.header.setting')}</span>}
-          onClick={handleOpenSetting}
+          onClick={() => setSettingMenuModalOpen(true)}
         />
       )}
       {/* 系统设置界面 */}
@@ -143,7 +129,7 @@ const Header = memo(() => {
       </Suspense>
     </>
   );
-});
+};
 
 Header.displayName = 'Header';
 

@@ -1,8 +1,7 @@
-import logo from '@/assets/images/icon-192.png';
-import { usePreferencesStore } from '@/stores/store';
 import { Link } from '@tanstack/react-router';
 import { Image } from 'antd';
-import { memo } from 'react';
+import logo from '@/assets/images/icon-192.png';
+import { usePreferencesStore } from '@/stores/store';
 
 /**
  * 系统logo - 协调系统主题的卡片风格
@@ -30,4 +29,4 @@ const SystemLogo = () => {
   );
 };
 
-export default memo(SystemLogo);
+export default SystemLogo;

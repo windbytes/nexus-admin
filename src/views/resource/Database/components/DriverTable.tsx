@@ -1,3 +1,4 @@
+import useTableScroll from '@/hooks/useTableScroll';
 import type { DatabaseDriver } from '@/services/resource/database/driverApi';
 import { DatabaseOutlined, DeleteOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
@@ -53,6 +54,7 @@ const getDatabaseTypeColor = (type: string): string => {
  */
 const DriverTable: React.FC<DriverTableProps> = memo(
   ({ data, loading, selectedRowKeys, onSelectionChange, onEdit, onDelete, onDownload, onStatusChange, pagination }) => {
+    const { scrollConfig,tableWrapperRef } = useTableScroll();
     // 表格列配置
     const columns: TableProps<DatabaseDriver>['columns'] = [
       {
@@ -209,7 +211,8 @@ const DriverTable: React.FC<DriverTableProps> = memo(
     };
 
     return (
-      <Table
+      <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+        <Table
         bordered
         columns={columns}
         dataSource={data}
@@ -217,12 +220,14 @@ const DriverTable: React.FC<DriverTableProps> = memo(
         loading={loading}
         rowSelection={rowSelection}
         pagination={pagination as TablePaginationConfig}
-        scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
+        scroll={scrollConfig}
         size="middle"
         classNames={{
           root: 'full-height-table'
         }}
       />
+      </div>
+      
     );
   }
 );

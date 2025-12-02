@@ -1,6 +1,6 @@
 import { Layout, theme } from 'antd';
 import type React from 'react';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { usePreferencesStore } from '@/stores/store';
@@ -11,7 +11,7 @@ import './leftMenu.scss';
 /**
  * 左边的菜单栏
  */
-const LeftMenu: React.FC = memo(() => {
+const LeftMenu: React.FC = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -37,10 +37,10 @@ const LeftMenu: React.FC = memo(() => {
 
   return (
     <Layout.Sider
-      className='nexus-layout-sider'
+      className="nexus-layout-sider"
       trigger={null}
       collapsedWidth={64}
-      style={{ backgroundColor: finalMode === 'dark' ?  'var(--ant-layout-sider-bg)' : colorBgContainer }}
+      style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}
       collapsible
       width={sidebar.width}
       theme={finalMode}
@@ -50,7 +50,7 @@ const LeftMenu: React.FC = memo(() => {
       <MenuComponent />
     </Layout.Sider>
   );
-});
+};
 
 LeftMenu.displayName = 'LeftMenu';
 

@@ -1,20 +1,20 @@
-import { useMenuStore } from '@/stores/store';
-import { getShortcutLabel } from '@/utils/utils';
 import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
-import { Empty, Input, Modal } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { Button, Empty, Input, type InputRef, Modal } from 'antd';
+import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMenuStore } from '@/stores/store';
+import { getShortcutLabel } from '@/utils/utils';
 import SearchHistory from './components/SearchHistory';
 import SearchResults from './components/SearchResults';
 import Footer from './footer';
 import { useSearch } from './hooks/useSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
 import './searchMenuModal.scss';
+import { useShallow } from 'zustand/shallow';
+import useGlobalUIStore from '@/stores/globalUIStore';
 import Title from './title';
 import type { SearchHistoryItem, SearchResultItem } from './types';
-import useGlobalUIStore from '@/stores/globalUIStore';
-import { useShallow } from 'zustand/shallow';
 
 /**
  * 搜索菜单模态框组件
@@ -36,23 +36,28 @@ const SearchMenuModal: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [showHistory, setShowHistory] = useState<boolean>(true);
 
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<InputRef>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const searchResults = useSearch(menus, searchValue);
   const { history, add, remove, clear, formatTime } = useSearchHistory();
 
-
   // 打开时聚焦
   useEffect(() => {
-    if (searchMenuModalOpen) setTimeout(() => inputRef.current?.focus(), 80);
+    if (searchMenuModalOpen) {
+      setTimeout(() => inputRef.current?.focus(), 80);
+    }
   }, [searchMenuModalOpen]);
 
   // 滚动到选中项
   useEffect(() => {
-    if (!listRef.current) return;
+    if (!listRef.current) {
+      return;
+    }
     const el = listRef.current.querySelector(`[data-index="${selectedIndex}"]`);
-    if (el) (el as HTMLElement).scrollIntoView({ block: 'nearest' });
+    if (el) {
+      (el as HTMLElement).scrollIntoView({ block: 'nearest' });
+    }
   }, [selectedIndex]);
 
   // 处理搜索输入
@@ -64,7 +69,12 @@ const SearchMenuModal: React.FC = () => {
 
   // 处理选择
   const handleSelect = (item: SearchResultItem | SearchHistoryItem) => {
-    add({ id: item.id, name: item.name, path: item.path, timestamp: Date.now() });
+    add({
+      id: item.id,
+      name: item.name,
+      path: item.path,
+      timestamp: Date.now(),
+    });
     navigate({ to: item.path });
     setSearchMenuModalOpen(false);
     setSearchValue('');
@@ -85,7 +95,9 @@ const SearchMenuModal: React.FC = () => {
         break;
       case 'Enter':
         e.preventDefault();
-        if (current.length > 0) handleSelect(current[selectedIndex] as any);
+        if (current.length > 0) {
+          handleSelect(current[selectedIndex] as SearchResultItem | SearchHistoryItem);
+        }
         break;
       case 'Escape':
         setSearchMenuModalOpen(false);
@@ -101,9 +113,18 @@ const SearchMenuModal: React.FC = () => {
         variant="filled"
         className="w-40!"
         readOnly
-        placeholder={t('common.operation.search')}
-        suffix={<div className="bg-white rounded-sm px-2" onClick={() => setSearchMenuModalOpen(true)}>{getShortcutLabel('ctrl+key')}</div>}
-        prefix={<SearchOutlined className='text-[18px] cursor-pointer' />}
+        placeholder={`${t('common.operation.search')}菜单`}
+        suffix={
+          <Button
+            size="small"
+            variant="outlined"
+            className="bg-white rounded-sm px-2 border-0!"
+            onClick={() => setSearchMenuModalOpen(true)}
+          >
+            {getShortcutLabel('ctrl k')}
+          </Button>
+        }
+        prefix={<SearchOutlined className="text-[18px] cursor-pointer" />}
         onClick={() => setSearchMenuModalOpen(true)}
       />
       <Modal
@@ -133,7 +154,7 @@ const SearchMenuModal: React.FC = () => {
                   </button>
                 )}
               </div>
-              <div className="flex-1 overflow-y-auto" ref={listRef as any}>
+              <div className="flex-1 overflow-y-auto" ref={listRef as RefObject<HTMLDivElement>}>
                 {history.length > 0 ? (
                   <SearchHistory
                     items={history}
@@ -152,7 +173,7 @@ const SearchMenuModal: React.FC = () => {
               <div className="searchHeader py-1 px-2">
                 <span className="headerTitle">搜索结果 ({searchResults.length})</span>
               </div>
-              <div className="flex-1 overflow-y-auto" ref={listRef as any}>
+              <div className="flex-1 overflow-y-auto" ref={listRef as RefObject<HTMLDivElement>}>
                 {searchResults.length > 0 ? (
                   <SearchResults items={searchResults} selectedIndex={selectedIndex} onSelect={handleSelect} />
                 ) : (

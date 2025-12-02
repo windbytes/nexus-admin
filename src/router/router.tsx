@@ -1,9 +1,9 @@
-import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
-import { useMenuStore } from '@/stores/store';
 import { Icon } from '@iconify/react';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { createRouter, type RegisteredRouter, RouterProvider } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
+import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
+import { useMenuStore } from '@/stores/store';
 import { authenticatedRoute, baseRoutes, rootRoute } from './routes';
 import { routeTreeManager } from './routeTree';
 
@@ -27,7 +27,7 @@ function createRouteTree(dynamicRoutes: any[] = []) {
  */
 export function Router() {
   const { menus } = useMenuStore();
-  const [routerInstance, setRouterInstance] = useState<any>(null);
+  const [routerInstance, setRouterInstance] = useState<RegisteredRouter>();
 
   // 当菜单变化时，重新生成路由
   useEffect(() => {
@@ -56,8 +56,7 @@ export function Router() {
   // 如果路由还未初始化，显示加载状态
   if (!routerInstance) {
     return (
-      <div className='h-full flex items-center justify-center min-h-[400px]'
-      >
+      <div className="h-full flex items-center justify-center min-h-[400px]">
         <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" fullscreen />
       </div>
     );

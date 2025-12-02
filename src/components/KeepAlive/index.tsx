@@ -1,7 +1,9 @@
-import { useTabStore } from '@/stores/tabStore';
-import KeepAlive, { useKeepAliveRef, type KeepAliveRef } from 'keepalive-for-react';
-import React, { memo, useEffect, useMemo } from 'react';
+import { useLocation } from '@tanstack/react-router';
+import KeepAlive, { type KeepAliveRef, useKeepAliveRef } from 'keepalive-for-react';
+import type React from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
+import { useTabStore } from '@/stores/tabStore';
 
 interface KeepAliveProps {
   children: React.ReactNode;
@@ -17,14 +19,13 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
       activeKey: state.activeKey,
     }))
   );
+  const location = useLocation();
 
   const aliveRef = useKeepAliveRef();
 
   // Filter tabs that should be kept alive
   const keepAliveIncludes = useMemo(() => {
-    return tabs
-      .filter((tab) => tab.route?.meta?.keepAlive)
-      .map((tab) => tab.key);
+    return tabs.filter((tab) => tab.route?.meta?.keepAlive).map((tab) => tab.key);
   }, [tabs]);
 
   // Handle Reload
@@ -53,16 +54,16 @@ const KeepAliveLayout: React.FC<KeepAliveProps> = memo(({ children }) => {
   }, [tabs]);
 
   return (
-      <KeepAlive
-        viewTransition
-        aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
-        activeCacheKey={activeKey}
-        include={keepAliveIncludes}
-        max={10} // Default max, can be configured
-        cacheNodeClassName="h-full w-full" // Ensure cached nodes take full height/width if needed
-      >
-        {children}
-      </KeepAlive>
+    <KeepAlive
+      viewTransition
+      aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
+      activeCacheKey={activeKey || location.pathname}
+      include={keepAliveIncludes}
+      max={10} // Default max, can be configured
+      cacheNodeClassName="h-full w-full" // Ensure cached nodes take full height/width if needed
+    >
+      {children}
+    </KeepAlive>
   );
 });
 

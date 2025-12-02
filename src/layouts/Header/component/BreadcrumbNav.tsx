@@ -1,14 +1,14 @@
-import { useMenuStore, usePreferencesStore } from '@/stores/store';
-import type { RouteItem } from '@/types/route';
-import { getIcon } from '@/utils/optimized-icons';
-import { matchPathname, type MenuCaches } from '@/utils/utils';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Breadcrumb } from 'antd';
 import { t } from 'i18next';
 import type React from 'react';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import type { RouteItem } from '@/types/route';
+import { getIcon } from '@/utils/optimized-icons';
+import { type MenuCaches, matchPathname } from '@/utils/utils';
 import '../header.scss';
 
 /**
@@ -42,7 +42,7 @@ const BreadcrumbNav: React.FC = () => {
   // 组件的DOM内容
   return <Breadcrumb items={items} className="flex justify-between items-center ml-[16px]! nexus-breadcrumb" />;
 };
-export default memo(BreadcrumbNav);
+export default BreadcrumbNav;
 
 /**
  * 根据路径生成面包屑的路径内容
@@ -102,17 +102,18 @@ function patchBreadcrumb(
     const iconNode = joinIcon && menu.meta?.icon ? getIcon(menu.meta.icon) : null;
     const titleContent = t(menu.meta?.title as string);
     const isNotRoute = menu.meta?.menuType !== 2;
-    const title = (isLast || isNotRoute) ? (
-      <>
-        {iconNode}
-        <span className="px-1">{titleContent}</span>
-      </>
-    ) : (
-      <>
-        {iconNode}
-        <Link to={menu.path}>{titleContent}</Link>
-      </>
-    );
+    const title =
+      isLast || isNotRoute ? (
+        <>
+          {iconNode}
+          <span className="px-1">{titleContent}</span>
+        </>
+      ) : (
+        <>
+          {iconNode}
+          <Link to={menu.path}>{titleContent}</Link>
+        </>
+      );
 
     breadcrumbItems.push({
       key: menu.path,

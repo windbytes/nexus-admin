@@ -1,10 +1,10 @@
-import RouteLoadingBar from '@/components/RouteLoadingBar';
-import HotKeyProvider from '@/components/HotKeyProvider';
-import { usePreferencesStore } from '@/stores/store';
-import { useUserStore } from '@/stores/userStore';
 import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { Layout, Skeleton } from 'antd';
 import { lazy, Suspense } from 'react';
+import HotKeyProvider from '@/components/HotKeyProvider';
+import RouteLoadingBar from '@/components/RouteLoadingBar';
+import { usePreferencesStore } from '@/stores/store';
+import { useUserStore } from '@/stores/userStore';
 
 // 懒加载组件
 const LoginComponent = lazy(() => import('@/views/Login'));

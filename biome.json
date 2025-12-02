@@ -6,8 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false,
-    "ignore": ["node_modules", "dist", "build", "*.min.js", "*.bundle.js"]
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
@@ -17,9 +16,6 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto"
-  },
-  "organizeImports": {
-    "enabled": true
   },
   "linter": {
     "enabled": true,
@@ -31,21 +27,21 @@
         "useKeyWithMouseEvents": "off",
         "useValidAnchor": "warn",
         "useAltText": "warn",
-        "useAriaPropsForRole": "warn",
-        "useAriaProptypes": "warn",
-        "useAriaProps": "warn"
+        "useAriaPropsForRole": "warn"
       },
       "complexity": {
         "recommended": true,
-        "noForEach": "off"
+        "noForEach": "off",
+        "useArrowFunction": "error"
       },
       "correctness": {
         "recommended": true,
         "noUnusedVariables": "warn",
         "noUnusedImports": "error",
         "noUnusedPrivateClassMembers": "warn",
-        "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error"
+        "useExhaustiveDependencies": "off",
+        "useHookAtTopLevel": "error",
+        "noUnreachable": "error"
       },
       "performance": {
         "recommended": true
@@ -55,16 +51,10 @@
       },
       "style": {
         "recommended": true,
-        "noVar": "error",
         "useConst": "error",
         "useTemplate": "error",
-        "useArrowFunction": "error",
-        "useShorthandArrayType": "error",
         "useShorthandAssign": "error",
-        "useSingleCaseStatement": "error",
-        "useSingleVarDeclarator": "error",
         "useBlockStatements": "error",
-        "useConstAssertions": "off",
         "useDefaultParameterLast": "error",
         "useExponentiationOperator": "error",
         "useFragmentSyntax": "error",
@@ -73,10 +63,8 @@
         },
         "useNodejsImportProtocol": "off",
         "useNumberNamespace": "error",
-        "useNumericLiterals": "error",
         "useSelfClosingElements": "error",
         "useShorthandFunctionType": "error",
-        "useSingleClassPerFile": "off",
         "useImportType": "error"
       },
       "suspicious": {
@@ -88,15 +76,13 @@
         "noDuplicateObjectKeys": "error",
         "noDuplicateParameters": "error",
         "noEmptyBlockStatements": "warn",
-        "noExtraBooleanCast": "error",
         "noFallthroughSwitchClause": "error",
         "noPrototypeBuiltins": "error",
         "noRedeclare": "error",
         "noShadowRestrictedNames": "error",
-        "noUnreachable": "error",
         "noUnsafeNegation": "error",
-        "useGetterReturn": "error",
-        "useValidTypeof": "error"
+        "noVar": "error",
+        "useGetterReturn": "error"
       },
       "nursery": {
         "useSortedClasses": "off"
@@ -126,7 +112,7 @@
   },
   "overrides": [
     {
-      "include": ["*.ts", "*.tsx"],
+      "includes": ["*.ts", "*.tsx"],
       "linter": {
         "rules": {
           "correctness": {

@@ -1,14 +1,15 @@
-import { Router } from '@/router';
-import { commonService } from '@/services/common';
-import { useMenuStore } from '@/stores/store';
-import { useUserStore } from '@/stores/userStore';
-import { antdUtils } from '@/utils/antdUtil';
 import { Icon } from '@iconify/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { App as AntdApp, Spin } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { Router } from '@/router';
+import { commonService } from '@/services/common';
+import { useMenuStore } from '@/stores/store';
+import { useUserStore } from '@/stores/userStore';
+import type { RouteItem } from '@/types/route';
+import { antdUtils } from '@/utils/antdUtil';
 
 /**
  * 主应用
@@ -45,7 +46,7 @@ const App: React.FC = () => {
     if (isLogin && roleId) {
       const cachedMenu = queryClient.getQueryData(['menuData', roleId]);
       if (cachedMenu) {
-        setMenus(cachedMenu as any);
+        setMenus(cachedMenu as RouteItem[]);
       } else {
         refetch();
       }

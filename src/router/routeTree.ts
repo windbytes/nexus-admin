@@ -1,8 +1,8 @@
+import { createRoute, redirect } from '@tanstack/react-router';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import type { RouteItem } from '@/types/route';
 import { findMenuByPath } from '@/utils/utils';
-import { createRoute, redirect } from '@tanstack/react-router';
 import { authenticatedRoute } from './routes';
 import { generateDynamicRoutes } from './routeUtils';
 
