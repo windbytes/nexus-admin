@@ -1,6 +1,6 @@
-import { usePreferencesStore } from "@/stores/store";
-import LayoutMenu from "../../menu";
-import { useShallow } from "zustand/shallow";
+import { useShallow } from 'zustand/shallow';
+import { usePreferencesStore } from '@/stores/store';
+import LayoutMenu from '../../menu';
 
 /**
  * 顶部菜单
@@ -14,20 +14,13 @@ const HeaderMenu = () => {
     }))
   );
 
-  const showHeaderNav =
-    layout === "header-nav" ||
-    layout === "mixed-nav" ||
-    layout === "header-mixed-nav";
+  const showHeaderNav = layout === 'header-nav' || layout === 'mixed-nav' || layout === 'header-mixed-nav';
 
-  const themeHeader = semiDarkHeader ? "dark" : "light";
+  const themeHeader = semiDarkHeader ? 'dark' : 'light';
 
   return (
-    <div
-      className={`menu-align-${menuAlign} flex h-full min-w-0 flex-1 items-center`}
-    >
-      {showHeaderNav && (
-        <LayoutMenu className="w-full" mode="horizontal" theme={themeHeader} />
-      )}
+    <div className={`menu-align-${menuAlign} flex h-full min-w-0 flex-1 items-center`}>
+      {showHeaderNav && <LayoutMenu className="w-full" mode="horizontal" theme={themeHeader} />}
     </div>
   );
 };

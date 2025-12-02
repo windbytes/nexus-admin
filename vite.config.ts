@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
-// import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -15,12 +15,12 @@ export default defineConfig(({ mode }) => {
         // 启用 React 编译器优化
         babel: {
           plugins: [
+            // React 编译器插件
+            ['babel-plugin-react-compiler'],
             // 装饰器插件
             ['@babel/plugin-proposal-decorators', { legacy: true }],
             // 类属性插件
             ['@babel/plugin-proposal-class-properties', { loose: true }],
-            // React 编译器插件
-            ['babel-plugin-react-compiler'],
           ],
         },
       }),
@@ -32,9 +32,9 @@ export default defineConfig(({ mode }) => {
         algorithm: 'gzip',
         ext: '.gz',
       }),
-      // mockDevServerPlugin({
-      //   prefix: '/api',
-      // }),
+      mockDevServerPlugin({
+        prefix: '/api',
+      }),
     ],
     // 配置分包
     build: {

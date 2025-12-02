@@ -1,9 +1,9 @@
 import clsx from 'clsx';
 import './switchItem.scss';
 import { InputNumber } from 'antd';
-import { usePreferencesStore, type Category, type SettingKey } from '@/stores/store';
-import type { Preferences } from '@/stores/storeState';
 import { useShallow } from 'zustand/shallow';
+import { type Category, type SettingKey, usePreferencesStore } from '@/stores/store';
+import type { Preferences } from '@/stores/storeState';
 
 /**
  * 获取 preferences 中的值
@@ -27,15 +27,10 @@ const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
 const NumberItem: React.FC<NumberItemProps> = (props) => {
   const { title, disabled, placeholder, category, pKey } = props;
 
-
-// 从全局状态库中获取配置(这样写表明当前组件只会关注 value 和 updatePreferences 的变化)
+  // 从全局状态库中获取配置(这样写表明当前组件只会关注 value 和 updatePreferences 的变化)
   const { value, updatePreferences } = usePreferencesStore(
     useShallow((state) => ({
-      value: getPreferenceValue(
-        state.preferences,
-        category,
-        pKey as unknown as SettingKey<Category>
-      ),
+      value: getPreferenceValue(state.preferences, category, pKey as unknown as SettingKey<Category>),
       updatePreferences: state.updatePreferences,
     }))
   );
@@ -54,13 +49,11 @@ const NumberItem: React.FC<NumberItemProps> = (props) => {
         'pointer-events-none opacity-50': disabled,
       })}
     >
-      <span className='flex items-center text-sm leading-5'>
-        {title}
-      </span>
+      <span className="flex items-center text-sm leading-5">{title}</span>
       <InputNumber
         disabled={disabled}
         placeholder={placeholder}
-        className='w-[165px]'
+        className="w-[165px]"
         value={value}
         onChange={changePreferences}
       />
@@ -75,5 +68,5 @@ export interface NumberItemProps {
   disabled?: boolean;
   placeholder?: string;
   category: Category;
-    pKey: SettingKey<keyof Preferences[Category]>;
+  pKey: SettingKey<Category>;
 }

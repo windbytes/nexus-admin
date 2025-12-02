@@ -1,11 +1,10 @@
-import type { BasicOptions } from '@/types/global';
 import { Select } from 'antd';
-import "./switchItem.scss";
-import classNames from '@/utils/classnames';
-import { getPreferenceValue, usePreferencesStore, type Category, type SettingKey } from '@/stores/store';
-import type { Preferences } from '@/stores/storeState';
+import type { BasicOptions } from '@/types/global';
+import './switchItem.scss';
 import { useShallow } from 'zustand/shallow';
 import { changeLanguage } from '@/locales/i18next-config';
+import { type Category, getPreferenceValue, type SettingKey, usePreferencesStore } from '@/stores/store';
+import classNames from '@/utils/classnames';
 
 /**
  * 选择项
@@ -17,11 +16,7 @@ const SelectItem: React.FC<SelectItemProps> = (props) => {
   // 从全局状态库中获取配置(这样写表明当前组件只会关注 value 和 updatePreferences 的变化)
   const { value, updatePreferences } = usePreferencesStore(
     useShallow((state) => ({
-      value: getPreferenceValue(
-        state.preferences,
-        category,
-        pKey as unknown as SettingKey<Category>
-      ),
+      value: getPreferenceValue(state.preferences, category, pKey as unknown as SettingKey<Category>),
       updatePreferences: state.updatePreferences,
     }))
   );
@@ -43,11 +38,16 @@ const SelectItem: React.FC<SelectItemProps> = (props) => {
         'pointer-events-none opacity-50': disabled,
       })}
     >
-      <span className='flex items-center text-sm leading-5'>
-        {title}
-      </span>
+      <span className="flex items-center text-sm leading-5">{title}</span>
       {/* Select组件 */}
-      <Select options={items} disabled={disabled} placeholder={placeholder} className='w-[165px]' value={value} onChange={changePreferences}/>
+      <Select
+        options={items}
+        disabled={disabled}
+        placeholder={placeholder}
+        className="w-[165px]"
+        value={value}
+        onChange={changePreferences}
+      />
     </div>
   );
 };
@@ -55,7 +55,7 @@ export default SelectItem;
 
 export interface SelectItemProps {
   category: Category;
-  pKey: SettingKey<keyof Preferences[Category]>;
+  pKey: SettingKey<Category>;
   title?: string;
   disabled?: boolean;
   placeholder?: string;

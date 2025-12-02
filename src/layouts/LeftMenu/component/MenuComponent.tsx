@@ -1,25 +1,25 @@
+import { Icon } from '@iconify/react';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { Menu, type MenuProps, Spin } from 'antd';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
-import { Icon } from '@iconify/react';
-import { useLocation, useNavigate } from '@tanstack/react-router';
-import { Menu, Spin, type MenuProps } from 'antd';
-import { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useShallow } from 'zustand/shallow';
 
 import {
   buildMenuItems,
   createInitialMenuState,
+  type MenuItem,
   menuStateReducer,
   resolveMenuSelection,
-  type MenuItem,
 } from './menu-utils';
 
 /**
  * 菜单组件
  */
-const MenuComponent = memo(() => {
+const MenuComponent = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -68,43 +68,36 @@ const MenuComponent = memo(() => {
 
   const currentOpenKeys = useMemo(() => computedOpenKeys, [computedOpenKeys]);
 
-  const onOpenChange = useCallback(
-    (newOpenKeys: string[]) => {
-      let nextOpenKeys = newOpenKeys;
+  const onOpenChange = (newOpenKeys: string[]) => {
+    let nextOpenKeys = newOpenKeys;
 
-      if (accordion) {
-        if (newOpenKeys.length < 1) {
+    if (accordion) {
+      if (newOpenKeys.length < 1) {
+        nextOpenKeys = newOpenKeys;
+      } else {
+        const latestOpenKey = newOpenKeys[newOpenKeys.length - 1];
+        if (latestOpenKey && newOpenKeys[0] && latestOpenKey.includes(newOpenKeys[0])) {
           nextOpenKeys = newOpenKeys;
-        } else {
-          const latestOpenKey = newOpenKeys[newOpenKeys.length - 1];
-          if (latestOpenKey && newOpenKeys[0] && latestOpenKey.includes(newOpenKeys[0])) {
-            nextOpenKeys = newOpenKeys;
-          } else if (latestOpenKey) {
-            nextOpenKeys = [latestOpenKey];
-          }
+        } else if (latestOpenKey) {
+          nextOpenKeys = [latestOpenKey];
         }
       }
-
-      dispatchMenuState({ type: 'user-open-change', openKeys: nextOpenKeys });
-    },
-    [accordion]
-  );
-
-  const mergedOpenKeys = useMemo(() => {
-    // 如果用户手动操作过，完全使用用户的选择
-    if (userInteracted) {
-      return openKeys;
     }
-    return currentOpenKeys;
-  }, [userInteracted, openKeys, currentOpenKeys]);
+
+    dispatchMenuState({ type: 'user-open-change', openKeys: nextOpenKeys });
+  };
+
+  const mergedOpenKeys = userInteracted ? openKeys : currentOpenKeys;
 
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route && Object.keys(route).length && dynamicTitle) {
       const title = route.meta?.title;
-      if (title) document.title = `Nexus - ${t(title)}`;
+      if (title) {
+        document.title = `Nexus - ${t(title)}`;
+      }
     }
-  }, [pathname, menus, dynamicTitle, t]);
+  }, [pathname, menus, dynamicTitle]);
 
   useEffect(() => {
     if (!menus || menus.length === 0 || !caches?.pathMap?.size) {
@@ -143,29 +136,24 @@ const MenuComponent = memo(() => {
 
   return (
     <>
-      {
-        loading ?(<Spin
-        indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-        spinning
-      >
-      </Spin>) : (
-          <Menu
-            className='side-menu'
-            mode="inline"
-            theme={mode}
-            inlineCollapsed={collapsed}
-            selectedKeys={currentSelectedKeys}
-            {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
-            items={menuList}
-            onClick={clickMenu}
-            onOpenChange={onOpenChange}
-          />
-        )
-      }
+      {loading ? (
+        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={24} />} spinning />
+      ) : (
+        <Menu
+          className="side-menu"
+          mode="inline"
+          theme={mode}
+          inlineCollapsed={collapsed}
+          selectedKeys={currentSelectedKeys}
+          {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
+          items={menuList}
+          onClick={clickMenu}
+          onOpenChange={onOpenChange}
+        />
+      )}
     </>
-    
   );
-});
+};
 
 MenuComponent.displayName = 'MenuComponent';
 

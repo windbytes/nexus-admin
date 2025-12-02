@@ -1,6 +1,6 @@
 import { BellOutlined, GithubOutlined, LockOutlined, SettingOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, FloatButton, Layout, Skeleton, Space, Tooltip, theme } from 'antd';
-import { lazy, memo, Suspense, useCallback, useMemo } from 'react';
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import TabBar from '@/components/TabBar';
@@ -26,7 +26,7 @@ const Setting = lazy(() => import('./component/Setting'));
  * 3. 使用 useMemo 缓存 MessageBox 组件
  * 4. 优化 Dropdown 的 dropdownRender
  */
-const Header = memo(() => {
+const Header = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -54,21 +54,16 @@ const Header = memo(() => {
   /**
    * 跳转到github - 使用 useCallback 缓存
    */
-  const routeGitHub = useCallback(() => {
+  const routeGitHub = () => {
     window.open('https://github.com/windbytes/nexus-admin', '_blank');
-  }, []);
+  };
 
   /**
    * 开启锁屏 - 使用 useCallback 缓存
    */
-  const handleLockScreen = useCallback(() => {
+  const handleLockScreen = () => {
     updatePreferences('widget', 'lockScreenStatus', true);
-  }, [updatePreferences]);
-
-  /**
-   * MessageBox 组件 - 使用 useMemo 缓存，避免 Dropdown 重渲染
-   */
-  const messageBoxContent = useMemo(() => <MessageBox />, []);
+  };
 
   return (
     <>
@@ -96,7 +91,7 @@ const Header = memo(() => {
               )}
               {/* 通知 */}
               {notification && (
-                <Dropdown placement="bottom" popupRender={() => messageBoxContent}>
+                <Dropdown placement="bottom" popupRender={() => <MessageBox />}>
                   <Badge count={5}>
                     <BellOutlined className="text-[18px] cursor-pointer" />
                   </Badge>
@@ -134,7 +129,7 @@ const Header = memo(() => {
       </Suspense>
     </>
   );
-});
+};
 
 Header.displayName = 'Header';
 

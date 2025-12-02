@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import avatar from '@/assets/images/avatar.png';
@@ -286,4 +286,4 @@ const UserDropdown: React.FC = () => {
   );
 };
 
-export default memo(UserDropdown);
+export default UserDropdown;
