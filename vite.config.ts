@@ -67,6 +67,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
       rolldownOptions: {
         output: {
+          minify: true,
           // 使用更安全的文件命名，不暴露库名
           chunkFileNames: 'static/js/[hash].js',
           entryFileNames: 'static/js/[hash].js',
