@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router';
-import KeepAlive, { type KeepAliveRef, useKeepAliveRef } from 'keepalive-for-react';
+import { KeepAlive, type KeepAliveRef, useKeepAliveRef } from 'keepalive-for-react';
 import type React from 'react';
 import { memo, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
