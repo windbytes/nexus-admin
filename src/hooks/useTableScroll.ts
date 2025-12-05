@@ -5,7 +5,7 @@ import { useRef } from 'react';
  * 计算表格滚动配置项的hooks
  * @param scrollX 横向滚动宽度
  */
-export default function useTableScroll(scrollX: string | number = 'max-content') {
+export default function useTableScroll(scrollX: string | number = 'max-content', paginationHeight: number = 56) {
   const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const size = useSize(tableWrapperRef);
@@ -13,9 +13,11 @@ export default function useTableScroll(scrollX: string | number = 'max-content')
   function getTableScrollY() {
     const height = size?.height;
 
-    if (!height) return undefined;
+    if (!height) {
+      return undefined;
+    }
 
-    return height - 96;
+    return height - paginationHeight;
   }
 
   const scrollConfig = {

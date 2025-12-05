@@ -29,7 +29,7 @@
     "@flowgram.ai/panel-manager-plugin": "^1.0.3",
     "@flowgram.ai/shortcuts-plugin": "^1.0.3",
     "@monaco-editor/react": "^4.7.0",
-    "@tanstack/react-query": "^5.90.11",
+    "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-router": "^1.139.14",
     "@zxcvbn-ts/core": "^3.0.4",
     "ahooks": "^3.9.6",

@@ -4,7 +4,7 @@ import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { DatabaseDriver } from '@/services/resource/database/driverApi';
-
+import '@/styles/table.full.scss';
 interface DriverTableProps {
   data: DatabaseDriver[];
   loading: boolean;
@@ -77,7 +77,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
       width: 70,
       align: 'center',
       hidden: true, // 隐藏序号列
-      render: (_: any, __: any, index: number) => {
+      render: (_: string, __: DatabaseDriver, index: number) => {
         const pageNum = (pagination as TablePaginationConfig)?.current || 1;
         const pageSize = (pagination as TablePaginationConfig)?.pageSize || 20;
         return (pageNum - 1) * pageSize + index + 1;
@@ -182,10 +182,10 @@ const DriverTable: React.FC<DriverTableProps> = ({
     {
       title: '操作',
       key: 'action',
-      width: 160,
+      width: 120,
       align: 'center',
       fixed: 'right',
-      render: (_: any, record: DatabaseDriver) => (
+      render: (_: string, record: DatabaseDriver) => (
         <Space size="small">
           <Tooltip title="编辑">
             <Button
