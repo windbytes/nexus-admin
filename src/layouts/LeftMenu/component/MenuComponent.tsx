@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps, Spin } from 'antd';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
@@ -49,8 +49,11 @@ const MenuComponent = () => {
     return mode;
   });
 
+  // 菜单列表
   const [menuList, setMenuList] = useState<MenuItem[]>([]);
+  // 菜单加载状态
   const [loading, setLoading] = useState(false);
+  // 菜单状态
   const [menuState, dispatchMenuState] = useReducer(
     menuStateReducer,
     { pathname, caches },
@@ -58,16 +61,12 @@ const MenuComponent = () => {
   );
   const { selectedKeys, computedOpenKeys, openKeys, userInteracted } = menuState;
 
+  // 菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
-    // 点击菜单项导航时，重置用户交互标志，让菜单自动同步
-    dispatchMenuState({ type: 'reset-interaction' });
     navigate({ to: key, replace: true });
   }, []);
 
-  const currentSelectedKeys = useMemo(() => selectedKeys, [selectedKeys]);
-
-  const currentOpenKeys = useMemo(() => computedOpenKeys, [computedOpenKeys]);
-
+  // 菜单展开状态改变
   const onOpenChange = (newOpenKeys: string[]) => {
     let nextOpenKeys = newOpenKeys;
 
@@ -87,8 +86,9 @@ const MenuComponent = () => {
     dispatchMenuState({ type: 'user-open-change', openKeys: nextOpenKeys });
   };
 
-  const mergedOpenKeys = userInteracted ? openKeys : currentOpenKeys;
+  const mergedOpenKeys = userInteracted ? openKeys : computedOpenKeys;
 
+  // title 动态设置
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route && Object.keys(route).length && dynamicTitle) {
@@ -99,6 +99,7 @@ const MenuComponent = () => {
     }
   }, [pathname, menus, dynamicTitle]);
 
+  // 菜单状态同步
   useEffect(() => {
     if (!menus || menus.length === 0 || !caches?.pathMap?.size) {
       return;
@@ -144,7 +145,7 @@ const MenuComponent = () => {
           mode="inline"
           theme={mode}
           inlineCollapsed={collapsed}
-          selectedKeys={currentSelectedKeys}
+          selectedKeys={selectedKeys}
           {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
           items={menuList}
           onClick={clickMenu}
