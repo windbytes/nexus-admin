@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Image } from 'antd';
-import logo from '@/assets/images/icon-192.png';
+import logo from '@/assets/icon/web/icon-192.png';
 import { usePreferencesStore } from '@/stores/store';
 
 /**
