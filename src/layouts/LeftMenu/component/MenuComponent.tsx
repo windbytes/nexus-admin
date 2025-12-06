@@ -68,6 +68,10 @@ const MenuComponent = () => {
 
   // 菜单展开状态改变
   const onOpenChange = (newOpenKeys: string[]) => {
+    // 侧边栏折叠状态下，不响应 openKeys 的变化
+    if (collapsed) {
+      return;
+    }
     let nextOpenKeys = newOpenKeys;
 
     if (accordion) {

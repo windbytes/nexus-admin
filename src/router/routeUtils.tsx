@@ -1,5 +1,5 @@
-import type { RouteItem } from '@/types/route';
 import { lazy } from 'react';
+import type { RouteItem } from '@/types/route';
 
 /**
  * 动态导入组件
