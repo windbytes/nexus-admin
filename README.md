@@ -111,6 +111,29 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
   <p><em>系统参数配置和监控</em></p>
 </div>
 
+### 数据库资源
+
+<div align="center">
+  <img src="images/数据库资源.png" alt="数据库资源" width="800"/>
+  <p><em>数据库资源</em></p>
+</div>
+
+### web服务
+
+<div align="center">
+  <img src="images/web服务.png" alt="web服务" width="800"/>
+  <p><em>web服务</em></p>
+</div>
+
+### 编辑JSON数据模式
+
+<div align="center">
+  <img src="images/编辑JSON数据模式.png" alt="编辑JSON数据模式" width="800"/>
+  <p><em>编辑JSON数据模式</em></p>
+</div>
+
+### 等等等……
+
 ## 🚀 Apache Camel 集成
 
 ### 集成架构

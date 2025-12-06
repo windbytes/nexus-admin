@@ -1,16 +1,53 @@
 .login-container {
-  /* // font-size: $text-fontSize;
-  // color: $test-color; */
-  @apply bg-[#eee]! relative flex flex-1 justify-center items-center min-w-[550px] h-[calc(100%-200px)] min-h-[500px] bg-[url('@/assets/svg/login/background.svg')] bg-center bg-cover;
+  /* 
+    font-size: 16px;
+    color: #333;
+  */
+  background-color: #eee !important;
+  position: relative;
+  display: flex;
+  flex: 1 1 0%;
+  justify-content: center;
+  align-items: center;
+  min-width: 550px;
+  height: calc(100% - 200px);
+  min-height: 500px;
+  background-image: url('@/assets/svg/login/background.svg');
+  background-position: center;
+  background-size: cover;
+
   .login-box {
-    @apply w-[800px] h-[540px] flex bg-[#fff] rounded-[6px] shadow-[0_0_10px_rgba(0,_0,_0,_0.149019607843137)] border-[0px];
-
+    width: 800px;
+    height: 540px;
+    display: flex;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    border: 0;
+    
     .login-left {
-      @apply border-0 w-[330px] h-[540px] flex flex-col text-center leading-[24px] bg-[url('@/assets/svg/login/left.svg')] bg-center bg-cover;
+      border: 0;
+      width: 330px;
+      height: 540px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      line-height: 24px;
+      background-image: url('@/assets/svg/login/left.svg');
+      background-position: center;
+      background-size: cover;
     }
-
     .login-form {
-      @apply border-0 w-[420px] h-[460px] flex p-[40px] flex-col text-left text-[#000000] leading-[24px] flex-1;
+      border: 0;
+      width: 420px;
+      height: 460px;
+      display: flex;
+      padding: 40px;
+      flex-direction: column;
+      text-align: left;
+      color: #000000;
+      line-height: 24px;
+      flex: 1;
     }
   }
 }
