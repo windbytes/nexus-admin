@@ -4,6 +4,7 @@ import type React from 'react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 import favicon from '@/assets/icon/web/icon-512.png';
+import background from '@/assets/svg/login/background.svg';
 import { usePreferencesStore } from '@/stores/store';
 
 const { Text } = Typography;
@@ -57,23 +58,14 @@ const ScreenLock: React.FC = memo(() => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-[#eee]">
-      {/* 背景装饰点 */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[20%] left-[10%] w-20 h-20 rounded-full bg-orange-200/30 animate-pulse" />
-        <div
-          className="absolute top-[60%] right-[15%] w-24 h-24 rounded-full bg-blue-200/30 animate-pulse"
-          style={{ animationDelay: '1s' }}
-        />
-        <div
-          className="absolute bottom-[30%] left-[20%] w-16 h-16 rounded-full bg-yellow-200/30 animate-pulse"
-          style={{ animationDelay: '2s' }}
-        />
-      </div>
-
+    <div
+      className="fixed inset-0 z-9999 flex items-center justify-center bg-[#eee]"
+      style={{ backgroundImage: `url(${background})` }}
+    >
       {/* 主要内容 */}
       <Card
-        className="w-full max-w-md mx-4 shadow-lg"
+        hoverable
+        className="w-full max-w-md mx-4"
         styles={{
           body: {
             padding: '48px 40px',
@@ -84,7 +76,7 @@ const ScreenLock: React.FC = memo(() => {
           {/* 图标和标题 */}
           <div className="mb-6">
             <div className="inline-block mb-4 relative">
-              <img src={favicon} alt="应用图标" className="w-20 h-20 rounded-lg shadow-md" />
+              <img src={favicon} alt="应用图标" className="w-20 h-20" />
             </div>
             <div className="flex items-center justify-center gap-3 mb-3">
               <LockOutlined className="text-2xl text-gray-600" />
