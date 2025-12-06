@@ -1,11 +1,10 @@
-import type { Key, ReactNode } from 'react';
-
 import type { MenuProps } from 'antd';
 import type { TFunction } from 'i18next';
+import type { Key, ReactNode } from 'react';
 
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { matchPathname, matchRoutePath, type MenuCaches } from '@/utils/utils';
+import { type MenuCaches, matchPathname, matchRoutePath } from '@/utils/utils';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -18,8 +17,7 @@ export type MenuState = {
 
 export type MenuAction =
   | { type: 'sync'; selectedKeys: string[]; computedOpenKeys: string[] }
-  | { type: 'user-open-change'; openKeys: string[] }
-  | { type: 'reset-interaction' };
+  | { type: 'user-open-change'; openKeys: string[] };
 
 /**
  * 浅比较两个字符串数组是否相等。
@@ -103,15 +101,6 @@ export const menuStateReducer = (state: MenuState, action: MenuAction): MenuStat
         ...state,
         openKeys: action.openKeys,
         userInteracted: true,
-      };
-    }
-    case 'reset-interaction': {
-      if (!state.userInteracted) {
-        return state;
-      }
-      return {
-        ...state,
-        userInteracted: false,
       };
     }
     default:

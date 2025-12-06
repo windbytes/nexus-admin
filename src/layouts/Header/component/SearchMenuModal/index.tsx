@@ -13,6 +13,7 @@ import { useSearchHistory } from './hooks/useSearchHistory';
 import './searchMenuModal.scss';
 import { useShallow } from 'zustand/shallow';
 import useGlobalUIStore from '@/stores/globalUIStore';
+import classNames from '@/utils/classnames';
 import Title from './title';
 import type { SearchHistoryItem, SearchResultItem } from './types';
 
@@ -146,7 +147,7 @@ const SearchMenuModal: React.FC = () => {
       >
         <div className="h-full flex flex-col">
           {showHistory ? (
-            <div className="flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden">
               <div className="searchHeader">
                 {history.length > 0 && (
                   <button type="button" onClick={clear} className="clearButton">
@@ -154,7 +155,13 @@ const SearchMenuModal: React.FC = () => {
                   </button>
                 )}
               </div>
-              <div className="flex-1 overflow-y-auto" ref={listRef as RefObject<HTMLDivElement>}>
+              <div
+                className={classNames(
+                  'flex-1 overflow-y-auto',
+                  history.length === 0 && 'flex items-center justify-center'
+                )}
+                ref={listRef as RefObject<HTMLDivElement>}
+              >
                 {history.length > 0 ? (
                   <SearchHistory
                     items={history}
@@ -164,7 +171,7 @@ const SearchMenuModal: React.FC = () => {
                     formatTime={formatTime}
                   />
                 ) : (
-                  <Empty description="暂无搜索历史" className="mt-8" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  <Empty description="暂无搜索历史" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 )}
               </div>
             </div>

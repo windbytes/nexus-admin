@@ -55,7 +55,7 @@ export default SelectItem;
 
 export interface SelectItemProps {
   category: Category;
-  pKey: SettingKey<Category>;
+  pKey: string;
   title?: string;
   disabled?: boolean;
   placeholder?: string;

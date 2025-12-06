@@ -5,8 +5,8 @@ import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } fro
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import logo from '@/assets/icon/web/icon-512.png';
 import filing from '@/assets/images/filing.png';
-import logo from '@/assets/images/icon-512.png';
 // 一些公用的API需要提取出来到api目录下(后续进行更改)
 import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';

@@ -15,7 +15,7 @@ const SwitchItem: React.FC<SwitchItemProps> = (props) => {
   // 从全局状态库中获取配置(这样写表明当前组件只会关注 value 和 updatePreferences 的变化)
   const { value, updatePreferences } = usePreferencesStore(
     useShallow((state) => ({
-      value: getPreferenceValue(state.preferences, category, pKey as unknown as SettingKey<Category>),
+      value: getPreferenceValue(state.preferences, category, pKey as SettingKey<Category>),
       updatePreferences: state.updatePreferences,
     }))
   );
@@ -46,6 +46,6 @@ export interface SwitchItemProps {
   children?: ReactNode;
   style?: React.CSSProperties;
   category: Category;
-  pKey: SettingKey<Category>;
+  pKey: string;
   className?: string;
 }

@@ -1,10 +1,10 @@
-import type { DatabaseDriver, DriverFormData, DriverSearchParams } from '@/services/resource/database/driverApi';
-import { driverService } from '@/services/resource/database/driverApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
-import { useCallback, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
+import type { DatabaseDriver, DriverFormData, DriverSearchParams } from '@/services/resource/database/driverApi';
+import { driverService } from '@/services/resource/database/driverApi';
 import DriverModal from './components/DriverModal';
 import DriverSearchForm from './components/DriverSearchForm';
 import DriverTable from './components/DriverTable';
@@ -89,11 +89,7 @@ const Database: React.FC = () => {
   const deleteDriverMutation = useMutation({
     mutationFn: (id: string) => driverService.deleteDriver(id),
     onSuccess: () => {
-      message.success('删除成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`删除失败：${error.message}`);
     },
   });
 
@@ -101,15 +97,11 @@ const Database: React.FC = () => {
   const batchDeleteDriverMutation = useMutation({
     mutationFn: (ids: string[]) => driverService.batchDeleteDriver(ids),
     onSuccess: () => {
-      message.success('批量删除成功！');
       dispatch({
         selectedRowKeys: [],
         selectedRows: [],
       });
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`批量删除失败：${error.message}`);
     },
   });
 
@@ -117,11 +109,7 @@ const Database: React.FC = () => {
   const updateStatusMutation = useMutation({
     mutationFn: (data: DriverFormData) => driverService.updateDriver(data),
     onSuccess: () => {
-      message.success('状态更新成功！');
       refetch();
-    },
-    onError: (error: any) => {
-      message.error(`状态更新失败：${error.message}`);
     },
   });
 
@@ -133,74 +121,62 @@ const Database: React.FC = () => {
   // 批量下载驱动 mutation
   const batchDownloadDriverMutation = useMutation({
     mutationFn: (ids: string[]) => driverService.batchDownloadDriver(ids),
-    onSuccess: () => {
-      message.success('批量下载成功！');
-    },
-    onError: (error: any) => {
-      message.error(`批量下载失败：${error.message}`);
-    },
   });
 
   /**
    * 处理搜索
    */
-  const handleSearch = useCallback(
-    (values: Omit<DriverSearchParams, 'pageNum' | 'pageSize'>) => {
-      setSearchParams({
-        ...values,
-        pageNum: 1,
-        pageSize: searchParams.pageSize,
-      });
-    },
-    [searchParams.pageSize]
-  );
+  const handleSearch = (values: Omit<DriverSearchParams, 'pageNum' | 'pageSize'>) => {
+    setSearchParams({
+      ...values,
+      pageNum: 1,
+      pageSize: searchParams.pageSize,
+    });
+  };
 
   /**
    * 处理新增
    */
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     dispatch({
       modalVisible: true,
       modalTitle: '新增驱动',
       currentRecord: null,
     });
-  }, []);
+  };
 
   /**
    * 处理编辑
    */
-  const handleEdit = useCallback((record: DatabaseDriver) => {
+  const handleEdit = (record: DatabaseDriver) => {
     dispatch({
       modalVisible: true,
       modalTitle: '编辑驱动',
       currentRecord: record,
     });
-  }, []);
+  };
 
   /**
    * 处理删除
    */
-  const handleDelete = useCallback(
-    (record: DatabaseDriver) => {
-      modal.confirm({
-        title: '确认删除',
-        icon: <ExclamationCircleOutlined />,
-        content: `确定要删除驱动"${record.name}"吗？此操作不可恢复。`,
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        onOk: () => {
-          deleteDriverMutation.mutate(record.id);
-        },
-      });
-    },
-    [modal, deleteDriverMutation]
-  );
+  const handleDelete = (record: DatabaseDriver) => {
+    modal.confirm({
+      title: '确认删除',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要删除驱动"${record.name}"吗？此操作不可恢复。`,
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => {
+        deleteDriverMutation.mutate(record.id);
+      },
+    });
+  };
 
   /**
    * 处理批量删除
    */
-  const handleBatchDelete = useCallback(() => {
+  const handleBatchDelete = () => {
     if (state.selectedRowKeys.length === 0) {
       message.warning('请先选择要删除的驱动！');
       return;
@@ -217,82 +193,66 @@ const Database: React.FC = () => {
         batchDeleteDriverMutation.mutate(state.selectedRowKeys as string[]);
       },
     });
-  }, [state.selectedRowKeys, modal, message, batchDeleteDriverMutation]);
+  };
 
   /**
    * 处理下载
    */
-  const handleDownload = useCallback(
-    (record: DatabaseDriver) => {
-      downloadDriverMutation.mutate({
-        id: record.id,
-        fileName: record.fileName,
-      });
-    },
-    [downloadDriverMutation]
-  );
+  const handleDownload = (record: DatabaseDriver) => {
+    downloadDriverMutation.mutate({
+      id: record.id,
+      fileName: record.fileName,
+    });
+  };
 
   /**
    * 处理批量下载
    */
-  const handleBatchDownload = useCallback(() => {
+  const handleBatchDownload = () => {
     if (state.selectedRowKeys.length === 0) {
       message.warning('请先选择要下载的驱动！');
       return;
     }
 
     batchDownloadDriverMutation.mutate(state.selectedRowKeys as string[]);
-  }, [state.selectedRowKeys, message, batchDownloadDriverMutation]);
-
-  /**
-   * 处理刷新
-   */
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
+  };
 
   /**
    * 处理状态变更
    */
-  const handleStatusChange = useCallback(
-    (record: DatabaseDriver, checked: boolean) => {
-      updateStatusMutation.mutate({
-        ...record,
-        status: checked,
-      });
-    },
-    [updateStatusMutation]
-  );
+  const handleStatusChange = (record: DatabaseDriver, checked: boolean) => {
+    updateStatusMutation.mutate({
+      ...record,
+      status: checked,
+    });
+  };
 
   /**
    * 处理选择变更
    */
-  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: DatabaseDriver[]) => {
+  const handleSelectionChange = (selectedRowKeys: React.Key[], selectedRows: DatabaseDriver[]) => {
     dispatch({
       selectedRowKeys,
       selectedRows,
     });
-  }, []);
+  };
 
   /**
    * 处理弹窗确认
    */
-  const handleModalOk = useCallback(
-    (values: DriverFormData) => {
-      saveDriverMutation.mutate(values);
-    },
-    [saveDriverMutation]
-  );
+  const handleModalOk = (values: DriverFormData) => {
+    saveDriverMutation.mutate(values);
+  };
 
   /**
    * 处理弹窗取消
    */
-  const handleModalCancel = useCallback(() => {
+  const handleModalCancel = () => {
     dispatch({
       modalVisible: false,
       currentRecord: null,
     });
-  }, []);
+  };
 
   // 表格加载状态
   const tableLoading =
@@ -309,15 +269,18 @@ const Database: React.FC = () => {
       <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
 
       {/* 表格区域 */}
-      <Card className="flex-1" classNames={{
-        body: 'flex flex-col flex-1 h-full'
-      }}>
+      <Card
+        className="flex-1"
+        classNames={{
+          body: 'flex flex-col flex-1 h-full',
+        }}
+      >
         {/* 表格操作按钮 */}
         <DriverTableActions
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
           onBatchDownload={handleBatchDownload}
-          onRefresh={handleRefresh}
+          onRefresh={refetch}
           selectedRowKeys={state.selectedRowKeys}
           loading={tableLoading}
         />
