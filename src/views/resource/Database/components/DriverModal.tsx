@@ -1,9 +1,9 @@
-import ChunkedUpload, { type ChunkedUploadRef } from '@/components/FileUpload/ChunkedUpload';
-import DragModal from '@/components/modal/DragModal';
-import { type DatabaseDriver, type DriverFormData } from '@/services/resource/database/driverApi';
-import { Button, Form, Input, Select, Space, Switch } from 'antd';
+import { Button, Form, Input, type InputRef, Select, Space, Switch } from 'antd';
 import type React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
+import ChunkedUpload, { type ChunkedUploadRef } from '@/components/FileUpload/ChunkedUpload';
+import DragModal from '@/components/modal/DragModal';
+import type { DatabaseDriver, DriverFormData } from '@/services/resource/database/driverApi';
 import { DATABASE_TYPE_OPTIONS } from './DriverSearchForm';
 
 const { TextArea } = Input;
@@ -26,10 +26,13 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [uploadedFileSize, setUploadedFileSize] = useState<number>(0);
   const chunkedUploadRef = useRef<ChunkedUploadRef>(null);
+  const sourceNameRef = useRef<InputRef>(null);
 
   // 初始化表单数据（由于使用了 destroyOnHidden，每次打开都是新组件，state 初始值已正确）
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     if (initialValues) {
       form.setFieldsValue(initialValues);
       setUploadedFilePath(initialValues.filePath || '');
@@ -42,6 +45,16 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
       setUploadedFileSize(0);
     }
   }, [open, initialValues, form]);
+
+  /**
+   * 弹窗打开关闭的回调
+   * @param open 弹窗是否打开
+   */
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      sourceNameRef.current?.focus();
+    }
+  };
 
   /**
    * 确认回调
@@ -153,6 +166,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
         </Space>
       }
       maskClosable={false}
+      afterOpenChange={handleAfterOpenChange}
     >
       <Form
         form={form}
@@ -172,7 +186,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
             { max: 100, message: '驱动名称不能超过100个字符' },
           ]}
         >
-          <Input autoComplete="off" placeholder="例如：MySQL 8.0 驱动" />
+          <Input autoComplete="off" placeholder="例如：MySQL 8.0 驱动" ref={sourceNameRef} />
         </Form.Item>
 
         <Form.Item name="databaseType" label="数据库类型" rules={[{ required: true, message: '请选择数据库类型' }]}>

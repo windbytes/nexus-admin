@@ -1,11 +1,11 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Input } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
-import { useTagStore } from '@/stores/useTagStore.ts';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tagsService } from '@/services/common/tags/tagsApi';
+import { useTagStore } from '@/stores/useTagStore.ts';
 import TagItemEditor from './tag-item-editor';
 
 type TagManagementModalProps = {
@@ -75,8 +75,12 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
    * @returns
    */
   const createNewTag = async () => {
-    if (!name) return;
-    if (pending) return;
+    if (!name) {
+      return;
+    }
+    if (pending) {
+      return;
+    }
     createNewTagMutation.mutateAsync(name);
   };
 
