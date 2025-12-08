@@ -1,14 +1,14 @@
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App, Card, Modal } from 'antd';
+import type React from 'react';
+import { useReducer, useState } from 'react';
 import type {
   WebService,
   WebServiceFormData,
   WebServiceSearchParams,
 } from '@/services/resource/webservice/webServiceApi';
 import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Card, Modal } from 'antd';
-import type React from 'react';
-import { useCallback, useReducer, useState } from 'react';
 import { WebServiceModal, WebServiceSearchForm, WebServiceTable, WebServiceTableActions } from './components';
 
 const { confirm } = Modal;
@@ -141,70 +141,67 @@ const Web: React.FC = () => {
   /**
    * 处理搜索
    */
-  const handleSearch = useCallback((params: WebServiceSearchParams) => {
+  const handleSearch = (params: WebServiceSearchParams) => {
     setSearchParams(params);
-  }, []);
+  };
 
   /**
    * 处理新增
    */
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     dispatch({
       modalVisible: true,
       modalTitle: '新增Web服务',
       currentRecord: null,
       isViewMode: false,
     });
-  }, []);
+  };
 
   /**
    * 处理查看
    */
-  const handleView = useCallback((record: WebService) => {
+  const handleView = (record: WebService) => {
     dispatch({
       modalVisible: true,
       modalTitle: '查看Web服务',
       currentRecord: record,
       isViewMode: true,
     });
-  }, []);
+  };
 
   /**
    * 处理编辑
    */
-  const handleEdit = useCallback((record: WebService) => {
+  const handleEdit = (record: WebService) => {
     dispatch({
       modalVisible: true,
       modalTitle: '编辑Web服务',
       currentRecord: record,
       isViewMode: false,
     });
-  }, []);
+  };
 
   /**
    * 处理删除
    */
-  const handleDelete = useCallback(
-    (record: WebService) => {
-      confirm({
-        title: '确认删除',
-        icon: <ExclamationCircleOutlined />,
-        content: `确定要删除Web服务"${record.name}"吗？此操作不可恢复！`,
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        onOk: () => {
-          deleteWebServiceMutation.mutate(record.id);
-        },
-      });
-    },
-    [deleteWebServiceMutation]
-  );
+  const handleDelete = (record: WebService) => {
+    confirm({
+      title: '确认删除',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要删除Web服务"${record.name}"吗？此操作不可恢复！`,
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => {
+        deleteWebServiceMutation.mutate(record.id);
+      },
+    });
+  };
 
   /**
    * 处理批量删除
    */
-  const handleBatchDelete = useCallback(() => {
+  const handleBatchDelete = () => {
     if (state.selectedRowKeys.length === 0) {
       message.warning('请先选择要删除的数据！');
       return;
@@ -221,67 +218,58 @@ const Web: React.FC = () => {
         batchDeleteMutation.mutate(state.selectedRowKeys as string[]);
       },
     });
-  }, [state.selectedRowKeys, batchDeleteMutation, message]);
+  };
 
   /**
    * 处理导出
    */
-  const handleExport = useCallback(
-    (record: WebService) => {
-      exportWsdlMutation.mutate({ id: record.id, name: record.name });
-    },
-    [exportWsdlMutation]
-  );
+  const handleExport = (record: WebService) => {
+    exportWsdlMutation.mutate({ id: record.id, name: record.name });
+  };
 
   /**
    * 处理状态变更
    */
-  const handleStatusChange = useCallback(
-    (record: WebService, checked: boolean) => {
-      const updatedRecord: WebServiceFormData = {
-        ...record,
-        status: checked,
-      };
-      saveWebServiceMutation.mutate(updatedRecord);
-    },
-    [saveWebServiceMutation]
-  );
+  const handleStatusChange = (record: WebService, checked: boolean) => {
+    const updatedRecord: WebServiceFormData = {
+      ...record,
+      status: checked,
+    };
+    saveWebServiceMutation.mutate(updatedRecord);
+  };
 
   /**
    * 处理刷新
    */
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['webServiceList'] });
-  }, [queryClient]);
+  };
 
   /**
    * 处理表格行选择
    */
-  const handleSelectionChange = useCallback((selectedRowKeys: React.Key[], selectedRows: WebService[]) => {
+  const handleSelectionChange = (selectedRowKeys: React.Key[], selectedRows: WebService[]) => {
     dispatch({ selectedRowKeys, selectedRows });
-  }, []);
+  };
 
   /**
    * 处理弹窗确认
    */
-  const handleModalOk = useCallback(
-    (values: WebServiceFormData) => {
-      saveWebServiceMutation.mutate(values);
-    },
-    [saveWebServiceMutation]
-  );
+  const handleModalOk = (values: WebServiceFormData) => {
+    saveWebServiceMutation.mutate(values);
+  };
 
   /**
    * 处理弹窗取消
    */
-  const handleModalCancel = useCallback(() => {
+  const handleModalCancel = () => {
     dispatch({
       modalVisible: false,
       modalTitle: '',
       currentRecord: null,
       isViewMode: false,
     });
-  }, []);
+  };
 
   // 表格加载状态
   const tableLoading =
@@ -297,7 +285,12 @@ const Web: React.FC = () => {
       <WebServiceSearchForm onSearch={handleSearch} loading={isLoading} />
 
       {/* 表格区域 */}
-      <Card className="flex-1">
+      <Card
+        className="flex-1"
+        classNames={{
+          body: 'flex flex-col flex-1 h-full',
+        }}
+      >
         {/* 表格操作按钮 */}
         <WebServiceTableActions
           onAdd={handleAdd}
@@ -323,7 +316,7 @@ const Web: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.total || 0,
+            total: result?.totalRow ?? 0,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

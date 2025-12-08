@@ -1,12 +1,12 @@
+import { App, Button, Form, Input, type InputRef, Select, Space, Switch } from 'antd';
 import type React from 'react';
-import { useEffect, useState, memo } from 'react';
-import { Form, Input, Select, Switch, Space, Button, App } from 'antd';
+import { memo, useEffect, useRef, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import type { WebService, WebServiceFormData } from '@/services/resource/webservice/webServiceApi';
 import { WEB_SERVICE_CATEGORIES } from '@/services/resource/webservice/webServiceApi';
-import InputTypeSelector, { type InputType } from './InputTypeSelector';
-import ManualWsdlEditor from './ManualWsdlEditor';
 import FileUploadEditor from './FileUploadEditor';
+import InputTypeSelector from './InputTypeSelector';
+import ManualWsdlEditor from './ManualWsdlEditor';
 import UrlFetchEditor from './UrlFetchEditor';
 
 const { TextArea } = Input;
@@ -28,47 +28,58 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
   ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
     const { message } = App.useApp();
     const [form] = Form.useForm();
-    const [inputType, setInputType] = useState<InputType>('manual');
+
+    // 使用 Form.useWatch 监听表单字段，替代 useState
+    const inputType = Form.useWatch('inputType', form);
+    const status = Form.useWatch('status', form);
+
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    const [wsdlContent, setWsdlContent] = useState<string>('');
-    const [status, setStatus] = useState<boolean>(true);
+
+    const nameRef = useRef<InputRef>(null);
 
     // 初始化表单数据
     useEffect(() => {
-      if (open && initialValues) {
-        form.setFieldsValue(initialValues);
-        setInputType(initialValues.inputType || 'manual');
-        setWsdlContent(initialValues.wsdlContent || '');
-        setStatus(initialValues.status ?? true);
-      } else if (open) {
-        form.resetFields();
-        setInputType('manual');
-        setUploadedFile(null);
-        setWsdlContent('');
-        setStatus(true);
+      if (open) {
+        if (initialValues) {
+          form.setFieldsValue(initialValues);
+          // 确保 status 有值
+          if (initialValues.status === undefined) {
+            form.setFieldValue('status', true);
+          }
+        } else {
+          // 新增模式注入默认值
+          form.setFieldsValue({
+            inputType: 'manual',
+            status: true,
+            wsdlContent: '',
+          });
+        }
       }
-    }, [open, initialValues, form]);
+    }, [open, initialValues]);
 
     /**
-     * 处理录入方式变更
+     * 处理表单字段变更
      */
-    const handleInputTypeChange = (value: InputType) => {
-      setInputType(value);
-      form.setFieldValue('inputType', value);
-      
-      // 清空相关字段
-      if (value !== 'manual') {
-        form.setFieldValue('namespace', undefined);
-        form.setFieldValue('serviceAnnotation', undefined);
-        form.setFieldValue('operations', undefined);
+    const handleValuesChange = (changedValues: Record<string, unknown>) => {
+      if ('inputType' in changedValues) {
+        const value = changedValues['inputType'] as string;
+
+        // 清空相关字段
+        if (value !== 'manual') {
+          form.setFieldsValue({
+            namespace: undefined,
+            serviceAnnotation: undefined,
+            operations: undefined,
+          });
+        }
+        if (value !== 'file') {
+          setUploadedFile(null);
+        }
+        if (value !== 'url') {
+          form.setFieldValue('wsdlUrl', undefined);
+        }
+        form.setFieldValue('wsdlContent', '');
       }
-      if (value !== 'file') {
-        setUploadedFile(null);
-      }
-      if (value !== 'url') {
-        form.setFieldValue('wsdlUrl', undefined);
-      }
-      setWsdlContent('');
     };
 
     /**
@@ -82,7 +93,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
      * 处理WSDL获取成功
      */
     const handleWsdlFetched = (content: string) => {
-      setWsdlContent(content);
+      form.setFieldValue('wsdlContent', content);
     };
 
     /**
@@ -91,6 +102,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
     const handleOk = async () => {
       try {
         const values = await form.validateFields();
+        const currentWsdlContent = form.getFieldValue('wsdlContent');
 
         // 根据录入方式进行额外验证
         if (inputType === 'file' && !uploadedFile && !initialValues?.fileInfo) {
@@ -98,7 +110,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
           return;
         }
 
-        if (inputType === 'url' && !wsdlContent && !initialValues?.wsdlContent) {
+        if (inputType === 'url' && !currentWsdlContent && !initialValues?.wsdlContent) {
           message.error('请先点击"获取WSDL"按钮获取内容！');
           return;
         }
@@ -106,16 +118,16 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
         const submitData: WebServiceFormData = {
           ...values,
           id: initialValues?.id,
-          inputType,
+          inputType, // values 中已有，但明确一下也可，或者...values覆盖
           file: uploadedFile || undefined,
-          wsdlContent: wsdlContent || initialValues?.wsdlContent,
-          status: status,
+          wsdlContent: currentWsdlContent || initialValues?.wsdlContent, // 优先使用表单中的，其次是初始值
+          status: values.status, // 确保从 values 获取
         };
 
         onOk(submitData);
-      } catch (error: any) {
+      } catch (error) {
         // 表单验证失败
-        const firstErrorField = error.errorFields?.[0]?.name;
+        const firstErrorField = (error as { errorFields?: { name: (string | number)[] }[] }).errorFields?.[0]?.name;
         if (firstErrorField) {
           form.scrollToField(firstErrorField);
           form.focusField(firstErrorField);
@@ -127,12 +139,24 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
      * 取消回调
      */
     const handleCancel = () => {
-      form.resetFields();
-      setInputType('manual');
-      setUploadedFile(null);
-      setWsdlContent('');
-      setStatus(true);
       onCancel();
+    };
+
+    /**
+     * 弹窗打开后回调
+     */
+    const handleAfterOpenChange = (open: boolean) => {
+      if (open) {
+        nameRef.current?.focus();
+      }
+    };
+
+    /**
+     * 关闭后清理
+     */
+    const handleAfterClose = () => {
+      form.resetFields();
+      setUploadedFile(null);
     };
 
     return (
@@ -142,6 +166,8 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
         open={open}
         onCancel={handleCancel}
         width={1200}
+        destroyOnHidden={true} // 使用 destroyOnHidden 销毁子元素
+        afterClose={handleAfterClose} // 关闭后清理
         styles={{
           body: {
             maxHeight: '70vh',
@@ -156,7 +182,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
                 <span className="text-sm text-gray-600">状态：</span>
                 <Switch
                   checked={status}
-                  onChange={(checked) => setStatus(checked)}
+                  onChange={(checked) => form.setFieldValue('status', checked)}
                   checkedChildren="启用"
                   unCheckedChildren="禁用"
                 />
@@ -175,18 +201,24 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
           )
         }
         maskClosable={false}
-        destroyOnHidden
+        afterOpenChange={handleAfterOpenChange}
       >
         <Form
           form={form}
           disabled={isViewMode}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 18 }}
-          initialValues={{
-            status: true,
-            inputType: 'manual',
-          }}
+          onValuesChange={handleValuesChange}
         >
+          {/* 隐藏字段 */}
+          <Form.Item name="status" hidden valuePropName="checked">
+            <Switch />
+          </Form.Item>
+          {/* wsdlContent 作为表单字段存储 */}
+          <Form.Item name="wsdlContent" hidden>
+            <Input />
+          </Form.Item>
+
           {/* 基本信息 */}
           <Form.Item
             name="name"
@@ -196,7 +228,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
               { max: 100, message: '服务名称不能超过100个字符' },
             ]}
           >
-            <Input autoComplete="off" placeholder="例如：用户信息服务" />
+            <Input autoComplete="off" ref={nameRef} placeholder="例如：用户信息服务" />
           </Form.Item>
 
           <Form.Item
@@ -218,19 +250,13 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
           </Form.Item>
 
           <Form.Item name="description" label="描述">
-            <TextArea
-              autoComplete="off"
-              placeholder="请输入描述信息"
-              rows={2}
-              maxLength={500}
-              showCount
-            />
+            <TextArea autoComplete="off" placeholder="请输入描述信息" rows={2} maxLength={500} showCount />
           </Form.Item>
 
           {/* 录入方式选择 */}
           {!isViewMode && (
-            <Form.Item label="录入方式" required>
-              <InputTypeSelector value={inputType} onChange={handleInputTypeChange} />
+            <Form.Item name="inputType" label="录入方式" required>
+              <InputTypeSelector />
             </Form.Item>
           )}
 
@@ -252,26 +278,17 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
               </div>
             </Form.Item>
           )}
-          {inputType === 'url' && (
-            <UrlFetchEditor disabled={isViewMode} onWsdlFetched={handleWsdlFetched} />
-          )}
+          {inputType === 'url' && <UrlFetchEditor disabled={isViewMode} onWsdlFetched={handleWsdlFetched} />}
 
           <Form.Item name="remark" label="备注">
-            <TextArea
-              autoComplete="off"
-              placeholder="请输入备注信息"
-              rows={2}
-              maxLength={500}
-              showCount
-            />
+            <TextArea autoComplete="off" placeholder="请输入备注信息" rows={2} maxLength={500} showCount />
           </Form.Item>
         </Form>
       </DragModal>
     );
-  },
+  }
 );
 
 WebServiceModal.displayName = 'WebServiceModal';
 
 export default WebServiceModal;
-
