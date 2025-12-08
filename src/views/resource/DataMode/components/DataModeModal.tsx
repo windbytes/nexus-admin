@@ -29,7 +29,7 @@ interface DataModeModalProps {
  * @param value - 可能是对象、字符串或 null
  * @returns JSON 字符串，如果为 null 则返回空字符串
  */
-const convertToJsonString = (value: any): string => {
+const convertToJsonString = (value: unknown): string => {
   if (value === null || value === undefined) {
     return '';
   }

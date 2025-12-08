@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { Button, Modal, Form, Input, TreeSelect, Switch, InputNumber, Space } from 'antd';
-import type { ButtonFormData } from '@/services/system/permission/PermissionButton/permissionButtonApi';
-import { menuService } from '@/services/system/menu/menuApi';
 import { useQuery } from '@tanstack/react-query';
+import { Button, Form, Input, InputNumber, type InputRef, Modal, Space, Switch, TreeSelect } from 'antd';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { addIcon } from '@/utils/optimized-icons';
+import { menuService } from '@/services/system/menu/menuApi';
 import type { MenuModel } from '@/services/system/menu/type';
+import type { ButtonFormData } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { addIcon } from '@/utils/optimized-icons';
 
 // 菜单类型枚举
 const MenuType = {
@@ -14,7 +14,6 @@ const MenuType = {
   SUB_ROUTE: 2,
   PERMISSION_BUTTON: 3,
 } as const;
-type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 /**
  * 按钮Modal组件Props
@@ -34,39 +33,36 @@ interface ButtonModalProps {
 const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel, loading = false }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
-
+  const nameRef = useRef<InputRef>(null);
   /**
    * 递归处理目录数据，只允许选择子菜单和子路由类型的节点
    */
-  const translateDirectory = useCallback(
-    (data: any[]): any[] => {
-      const loop = (items: any[]): any[] =>
-        items.map((item) => {
-          const iconNode = item.icon ? addIcon(item.icon) : null;
+  const translateDirectory = (data: any[]): any[] => {
+    const loop = (items: any[]): any[] =>
+      items.map((item) => {
+        const iconNode = item.icon ? addIcon(item.icon) : null;
 
-          const newItem: any = {
-            ...item,
-            value: item.id,
-            selectable: item.menuType === MenuType.SUB_MENU || item.menuType === MenuType.SUB_ROUTE, // 子菜单和子路由都可以选择
-            title: (
-              <Space>
-                {iconNode}
-                {t(item.title || item.name)}
-              </Space>
-            ),
-          };
+        const newItem: any = {
+          ...item,
+          value: item.id,
+          selectable: item.menuType === MenuType.SUB_MENU || item.menuType === MenuType.SUB_ROUTE, // 子菜单和子路由都可以选择
+          title: (
+            <Space>
+              {iconNode}
+              {t(item.title || item.name)}
+            </Space>
+          ),
+        };
 
-          if (Array.isArray(item.children) && item.children.length > 0) {
-            newItem.children = loop(item.children);
-          }
+        if (Array.isArray(item.children) && item.children.length > 0) {
+          newItem.children = loop(item.children);
+        }
 
-          return newItem;
-        });
+        return newItem;
+      });
 
-      return loop(data);
-    },
-    [t],
-  );
+    return loop(data);
+  };
 
   /**
    * 查询目录数据
@@ -88,7 +84,9 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
    * 初始化表单数据
    */
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     if (button) {
       form.setFieldsValue({
         name: button.name,
@@ -100,8 +98,11 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
       });
     } else {
       form.resetFields();
+      form.setFieldsValue({
+        status: true,
+      });
     }
-  }, [button, form, open]);
+  }, [button, open]);
 
   /**
    * 处理表单提交
@@ -119,12 +120,24 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
     }
   }, [form, onOk]);
 
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      nameRef.current?.focus();
+    }
+  };
+
+  const handleAfterClose = () => {
+    form.resetFields();
+  };
+
   return (
     <Modal
       title={button ? '编辑按钮' : '新增按钮'}
       open={open}
       width={600}
       confirmLoading={loading}
+      afterOpenChange={handleAfterOpenChange}
+      afterClose={handleAfterClose}
       footer={
         <div className="flex justify-end space-x-2">
           <Button onClick={onCancel}>取消</Button>
@@ -145,7 +158,7 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
                 { max: 50, message: '按钮名称不能超过50个字符' },
               ]}
             >
-              <Input placeholder="请输入按钮名称" autoFocus />
+              <Input placeholder="请输入按钮名称" ref={nameRef} autoFocus />
             </Form.Item>
 
             <Form.Item

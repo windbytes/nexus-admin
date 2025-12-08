@@ -252,27 +252,43 @@ export const webServiceApi = {
       formData.append('file', data.file);
       formData.append('name', data.name);
       formData.append('code', data.code);
-      if (data.description) formData.append('description', data.description);
-      if (data.category) formData.append('category', data.category);
-      if (data.status !== undefined) formData.append('status', String(data.status));
-      if (data.remark) formData.append('remark', data.remark);
-      if (data.tags) formData.append('tags', JSON.stringify(data.tags));
+      if (data.description) {
+        formData.append('description', data.description);
+      }
+      if (data.category) {
+        formData.append('category', data.category);
+      }
+      if (data.status !== undefined) {
+        formData.append('status', String(data.status));
+      }
+      if (data.remark) {
+        formData.append('remark', data.remark);
+      }
+      if (data.tags) {
+        formData.append('tags', JSON.stringify(data.tags));
+      }
 
-      const response = await HttpRequest.post<WebService>({
-        url: WebServiceAction.add,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await HttpRequest.post<WebService>(
+        {
+          url: WebServiceAction.add,
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+        { successMessageMode: 'none' }
+      );
       return response;
     }
 
     // 普通模式
-    const response = await HttpRequest.post<WebService>({
-      url: WebServiceAction.add,
-      data,
-    });
+    const response = await HttpRequest.post<WebService>(
+      {
+        url: WebServiceAction.add,
+        data,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 
@@ -287,27 +303,43 @@ export const webServiceApi = {
       formData.append('id', data.id || '');
       formData.append('name', data.name);
       formData.append('code', data.code);
-      if (data.description) formData.append('description', data.description);
-      if (data.category) formData.append('category', data.category);
-      if (data.status !== undefined) formData.append('status', String(data.status));
-      if (data.remark) formData.append('remark', data.remark);
-      if (data.tags) formData.append('tags', JSON.stringify(data.tags));
+      if (data.description) {
+        formData.append('description', data.description);
+      }
+      if (data.category) {
+        formData.append('category', data.category);
+      }
+      if (data.status !== undefined) {
+        formData.append('status', String(data.status));
+      }
+      if (data.remark) {
+        formData.append('remark', data.remark);
+      }
+      if (data.tags) {
+        formData.append('tags', JSON.stringify(data.tags));
+      }
 
-      const response = await HttpRequest.post<WebService>({
-        url: WebServiceAction.update,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await HttpRequest.post<WebService>(
+        {
+          url: WebServiceAction.update,
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+        { successMessageMode: 'none' }
+      );
       return response;
     }
 
     // 普通模式
-    const response = await HttpRequest.post<WebService>({
-      url: WebServiceAction.update,
-      data,
-    });
+    const response = await HttpRequest.post<WebService>(
+      {
+        url: WebServiceAction.update,
+        data,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 

@@ -1,6 +1,7 @@
-import { HttpRequest } from '@/utils/request';
-import type { RoleMenu, RoleModel, RoleSearchParams, UserSearchParams } from './type';
 import type { PageResult } from '@/types/global';
+import { HttpRequest } from '@/utils/request';
+import type { UserModel } from '../user/type';
+import type { RoleMenu, RoleModel, RoleSearchParams, UserSearchParams } from './type';
 
 /**
  * 枚举角色相关的api
@@ -161,7 +162,7 @@ export interface IRoleService {
    * @param params 用户查询参数和分页参数
    * @returns 结果
    */
-  getRoleUser(roleId: string, params: UserSearchParams): Promise<Record<string, any>>;
+  getRoleUser(roleId: string, params: UserSearchParams): Promise<PageResult<UserModel>>;
 
   /**
    * 获取不在该角色下的所有可用用户，包括分页结果
@@ -169,7 +170,7 @@ export interface IRoleService {
    * @param params 用户查询参数和分页参数
    * @returns 结果
    */
-  getUserNotInRoleByPage(roleId: string, params: UserSearchParams): Promise<Record<string, any>>;
+  getUserNotInRoleByPage(roleId: string, params: UserSearchParams): Promise<PageResult<UserModel>>;
 
   /**
    * 校验角色编码是否存在
@@ -197,7 +198,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
   /**
@@ -213,7 +214,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
   /**
@@ -229,7 +230,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
 
@@ -303,7 +304,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
   /**
@@ -333,7 +334,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
   /**
@@ -342,7 +343,7 @@ export const roleService: IRoleService = {
    * @param params 用户查询参数和分页参数
    * @returns 结果
    */
-  async getRoleUser(roleId: string, params: UserSearchParams): Promise<Record<string, any>> {
+  async getRoleUser(roleId: string, params: UserSearchParams): Promise<PageResult<UserModel>> {
     return await HttpRequest.post(
       {
         url: RoleApi.getRoleUser,
@@ -350,7 +351,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
 
@@ -360,7 +361,7 @@ export const roleService: IRoleService = {
    * @param params 用户查询参数和分页参数
    * @returns 结果
    */
-  async getUserNotInRoleByPage(roleId: string, params: UserSearchParams): Promise<Record<string, any>> {
+  async getUserNotInRoleByPage(roleId: string, params: UserSearchParams): Promise<PageResult<UserModel>> {
     return await HttpRequest.post(
       {
         url: RoleApi.getUserNotInRoleByPage,
@@ -368,7 +369,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
   /**
@@ -384,7 +385,7 @@ export const roleService: IRoleService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
   },
 };

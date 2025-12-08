@@ -1,13 +1,13 @@
-import { usePermission } from '@/hooks/usePermission';
-import type { MenuModel } from '@/services/system/menu/type';
-import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
-import { addIcon } from '@/utils/optimized-icons';
 import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Card, Empty, Input, Space, Spin, Tag, Tree } from 'antd';
 import type React from 'react';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePermission } from '@/hooks/usePermission';
+import type { MenuModel } from '@/services/system/menu/type';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { addIcon } from '@/utils/optimized-icons';
 import ButtonModal from './ButtonModal';
 
 // 菜单类型枚举
@@ -57,7 +57,11 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
   /**
    * 查询菜单目录数据
    */
-  const { data: allDirectoryData, isLoading: menuLoading, refetch } = useQuery({
+  const {
+    data: allDirectoryData,
+    isLoading: menuLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['sys_menu_directory'],
     queryFn: async () => {
       return await permissionButtonService.getButtonList({ name: searchText });
@@ -87,11 +91,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
               <Space>
                 {iconNode}
                 {t(item.title || item.name)}
-                {item.menuType === MenuType.PERMISSION_BUTTON && (
-                  <Tag color="blue">
-                    按钮
-                  </Tag>
-                )}
+                {item.menuType === MenuType.PERMISSION_BUTTON && <Tag color="blue">按钮</Tag>}
               </Space>
             ),
             data: item.menuType === MenuType.PERMISSION_BUTTON ? item : null,
@@ -107,7 +107,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
 
       return loop(data);
     },
-    [t],
+    [t]
   );
 
   /**
@@ -150,7 +150,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
         onSelectButton(null);
       }
     },
-    [onSelectButton],
+    [onSelectButton]
   );
 
   /**
@@ -176,7 +176,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
     (formData: any) => {
       saveButtonMutation.mutate(formData);
     },
-    [saveButtonMutation],
+    [saveButtonMutation]
   );
 
   /**
@@ -191,7 +191,9 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
    * 构建树形数据
    */
   const treeData = useMemo(() => {
-    if (!allDirectoryData) return [];
+    if (!allDirectoryData) {
+      return [];
+    }
 
     // 直接使用菜单数据构建树形结构，后端返回的数据已经是树形结构
     return translateDirectory(allDirectoryData);
@@ -232,7 +234,13 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
       }
     >
       <Space.Compact>
-        <Input placeholder='请输入按钮名称' value={searchText} onChange={(e) => setSearchText(e.target.value)} allowClear />
+        <Input
+          placeholder="请输入按钮名称"
+          autoFocus
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          allowClear
+        />
         <Button type="primary" icon={<SearchOutlined />} onClick={() => handleSearch(searchText)} />
       </Space.Compact>
 

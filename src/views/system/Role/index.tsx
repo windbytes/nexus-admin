@@ -1,10 +1,10 @@
-import { roleService } from '@/services/system/role/roleApi';
-import type { RoleSearchParams, RoleState } from '@/services/system/role/type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, type TableProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useReducer, useState } from 'react';
+import { roleService } from '@/services/system/role/roleApi';
+import type { RoleSearchParams, RoleState } from '@/services/system/role/type';
 import RoleMenuDrawer from './AssignRoleMenuDrawer';
 import RoleUserDrawer from './AssignRoleUserDrawer';
 import RoleActionButtons from './RoleActionButtons';
@@ -18,7 +18,6 @@ import getRoleTableColumns from './RoleTableColumns';
  * @returns
  */
 const Role: React.FC = () => {
-
   // 定义状态（合并的状态）
   const [state, dispatch] = useReducer(
     (prev: RoleState, action: Partial<RoleState>) => ({
@@ -209,7 +208,7 @@ const Role: React.FC = () => {
         {/* 菜单检索条件栏 */}
         <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
         {/* 查询表格 */}
-        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }} >
+        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
           {/* 操作按钮 */}
           <RoleActionButtons
             onAddRoleClick={onAddRoleClick}

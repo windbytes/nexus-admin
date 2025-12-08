@@ -1,6 +1,6 @@
 import { Button, Form, Input, type InputRef, Select, Space, Switch } from 'antd';
 import type React from 'react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import ChunkedUpload, { type ChunkedUploadRef } from '@/components/FileUpload/ChunkedUpload';
 import DragModal from '@/components/modal/DragModal';
 import type { DatabaseDriver, DriverFormData } from '@/services/resource/database/driverApi';
@@ -22,39 +22,31 @@ interface DriverModalProps {
  */
 const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, initialValues, onOk, onCancel }) => {
   const [form] = Form.useForm();
-  const [uploadedFilePath, setUploadedFilePath] = useState<string>('');
-  const [uploadedFileName, setUploadedFileName] = useState<string>('');
-  const [uploadedFileSize, setUploadedFileSize] = useState<number>(0);
   const chunkedUploadRef = useRef<ChunkedUploadRef>(null);
   const sourceNameRef = useRef<InputRef>(null);
 
-  // 初始化表单数据（由于使用了 destroyOnHidden，每次打开都是新组件，state 初始值已正确）
+  // 监听文件名用于显示
+  const fileName = Form.useWatch('fileName', form);
+
+  // 初始化表单数据
   useEffect(() => {
     if (!open) {
       return;
     }
+
     if (initialValues) {
-      form.setFieldsValue(initialValues);
-      setUploadedFilePath(initialValues.filePath || '');
-      setUploadedFileName(initialValues.fileName || '');
-      setUploadedFileSize(initialValues.fileSize || 0);
+      form.setFieldsValue({
+        ...initialValues,
+        status: initialValues.status ?? true,
+      });
     } else {
       form.resetFields();
-      setUploadedFilePath('');
-      setUploadedFileName('');
-      setUploadedFileSize(0);
+      form.setFieldsValue({
+        status: true,
+        databaseType: 'MySQL',
+      });
     }
   }, [open, initialValues, form]);
-
-  /**
-   * 弹窗打开关闭的回调
-   * @param open 弹窗是否打开
-   */
-  const handleAfterOpenChange = (open: boolean) => {
-    if (open) {
-      sourceNameRef.current?.focus();
-    }
-  };
 
   /**
    * 确认回调
@@ -64,7 +56,8 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
       const values = await form.validateFields();
 
       // 如果是新增，必须上传文件
-      if (!initialValues?.id && !uploadedFilePath) {
+      const currentFilePath = form.getFieldValue('filePath');
+      if (!initialValues?.id && !currentFilePath) {
         form.setFields([
           {
             name: 'file',
@@ -77,9 +70,6 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
       const submitData: DriverFormData = {
         ...values,
         id: initialValues?.id,
-        filePath: uploadedFilePath || initialValues?.filePath,
-        fileName: uploadedFileName || initialValues?.fileName,
-        fileSize: uploadedFileSize || initialValues?.fileSize,
         status: Boolean(values.status),
       };
 
@@ -98,42 +88,40 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
    * 取消回调
    */
   const handleCancel = async () => {
-    // 如果已上传文件但未提交，删除已上传的文件
-    if (uploadedFilePath && !initialValues?.id) {
-      try {
-        // 取消上传并清理文件
-        if (chunkedUploadRef.current) {
-          await chunkedUploadRef.current.cancelUpload();
-        }
-      } catch (error) {
-        console.error('清理上传文件失败:', error);
-      }
-    } else if (uploadedFilePath && initialValues?.id) {
-      // 如果是编辑模式，只清理新上传的文件
+    const currentFilePath = form.getFieldValue('filePath');
+
+    // 如果已上传文件但未提交，或者编辑时上传了新文件，需要清理
+    // 只有当当前路径存在，且（没有初始ID 或者 当前路径不等于初始路径）时才清理
+    const shouldCleanup = currentFilePath && (!initialValues?.id || currentFilePath !== initialValues.filePath);
+
+    if (shouldCleanup) {
       try {
         if (chunkedUploadRef.current) {
-          await chunkedUploadRef.current.cleanupUploadedFile();
+          // 如果没有ID（新增），取消上传
+          // 如果有ID（编辑），清理新上传的文件
+          if (!initialValues?.id) {
+            await chunkedUploadRef.current.cancelUpload();
+          } else {
+            await chunkedUploadRef.current.cleanupUploadedFile();
+          }
         }
       } catch (error) {
         console.error('清理上传文件失败:', error);
       }
     }
 
-    form.resetFields();
-    setUploadedFilePath('');
-    setUploadedFileName('');
-    setUploadedFileSize(0);
     onCancel();
   };
 
   /**
    * 文件上传成功回调
    */
-  const handleUploadSuccess = (filePath: string, fileName: string, fileSize: number) => {
-    setUploadedFilePath(filePath);
-    setUploadedFileName(fileName);
-    setUploadedFileSize(fileSize);
-    form.setFieldValue('fileName', fileName);
+  const handleUploadSuccess = (path: string, name: string, size: number) => {
+    form.setFieldsValue({
+      filePath: path,
+      fileName: name,
+      fileSize: size,
+    });
     // 清除文件上传错误
     form.setFields([
       {
@@ -148,6 +136,22 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
    */
   const handleUploadError = (error: Error) => {
     console.error('文件上传失败:', error);
+    form.setFields([
+      {
+        name: 'file',
+        errors: [`文件上传失败: ${error.message}`],
+      },
+    ]);
+  };
+
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      sourceNameRef.current?.focus();
+    }
+  };
+
+  const handleAfterClose = () => {
+    form.resetFields();
   };
 
   return (
@@ -157,6 +161,9 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
       open={open}
       onCancel={handleCancel}
       width={800}
+      destroyOnHidden={true}
+      afterClose={handleAfterClose}
+      afterOpenChange={handleAfterOpenChange}
       footer={
         <Space>
           <Button onClick={handleCancel}>取消</Button>
@@ -166,18 +173,19 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
         </Space>
       }
       maskClosable={false}
-      afterOpenChange={handleAfterOpenChange}
     >
-      <Form
-        form={form}
-        layout="horizontal"
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 18 }}
-        initialValues={{
-          status: true,
-          databaseType: 'MySQL',
-        }}
-      >
+      <Form form={form} layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
+        {/* 隐藏字段存储文件信息 */}
+        <Form.Item name="filePath" hidden>
+          <Input />
+        </Form.Item>
+        <Form.Item name="fileName" hidden>
+          <Input />
+        </Form.Item>
+        <Form.Item name="fileSize" hidden>
+          <Input />
+        </Form.Item>
+
         <Form.Item
           name="name"
           label="驱动名称"
@@ -186,7 +194,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
             { max: 100, message: '驱动名称不能超过100个字符' },
           ]}
         >
-          <Input autoComplete="off" placeholder="例如：MySQL 8.0 驱动" ref={sourceNameRef} />
+          <Input autoComplete="off" ref={sourceNameRef} placeholder="例如：MySQL 8.0 驱动" />
         </Form.Item>
 
         <Form.Item name="databaseType" label="数据库类型" rules={[{ required: true, message: '请选择数据库类型' }]}>
@@ -226,14 +234,22 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
           rules={initialValues?.id ? [] : [{ required: true, message: '请上传驱动文件' }]}
         >
           <div>
-            {uploadedFileName && (
-              <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded">
-                <span className="text-green-600">已上传: {uploadedFileName}</span>
-              </div>
-            )}
-            {initialValues?.fileName && !uploadedFileName && (
-              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded">
-                <span className="text-blue-600">当前文件: {initialValues.fileName}</span>
+            {fileName && (
+              <div
+                className={`mb-2 p-2 rounded border ${
+                  initialValues?.id && fileName === initialValues.fileName
+                    ? 'bg-blue-50 border-blue-200'
+                    : 'bg-green-50 border-green-200'
+                }`}
+              >
+                <span
+                  className={
+                    initialValues?.id && fileName === initialValues.fileName ? 'text-blue-600' : 'text-green-600'
+                  }
+                >
+                  {initialValues?.id && fileName === initialValues.fileName ? '当前文件: ' : '已上传: '}
+                  {fileName}
+                </span>
               </div>
             )}
             <ChunkedUpload

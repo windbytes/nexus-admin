@@ -1,6 +1,3 @@
-import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
-import { menuService } from '@/services/system/menu/menuApi';
-import { addIcon } from '@/utils/optimized-icons';
 import {
   CloseOutlined,
   MinusCircleOutlined,
@@ -16,17 +13,20 @@ import {
   Form,
   Input,
   InputNumber,
+  type InputRef,
   Radio,
+  type RadioChangeEvent,
   Space,
   Switch,
   Tooltip,
   TreeSelect,
-  type InputRef,
 } from 'antd';
-import type { String } from 'lodash';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
+import { menuService } from '@/services/system/menu/menuApi';
+import { addIcon } from '@/utils/optimized-icons';
 
 // 菜单类型枚举
 const MenuType = {
@@ -37,9 +37,19 @@ const MenuType = {
 } as const;
 type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
+// 目录项接口
+interface DirectoryItem {
+  id: string;
+  title: string;
+  icon?: string;
+  children?: DirectoryItem[];
+  menuType: number;
+  [key: string]: any;
+}
+
 // 菜单数据类型
 export interface MenuData {
-  id?: String;
+  id?: string;
   menuType: MenuType;
   name: string;
   parentId?: string;
@@ -59,20 +69,41 @@ export interface MenuData {
   perms?: string;
 }
 
+export type MenuInfoDrawerProps = {
+  open: boolean;
+  // 操作
+  operation: string;
+  onClose: (open: boolean, operation: string) => void;
+  /**
+   * 当前选中的菜单
+   */
+  menu?: MenuData;
+  /**
+   * 复制的菜单数据（用于复制功能）
+   */
+  copiedMenuData?: MenuData;
+
+  /**
+   * 点击确定
+   */
+  onOk: (menu: MenuData) => void;
+};
+
+// 静态样式对象，避免重复创建
+const TREE_SELECT_STYLES = { popup: { root: { maxHeight: 400, overflow: 'auto' } } };
+const ICON_PANEL_CLASSNAMES = {
+  root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
+};
+const DRAWER_CLASSNAMES = { footer: 'flex justify-end' };
+
 /**
  * 菜单信息抽屉
- * @param open 是否打开
- * @param operation 操作
- * @param onClose 关闭抽屉
- * @param menu 当前选中的菜单
- * @param onOk 点击确定
- * @returns 菜单信息抽屉
  */
 const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose, menu, copiedMenuData, onOk }) => {
   const [form] = Form.useForm();
   const nameRef = useRef<InputRef>(null);
-  const [menuType, setMenuType] = useState<MenuType>(MenuType.SUB_MENU);
   const { t } = useTranslation();
+  const menuType = Form.useWatch('menuType', form);
 
   // 初始化表单数据
   useEffect(() => {
@@ -82,23 +113,27 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
     if (operation === 'add' && copiedMenuData) {
       // 如果是新增操作且有复制的数据，使用复制的数据
-      setMenuType(copiedMenuData.menuType);
       form.setFieldsValue(copiedMenuData);
     } else if (menu && operation !== 'add') {
       // 如果是编辑操作，使用当前菜单数据
-      setMenuType(menu.menuType);
       form.setFieldsValue(menu);
     } else {
-      // 普通新增操作，重置表单
-      form.resetFields();
-      setMenuType(MenuType.SUB_MENU);
+      // 普通新增操作
+      form.setFieldsValue({
+        menuType: MenuType.SUB_MENU,
+        route: false,
+        hidden: false,
+        internalOrExternal: false,
+        status: true,
+        parentId: menu?.id,
+      });
     }
-  }, [menu, copiedMenuData, operation, form, open]);
+  }, [open]);
 
   // 递归处理目录数据，对 title 进行国际化
   const translateDirectory = useCallback(
-    (data: any[], filterFn?: (item: any) => boolean): any[] => {
-      const loop = (items: any[]): any[] =>
+    (data: DirectoryItem[], filterFn?: (item: DirectoryItem) => boolean): any[] => {
+      const loop = (items: DirectoryItem[]): any[] =>
         items
           .map((item) => {
             const shouldKeep = filterFn ? filterFn(item) : true;
@@ -132,7 +167,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
       return loop(data);
     },
-    [t, menuType]
+    [menuType]
   );
 
   // 使用 useQuery 获取目录数据
@@ -146,7 +181,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 
   // 根据当前菜单类型进行过滤并国际化
   const directoryFilter = useCallback(
-    (item: any) => {
+    (item: DirectoryItem) => {
       if (menuType === MenuType.PERMISSION_BUTTON) {
         return item.menuType !== MenuType.PERMISSION_BUTTON;
       }
@@ -157,15 +192,14 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
   );
 
   const directoryData = useMemo(() => {
-    const di = open ? translateDirectory(allDirectoryData || [], directoryFilter) : [];
-    console.log(di);
-    return di;
-  }, [allDirectoryData, menuType, open]);
+    // 确保 allDirectoryData 符合 DirectoryItem[] 类型，这里假设 API 返回符合预期
+    return open ? translateDirectory((allDirectoryData as unknown as DirectoryItem[]) || [], directoryFilter) : [];
+  }, [allDirectoryData, translateDirectory, directoryFilter, open]);
 
   /**
    * 提交表单
    */
-  const onSubmit = useCallback(async () => {
+  const onSubmit = async () => {
     try {
       const values = await form.validateFields();
       const formData: MenuData = {
@@ -175,71 +209,63 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         routeQuery: values.routeQuery ? values.routeQuery : {},
       };
       onOk(formData);
-    } catch (errorInfo: any) {
-      const firstErrorField = errorInfo.errorFields?.[0]?.name;
+    } catch (errorInfo) {
+      // 安全处理 errorInfo
+      const firstErrorField = (errorInfo as any).errorFields?.[0]?.name;
       if (firstErrorField) {
         form.scrollToField(firstErrorField);
         form.focusField(firstErrorField);
       }
     }
-  }, [form, onOk]);
+  };
 
   // 处理菜单类型变更
-  const handleMenuTypeChange = useCallback(
-    (value: MenuType) => {
-      setMenuType(value);
-      requestAnimationFrame(() => {
-        if (value === MenuType.SUB_ROUTE) {
-          form.setFieldsValue({ route: true });
-        }
-        nameRef.current?.focus();
-      });
-    },
-    [form, nameRef]
-  );
+  const handleMenuTypeChange = (e: RadioChangeEvent) => {
+    const value = e.target.value;
+    form.setFieldsValue({ menuType: value });
+    requestAnimationFrame(() => {
+      if (value === MenuType.SUB_ROUTE) {
+        form.setFieldsValue({ route: true });
+      }
+      nameRef.current?.focus();
+    });
+  };
 
   // 选择图标
-  const handleIconSelect = useCallback((icon: string) => {
+  const handleIconSelect = (icon: string) => {
     if (icon) {
-      form.setFieldsValue({ icon });
+      form.setFieldsValue({ originalIcon: icon });
     }
-  }, []);
+  };
 
   // 弹窗打开后的处理
-  const handleAfterOpenChange = useCallback((open: boolean) => {
+  const handleAfterOpenChange = (open: boolean) => {
     if (open) {
       nameRef.current?.focus();
+    } else {
+      form.resetFields();
     }
-  }, []);
+  };
 
   // 根据菜单类型判断是否显示路由相关字段
   const showRouteFields = useMemo(() => menuType !== MenuType.PERMISSION_BUTTON, [menuType]);
 
-  // 表单初始值
-  const initialFormValues = useMemo(() => {
-    return {
-      menuType: MenuType.SUB_MENU,
-      route: false,
-      hidden: false,
-      internalOrExternal: false,
-      status: true,
-      parentId: menu?.id,
-    };
-  }, [menu]);
+  // 关闭处理
+  const handleClose = () => onClose(false, 'view');
 
   return (
     <Drawer
       title={`${menu ? '编辑' : '新增'}菜单`}
       open={open}
       size={800}
-      onClose={() => onClose(false, 'view')}
-      classNames={{ footer: 'flex justify-end' }}
+      onClose={handleClose}
+      classNames={DRAWER_CLASSNAMES}
       closeIcon={false}
-      extra={<Button type="text" icon={<CloseOutlined />} onClick={() => onClose(false, 'view')} />}
+      extra={<Button type="text" icon={<CloseOutlined />} onClick={handleClose} />}
       afterOpenChange={handleAfterOpenChange}
       footer={
         <Space>
-          <Button type="default" onClick={() => onClose(false, 'view')}>
+          <Button type="default" onClick={handleClose}>
             取消
           </Button>
           <Button type="primary" onClick={onSubmit}>
@@ -248,12 +274,12 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         </Space>
       }
     >
-      <Form form={form} initialValues={initialFormValues} labelCol={{ span: 4 }}>
+      <Form form={form} labelCol={{ span: 4 }}>
         <Form.Item name="id" hidden>
           <Input />
         </Form.Item>
         <Form.Item name="menuType" label="菜单类型" rules={[{ required: true, message: '请选择菜单类型!' }]}>
-          <Radio.Group buttonStyle="solid" onChange={(e) => handleMenuTypeChange(e.target.value)}>
+          <Radio.Group buttonStyle="solid" onChange={handleMenuTypeChange}>
             <Radio.Button value={MenuType.SUB_MENU}>子菜单</Radio.Button>
             <Radio.Button value={MenuType.SUB_ROUTE}>子路由</Radio.Button>
             {/* <Radio.Button value={MenuType.PERMISSION_BUTTON}>权限按钮</Radio.Button> */}
@@ -278,7 +304,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
               showSearch
               loading={isLoading}
               style={{ width: '100%' }}
-              styles={{ popup: { root: { maxHeight: 400, overflow: 'auto' } } }}
+              styles={TREE_SELECT_STYLES}
               placeholder="请选择上级目录"
               treeData={directoryData}
             />
@@ -334,14 +360,12 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
             <Form.Item name="originalIcon" label="菜单图标">
               <Space.Compact className="w-full">
                 <Input allowClear placeholder="请选择菜单图标" autoComplete="off" />
-                <Dropdown 
-                  trigger={['click']} 
-                  placement="bottom" 
+                <Dropdown
+                  trigger={['click']}
+                  placement="bottom"
                   popupRender={() => <OptimizedIconPanel onSelect={handleIconSelect} />}
-                  classNames={{
-                    root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
-                  }}
-                  >
+                  classNames={ICON_PANEL_CLASSNAMES}
+                >
                   <Button icon={<SettingOutlined className="cursor-pointer" />} />
                 </Dropdown>
               </Space.Compact>
@@ -349,7 +373,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           </>
         )}
         <Form.Item name="sortNo" label="排序">
-          <InputNumber min={0} autoComplete="off" mode='spinner'/>
+          <InputNumber min={0} autoComplete="off" mode="spinner" />
         </Form.Item>
 
         {/* 添加路由参数配置项目 */}
@@ -423,23 +447,3 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
 };
 
 export default MenuInfoDrawer;
-
-export type MenuInfoDrawerProps = {
-  open: boolean;
-  // 操作
-  operation: string;
-  onClose: (open: boolean, operation: string) => void;
-  /**
-   * 当前选中的菜单
-   */
-  menu?: MenuData;
-  /**
-   * 复制的菜单数据（用于复制功能）
-   */
-  copiedMenuData?: MenuData;
-
-  /**
-   * 点击确定
-   */
-  onOk: (menu: MenuData) => void;
-};

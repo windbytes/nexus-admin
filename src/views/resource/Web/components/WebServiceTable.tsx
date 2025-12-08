@@ -1,9 +1,11 @@
-import type { WebService } from '@/services/resource/webservice/webServiceApi';
 import { DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons';
-import type { TablePaginationConfig, TableProps } from 'antd';
+import type { TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import useTableScroll from '@/hooks/useTableScroll';
+import type { WebService } from '@/services/resource/webservice/webServiceApi';
+import '@/styles/table.full.scss';
 
 interface WebServiceTableProps {
   data: WebService[];
@@ -35,9 +37,15 @@ const getInputTypeTag = (inputType: string) => {
  * 格式化文件大小
  */
 const formatFileSize = (bytes?: number): string => {
-  if (!bytes) return '-';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+  if (!bytes) {
+    return '-';
+  }
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(2)} KB`;
+  }
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
@@ -57,6 +65,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
     onStatusChange,
     pagination,
   }) => {
+    const { tableWrapperRef, scrollConfig } = useTableScroll('max-content');
     // 表格列配置
     const columns: TableProps<WebService>['columns'] = [
       {
@@ -118,7 +127,7 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         key: 'operationCount',
         width: 100,
         align: 'center',
-        render: (operations: any[]) => <Tag color="cyan">{operations?.length || 0}</Tag>,
+        render: (operations: string[]) => <Tag color="cyan">{operations.length || 0}</Tag>,
       },
       {
         title: '文件信息',
@@ -162,7 +171,9 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
         width: 100,
         align: 'center',
         render: (value: string) => {
-          if (!value) return '-';
+          if (!value) {
+            return '-';
+          }
           const colorMap: Record<string, string> = {
             soap: 'blue',
             rest: 'green',
@@ -266,17 +277,22 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
     };
 
     return (
-      <Table
-        bordered
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={pagination as TablePaginationConfig}
-        scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
-        size="middle"
-      />
+      <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+        <Table
+          bordered
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={pagination}
+          scroll={scrollConfig}
+          size="middle"
+          classNames={{
+            root: 'full-height-table',
+          }}
+        />
+      </div>
     );
   }
 );

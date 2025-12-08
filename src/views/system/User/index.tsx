@@ -1,8 +1,8 @@
-import type { UserModel } from '@/services/system/user/type';
-import { userService } from '@/services/system/user/userApi';
 import { useQuery } from '@tanstack/react-query';
 import { isEqual } from 'lodash-es';
 import { useCallback, useReducer, useState } from 'react';
+import type { UserModel } from '@/services/system/user/type';
+import { userService } from '@/services/system/user/userApi';
 import {
   Operation,
   SearchForm,
@@ -70,7 +70,6 @@ const User = () => {
     queryFn: () => userService.queryUserListPage({ ...searchParams }),
   });
 
-
   // 成功回调
   const handleSuccess = useCallback(() => {
     dispatch({
@@ -82,30 +81,20 @@ const User = () => {
   }, [refetch]);
 
   // Mutations
-  const {
-    logicDeleteUserMutation,
-    updateStatusMutation,
-    handleSubmit,
-  } = useUserMutations({
+  const { logicDeleteUserMutation, updateStatusMutation, handleSubmit } = useUserMutations({
     currentRow: state.currentRow,
     onSuccess: handleSuccess,
   });
 
   // 表格操作
-  const {
-    handleEdit,
-    handleDetail,
-    handleAdd,
-    handleStatusChange,
-    getMoreActions,
-    handleBatchDelete,
-  } = useUserTableActions({
-    permissions,
-    dispatch,
-    logicDeleteUserMutation,
-    refetch,
-    updateStatusMutation,
-  });
+  const { handleEdit, handleDetail, handleAdd, handleStatusChange, getMoreActions, handleBatchDelete } =
+    useUserTableActions({
+      permissions,
+      dispatch,
+      logicDeleteUserMutation,
+      refetch,
+      updateStatusMutation,
+    });
 
   // 处理搜索
   const handleSearch = useCallback(
@@ -127,16 +116,13 @@ const User = () => {
   );
 
   // 处理分页变化
-  const handlePageChange = useCallback(
-    (page: number, pageSize?: number) => {
-      setSearchParams((prev) => ({
-        ...prev,
-        pageNum: page,
-        pageSize: pageSize || prev.pageSize,
-      }));
-    },
-    []
-  );
+  const handlePageChange = useCallback((page: number, pageSize?: number) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      pageNum: page,
+      pageSize: pageSize || prev.pageSize,
+    }));
+  }, []);
 
   // 处理行选择变化
   const handleSelectionChange = useCallback((keys: string[], rows: UserModel[]) => {
@@ -204,7 +190,6 @@ const User = () => {
           searchParams={searchParams}
           total={result?.totalRow || 0}
           selectedRowKeys={selectedRowKeys}
-          selectedRows={selectedRows}
           onSelectionChange={handleSelectionChange}
           onPageChange={handlePageChange}
           onEdit={handleEdit}

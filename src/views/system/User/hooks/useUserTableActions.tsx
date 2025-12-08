@@ -1,11 +1,11 @@
-import { App } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Icon } from '@iconify/react';
+import type { MenuProps } from 'antd';
+import { App } from 'antd';
+import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MyIcon } from '@/components/MyIcon';
 import type { UserModel } from '@/services/system/user/type';
-import { useTranslation } from 'react-i18next';
-import { useCallback } from 'react';
-import type { MenuProps } from 'antd';
 
 interface UseUserTableActionsProps {
   permissions: ReturnType<typeof import('./useUserPermissions').useUserPermissions>;
@@ -77,9 +77,7 @@ export const useUserTableActions = ({
       }
 
       const newStatus = checked ? 1 : 0;
-      updateStatusMutation.mutate(
-        { ids: [record.id], status: newStatus },
-      );
+      updateStatusMutation.mutate({ ids: [record.id], status: newStatus });
     },
     [permissions.canUpdateStatus, modal, message, updateStatusMutation, refetch]
   );
@@ -90,7 +88,7 @@ export const useUserTableActions = ({
       {
         key: 'updatePwd',
         label: '修改密码',
-        icon: <Icon icon="fluent:password-reset-48-regular" className="text-xl! block text-orange-300" />,
+        icon: <Icon icon="fluent:password-reset-48-regular" className="text-sm! block text-orange-300" />,
         disabled: !permissions.canUpdatePassword,
         onClick: () => {
           if (!permissions.canUpdatePassword) {
@@ -109,7 +107,7 @@ export const useUserTableActions = ({
       {
         key: 'assignRole',
         label: '分配角色',
-        icon: <MyIcon type="nexus-assigned" className="text-xl! block" />,
+        icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
         disabled: !permissions.canAssignRole,
         onClick: () => {
           if (!permissions.canAssignRole) {
@@ -128,7 +126,7 @@ export const useUserTableActions = ({
       {
         key: 'operation',
         label: '操作记录',
-        icon: <Icon icon="fluent-color:history-48" className="text-xl! block" />,
+        icon: <Icon icon="fluent-color:history-48" className="text-sm! block" />,
         disabled: !permissions.canViewOperationLog,
         onClick: () => {
           if (!permissions.canViewOperationLog) {
@@ -147,7 +145,7 @@ export const useUserTableActions = ({
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-xl! block text-[#ff4d4f]!" />,
+        icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]!" />,
         disabled: !permissions.canDeleteUser,
         onClick: () => {
           if (!permissions.canDeleteUser) {

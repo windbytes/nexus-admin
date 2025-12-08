@@ -4,18 +4,16 @@ import DragModal from '@/components/modal/DragModal';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleState } from '@/services/system/role/type';
 
-const RoleInfoModal: React.FC<RoleInfoModalProps> = ({
-  params,
-  onOk,
-  onCancel,
-}) => {
+const RoleInfoModal: React.FC<RoleInfoModalProps> = ({ params, onOk, onCancel }) => {
   // 表单实例
   const [form] = Form.useForm();
   const roleCodeRef = useRef<InputRef>(null);
   const { openEditModal, currentRow, action } = params;
 
   useEffect(() => {
-    if (!openEditModal) return;
+    if (!openEditModal) {
+      return;
+    }
     if (currentRow) {
       // 填充表单数据
       form.setFieldsValue(currentRow);
@@ -31,7 +29,7 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({
    */
   const onAfterOpenChange = (open: boolean) => {
     if (open) {
-      roleCodeRef.current?.focus();
+      roleCodeRef.current?.focus({ cursor: 'end' });
     }
   };
 
@@ -83,12 +81,7 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({
       onCancel={onCancel}
       afterOpenChange={onAfterOpenChange}
     >
-      <Form
-        form={form}
-        labelCol={{ span: 3 }}
-        initialValues={{ status: true }}
-        disabled={action === 'view'}
-      >
+      <Form form={form} labelCol={{ span: 3 }} initialValues={{ status: true }} disabled={action === 'view'}>
         <Form.Item name="id" hidden>
           <Input disabled />
         </Form.Item>
@@ -100,17 +93,9 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({
             { validator: checkUnique }, // 唯一性校验
           ]}
         >
-          <Input
-            ref={roleCodeRef}
-            placeholder="请输入角色编码"
-            autoComplete="off"
-          />
+          <Input ref={roleCodeRef} placeholder="请输入角色编码" autoComplete="off" />
         </Form.Item>
-        <Form.Item
-          name="roleName"
-          label="角色名称"
-          rules={[{ required: true, message: '请输入角色名称' }]}
-        >
+        <Form.Item name="roleName" label="角色名称" rules={[{ required: true, message: '请输入角色名称' }]}>
           <Input placeholder="请输入角色名称" autoComplete="off" />
         </Form.Item>
         <Form.Item name="roleType" label="角色类型">
@@ -122,11 +107,7 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({
             ]}
           />
         </Form.Item>
-        <Form.Item
-          name="status"
-          label="角色状态"
-          rules={[{ required: true, message: '请选择角色状态' }]}
-        >
+        <Form.Item name="status" label="角色状态" rules={[{ required: true, message: '请选择角色状态' }]}>
           <Switch checkedChildren="启用" unCheckedChildren="禁用" />
         </Form.Item>
         <Form.Item name="remark" label="角色描述">

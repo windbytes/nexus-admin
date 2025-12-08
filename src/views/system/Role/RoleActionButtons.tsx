@@ -44,7 +44,7 @@ const RoleActionButtons: React.FC<RoleActionButtonsProps> = ({ onAddRoleClick, s
       <Button
         type="default"
         danger
-        icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-xl! block text-[#ff4d4f]!" />}
+        icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]!" />}
         disabled={selRows.length === 0}
         onClick={onBatchDelete}
       >

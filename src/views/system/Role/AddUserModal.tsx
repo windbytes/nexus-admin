@@ -1,11 +1,11 @@
+import { ManOutlined, RedoOutlined, SearchOutlined, WomanOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { isEqual } from 'lodash-es';
-import { SearchOutlined, RedoOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Form, Input, type InputRef, Row, Select, Space, Table, type TableProps } from 'antd';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { UserSearchParams } from '@/services/system/role/type';
+import { isEqual } from 'lodash-es';
+import { useCallback, useRef, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import { roleService } from '@/services/system/role/roleApi';
+import type { UserSearchParams } from '@/services/system/role/type';
 
 /**
  * 添加用户弹窗
@@ -41,11 +41,6 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
       setSelectedRows([]);
     },
   });
-
-  useEffect(() => {
-    if (!open) return;
-    ref.current?.focus();
-  }, [open]);
 
   /**
    * 表单检索
@@ -150,8 +145,21 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
     });
   };
 
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      ref.current?.focus();
+    }
+  };
+
   return (
-    <DragModal open={open} onCancel={onCancel} title="添加用户" width={{ xl: 800, xxl: 1000 }} onOk={handleOk}>
+    <DragModal
+      open={open}
+      onCancel={onCancel}
+      title="添加用户"
+      width={{ xl: 800, xxl: 1000 }}
+      onOk={handleOk}
+      afterOpenChange={handleAfterOpenChange}
+    >
       <Card>
         <Form form={form} onFinish={onFinish}>
           <Row gutter={12}>
@@ -209,12 +217,12 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
             showQuickJumper: true,
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
-            total: data?.total || 0,
+            total: data?.totalRow || 0,
             onChange(page, pageSize) {
               onPageSizeChange(page, pageSize);
             },
           }}
-          dataSource={data?.data || []}
+          dataSource={data?.records || []}
           rowSelection={rowSelection}
         />
       </Card>

@@ -1,6 +1,6 @@
-import type { MenuModel } from '@/services/system/menu/type';
 import type React from 'react';
 import { useCallback, useState } from 'react';
+import type { MenuModel } from '@/services/system/menu/type';
 import ButtonDetail from './ButtonDetail';
 import ButtonInterfacePermission from './ButtonInterfacePermission';
 import ButtonTree from './ButtonTree';
@@ -23,7 +23,7 @@ const PermissionButton: React.FC = () => {
 
   return (
     <div className="flex gap-2 h-full w-full">
-        {/* 左侧按钮树 */}
+      {/* 左侧按钮树 */}
       <ButtonTree onSelectButton={handleSelectButton} selectedButtonId={selectedButton ? selectedButton.id : ''} />
       <div className="flex flex-col flex-1 gap-2 h-full min-w-0">
         {/* 按钮详情 */}

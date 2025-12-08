@@ -1,11 +1,11 @@
-import useTableScroll from '@/hooks/useTableScroll';
-import type { UserModel } from '@/services/system/user/type';
+import type { MenuProps, TableProps } from 'antd';
 import { Table } from 'antd';
 import { memo, useMemo } from 'react';
-import type { MenuProps, TableProps } from 'antd';
-import { getColumns } from '../columns';
 import { useTranslation } from 'react-i18next';
+import useTableScroll from '@/hooks/useTableScroll';
+import type { UserModel } from '@/services/system/user/type';
 import { usePreferencesStore } from '@/stores/store';
+import { getColumns } from '../columns';
 
 interface UserTableProps {
   data: UserModel[];
@@ -16,7 +16,6 @@ interface UserTableProps {
   };
   total: number;
   selectedRowKeys: React.Key[];
-  selectedRows: UserModel[];
   onSelectionChange: (keys: string[], rows: UserModel[]) => void;
   onPageChange: (page: number, pageSize?: number) => void;
   onEdit: (record: UserModel) => void;
@@ -36,7 +35,6 @@ const UserTable = memo<UserTableProps>(
     searchParams,
     total,
     selectedRowKeys,
-    selectedRows,
     onSelectionChange,
     onPageChange,
     onEdit,
@@ -50,16 +48,7 @@ const UserTable = memo<UserTableProps>(
     const { scrollConfig, tableWrapperRef } = useTableScroll();
 
     const columns = useMemo(
-      () =>
-        getColumns(
-          onEdit,
-          onDetail,
-          t,
-          colorPrimary,
-          getMoreActions,
-          onStatusChange,
-          canUpdateStatus
-        ),
+      () => getColumns(onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus),
       [onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus]
     );
 
@@ -85,10 +74,7 @@ const UserTable = memo<UserTableProps>(
       [searchParams.pageNum, searchParams.pageSize, total, onPageChange]
     );
 
-    const rowClassName = useMemo(
-      () => (record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : ''),
-      []
-    );
+    const rowClassName = useMemo(() => (record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : ''), []);
 
     return (
       <div className="flex-1 min-h-0" ref={tableWrapperRef}>

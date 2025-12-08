@@ -1,10 +1,10 @@
-import DragModal from '@/components/modal/DragModal';
-import { Form, Input, Select, DatePicker, Upload, message } from 'antd';
-import { useEffect, useState } from 'react';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { DatePicker, Form, Input, message, Select, Upload } from 'antd';
 import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
 import type { UserModel } from '@/services/system/user/type';
 
 interface UserInfoModalProps {
