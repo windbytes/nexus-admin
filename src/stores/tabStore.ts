@@ -133,9 +133,14 @@ export const useTabStore = create<TabStore>()(
         if (targetTab) {
           // 保留目标tab和homePath的tab
           const homeTab = homePath ? tabs.find((tab) => tab.key === homePath) : null;
-          const newTabs = [targetTab];
+
+          let newTabs: TabItem[];
+
+          // 始终保持 homeTab 在第一个
           if (homeTab && homeTab.key !== targetKey) {
-            newTabs.push(homeTab);
+            newTabs = [homeTab, targetTab];
+          } else {
+            newTabs = [targetTab];
           }
 
           // 如果当前激活的tab不在保留的tab中，需要激活目标tab
@@ -178,13 +183,14 @@ export const useTabStore = create<TabStore>()(
         const { tabs, activeKey } = get();
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
         if (targetIndex >= 0 && targetIndex < tabs.length - 1) {
-          const newTabs = tabs.slice(0, targetIndex + 1);
+          let newTabs = tabs.slice(0, targetIndex + 1);
 
           // 如果homePath的tab在右侧被删除了，需要保留它
           if (homePath) {
             const homeTab = tabs.find((tab) => tab.key === homePath);
             if (homeTab && !newTabs.some((tab) => tab.key === homePath)) {
-              newTabs.push(homeTab);
+              // 始终保持 homeTab 在第一个
+              newTabs = [homeTab, ...newTabs];
             }
           }
 
