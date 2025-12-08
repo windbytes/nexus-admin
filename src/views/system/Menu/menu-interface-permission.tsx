@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReloadOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Card, Table, Button, Space, Tag, Tooltip, type TableProps, Input, Form, App, Select } from 'antd';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App, Button, Card, Form, Input, Select, Space, Table, type TableProps, Tag, Tooltip } from 'antd';
 import type React from 'react';
-import type { MenuModel } from '@/services/system/menu/type';
-import { menuService, type InterfacePermission } from '@/services/system/menu/menuApi';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePermission } from '@/hooks/usePermission';
+import { type InterfacePermission, menuService } from '@/services/system/menu/menuApi';
+import type { MenuModel } from '@/services/system/menu/type';
 
 // 组件状态类型 - 合并所有状态
 interface ComponentState {
@@ -18,6 +18,7 @@ interface ComponentState {
     path: string;
     method: string;
     name: string;
+    menuName?: string;
   };
   nextId: number;
   errors: {
@@ -76,7 +77,9 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
   } = useQuery({
     queryKey: ['menu-interface-permission', menu?.id, state.pagination.current, state.pagination.pageSize],
     queryFn: async () => {
-      if (!menu?.id) return { records: [], totalRow: 0, pageNumber: 1, pageSize: 10, totalPage: 0 };
+      if (!menu?.id) {
+        return { records: [], totalRow: 0, pageNumber: 1, pageSize: 10, totalPage: 0 };
+      }
       const response = await menuService.queryInterfacePermissions({
         menuId: menu.id,
         pageNumber: state.pagination.current,
@@ -180,7 +183,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
             editForm: { id: '', code: '', remark: '', path: '', method: '', name: '' },
             errors: {},
             // 移除临时行（以temp_开头的行）
-            permissionList: state.permissionList.filter(item => !item.id.startsWith('temp_')),
+            permissionList: state.permissionList.filter((item) => !item.id.startsWith('temp_')),
           });
           // 执行刷新
           refetch();
@@ -203,7 +206,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
         },
       });
     },
-    [state.pagination, updateState],
+    [state.pagination, updateState]
   );
 
   // 添加接口权限
@@ -228,6 +231,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
       path: '',
       method: 'GET',
       name: '',
+      menuName: '',
     };
 
     updateState({
@@ -255,7 +259,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
         errors: {},
       });
     },
-    [updateState],
+    [updateState]
   );
 
   // 取消编辑
@@ -277,7 +281,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
         });
       }
     },
-    [state.permissionList, updateState],
+    [state.permissionList, updateState]
   );
 
   // 确认编辑
@@ -344,7 +348,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
         editForm: { id: '', code: '', remark: '', path: '', method: '', name: '' },
       });
     },
-    [state.editForm, state.permissionList, state.nextId, updateState, clearErrors, savePermissionMutation],
+    [state.editForm, state.permissionList, state.nextId, updateState, clearErrors, savePermissionMutation]
   );
 
   // 删除接口权限
@@ -368,7 +372,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
         },
       });
     },
-    [state.permissionList, updateState, savePermissionMutation],
+    [state.permissionList, updateState, savePermissionMutation]
   );
 
   // 使用useMemo优化表格列定义，避免每次渲染都重新创建
@@ -569,21 +573,21 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
           return (
             <Space size="small">
               {hasEditPermission && (
-              <Tooltip title="编辑">
-                <Button type="link" icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)} />
-              </Tooltip>
+                <Tooltip title="编辑">
+                  <Button type="link" icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)} />
+                </Tooltip>
               )}
               {hasDeletePermission && (
-              <Tooltip title="删除">
-                <Button
-                  type="link"
-                  danger
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  onClick={() => handleDelete(record)}
-                  loading={savePermissionMutation.isPending}
-                />
-              </Tooltip>
+                <Tooltip title="删除">
+                  <Button
+                    type="link"
+                    danger
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    onClick={() => handleDelete(record)}
+                    loading={savePermissionMutation.isPending}
+                  />
+                </Tooltip>
               )}
             </Space>
           );
@@ -601,14 +605,14 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
       handleDelete,
       updateState,
       savePermissionMutation.isPending,
-    ],
+    ]
   );
 
   return (
     <Card
       className="flex-1 max-h-full flex flex-col min-w-0"
       title="接口权限列表"
-      styles={{ body: { flex: 1, maxHeight:0 } }}
+      styles={{ body: { flex: 1, maxHeight: 0 } }}
       extra={
         <Button
           color="default"
@@ -672,13 +676,13 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
                 {!hasMenuData && <span className="text-gray-400">📋 请先选择菜单</span>}
               </div>
               {hasAddPermission && (
-              <Button
-                type={buttonType}
-                style={{ width: '100%' }}
-                onClick={handleAdd}
-                disabled={buttonDisabled}
-                title={tooltipText}
-              >
+                <Button
+                  type={buttonType}
+                  style={{ width: '100%' }}
+                  onClick={handleAdd}
+                  disabled={buttonDisabled}
+                  title={tooltipText}
+                >
                   {buttonText}
                 </Button>
               )}

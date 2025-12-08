@@ -1,5 +1,3 @@
-import { MyIcon } from '@/components/MyIcon';
-import { usePermission } from '@/hooks/usePermission';
 import {
   ColumnHeightOutlined,
   PlusOutlined,
@@ -10,6 +8,8 @@ import {
 import { Icon } from '@iconify/react';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { MyIcon } from '@/components/MyIcon';
+import { usePermission } from '@/hooks/usePermission';
 
 interface TableActionButtonsProps {
   handleAdd: () => void;
@@ -41,7 +41,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'csv',
       label: '导出为CSV',
-      icon: <Icon icon="teenyicons:csv-outline" className="text-xl! block text-orange-400" />,
+      icon: <Icon icon="teenyicons:csv-outline" className="text-sm! block text-orange-400" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -52,7 +52,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'excel',
       label: '导出为Excel',
-      icon: <Icon icon="vscode-icons:file-type-excel" className="text-xl! block" />,
+      icon: <Icon icon="vscode-icons:file-type-excel" className="text-sm! block" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -63,7 +63,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'pdf',
       label: '导出为PDF',
-      icon: <Icon icon="material-icon-theme:pdf" className="text-xl! block" />,
+      icon: <Icon icon="material-icon-theme:pdf" className="text-sm! block" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -78,7 +78,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'assignRole',
       label: '批量分配角色',
-      icon: <MyIcon type="nexus-assigned" className="text-xl! block" />,
+      icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
       disabled: selectedRows.length === 0 || !canBatchAssignRole,
       onClick: () => {
         if (!canBatchAssignRole) {
@@ -97,7 +97,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'updateStatus',
       label: '批量更新状态',
-      icon: <Icon icon="fluent:status-24-regular" className="text-xl! block" />,
+      icon: <Icon icon="fluent:status-24-regular" className="text-sm! block" />,
       onClick: () => {
         if (!canBatchUpdateStatus) {
           modal.error({
@@ -115,7 +115,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'resetPassword',
       label: '批量重置密码',
-      icon: <Icon icon="hugeicons:reset-password" className="text-xl! block" />,
+      icon: <Icon icon="hugeicons:reset-password" className="text-sm! block" />,
       disabled: selectedRows.length === 0 || !canBatchResetPassword,
       onClick: () => {
         if (!canBatchResetPassword) {
@@ -137,7 +137,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'delete',
       label: '批量删除',
-      icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-xl! block text-[#ff4d4f]" />,
+      icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]" />,
       disabled: selectedRows.length === 0 || !canBatchDelete,
       onClick: () => {
         if (!canBatchDelete) {
@@ -179,7 +179,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               }
             }}
           >
-            <Button icon={<Icon icon="material-icon-theme:folder-import" className="text-xl! block" />}>
+            <Button icon={<Icon icon="material-icon-theme:folder-import" className="text-sm! block" />}>
               {t('common.operation.import')}
             </Button>
           </Upload>
@@ -188,17 +188,16 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         {canBatchExport && (
           <Space.Compact>
             <Dropdown menu={{ items: exportItems }}>
-              <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}>{t('common.operation.export')}</Button>
+              <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-sm! block" />}>
+                {t('common.operation.export')}
+              </Button>
             </Dropdown>
           </Space.Compact>
         )}
 
         {/* 批量操作下拉菜单 */}
-        <Dropdown menu={{ items: batchItems }} placement="bottomLeft">
-          <Button
-            icon={<Icon icon="fluent:options-24-regular" className="text-xl! block" />}
-            disabled={selectedRows.length === 0}
-          >
+        <Dropdown disabled={selectedRows.length === 0} menu={{ items: batchItems }} placement="bottomLeft">
+          <Button icon={<Icon icon="fluent:options-24-regular" className="text-sm! block" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
@@ -207,7 +206,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
           <Button
-            icon={<Icon icon="fa:recycle" className="text-xl! block text-green-500" />}
+            icon={<Icon icon="fa:recycle" className="text-sm! block text-green-500!" />}
             onClick={() => {
               modal.error({
                 title: '功能暂未开放',
@@ -233,7 +232,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         <Tooltip title="列设置">
           <Button
-            icon={<Icon icon="fluent:column-edit-24-regular" className="text-lg block" />}
+            icon={<Icon icon="fluent:column-edit-24-regular" className="text-sm block" />}
             type="text"
             onClick={() =>
               modal.error({
@@ -247,7 +246,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         <Tooltip title="表格大小">
           <Button
-            icon={<ColumnHeightOutlined />}
+            icon={<ColumnHeightOutlined className="text-sm block" />}
             type="text"
             onClick={() =>
               modal.error({

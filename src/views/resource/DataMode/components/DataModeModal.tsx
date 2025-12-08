@@ -1,17 +1,13 @@
-import type { CodeEditorRef } from '@/components/CodeEditor';
-import { CodeEditor } from '@/components/CodeEditor';
-import DragModal from '@/components/modal/DragModal';
-import type {
-  DataModeFormData,
-  JsonDataMode,
-} from '@/services/resource/datamode/dataModeApi';
-import { DATA_MODE_CATEGORIES, dataModeService } from '@/services/resource/datamode/dataModeApi';
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { App, Button, Form, Input, Select, Space, Switch, Upload, type InputRef } from 'antd';
+import { App, Button, Form, Input, type InputRef, Select, Space, Switch, Upload } from 'antd';
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
+import { CodeEditor } from '@/components/CodeEditor';
+import DragModal from '@/components/modal/DragModal';
+import type { DataModeFormData, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
+import { DATA_MODE_CATEGORIES, dataModeService } from '@/services/resource/datamode/dataModeApi';
 import DataSourceSelector, { type DataSourceType } from './DataSourceSelector';
 
 const { TextArea } = Input;
@@ -32,7 +28,7 @@ interface DataModeModalProps {
  * @param value - 可能是对象、字符串或 null
  * @returns JSON 字符串，如果为 null 则返回空字符串
  */
-const convertToJsonString = (value: any): string => {
+const convertToJsonString = (value: unknown): string => {
   if (value === null || value === undefined) {
     return '';
   }
@@ -40,30 +36,27 @@ const convertToJsonString = (value: any): string => {
     return value;
   }
   return JSON.stringify(value, null, 2);
-}
+};
 
 /**
  * 数据模式编辑/新增弹窗组件
  */
-const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
+const DataModeModal: React.FC<DataModeModalProps> = memo(
+  ({ open, title, loading, initialValues, isViewMode = false, onOk, onCancel }) => {
     const { message } = App.useApp();
     const [form] = Form.useForm();
-    const [dataSource, setDataSource] = useState<DataSourceType>();
-    const [jsonText, setJsonText] = useState<string>('');
-    const [schemaText, setSchemaText] = useState<string>('');
-    const [status, setStatus] = useState<boolean>(initialValues?.status || true);
-    
-    const jsonEditorRef = useRef<CodeEditorRef>(null);
-    const schemaEditorRef = useRef<CodeEditorRef>(null);
+
+    // 使用 useWatch 监听表单字段
+    const dataSource = Form.useWatch('dataSource', form);
+    const status = Form.useWatch('status', form);
+
+    // 依然保留 ref 以便在需要时进行非受控操作（如获取编辑器实例等），或者保持代码改动最小
     const focusFieldRef = useRef<InputRef>(null);
 
     const navigate = useNavigate();
 
     // 使用 useQuery 加载端点列表
-    const {
-      data: endpoints,
-      isLoading: loadingEndpoints,
-    } = useQuery({
+    const { data: endpoints, isLoading: loadingEndpoints } = useQuery({
       queryKey: ['endpoints', { endpointType: 'database', status: true }],
       queryFn: () => dataModeService.getEndpoints({ endpointType: 'database', status: true }),
       enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
@@ -75,17 +68,20 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         // 查询JSON数据
         const jsonResult = await dataModeService.queryJsonFromEndpoint({ endpointId });
         const jsonStr = jsonResult.json || JSON.stringify(jsonResult.data, null, 2);
-        
+
         // 生成Schema
         const schemaResult = await dataModeService.generateSchemaFromJson({ json: jsonStr });
-        
+
         return { jsonStr, schema: schemaResult.schema };
       },
       onSuccess: ({ jsonStr, schema }) => {
-        setJsonText(jsonStr);
-        setSchemaText(schema);
+        // 直接更新 Form 字段
+        form.setFieldsValue({
+          sourceJson: jsonStr,
+          schemaJson: schema,
+        });
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         message.error(`生成Schema失败：${error.message}`);
       },
     });
@@ -97,9 +93,9 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         return schemaResult.schema;
       },
       onSuccess: (schema) => {
-        setSchemaText(schema);
+        form.setFieldValue('schemaJson', schema);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         message.error(`生成Schema失败：${error.message}`);
       },
     });
@@ -111,48 +107,58 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         return result.schema;
       },
       onSuccess: (schema) => {
-        setSchemaText(schema);
+        form.setFieldValue('schemaJson', schema);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         message.error(`文件上传失败：${error.message}`);
       },
     });
 
-    // 初始化表单数据和 state
+    // 初始化表单数据
     useEffect(() => {
-      if (!open) return;
+      if (!open) {
+        return;
+      }
       if (initialValues) {
-        form.setFieldsValue(initialValues);
-        // 同步 state 值
-        setDataSource(initialValues.dataSource || 'database');
-        setJsonText(convertToJsonString(initialValues.sourceJson));
-        setSchemaText(convertToJsonString(initialValues.schemaJson));
-        setStatus(initialValues.status ?? true);
+        form.setFieldsValue({
+          ...initialValues,
+          sourceJson: convertToJsonString(initialValues.sourceJson),
+          schemaJson: convertToJsonString(initialValues.schemaJson),
+          // 确保 status 和 dataSource 有值
+          status: initialValues.status ?? true,
+          dataSource: initialValues.dataSource || 'database',
+        });
       } else {
         form.resetFields();
-        // 重置 state 值
-        setDataSource('database');
-        setJsonText('');
-        setSchemaText('');
-        setStatus(true);
+        // 设置默认值
+        form.setFieldsValue({
+          status: true,
+          dataSource: 'database',
+          schemaVersion: 'v1.0',
+        });
       }
-      focusFieldRef.current?.focus();
     }, [open, initialValues, form]);
 
     /**
      * 处理数据来源变更
      */
-    const handleDataSourceChange = useCallback((value: DataSourceType) => {
-      setDataSource(value);
-      form.setFieldValue('dataSource', value);
-      
-      // 清空相关字段
-      if (value !== 'database') {
-        form.resetFields(['endpointId']);
-      }
-      setJsonText('');
-      setSchemaText('');
-    }, [form]);
+    const handleDataSourceChange = useCallback(
+      (value: DataSourceType) => {
+        // Form 字段由 Form.Item 自动更新，这里只需处理副作用
+        // 清空相关字段
+        if (value !== 'database') {
+          form.setFieldsValue({
+            endpointId: undefined,
+            endpointName: undefined,
+          });
+        }
+        form.setFieldsValue({
+          sourceJson: '',
+          schemaJson: '',
+        });
+      },
+      [form]
+    );
 
     /**
      * 从端点查询JSON并生成Schema
@@ -171,9 +177,9 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
      * 从JSON文本生成Schema
      */
     const handleGenerateFromJson = useCallback(() => {
-      const currentJsonText = jsonEditorRef.current?.getValue() || jsonText;
-      
-      if (!currentJsonText.trim()) {
+      const currentJsonText = form.getFieldValue('sourceJson');
+
+      if (!currentJsonText?.trim()) {
         message.warning('请先输入JSON文本！');
         return;
       }
@@ -181,35 +187,38 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
       // 验证JSON格式
       try {
         JSON.parse(currentJsonText);
-      } catch (e) {
+      } catch {
         message.error('JSON格式不正确，请检查！');
         return;
       }
 
       generateFromJsonMutation.mutate(currentJsonText);
-    }, [jsonText, message, generateFromJsonMutation]);
+    }, [form, message, generateFromJsonMutation]);
 
     /**
      * 处理文件上传
      */
-    const handleFileUpload = useCallback((file: File): boolean => {
-      // 验证文件类型
-      if (!file.name.endsWith('.json')) {
-        message.error('只支持 JSON 格式的文件！');
-        return false;
-      }
+    const handleFileUpload = useCallback(
+      (file: File): boolean => {
+        // 验证文件类型
+        if (!file.name.endsWith('.json')) {
+          message.error('只支持 JSON 格式的文件！');
+          return false;
+        }
 
-      // 验证文件大小
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        message.error('文件大小不能超过 10MB！');
-        return false;
-      }
+        // 验证文件大小
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+          message.error('文件大小不能超过 10MB！');
+          return false;
+        }
 
-      importFileMutation.mutate(file);
+        importFileMutation.mutate(file);
 
-      return false; // 阻止自动上传
-    }, [message, importFileMutation]);
+        return false; // 阻止自动上传
+      },
+      [message, importFileMutation]
+    );
 
     /**
      * 确认回调
@@ -217,11 +226,10 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
     const handleOk = async () => {
       try {
         const values = await form.validateFields();
-        
-        // 获取最新的Schema文本
-        const currentSchemaText = schemaEditorRef.current?.getValue() || schemaText;
-        
-        if (!currentSchemaText.trim()) {
+
+        const currentSchemaText = values.schemaJson;
+
+        if (!currentSchemaText?.trim()) {
           message.error('请先生成或输入JSON Schema！');
           return;
         }
@@ -229,7 +237,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         // 验证Schema格式
         try {
           JSON.parse(currentSchemaText);
-        } catch (e) {
+        } catch {
           message.error('Schema格式不正确，请检查！');
           return;
         }
@@ -237,10 +245,8 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         const submitData: DataModeFormData = {
           ...values,
           id: initialValues?.id,
-          dataSource,
-          schemaJson: currentSchemaText,
-          sourceJson: dataSource === 'json' ? (jsonEditorRef.current?.getValue() || jsonText) : undefined,
-          status: status,
+          // 确保 sourceJson 在非 json 模式下被清理，或者由后端处理
+          sourceJson: dataSource === 'json' ? values.sourceJson : undefined,
         };
 
         onOk(submitData);
@@ -254,6 +260,22 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
       }
     };
 
+    /**
+     * 弹窗打开后回调
+     */
+    const handleAfterOpenChange = (open: boolean) => {
+      if (open) {
+        focusFieldRef.current?.focus();
+      }
+    };
+
+    /**
+     * 关闭后清理
+     */
+    const handleAfterClose = () => {
+      form.resetFields();
+    };
+
     return (
       <DragModal
         centered
@@ -261,6 +283,9 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         open={open}
         onCancel={onCancel}
         width={1000}
+        destroyOnHidden={true}
+        afterClose={handleAfterClose}
+        afterOpenChange={handleAfterOpenChange}
         styles={{
           body: {
             maxHeight: '70vh',
@@ -273,11 +298,11 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">状态：</span>
-                <Switch 
+                <Switch
                   checked={status}
-                  onChange={(checked) => setStatus(checked)}
-                  checkedChildren="启用" 
-                  unCheckedChildren="禁用" 
+                  onChange={(checked) => form.setFieldValue('status', checked)}
+                  checkedChildren="启用"
+                  unCheckedChildren="禁用"
                 />
               </div>
               <Space>
@@ -295,17 +320,12 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         }
         maskClosable={false}
       >
-        <Form
-          form={form}
-          disabled={isViewMode}
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 18 }}
-          initialValues={{
-            status: true,
-            dataSource: 'database',
-            schemaVersion: 'v1.0',
-          }}
-        >
+        <Form form={form} disabled={isViewMode} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
+          {/* 隐藏字段 */}
+          <Form.Item name="status" hidden valuePropName="checked">
+            <Switch />
+          </Form.Item>
+
           {/* 基本信息 */}
           <Form.Item
             name="name"
@@ -347,8 +367,8 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
           {/* 数据来源选择 */}
           {!isViewMode && (
             <>
-              <Form.Item label="数据来源" required>
-                <DataSourceSelector value={dataSource} onChange={handleDataSourceChange} />
+              <Form.Item name="dataSource" label="数据来源" required>
+                <DataSourceSelector onChange={handleDataSourceChange} />
               </Form.Item>
 
               {/* 数据库查询 */}
@@ -372,7 +392,7 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                           }))}
                           showSearch
                           filterOption={(input, option) =>
-                            (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                            ((option?.label as string) ?? '').toLowerCase().includes(input.toLowerCase())
                           }
                           onChange={(_value, option) => {
                             const label = Array.isArray(option) ? option[0]?.label : option?.label;
@@ -381,12 +401,15 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                           notFoundContent={
                             <div>
                               暂无可用端点
-                              <Button type="link" onClick={() => {
-                                navigate({ 
-                                  to: '/integrated/endpoint',
-                                  state: { type: 'database', action: 'create' },
-                                });
-                              }}>
+                              <Button
+                                type="link"
+                                onClick={() => {
+                                  navigate({
+                                    to: '/integrated/endpoint',
+                                    state: { type: 'database', action: 'create' },
+                                  });
+                                }}
+                              >
                                 去创建
                               </Button>
                             </div>
@@ -397,12 +420,11 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
                           onClick={handleGenerateFromEndpoint}
                           loading={queryFromEndpointMutation.isPending}
                           className="self-end mb-6 ml-4"
-                      >
-                        查询并生成
-                      </Button>
+                        >
+                          查询并生成
+                        </Button>
                       </div>
                     </Form.Item>
-                    
                   </div>
                 </div>
               )}
@@ -411,23 +433,18 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
               {dataSource === 'json' && (
                 <>
                   <Form.Item label="JSON文本" required>
-                    <div className='rounded-lg flex flex-col'>
-                      <CodeEditor
-                        ref={jsonEditorRef}
-                        value={jsonText}
-                        language="json"
-                        height="200px"
-                        showMinimap={false}
-                        onChange={(value) => setJsonText(value || '')}
-                      />
+                    <div className="rounded-lg flex flex-col">
+                      <Form.Item name="sourceJson" noStyle>
+                        <CodeEditor language="json" height="200px" showMinimap={false} />
+                      </Form.Item>
                       <Button
-                      type="primary"
-                      onClick={handleGenerateFromJson}
-                      loading={generateFromJsonMutation.isPending}
-                      className='mt-2'
-                    >
-                      生成Schema
-                    </Button>
+                        type="primary"
+                        onClick={handleGenerateFromJson}
+                        loading={generateFromJsonMutation.isPending}
+                        className="mt-2"
+                      >
+                        生成Schema
+                      </Button>
                     </div>
                   </Form.Item>
                 </>
@@ -436,19 +453,12 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
               {/* 文件上传 */}
               {dataSource === 'file' && (
                 <Form.Item label="上传JSON文件">
-                  <Dragger
-                    beforeUpload={handleFileUpload}
-                    accept=".json"
-                    maxCount={1}
-                    showUploadList={false}
-                  >
+                  <Dragger beforeUpload={handleFileUpload} accept=".json" maxCount={1} showUploadList={false}>
                     <p className="ant-upload-drag-icon">
                       <InboxOutlined />
                     </p>
                     <p className="ant-upload-text">点击或拖拽JSON文件到此区域</p>
-                    <p className="ant-upload-hint">
-                      支持 .json 格式文件，最大10MB
-                    </p>
+                    <p className="ant-upload-hint">支持 .json 格式文件，最大10MB</p>
                   </Dragger>
                 </Form.Item>
               )}
@@ -458,14 +468,9 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
           {/* JSON Schema编辑器 */}
           <Form.Item label="JSON Schema" required>
             <div style={{ borderRadius: '8px' }}>
-              <CodeEditor
-                ref={schemaEditorRef}
-                value={schemaText}
-                language="json"
-                height="400px"
-                showMinimap={false}
-                readOnly
-              />
+              <Form.Item name="schemaJson" noStyle>
+                <CodeEditor language="json" height="400px" showMinimap={false} readOnly />
+              </Form.Item>
             </div>
           </Form.Item>
 
@@ -475,9 +480,9 @@ const DataModeModal: React.FC<DataModeModalProps> = ({ open, title, loading, ini
         </Form>
       </DragModal>
     );
-  };
+  }
+);
 
 DataModeModal.displayName = 'DataModeModal';
 
 export default DataModeModal;
-

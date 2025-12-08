@@ -1,14 +1,13 @@
-import { Card, Descriptions, Tag, Space, Button, Switch, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined, CopyOutlined, PlusOutlined } from '@ant-design/icons';
-import { useState, useCallback } from 'react';
-import type React from 'react';
-import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
-import { usePermission } from '@/hooks/usePermission';
+import { CopyOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
-import ButtonModal from './ButtonModal';
-import type { MenuModel } from '@/services/system/menu/type';
+import { App, Button, Card, Descriptions, Popconfirm, Space, Switch, Tag } from 'antd';
+import type React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePermission } from '@/hooks/usePermission';
+import type { MenuModel } from '@/services/system/menu/type';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import ButtonModal from './ButtonModal';
 
 /**
  * 按钮详情组件Props
@@ -24,8 +23,7 @@ interface ButtonDetailProps {
 const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
   const { modal } = App.useApp();
   const queryClient = useQueryClient();
-  const { t } = useTranslation()
-
+  const { t } = useTranslation();
 
   const [editing, setEditing] = useState(false);
 
@@ -55,30 +53,32 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
   /**
    * 处理编辑
    */
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     setEditing(true);
-  }, []);
+  };
 
   /**
    * 处理取消编辑
    */
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEdit = () => {
     setEditing(false);
-  }, []);
+  };
 
   /**
    * 处理保存编辑
    */
-  const handleSaveEdit = useCallback(() => {
+  const handleSaveEdit = () => {
     setEditing(false);
     queryClient.invalidateQueries({ queryKey: ['permission-buttons'] });
-  }, [queryClient]);
+  };
 
   /**
    * 处理删除
    */
-  const handleDelete = useCallback(() => {
-    if (!button) return;
+  const handleDelete = () => {
+    if (!button) {
+      return;
+    }
 
     modal.confirm({
       title: '删除按钮',
@@ -91,15 +91,15 @@ const ButtonDetail: React.FC<ButtonDetailProps> = ({ button }) => {
         }
       },
     });
-  }, [button, deleteButtonMutation, modal]);
+  };
 
   /**
    * 处理复制
    */
-  const handleCopy = useCallback(() => {
+  const handleCopy = () => {
     // TODO: 实现复制逻辑
     console.log('复制按钮:', button?.id);
-  }, [button?.id]);
+  };
 
   if (!button) {
     return (

@@ -1,6 +1,6 @@
-import type { RouteItem } from '@/types/route';
 import { create } from 'zustand';
-import { persist, type PersistOptions } from 'zustand/middleware';
+import { type PersistOptions, persist } from 'zustand/middleware';
+import type { RouteItem } from '@/types/route';
 
 export interface TabItem {
   key: string;
@@ -91,7 +91,9 @@ export const useTabStore = create<TabStore>()(
         const { tabs, activeKey } = get();
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
 
-        if (targetIndex === -1) return activeKey;
+        if (targetIndex === -1) {
+          return activeKey;
+        }
 
         const newTabs = tabs.filter((tab) => tab.key !== targetKey);
 
@@ -176,7 +178,7 @@ export const useTabStore = create<TabStore>()(
         const { tabs, activeKey } = get();
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
         if (targetIndex >= 0 && targetIndex < tabs.length - 1) {
-          let newTabs = tabs.slice(0, targetIndex + 1);
+          const newTabs = tabs.slice(0, targetIndex + 1);
 
           // 如果homePath的tab在右侧被删除了，需要保留它
           if (homePath) {

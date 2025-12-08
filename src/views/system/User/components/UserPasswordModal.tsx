@@ -1,13 +1,13 @@
-import DragModal from '@/components/modal/DragModal';
-import type { UserModel } from '@/services/system/user/type';
-import { userService } from '@/services/system/user/userApi';
 import { useMutation } from '@tanstack/react-query';
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { App, Col, Form, Input, Progress, Row, type InputRef } from 'antd';
+import { App, Col, Form, Input, type InputRef, Progress, Row } from 'antd';
 import { keys, values } from 'lodash-es';
 import type React from 'react';
 import { memo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import DragModal from '@/components/modal/DragModal';
+import type { UserModel } from '@/services/system/user/type';
+import { userService } from '@/services/system/user/userApi';
 import { strengthMeterOptions } from '../config';
 import styles from '../strengthMeter.module.scss';
 

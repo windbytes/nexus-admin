@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReloadOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Card, Table, Button, Space, Tag, Tooltip, type TableProps, App } from 'antd';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { DeleteOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App, Button, Card, Space, Table, type TableProps, Tag, Tooltip } from 'antd';
 import type React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MenuModel } from '@/services/system/menu/type';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import InterfacePermissionMappingModal from './InterfacePermissionMappingModal';
@@ -67,7 +67,9 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
   } = useQuery({
     queryKey: ['button-interface-permission', button?.id, state.pagination.current, state.pagination.pageSize],
     queryFn: async () => {
-      if (!button?.id) return { records: [], totalRow: 0, pageNumber: 1, pageSize: 10, totalPage: 0 };
+      if (!button?.id) {
+        return { records: [], totalRow: 0, pageNumber: 1, pageSize: 10, totalPage: 0 };
+      }
       const response = await permissionButtonService.getButtonInterfaces(button.id);
       return {
         records: response || [],
@@ -82,7 +84,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
 
   // 删除映射的mutation
   const deleteMappingMutation = useMutation({
-    mutationFn: async ({buttonId, interfaces}: {buttonId: string, interfaces: string[]}) => {
+    mutationFn: async ({ buttonId, interfaces }: { buttonId: string; interfaces: string[] }) => {
       // 这里应该调用删除映射的API，暂时使用现有的方法
       return await permissionButtonService.deleteMapping(buttonId, interfaces);
     },
@@ -132,7 +134,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
         },
       });
     },
-    [state.pagination, updateState],
+    [state.pagination, updateState]
   );
 
   // 处理添加映射
@@ -164,7 +166,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
         },
       });
     },
-    [deleteMappingMutation, modal, button?.id],
+    [deleteMappingMutation, modal, button?.id]
   );
 
   // 表格列定义
@@ -231,7 +233,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
         ),
       },
     ],
-    [handleDeleteMapping, deleteMappingMutation.isPending],
+    [handleDeleteMapping, deleteMappingMutation.isPending]
   );
 
   return (

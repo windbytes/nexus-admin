@@ -1,6 +1,3 @@
-import { roleService } from '@/services/system/role/roleApi';
-import type { UserSearchParams } from '@/services/system/role/type';
-import { usePreferencesStore } from '@/stores/store';
 import {
   CloseOutlined,
   DeleteOutlined,
@@ -34,6 +31,9 @@ import {
 } from 'antd';
 import { isEqual } from 'lodash-es';
 import { memo, useRef, useState } from 'react';
+import { roleService } from '@/services/system/role/roleApi';
+import type { UserSearchParams } from '@/services/system/role/type';
+import { usePreferencesStore } from '@/stores/store';
 import AddUser from './AddUserModal';
 
 /**
@@ -137,7 +137,12 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
             <Tooltip title="移除用户">
               <Button
                 type="text"
-                icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-xl block text-[#ff4d4f]" />}
+                icon={
+                  <Icon
+                    icon="fluent:delete-dismiss-24-filled"
+                    className="text-sm block text-[var(--ant-color-error)]"
+                  />
+                }
               />
             </Tooltip>
           </Popconfirm>
@@ -323,7 +328,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
             className="mt-2"
             size="small"
             columns={columns}
-            dataSource={data?.['data'] || []}
+            dataSource={data?.records || []}
             loading={isLoading}
             bordered
             rowKey="id"
@@ -334,7 +339,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
               hideOnSinglePage: false,
               showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
-              total: data?.['total'],
+              total: data?.totalRow || 0,
               onChange(page, pageSize) {
                 onPageSizeChange(page, pageSize);
               },

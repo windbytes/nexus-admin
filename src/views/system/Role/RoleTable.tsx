@@ -1,7 +1,7 @@
-import useTableScroll from '@/hooks/useTableScroll';
-import type { RoleModel } from '@/services/system/role/type';
 import { Table, type TableProps } from 'antd';
 import type React from 'react';
+import useTableScroll from '@/hooks/useTableScroll';
+import type { RoleModel } from '@/services/system/role/type';
 
 interface RoleTableProps {
   tableData: RoleModel[];
@@ -18,17 +18,10 @@ interface RoleTableProps {
  * @param props 参数
  * @returns 表格
  */
-const RoleTable: React.FC<RoleTableProps> = ({
-  tableData,
-  loading,
-  columns,
-  onRow,
-  rowSelection,
-  pagination
-}) => {
+const RoleTable: React.FC<RoleTableProps> = ({ tableData, loading, columns, onRow, rowSelection, pagination }) => {
   const { scrollConfig, tableWrapperRef } = useTableScroll('max-content');
   return (
-    <div className='flex-1 min-h-0' ref={tableWrapperRef}>
+    <div className="flex-1 min-h-0" ref={tableWrapperRef}>
       <Table
         size="small"
         onRow={onRow as any}
@@ -43,7 +36,6 @@ const RoleTable: React.FC<RoleTableProps> = ({
         rowSelection={{ ...rowSelection }}
       />
     </div>
-    
   );
 };
 

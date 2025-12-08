@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback, useId } from 'react';
-import { App, Tag } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
-import type { InterfacePermission } from '@/services/system/menu/menuApi';
+import { App, Tag } from 'antd';
+import { useCallback, useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { TableSelect } from '@/components/select/TableSelect';
 import type { TableColumnConfig } from '@/components/select/TableSelect/types';
+import type { InterfacePermission } from '@/services/system/menu/menuApi';
 import type { MenuModel } from '@/services/system/menu/type';
-import { useTranslation } from 'react-i18next';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 
 /**
  * 接口权限映射Modal组件Props
@@ -37,7 +37,7 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
 
   // 获取接口权限数据
   const fetchInterfaceData = async (
-    _id: string,
+    _id: string
   ): Promise<{ columns: TableColumnConfig<InterfacePermission>[]; data: InterfacePermission[] }> => {
     const data = await permissionButtonService.getAllInterfaces(button?.id || '');
 
@@ -110,8 +110,14 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
   // 添加映射的mutation
   const addMappingMutation = useMutation({
     mutationFn: async (permissionIds: string[]) => {
-      if (!button?.id) throw new Error('按钮ID不能为空');
-      return await permissionButtonService.assignButtonInterfaces(button.id, permissionIds);
+      if (!button?.id) {
+        modal.warning({
+          title: '请选择按钮',
+          content: '请先选择一个按钮',
+        });
+        return;
+      }
+      await permissionButtonService.assignButtonInterfaces(button.id, permissionIds);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -155,6 +161,9 @@ const InterfacePermissionMappingModal: React.FC<InterfacePermissionMappingModalP
       onCancel={handleCancel}
       width={800}
       confirmLoading={addMappingMutation.isPending}
+      classNames={{
+        body: 'h-48',
+      }}
     >
       <div className="flex flex-col gap-4">
         <div className="text-sm text-gray-600">请选择要映射到按钮 "{button?.name}" 的接口权限：</div>
