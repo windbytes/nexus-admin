@@ -183,7 +183,7 @@ export const useTabStore = create<TabStore>()(
         const { tabs, activeKey } = get();
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
         if (targetIndex >= 0 && targetIndex < tabs.length - 1) {
-          const newTabs = tabs.slice(0, targetIndex + 1);
+          let newTabs = tabs.slice(0, targetIndex + 1);
 
           // 如果homePath的tab在右侧被删除了，需要保留它
           if (homePath) {
