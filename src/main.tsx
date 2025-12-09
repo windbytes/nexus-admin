@@ -20,10 +20,11 @@ import { usePreferencesStore } from './stores/store';
  */
 const GlobalProvider: React.FC = () => {
   // 只订阅需要的状态，避免不必要的重渲染
-  const { colorPrimary, locale } = usePreferencesStore(
+  const { colorPrimary, locale, radius } = usePreferencesStore(
     useShallow((state) => ({
       colorPrimary: state.preferences.theme.colorPrimary,
       locale: state.preferences.app.locale,
+      radius: state.preferences.theme.radius,
     }))
   );
 
@@ -37,6 +38,7 @@ const GlobalProvider: React.FC = () => {
         zeroRuntime: true,
         token: {
           colorPrimary: colorPrimary,
+          borderRadius: radius,
         },
         components: {
           Layout: {

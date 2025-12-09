@@ -27,7 +27,8 @@
         "useKeyWithMouseEvents": "off",
         "useValidAnchor": "warn",
         "useAltText": "warn",
-        "useAriaPropsForRole": "warn"
+        "useAriaPropsForRole": "warn",
+        "noStaticElementInteractions": "warn"
       },
       "complexity": {
         "recommended": true,
