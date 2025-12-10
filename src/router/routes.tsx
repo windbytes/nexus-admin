@@ -8,7 +8,6 @@ import { useUserStore } from '@/stores/userStore';
 
 // 懒加载组件
 const LoginComponent = lazy(() => import('@/views/Login'));
-const Login2Component = lazy(() => import('@/views/Login2'));
 const NotFoundComponent = lazy(() => import('@/views/error/404'));
 const ForbiddenComponent = lazy(() => import('@/views/error/403'));
 const ServerErrorComponent = lazy(() => import('@/views/error/500'));
@@ -103,24 +102,6 @@ export const loginRoute = createRoute({
 });
 
 /**
- * 登录路由2
- */
-export const login2Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/login2',
-  component: Login2Component,
-  beforeLoad: async () => {
-    const { isLogin, homePath } = useUserStore.getState();
-
-    if (isLogin) {
-      throw redirect({
-        to: homePath,
-      });
-    }
-  },
-});
-
-/**
  * 根路径路由 - 重定向
  */
 export const indexRoute = createRoute({
@@ -179,7 +160,6 @@ export const serverErrorRoute = createRoute({
 export const baseRoutes = [
   indexRoute,
   loginRoute,
-  login2Route,
   notFoundRoute,
   forbiddenRoute,
   serverErrorRoute,

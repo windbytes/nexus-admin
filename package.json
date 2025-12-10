@@ -41,7 +41,7 @@
     "echarts": "^6.0.0",
     "i18next": "^25.7.2",
     "jsencrypt": "^3.5.4",
-    "keepalive-for-react": "5.0.6",
+    "keepalive-for-react": "5.0.7",
     "lodash-es": "^4.17.21",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

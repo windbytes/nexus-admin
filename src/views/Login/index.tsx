@@ -58,7 +58,7 @@ const Login: React.FC = () => {
   /**
    * 处理角色选择
    */
-  const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
+  const handleRoleSelect = async (roleId: string, roleData: UserRole[] = [], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
     const currentLoginData = loginResponseData || loginData;
     if (!currentLoginData) {
@@ -71,14 +71,8 @@ const Login: React.FC = () => {
       // 使用传入的角色数据或当前状态中的角色数据
       const rolesToUse = roleData || userRoles;
 
-      // 查找选中的角色
-      const selectedRole = rolesToUse.find((role) => role.id === roleId);
-      if (!selectedRole) {
-        antdUtils.message?.error('选择的角色不存在');
-        return;
-      }
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
+      userStore.login(currentLoginData.username, '', 'admin');
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels = rolesToUse.map((role) => ({
@@ -193,28 +187,7 @@ const Login: React.FC = () => {
           {
             // 保存登录数据
             setLoginData(loginResponse);
-
-            // 检查角色信息
-            if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
-              // 没有角色信息，提示错误
-              antdUtils.modal?.error({
-                title: '登录失败',
-                content: '您的账户没有分配任何角色，请联系管理员配置角色权限！',
-                onOk: () => {
-                  // 刷新验证码
-                  refetch();
-                },
-              });
-              return;
-            } else if (loginResponse.userRoles.length === 1) {
-              // 单角色情况，直接登录
-              const role = loginResponse.userRoles[0];
-              await handleRoleSelect(role.id, loginResponse.userRoles, loginResponse);
-            } else {
-              // 多角色情况，显示角色选择界面
-              setUserRoles(loginResponse.userRoles);
-              setShowRoleSelector(true);
-            }
+            handleRoleSelect('nexus');
           }
           break;
         default:

@@ -1,13 +1,12 @@
-import { useCallback } from 'react';
-import { App } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { App } from 'antd';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
-import { commonService } from '@/services/common';
 
 /**
  * 退出登录 Hook
@@ -39,19 +38,16 @@ export const useLogout = () => {
       content: t('login.confirmLogout'),
       onOk: async () => {
         // 清除后端的信息
-        const res = await commonService.logout();
-        if (res) {
-          // 清空所有tab
-          resetTabs();
-          // 清理角色相关的缓存
-          queryClient.removeQueries({ queryKey: ['user-roles'] });
-          // 清理用户信息
-          userLogout();
-          // 修改回document.title
-          document.title = 'nexus';
-          // 退出到登录页面
-          navigate({ to: '/login', replace: true });
-        }
+        // 清空所有tab
+        resetTabs();
+        // 清理角色相关的缓存
+        queryClient.removeQueries({ queryKey: ['user-roles'] });
+        // 清理用户信息
+        userLogout();
+        // 修改回document.title
+        document.title = 'nexus';
+        // 退出到登录页面
+        navigate({ to: '/login', replace: true });
       },
     });
   }, [modal, t, resetTabs, queryClient, userLogout, navigate]);

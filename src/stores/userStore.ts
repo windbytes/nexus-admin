@@ -1,6 +1,6 @@
-import type { RoleModel } from '@/services/system/role/type';
 import { create } from 'zustand';
-import { persist, type PersistOptions } from 'zustand/middleware';
+import { type PersistOptions, persist } from 'zustand/middleware';
+import type { RoleModel } from '@/services/system/role/type';
 
 // 定义用户信息的store
 interface UserState {

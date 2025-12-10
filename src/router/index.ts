@@ -4,7 +4,7 @@
  */
 
 export { Router } from './router';
-export { authenticatedRoute, baseRoutes, login2Route, loginRoute, rootRoute } from './routes';
+export { authenticatedRoute, baseRoutes, loginRoute, rootRoute } from './routes';
 export { initializeRouteTree, routeTreeManager } from './routeTree';
 export {
   flattenRoutes,
