@@ -1,4 +1,5 @@
 import { DeleteOutlined, PlayCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { createDownloadPlugin } from '@flowgram.ai/export-plugin';
 import { createFreeAutoLayoutPlugin } from '@flowgram.ai/free-auto-layout-plugin';
 import { createContainerNodePlugin } from '@flowgram.ai/free-container-plugin';
 import { createFreeGroupPlugin } from '@flowgram.ai/free-group-plugin';
@@ -453,6 +454,8 @@ export function useEditorProps(
             overlayColor: 'rgba(255, 255, 255, 0.55)',
           },
         }),
+
+        createDownloadPlugin({}),
 
         /**
          * Snap plugin
