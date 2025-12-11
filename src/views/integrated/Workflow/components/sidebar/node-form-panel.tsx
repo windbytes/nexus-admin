@@ -1,9 +1,8 @@
-import type { FlowNodeMeta } from '@/types/workflow/node';
 import { PlaygroundEntityContext, useClientContext, useRefresh } from '@flowgram.ai/free-layout-editor';
-import { usePanelManager } from '@flowgram.ai/panel-manager-plugin';
 import { startTransition, useCallback, useEffect } from 'react';
-import { nodeFormPanelFactory } from '.';
+import type { FlowNodeMeta } from '@/types/workflow/node';
 import { IsSidebarContext } from '../../context/sidebar-context';
+import { useNodeFormPanel } from '../../plugins/panel-manager-plugin/hooks';
 import SidebarNodeRenderer from './sidebar-node-renderer';
 
 export interface NodeFormPanelProps {
@@ -12,11 +11,9 @@ export interface NodeFormPanelProps {
 
 /**
  * 节点表单面板(侧边栏包裹容器)
- * @param {NodeFormPanelProps} props - 节点表单面板属性
- * @returns {React.ReactNode}
+ * @param props - 节点表单面板属性
  */
 const NodeFormPanel: React.FC<NodeFormPanelProps> = ({ nodeId }) => {
-  const panelManager = usePanelManager();
   const { selection, playground, document } = useClientContext();
   const refresh = useRefresh();
 
@@ -25,12 +22,14 @@ const NodeFormPanel: React.FC<NodeFormPanelProps> = ({ nodeId }) => {
   // 是否禁用侧边栏
   const sidebarDisabled = node?.getNodeMeta<FlowNodeMeta>()?.disableSideBar === true;
 
+  const { close: closePanel } = useNodeFormPanel();
+
   /**
    * 关闭侧边栏
    */
   const handleClosePanel = useCallback(() => {
     startTransition(() => {
-      panelManager.close(nodeFormPanelFactory.key);
+      closePanel();
     });
   }, []);
 
@@ -71,7 +70,7 @@ const NodeFormPanel: React.FC<NodeFormPanelProps> = ({ nodeId }) => {
   useEffect(() => {
     if (node) {
       const toDispose = node.onDispose(() => {
-        panelManager.close(nodeFormPanelFactory.key);
+        closePanel();
       });
       return () => toDispose.dispose();
     }

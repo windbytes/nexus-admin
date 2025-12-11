@@ -1,7 +1,9 @@
-import { type PluginCreator, definePluginCreator, FreeLayoutPluginContext } from '@flowgram.ai/free-layout-editor';
+import { definePluginCreator, type FreeLayoutPluginContext, type PluginCreator } from '@flowgram.ai/free-layout-editor';
 import { ContextMenuLayer } from './context-menu-layer';
 
-export interface ContextMenuPluginOptions {}
+export type ContextMenuPluginOptions = {
+  menus?: string[];
+};
 
 /**
  * 右键菜单插件

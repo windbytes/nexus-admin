@@ -1,32 +1,31 @@
-import { WorkflowNodeType } from '@/components/workflow/nodes/constants';
-import type { FlowDocumentJSON, FlowNodeRegistry } from '@/types/workflow/node';
 import { DeleteOutlined, PlayCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { createFreeAutoLayoutPlugin } from '@flowgram.ai/free-auto-layout-plugin';
 import { createContainerNodePlugin } from '@flowgram.ai/free-container-plugin';
 import { createFreeGroupPlugin } from '@flowgram.ai/free-group-plugin';
 import {
   FlowNodeBaseType,
-  FreeLayoutPluginContext,
-  WorkflowNodeEntity,
+  type FreeLayoutPluginContext,
   type FreeLayoutProps,
+  type WorkflowNodeEntity,
 } from '@flowgram.ai/free-layout-editor';
 import { createFreeLinesPlugin } from '@flowgram.ai/free-lines-plugin';
 import { createFreeNodePanelPlugin } from '@flowgram.ai/free-node-panel-plugin';
 import { createFreeSnapPlugin } from '@flowgram.ai/free-snap-plugin';
 import { createFreeStackPlugin } from '@flowgram.ai/free-stack-plugin';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
-import { createPanelManagerPlugin } from '@flowgram.ai/panel-manager-plugin';
 import { debounce } from 'lodash-es';
 import { useMemo } from 'react';
+import { WorkflowNodeType } from '@/components/workflow/nodes/constants';
+import type { FlowDocumentJSON, FlowNodeRegistry } from '@/types/workflow/node';
 import BaseNode from '../components/base-node';
 import { CommentRender } from '../components/comment/components/render';
 import { GroupNodeRender } from '../components/group/components/node-render';
 import { LineDeleteButton } from '../components/line-delete-button';
 import { NodePanel } from '../components/node-panel';
 import SelectBoxPopover from '../components/select-box-popover';
-import { nodeFormPanelFactory } from '../components/sidebar';
 import { DefaultNode } from '../nodes/defaultNode';
 import { createContextMenuPlugin } from '../plugins/context-menu-plugin/context-menu-plugin';
+import { createPanelManagerPlugin } from '../plugins/panel-manager-plugin';
 import { CustomService } from '../services/custom-service';
 import { shortcuts } from '../shortcuts/shortcuts';
 
@@ -294,6 +293,7 @@ export function useEditorProps(
        * 集成的支持的物料节点
        */
       materials: {
+        components: {},
         // 渲染节点(所有的节点渲染都会从这里开始)
         renderDefaultNode: BaseNode,
         // 注册特定的渲染组件
@@ -326,6 +326,9 @@ export function useEditorProps(
        * 内容改变监听（自动保存）
        */
       onContentChange: debounce((ctx, event) => {
+        if (ctx.document.dispose) {
+          return;
+        }
         // 这里可以添加自动保存逻辑
         const json = ctx.document.toJSON();
         console.log('Auto Save', event, json);
@@ -487,9 +490,7 @@ export function useEditorProps(
         /**
          * Panel manager plugin
          */
-        createPanelManagerPlugin({
-          factories: [nodeFormPanelFactory],
-        }),
+        createPanelManagerPlugin(),
       ],
     }),
     []

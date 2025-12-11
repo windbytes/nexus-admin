@@ -28,7 +28,7 @@
         "useValidAnchor": "warn",
         "useAltText": "warn",
         "useAriaPropsForRole": "warn",
-        "noStaticElementInteractions": "warn",
+        "noStaticElementInteractions": "off",
         "noSvgWithoutTitle": "warn"
       },
       "complexity": {

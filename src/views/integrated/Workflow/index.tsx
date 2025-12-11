@@ -1,10 +1,10 @@
-import { usePreferencesStore } from '@/stores/store';
 import {
   EditorRenderer,
   FreeLayoutEditorProvider,
-  FreeLayoutPluginContext,
+  type FreeLayoutPluginContext,
   type WorkflowJSON,
 } from '@flowgram.ai/free-layout-editor';
+import { usePreferencesStore } from '@/stores/store';
 import '@flowgram.ai/free-layout-editor/index.css';
 import { useParams } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef } from 'react';
@@ -15,6 +15,7 @@ import BottomToolbar from './tools/BottomToolbar';
 import LeftToolbar from './tools/LeftToolbar';
 import TopToolbar from './tools/TopToolbar';
 import './workflow.scss';
+import { DockedPanelLayer } from '@flowgram.ai/panel-manager-plugin';
 
 /**
  * 流程编辑器
@@ -54,7 +55,9 @@ const Workflow: React.FC = () => {
         <BottomToolbar />
         {/* 画布区域 */}
         <div className="workflow-container">
-          <EditorRenderer className="workflow-editor" />
+          <DockedPanelLayer>
+            <EditorRenderer className="workflow-editor" />
+          </DockedPanelLayer>
         </div>
       </FreeLayoutEditorProvider>
     </div>

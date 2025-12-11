@@ -1,4 +1,4 @@
-import { useNodeRender, type FlowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { type FlowNodeEntity, useNodeRender } from '@flowgram.ai/free-layout-editor';
 import { NodeRenderContext } from '../../context/node-render-context';
 
 /**
