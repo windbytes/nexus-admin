@@ -42,7 +42,7 @@ export function useEditorProps(
   nodeRegistries: FlowNodeRegistry[],
   handleSave?: (data: FlowDocumentJSON) => void
 ): FreeLayoutProps {
-  return useMemo(
+  return useMemo<FreeLayoutProps>(
     () => ({
       /**
        * 支持背景
@@ -370,7 +370,9 @@ export function useEditorProps(
        * Playground all layers rendered
        */
       onAllLayersRendered(ctx) {
-        ctx.tools.fitView(false);
+        setTimeout(() => {
+          ctx.tools.fitView(false);
+        }, 10);
         console.log('--- onAllLayersRendered ---');
       },
 
@@ -455,6 +457,9 @@ export function useEditorProps(
           },
         }),
 
+        /**
+         * 下载插件
+         */
         createDownloadPlugin({}),
 
         /**
