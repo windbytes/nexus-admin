@@ -271,7 +271,7 @@ const UserDropdown: React.FC = () => {
   ];
   return (
     <Dropdown
-      trigger={['hover']}
+      trigger={['click']}
       menu={{ items, triggerSubMenuAction: 'hover' }}
       placement="bottomLeft"
       classNames={{

@@ -1,17 +1,16 @@
-import { usePreferencesStore } from '@/stores/store';
 import {
-  FreeLayoutPluginContext,
+  type FreeLayoutPluginContext,
   useClientContext,
-  WorkflowNodeEntity,
+  type WorkflowNodeEntity,
   WorkflowPortRender,
 } from '@flowgram.ai/free-layout-editor';
-import { usePanelManager } from '@flowgram.ai/panel-manager-plugin';
 import { Dropdown } from 'antd';
 import { useState } from 'react';
+import { usePreferencesStore } from '@/stores/store';
 import { useNodeRenderContext } from '../../context/use-node-render-context';
 import { usePortClick } from '../../hooks/usePortClick';
-import { nodeFormPanelFactory } from '../sidebar';
 import './node-wrapper.scss';
+import { useNodeFormPanel } from '../../plugins/panel-manager-plugin/hooks';
 import { scrollToView } from './util';
 
 /**
@@ -44,8 +43,7 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, child
   // 点击端口后唤起节点选择面板
   const onPortClick = usePortClick();
 
-  // 窗口管理器
-  const panelManager = usePanelManager();
+  const { open } = useNodeFormPanel();
 
   // 节点端口渲染
   const portsRender = ports.map((port) => (
@@ -83,7 +81,9 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, child
           items: menuItems,
         }}
         getPopupContainer={() => document.body}
-        overlayClassName="w-[240px]"
+        classNames={{
+          root: 'w-[240px]',
+        }}
       >
         <div
           className="node-wrapper"
@@ -100,10 +100,8 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({ isScrollToView = false, child
           onClick={(e) => {
             selectNode(e);
             if (!isDragging) {
-              panelManager.open(nodeFormPanelFactory.key, 'right', {
-                props: {
-                  nodeId: nodeRender.node.id,
-                },
+              open({
+                nodeId: nodeRender.node.id,
               });
               // 可选：将 isScrollToView 设为 true，可以让节点选中后滚动到画布中间
               if (isScrollToView) {

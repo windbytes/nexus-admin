@@ -1,9 +1,9 @@
-import KeepAlive from '@/components/KeepAlive';
-import { ErrorFallback } from './ErrorBoundary';
 import { Icon } from '@iconify/react';
 import { Layout, Spin } from 'antd';
-import { memo, Suspense, useMemo, type ReactNode } from 'react';
+import { memo, type ReactNode, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import KeepAlive from '@/components/KeepAlive';
+import { ErrorFallback } from './ErrorBoundary';
 
 /**
  * 中间主内容区域
@@ -19,13 +19,10 @@ interface ContentProps {
 }
 
 const Content = memo(({ children }: ContentProps) => {
-
   // 【优化】使用更明显的加载指示器
   const loadingFallback = useMemo(
     () => (
-      <div
-        className='h-full flex items-center justify-center min-h-[400px]'
-      >
+      <div className="h-full flex items-center justify-center min-h-[400px]">
         <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" />
       </div>
     ),

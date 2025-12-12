@@ -94,7 +94,7 @@ export const defaultPreferences: Preferences = {
     colorSuccess: '#52c41a',
     colorWarning: '#faad14',
     mode: 'light',
-    radius: '0.5',
+    radius: 6,
     semiDarkHeader: false,
     semiDarkSidebar: false,
   },

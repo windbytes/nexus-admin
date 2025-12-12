@@ -1,5 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { useNodeRender, type FlowNodeEntity } from '@flowgram.ai/free-layout-editor';
+import { type FlowNodeEntity, useNodeRender } from '@flowgram.ai/free-layout-editor';
 import { ConfigProvider } from 'antd';
 import { useCallback } from 'react';
 import { NodeRenderContext } from '../../context/node-render-context';

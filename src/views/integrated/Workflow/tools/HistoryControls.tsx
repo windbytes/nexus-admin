@@ -22,7 +22,7 @@ const HistoryControls: React.FC = () => {
   }, [history]);
   return (
     <div className="flex items-center gap-1 px-2 py-1 bg-white rounded-lg shadow-lg">
-      <Tooltip title="撤销">
+      <Tooltip title="撤销" color="white">
         <Button
           type="text"
           icon={<UndoOutlined />}
@@ -32,7 +32,7 @@ const HistoryControls: React.FC = () => {
           }}
         />
       </Tooltip>
-      <Tooltip title="重做">
+      <Tooltip title="重做" color="white">
         <Button
           type="text"
           icon={<RedoOutlined />}
@@ -42,7 +42,7 @@ const HistoryControls: React.FC = () => {
           }}
         />
       </Tooltip>
-      <Tooltip title="历史记录">
+      <Tooltip title="历史记录" color="white">
         <Button type="text" icon={<HistoryOutlined />} onClick={() => console.log('历史记录')} />
       </Tooltip>
     </div>

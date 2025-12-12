@@ -1,18 +1,18 @@
 import { ContainerUtils } from '@flowgram.ai/free-container-plugin';
 import {
   FreeLayoutPluginContext,
+  inject,
+  injectable,
   Layer,
+  type PositionSchema,
   WorkflowDocument,
   WorkflowDragService,
   WorkflowHoverService,
-  WorkflowNodeEntity,
-  WorkflowSelectService,
-  inject,
-  injectable,
-  type PositionSchema,
+  type WorkflowNodeEntity,
   type WorkflowNodeJSON,
+  WorkflowSelectService,
 } from '@flowgram.ai/free-layout-editor';
-import { WorkflowNodePanelService, type NodePanelResult } from '@flowgram.ai/free-node-panel-plugin';
+import { type NodePanelResult, WorkflowNodePanelService } from '@flowgram.ai/free-node-panel-plugin';
 
 /**
  * 右键菜单图层
@@ -56,7 +56,9 @@ export class ContextMenuLayer extends Layer {
   override onReady(): void {
     // 监听右键菜单事件
     this.listenPlaygroundEvent('contextmenu', (e) => {
-      if (this.config.readonlyOrDisabled) return;
+      if (this.config.readonlyOrDisabled) {
+        return;
+      }
       this.openNodePanel(e);
       // 阻止默认事件
       e.preventDefault();
@@ -78,7 +80,9 @@ export class ContextMenuLayer extends Layer {
       containerNode,
       panelProps: {},
       onSelect: async (panelParams?: NodePanelResult) => {
-        if (!panelParams) return;
+        if (!panelParams) {
+          return;
+        }
         const { nodeType, nodeJSON } = panelParams;
         // 根据选择的类型创建新的工作流节点
         const node: WorkflowNodeEntity = this.ctx.document.createWorkflowNodeByType(

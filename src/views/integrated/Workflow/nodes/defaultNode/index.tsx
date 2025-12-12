@@ -4,6 +4,8 @@ import {
   type FormRenderProps,
   ValidateTrigger,
 } from '@flowgram.ai/free-layout-editor';
+import SidebarHeader from '../../components/sidebar/SidebarHeader';
+import { useIsSidebar } from '../../hooks/useIsSidebar';
 
 /**
  * 默认节点渲染
@@ -11,7 +13,16 @@ import {
  * @returns 返回默认节点渲染
  */
 export const renderDefaultNode = ({ form }: FormRenderProps<FlowNodeJSON>) => {
-  return <div>默认节点</div>;
+  const isSidebar = useIsSidebar();
+  if (isSidebar) {
+    return (
+      <>
+        <SidebarHeader />
+        <div className="p-4 pt-0 flex-auto overflow-y-auto">默认渲染节点部分</div>
+      </>
+    );
+  }
+  return <div>默认渲染节点部分</div>;
 };
 
 /**

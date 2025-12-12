@@ -33,6 +33,8 @@ export interface FlowNodeMeta extends WorkflowNodeMeta {
   disableSideBar?: boolean;
   // 是否禁用弹窗（某些节点双击的时候不需要弹窗）
   disableModal?: boolean;
+  // 节点名称
+  name?: string;
 }
 
 /**

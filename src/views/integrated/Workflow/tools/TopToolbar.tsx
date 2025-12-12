@@ -1,6 +1,6 @@
-import { AppstoreOutlined, HistoryOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, HistoryOutlined, PlayCircleOutlined, RollbackOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
-import { Badge, Button, Space, Tag, theme, Tooltip } from 'antd';
+import { Badge, Button, Space, Tag, Tooltip, theme } from 'antd';
 import { IconRunHistory } from '../assets/icon-run-history';
 
 /**
@@ -21,24 +21,21 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
 
       {/* 中间：项目名称（空白） */}
       <div className="flex-1 flex items-center justify-center">
-        <Tooltip title="回到应用中心" color={token.colorPrimary} placement="bottom">
-          <Tag
-            color="green"
-            className="text-[16px]! p-1! cursor-pointer!"
-            onClick={() => navigate({ to: `/integrated/apps`, replace: true })}
-          >
-            {/* 项目名称 */}
-            应用ID ：{appId}
-          </Tag>
-        </Tooltip>
+        <Tag color="green" className="text-[16px]! p-1! cursor-pointer!">
+          {/* 项目名称 */}
+          应用ID ：{appId}
+        </Tag>
       </div>
 
       {/* 右侧：操作按钮 */}
       <Space size="small">
+        <Tooltip title="回到应用中心" color="white">
+          <Button icon={<RollbackOutlined />} onClick={() => navigate({ to: `/integrated/apps`, replace: true })} />
+        </Tooltip>
         <Button icon={<PlayCircleOutlined />} onClick={() => console.log('预览')}>
           预览
         </Button>
-        <Tooltip title="查看运行记录">
+        <Tooltip title="查看运行记录" color="white">
           <Button icon={IconRunHistory} onClick={() => console.log('运行记录')} />
         </Tooltip>
 
@@ -50,7 +47,7 @@ const TopToolbar: React.FC<{ appId: string }> = ({ appId }) => {
         <Button type="primary" onClick={() => console.log('发布')}>
           发布
         </Button>
-        <Tooltip title="版本历史">
+        <Tooltip title="版本历史" color="white">
           <Button icon={<HistoryOutlined />} onClick={() => console.log('版本历史')} />
         </Tooltip>
       </Space>

@@ -1,6 +1,6 @@
+import { SUPPORT_LANGUAGES } from '@/enums/constants';
 import SelectItem from '../SelectItem';
 import SwitchItem from '../SwitchItem';
-import { SUPPORT_LANGUAGES } from '@/enums/constants';
 
 /**
  * 通用
@@ -16,11 +16,7 @@ const General: React.FC = () => {
       {/* 水印 */}
       <SwitchItem title="水印" category="app" pKey="watermark" />
       {/* 定时检查更新 */}
-      <SwitchItem
-        title="定时检查更新"
-        category="app"
-        pKey="enableCheckUpdates"
-      />
+      <SwitchItem title="定时检查更新" category="app" pKey="enableCheckUpdates" />
     </>
   );
 };

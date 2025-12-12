@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import './switchItem.scss';
 import { InputNumber } from 'antd';
+import type { ReactNode } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { type Category, type SettingKey, usePreferencesStore } from '@/stores/store';
 import type { Preferences } from '@/stores/storeState';
@@ -25,7 +26,7 @@ const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
  * @returns
  */
 const NumberItem: React.FC<NumberItemProps> = (props) => {
-  const { title, disabled, placeholder, category, pKey } = props;
+  const { title, disabled, placeholder, category, pKey, suffix } = props;
 
   // 从全局状态库中获取配置(这样写表明当前组件只会关注 value 和 updatePreferences 的变化)
   const { value, updatePreferences } = usePreferencesStore(
@@ -53,9 +54,10 @@ const NumberItem: React.FC<NumberItemProps> = (props) => {
       <InputNumber
         disabled={disabled}
         placeholder={placeholder}
-        className="w-[165px]"
+        className="w-[165px]!"
         value={value}
         onChange={changePreferences}
+        suffix={suffix}
       />
     </div>
   );
@@ -66,6 +68,7 @@ export default NumberItem;
 export interface NumberItemProps {
   title?: string;
   disabled?: boolean;
+  suffix?: ReactNode;
   placeholder?: string;
   category: Category;
   pKey: string;

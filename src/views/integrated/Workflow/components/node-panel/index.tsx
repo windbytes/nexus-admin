@@ -35,7 +35,7 @@ export const NodePanel: React.FC<NodePanelRenderProps> = (props) => {
         root: {
           width: 200,
         },
-        body: {
+        content: {
           padding: 8,
         },
       }}

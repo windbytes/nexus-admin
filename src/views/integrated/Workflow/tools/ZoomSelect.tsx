@@ -8,7 +8,7 @@ import { Button, Dropdown, theme } from 'antd';
  * @returns
  */
 const ZoomSelect: React.FC = () => {
-  const tools = usePlaygroundTools();
+  const tools = usePlaygroundTools({ maxZoom: 2, minZoom: 0.25 });
   const playound = usePlayground();
   const { token } = theme.useToken();
 
