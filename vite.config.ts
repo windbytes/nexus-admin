@@ -68,7 +68,6 @@ export default defineConfig(({ mode }) => {
       rolldownOptions: {
         output: {
           minify: true,
-          // 使用更安全的文件命名，不暴露库名
           chunkFileNames: 'static/js/[hash].js',
           entryFileNames: 'static/js/[hash].js',
           // 按文件类型进行拆分文件夹
@@ -95,10 +94,6 @@ export default defineConfig(({ mode }) => {
               {
                 name: 'lib-chart',
                 test: /node_modules[\\/]echarts/,
-              },
-              {
-                name: 'lib-antd',
-                test: /node_modules[\\/]antd/,
               },
               {
                 name: 'lib-antd-icons',
