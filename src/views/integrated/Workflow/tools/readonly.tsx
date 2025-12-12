@@ -20,12 +20,10 @@ export const Readonly = () => {
   }, [playground]);
 
   return (
-    <Tooltip title={t(playground.config.readonly ? 'editable' : 'readonly')}>
+    <Tooltip title={t(playground.config.readonly ? 'editable' : 'readonly')} color="white">
       <Button
         type="text"
-        icon={
-          playground.config.readonly ? <LockOutlined /> : <UnlockOutlined />
-        }
+        icon={playground.config.readonly ? <LockOutlined /> : <UnlockOutlined />}
         onClick={toggleReadonly}
       />
     </Tooltip>

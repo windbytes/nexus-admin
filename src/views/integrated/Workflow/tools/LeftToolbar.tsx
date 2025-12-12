@@ -1,7 +1,7 @@
 import { PlusCircleFilled, QuestionCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import { useClientContext, useRefresh } from '@flowgram.ai/free-layout-editor';
 import type { NodePanelResult } from '@flowgram.ai/free-node-panel-plugin';
-import { Button, Popover, theme, Tooltip } from 'antd';
+import { Button, Popover, Tooltip, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import NodeList from '../components/node-panel/node-list';
 import AutoLayout from './AutoLayout';
@@ -30,7 +30,9 @@ const LeftToolbar: React.FC = () => {
    * @param panelParams 节点面板参数
    */
   const onSelect = useCallback(async (panelParams?: NodePanelResult) => {
-    if (!panelParams) return;
+    if (!panelParams) {
+      return;
+    }
     const { nodeType, nodeJSON } = panelParams;
     console.log('选中的节点', nodeType, nodeJSON);
   }, []);
@@ -38,7 +40,7 @@ const LeftToolbar: React.FC = () => {
   return (
     <div className="absolute left-0 top-0 z-20 flex w-12 items-center justify-center p-1 pl-2 h-full">
       <div className="flex flex-col items-center bg-white rounded-lg p-0.5 shadow-lg">
-        <Tooltip title="添加节点">
+        <Tooltip title="添加节点" color="white">
           <Popover
             arrow={false}
             placement="right"
@@ -49,7 +51,7 @@ const LeftToolbar: React.FC = () => {
             <Button type="text" icon={<PlusCircleFilled />} />
           </Popover>
         </Tooltip>
-        <Tooltip title="添加注释">
+        <Tooltip title="添加注释" color="white">
           <Button
             type="text"
             icon={<QuestionCircleOutlined />}
@@ -61,7 +63,7 @@ const LeftToolbar: React.FC = () => {
         <Readonly />
         <ExportImage />
         <AutoLayout />
-        <Tooltip title="设置">
+        <Tooltip title="设置" color="white">
           <Button type="text" icon={<SettingOutlined />} onClick={() => console.log('设置')} />
         </Tooltip>
       </div>

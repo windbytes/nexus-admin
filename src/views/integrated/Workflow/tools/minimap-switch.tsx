@@ -10,7 +10,7 @@ const MinimapSwitch: React.FC<MinimapSwitchProps> = ({ minimapVisible, setMinima
   const { t } = useTranslation();
 
   return (
-    <Tooltip title={t('workflow.tools.minimapWitch')}>
+    <Tooltip title={t('workflow.tools.minimapWitch')} color="white">
       <Button
         type="text"
         icon={<IconMinimap style={{ color: minimapVisible ? undefined : '#060709cc' }} />}

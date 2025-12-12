@@ -25,7 +25,7 @@ const AutoLayout: React.FC = () => {
     });
   }, [tools]);
   return (
-    <Tooltip title={t('workflow.tools.autoLayout')}>
+    <Tooltip title={t('workflow.tools.autoLayout')} color="white">
       <Button type="text" onClick={autoLayout} disabled={playground.config.readonly} icon={IconAutoLayout} />
     </Tooltip>
   );

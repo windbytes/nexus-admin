@@ -15,7 +15,7 @@ const SwitchLine: React.FC = () => {
     linesManager.switchLineType();
   }, [linesManager]);
   return (
-    <Tooltip title={t('workflow.tools.switchLine')}>
+    <Tooltip title={t('workflow.tools.switchLine')} color="white">
       <Button type="text" icon={IconSwitchLine} onClick={switchLine} />
     </Tooltip>
   );

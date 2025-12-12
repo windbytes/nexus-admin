@@ -16,7 +16,6 @@ import { createFreeStackPlugin } from '@flowgram.ai/free-stack-plugin';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 import { debounce } from 'lodash-es';
 import { useMemo } from 'react';
-import { WorkflowNodeType } from '@/components/workflow/nodes/constants';
 import type { FlowDocumentJSON, FlowNodeRegistry } from '@/types/workflow/node';
 import BaseNode from '../components/base-node';
 import { CommentRender } from '../components/comment/components/render';
@@ -24,6 +23,7 @@ import { GroupNodeRender } from '../components/group/components/node-render';
 import { LineDeleteButton } from '../components/line-delete-button';
 import { NodePanel } from '../components/node-panel';
 import SelectBoxPopover from '../components/select-box-popover';
+import { WorkflowNodeType } from '../nodes/constants';
 import { DefaultNode } from '../nodes/defaultNode';
 import { createContextMenuPlugin } from '../plugins/context-menu-plugin/context-menu-plugin';
 import { createPanelManagerPlugin } from '../plugins/panel-manager-plugin';
@@ -372,7 +372,7 @@ export function useEditorProps(
       onAllLayersRendered(ctx) {
         setTimeout(() => {
           ctx.tools.fitView(false);
-        }, 10);
+        }, 50);
         console.log('--- onAllLayersRendered ---');
       },
 
