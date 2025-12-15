@@ -1,21 +1,24 @@
 import {
+  CaretDownOutlined,
   CaretRightOutlined,
+  CaretUpOutlined,
   CloseOutlined,
   DeleteOutlined,
   EllipsisOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Button, Divider, Dropdown, Input, Space, Tooltip } from 'antd';
-import { useNodeRenderContext } from '../../hooks/useNodeRenderContext';
-import { useNodeFormPanel } from '../../plugins/panel-manager-plugin/hooks';
+import { useNodeRenderContext } from '../../../context/use-node-render-context';
+import { useIsSidebar } from '../../../hooks/useIsSidebar';
+import { useNodeFormPanel } from '../../../plugins/panel-manager-plugin/hooks';
 
 /**
  * 统一侧边栏头部
  * @returns
  */
-const SidebarHeader = () => {
+const FormHeader = () => {
   const { node, expanded, toggleExpand, readonly } = useNodeRenderContext();
-
+  const isSidebar = useIsSidebar();
   const { close: closePanel } = useNodeFormPanel();
 
   /**
@@ -40,6 +43,9 @@ const SidebarHeader = () => {
         variant="borderless"
       />
       <Space size={4}>
+        {node.renderData.expandable && !isSidebar && (
+          <Button type="text" icon={expanded ? <CaretUpOutlined /> : <CaretDownOutlined />} onClick={toggleExpand} />
+        )}
         {readonly ? undefined : (
           <>
             <Tooltip title="运行此步骤" color="white">
@@ -64,10 +70,10 @@ const SidebarHeader = () => {
             <Divider vertical />
           </>
         )}
-        <Button type="text" icon={<CloseOutlined />} onClick={handleCLose} />
+        {isSidebar && <Button type="text" icon={<CloseOutlined />} onClick={handleCLose} />}
       </Space>
     </div>
   );
 };
 
-export default SidebarHeader;
+export default FormHeader;

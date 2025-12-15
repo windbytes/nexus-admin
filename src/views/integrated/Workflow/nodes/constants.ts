@@ -2,6 +2,8 @@
  * 定义流程支持的节点类型
  */
 export const WorkflowNodeType = {
+  // 开始节点(这里是用作示例，实际开发中应该根据业务需求选择合适的节点)
+  Start: 'start',
   // 注释节点
   Comment: 'comment',
   /************ 消息队列(activeMQ、rabbitMQ、rocketMQ、kafka、jms、AMQP、MQTT) *****************/
