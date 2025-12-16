@@ -1,7 +1,7 @@
-import type { Endpoint, EndpointFormData } from '@/services/integrated/endpoint/endpointApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { App } from 'antd';
 import { useCallback } from 'react';
+import type { Endpoint, EndpointFormData } from '@/services/integrated/endpoint/endpointApi';
 
 interface EndpointHandlersOptions {
   modalActions: {

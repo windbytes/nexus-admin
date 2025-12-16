@@ -1,10 +1,10 @@
-import type { EndpointFormData, EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
-import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from '@tanstack/react-router';
 import { Card, Spin } from 'antd';
 import type React from 'react';
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import type { EndpointFormData, EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
+import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 import EndpointSearchForm from './components/EndpointSearchForm';
 import EndpointTable from './components/EndpointTable';
 import EndpointTableActions from './components/EndpointTableActions';
@@ -14,7 +14,7 @@ import { useEndpointMutations } from './hooks/useEndpointMutations';
 import { useEndpointTest } from './hooks/useEndpointTest';
 
 // 懒加载组件
-const EndpointModal = lazy(() => import('./components/EndpointModal'));
+const EndpointModal = lazy(() => import('./components/EndpointModal/index'));
 const EndpointTestDrawer = lazy(() => import('./components/EndpointTestDrawer'));
 const EndpointDetailDrawer = lazy(() => import('./components/EndpointDetailDrawer'));
 const EndpointVersionDrawer = lazy(() => import('./components/EndpointVersionDrawer'));
@@ -76,14 +76,14 @@ const Endpoint: React.FC = () => {
   const { state, modalActions, drawerActions, selectionActions } = useDrawerState();
 
   // 稳定的回调函数引用
-  const handleMutationSuccess = useCallback(() => {
+  const handleMutationSuccess = () => {
     refetch();
     modalActions.close();
-  }, [refetch, modalActions.close]);
+  };
 
-  const handleClearSelection = useCallback(() => {
+  const handleClearSelection = () => {
     selectionActions.clearSelection();
-  }, [selectionActions.clearSelection]);
+  };
 
   // Mutations管理
   const mutations = useEndpointMutations(handleMutationSuccess, handleClearSelection);
@@ -125,21 +125,18 @@ const Endpoint: React.FC = () => {
   /**
    * 处理搜索
    */
-  const handleSearch = useCallback(
-    (values: Omit<EndpointSearchParams, 'pageNum' | 'pageSize'>) => {
-      setSearchParams({
-        ...values,
-        pageNum: 1,
-        pageSize: searchParams.pageSize,
-      });
-    },
-    [searchParams.pageSize]
-  );
+  const handleSearch = (values: Omit<EndpointSearchParams, 'pageNum' | 'pageSize'>) => {
+    setSearchParams({
+      ...values,
+      pageNum: 1,
+      pageSize: searchParams.pageSize,
+    });
+  };
 
   /**
    * 版本恢复处理
    */
-  const handleRestoreVersion = useCallback(async () => {
+  const handleRestoreVersion = async () => {
     // 模拟API调用
     // TODO: 实际应该调用后端API进行版本恢复
     return new Promise<void>((resolve) => {
@@ -147,17 +144,14 @@ const Endpoint: React.FC = () => {
         resolve();
       }, 500);
     });
-  }, []);
+  };
 
   /**
    * 处理弹窗确认
    */
-  const handleModalOk = useCallback(
-    (values: EndpointFormData) => {
-      mutations.saveEndpoint.mutate(values);
-    },
-    [mutations.saveEndpoint]
-  );
+  const handleModalOk = (values: EndpointFormData) => {
+    mutations.saveEndpoint.mutate(values);
+  };
 
   // 表格加载状态
   const tableLoading = isLoading || mutations.isLoading;
