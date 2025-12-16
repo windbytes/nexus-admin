@@ -258,7 +258,7 @@ enum EndpointAction {
   /**
    * 分页查询端点列表
    */
-  list = '/integrated/endpoint/list',
+  queryEndpointsByPage = '/integrated/endpoint/queryEndpointsByPage',
   /**
    * 新增端点
    */
@@ -311,7 +311,7 @@ export const endpointService = {
   async getEndpointList(params: EndpointSearchParams): Promise<PageResult<Endpoint>> {
     const response = await HttpRequest.post<PageResult<Endpoint>>(
       {
-        url: EndpointAction.list,
+        url: EndpointAction.queryEndpointsByPage,
         data: params,
       },
       { successMessageMode: 'none' }
