@@ -1,3 +1,4 @@
+import type { SelectProps } from 'antd';
 import type { PageQueryParams, PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
@@ -16,26 +17,26 @@ export enum EndpointType {
 /**
  * 端点分类
  */
-export const ENDPOINT_CATEGORIES = [
+export const ENDPOINT_CATEGORIES: SelectProps['options'] = [
   { value: 'api', label: 'API接口' },
   { value: 'integration', label: '系统集成' },
   { value: 'data', label: '数据处理' },
   { value: 'schedule', label: '定时任务' },
   { value: 'message', label: '消息队列' },
   { value: 'custom', label: '自定义' },
-] as const;
+];
 
 /**
  * 端点类型选项
  */
-export const ENDPOINT_TYPE_OPTIONS = [
+export const ENDPOINT_TYPE_OPTIONS: SelectProps['options'] = [
   { value: 'http', label: 'HTTP/Web服务' },
   { value: 'database', label: '数据库/数据存储' },
   { value: 'webservice', label: 'WebService/Web服务' },
   { value: 'file', label: '文件与系统/IO' },
   { value: 'timer', label: '定时器/调度' },
   { value: 'mq', label: '消息中间件/队列' },
-] as const;
+];
 
 /**
  * HTTP端点配置

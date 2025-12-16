@@ -1,6 +1,3 @@
-import { usePermission } from '@/hooks/usePermission';
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import {
   ApiOutlined,
   CopyOutlined,
@@ -17,6 +14,10 @@ import {
 import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Dropdown, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import React from 'react';
+import { usePermission } from '@/hooks/usePermission';
+import useTableScroll from '@/hooks/useTableScroll';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 
 interface EndpointTableProps {
   /** 数据源 */
@@ -79,6 +80,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   const canExport = usePermission(['integrated:endpoint:export']);
   const canDelete = usePermission(['integrated:endpoint:delete']);
 
+  const { scrollConfig, tableWrapperRef } = useTableScroll();
+
   /**
    * 获取端点类型标签颜色
    */
@@ -98,8 +101,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
    * 获取端点类型名称
    */
   const getEndpointTypeName = (type: string): string => {
-    const option = ENDPOINT_TYPE_OPTIONS.find((opt) => opt.value === type);
-    return option?.label || type;
+    const option = ENDPOINT_TYPE_OPTIONS?.find((opt) => opt.value === type);
+    return (option?.label as string) || type;
   };
 
   /**
@@ -278,23 +281,25 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   ];
 
   return (
-    <Table<Endpoint>
-      rowKey="id"
-      bordered
-      size="middle"
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      pagination={pagination}
-      scroll={{ x: 'max-content' }}
-      rowSelection={{
-        selectedRowKeys,
-        onChange: onSelectionChange,
-      }}
-      onRow={(record) => ({
-        onDoubleClick: () => onView(record),
-      })}
-    />
+    <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+      <Table<Endpoint>
+        rowKey="id"
+        bordered
+        size="middle"
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        pagination={pagination}
+        scroll={scrollConfig}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: onSelectionChange,
+        }}
+        onRow={(record) => ({
+          onDoubleClick: () => onView(record),
+        })}
+      />
+    </div>
   );
 };
 

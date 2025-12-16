@@ -59,7 +59,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
       </Form.Item>
 
       <Form.Item name="category" label="端点分类">
-        <Select placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES as any} />
+        <Select placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES} />
       </Form.Item>
 
       <Form.Item name="description" label="端点描述">

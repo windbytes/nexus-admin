@@ -19,13 +19,8 @@ const UserCard = memo<UserCardProps>(({ selectedCount, children }) => {
           <span className="text-sm text-gray-500">已选择 {selectedCount} 项</span>
         </div>
       }
-      styles={{
-        body: {
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '16px',
-        },
+      classNames={{
+        body: 'flex flex-col flex-1 p-4',
       }}
     >
       {children}

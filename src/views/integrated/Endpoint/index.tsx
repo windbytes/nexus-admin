@@ -163,7 +163,12 @@ const Endpoint: React.FC = () => {
         <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
 
         {/* 表格区域 */}
-        <Card className="flex-1">
+        <Card
+          className="flex-1"
+          classNames={{
+            body: 'flex flex-col flex-1',
+          }}
+        >
           {/* 表格操作按钮 */}
           <EndpointTableActions {...actionHandlers} selectedRowKeys={state.selectedRowKeys} loading={tableLoading} />
 

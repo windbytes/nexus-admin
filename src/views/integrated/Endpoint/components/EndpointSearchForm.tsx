@@ -1,9 +1,9 @@
-import type { EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
-import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
+import type { EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 
 interface EndpointSearchFormProps {
   /** 搜索回调 */
@@ -88,7 +88,7 @@ const EndpointSearchForm: React.FC<EndpointSearchFormProps> = memo(({ onSearch, 
               labelCol={{ flex: '0 0 80px' }}
               wrapperCol={{ flex: '1' }}
             >
-              <Select allowClear placeholder="请选择端点类型" options={ENDPOINT_TYPE_OPTIONS as any} />
+              <Select allowClear placeholder="请选择端点类型" options={ENDPOINT_TYPE_OPTIONS} />
             </Form.Item>
 
             {/* 在大屏幕上，第一行可以显示4个，这里预留操作按钮的位置 */}
@@ -123,7 +123,7 @@ const EndpointSearchForm: React.FC<EndpointSearchFormProps> = memo(({ onSearch, 
                 labelCol={{ flex: '0 0 80px' }}
                 wrapperCol={{ flex: '1' }}
               >
-                <Select allowClear placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES as any} />
+                <Select allowClear placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES} />
               </Form.Item>
 
               <Form.Item

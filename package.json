@@ -72,7 +72,7 @@
     "@types/react-resizable": "^3.0.8",
     "@vitejs/plugin-react": "^5.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
-    "sass-embedded": "^1.96.0",
+    "sass-embedded": "^1.97.0",
     "styled-components": "^6.1.19",
     "tailwindcss": "^4.1.18",
     "terser": "^5.44.1",

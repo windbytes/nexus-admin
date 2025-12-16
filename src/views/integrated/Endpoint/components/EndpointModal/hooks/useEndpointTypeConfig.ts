@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Form } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import type { UseEndpointTypeConfigReturn } from '../types';
@@ -14,9 +14,13 @@ export const useEndpointTypeConfig = (
   endpointTypeName: string | undefined,
   selectedMode: string | undefined,
   form: ReturnType<typeof Form.useForm>[0],
-  initialValues?: { endpointType?: string }
+  initialValues?: { endpointType?: string; mode?: string }
 ): UseEndpointTypeConfigReturn => {
   const [selectedEndpointTypeConfig, setSelectedEndpointTypeConfig] = useState<EndpointTypeConfig | null>(null);
+  // 使用 ref 记录上一次的 endpointTypeName，用于判断是否是初始化
+  const prevEndpointTypeNameRef = useRef<string | undefined>(undefined);
+  // 使用 ref 标记是否是初始化阶段（弹窗刚打开时）
+  const isInitializingRef = useRef<boolean>(false);
 
   /**
    * 获取所有启用的端点类型配置列表
@@ -61,12 +65,27 @@ export const useEndpointTypeConfig = (
   }, [selectedEndpointTypeConfig]);
 
   /**
+   * 标记初始化阶段
+   * 当弹窗打开且有初始值时，标记为初始化阶段
+   */
+  useEffect(() => {
+    if (open && initialValues?.endpointType) {
+      isInitializingRef.current = true;
+      prevEndpointTypeNameRef.current = undefined;
+    } else if (!open) {
+      isInitializingRef.current = false;
+      prevEndpointTypeNameRef.current = undefined;
+    }
+  }, [open, initialValues?.endpointType]);
+
+  /**
    * 根据选择的类型名称查找对应的配置
-   * 当端点类型改变时，清空 mode 字段
+   * 当端点类型改变时，清空 mode 字段（但初始化时不清空）
    */
   useEffect(() => {
     if (!endpointTypeName || !endpointTypeListModule?.records) {
       setSelectedEndpointTypeConfig(null);
+      prevEndpointTypeNameRef.current = endpointTypeName;
       return;
     }
 
@@ -74,10 +93,28 @@ export const useEndpointTypeConfig = (
 
     if (config) {
       setSelectedEndpointTypeConfig(config);
-      // 类型改变时，清空 mode 字段
-      form.setFieldValue('mode', undefined);
+
+      // 判断是否是用户主动改变端点类型（而非初始化）
+      // 如果 prevEndpointTypeNameRef.current === undefined，说明是首次设置（初始化），不清空
+      // 如果 isInitializingRef.current === true，说明是初始化阶段，不清空
+      const isFirstTime = prevEndpointTypeNameRef.current === undefined;
+      const isUserChangingType = !isFirstTime && prevEndpointTypeNameRef.current !== endpointTypeName;
+
+      // 只有在用户主动改变端点类型时才清空 mode
+      // 初始化时（首次设置或 isInitializingRef 为 true）不清空
+      if (isUserChangingType && !isInitializingRef.current) {
+        form.setFieldValue('mode', undefined);
+      }
+
+      // 初始化完成后，重置标记
+      if (isInitializingRef.current) {
+        isInitializingRef.current = false;
+      }
+
+      prevEndpointTypeNameRef.current = endpointTypeName;
     } else {
       setSelectedEndpointTypeConfig(null);
+      prevEndpointTypeNameRef.current = endpointTypeName;
     }
   }, [endpointTypeName, endpointTypeListModule, form]);
 
