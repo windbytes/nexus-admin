@@ -83,10 +83,11 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
               />
             )}
 
-          {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
-          {endpointTypeConfig.selectedEndpointTypeConfig?.supportRetry && (
-            <RetryStrategyForm useExponentialBackoff={endpointForm.useExponentialBackoff} />
-          )}
+          {/* 重试策略表单 - 始终渲染，通过 hidden 属性控制显示/隐藏 */}
+          <RetryStrategyForm
+            useExponentialBackoff={endpointForm.useExponentialBackoff}
+            hidden={!endpointTypeConfig.selectedEndpointTypeConfig?.supportRetry}
+          />
         </Form>
       ),
     },
