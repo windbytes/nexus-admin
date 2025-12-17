@@ -40,7 +40,7 @@ export const useEndpointForm = (
     if (open && initialValues) {
       form.setFieldsValue(initialValues);
       setFormValues(initialValues);
-    } else if (!open) {
+    } else {
       form.resetFields();
       setFormValues({});
     }

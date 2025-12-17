@@ -47,7 +47,6 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   const handleOpenChange = (open: boolean) => {
     if (open) {
       nameRef.current?.focus();
-      form.setFieldValue('maximumRedeliveryDelay', 10000);
     }
   };
 
