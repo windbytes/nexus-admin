@@ -101,7 +101,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
     <DragModal
       title={title}
       open={open}
-      onOk={() => endpointForm.handleOk(endpointTypeConfig.schemaFields)}
+      onOk={() => endpointForm.handleOk()}
       onCancel={onCancel}
       confirmLoading={loading}
       width={900}

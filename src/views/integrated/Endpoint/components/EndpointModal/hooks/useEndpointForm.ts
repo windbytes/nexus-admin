@@ -50,88 +50,20 @@ export const useEndpointForm = (
    * 处理确定
    * 接受 schemaFields 参数，避免循环依赖
    */
-  const handleOk = useCallback(
-    async (schemaFields: Array<{ field: string }> = []) => {
-      try {
-        const values = await form.validateFields();
-
-        // 获取所有基础字段名（包括 model，对应后端的 mode 字段）
-        const baseFieldNames = [
-          'name',
-          'code',
-          'description',
-          'endpointType',
-          'category',
-          'mode',
-          'status',
-          'tags',
-          'remark',
-        ];
-
-        // 获取配置字段名（从schemaFields中提取）
-        const configFieldNames = schemaFields.map((field) => field.field);
-
-        // 重试策略字段名（这些字段应该放在 config.retryStrategy 中）
-        const retryStrategyFieldNames = [
-          'maximumRedeliveries',
-          'redeliveryDelay',
-          'useExponentialBackoff',
-          'backOffMultiplier',
-          'maximumRedeliveryDelay',
-        ];
-
-        // 分离基础字段、配置字段和重试策略字段
-        const baseFields: any = {};
-        const configFields: any = {};
-        const retryStrategyFields: any = {};
-
-        Object.keys(values).forEach((key) => {
-          if (baseFieldNames.includes(key)) {
-            baseFields[key] = values[key];
-          } else if (retryStrategyFieldNames.includes(key)) {
-            // 重试策略字段单独收集，并确保数字类型字段是整数
-            let value = values[key];
-            if (
-              ['maximumRedeliveries', 'redeliveryDelay', 'backOffMultiplier', 'maximumRedeliveryDelay'].includes(key) &&
-              value !== undefined &&
-              value !== null
-            ) {
-              // 确保是整数类型
-              value = typeof value === 'string' ? Number.parseInt(value, 10) : Math.floor(Number(value));
-            }
-            retryStrategyFields[key] = value;
-          } else if (configFieldNames.includes(key)) {
-            // 其他配置字段
-            configFields[key] = values[key];
-          }
-        });
-
-        // 构造提交数据
-        const submitData = {
-          id: initialValues?.id,
-          ...baseFields,
-          config: {
-            ...configFields,
-            // 只有当存在重试策略字段时才添加 retryStrategy
-            ...(Object.keys(retryStrategyFields).length > 0 && {
-              retryStrategy: retryStrategyFields,
-            }),
-          },
-        };
-
-        onOk(submitData);
-      } catch (error: any) {
-        // 滚动到第一个错误字段
-        form.scrollToField(error.errorFields[0].name, {
-          behavior: 'smooth',
-          block: 'center',
-        });
-        form.focusField(error.errorFields[0].name);
-        message.error(`表单验证失败， 原因：${error.errorFields[0].errors[0]}`);
-      }
-    },
-    [form, initialValues?.id, onOk]
-  );
+  const handleOk = useCallback(async () => {
+    try {
+      const values = await form.validateFields();
+      onOk(values);
+    } catch (error: any) {
+      // 滚动到第一个错误字段
+      form.scrollToField(error.errorFields[0].name, {
+        behavior: 'smooth',
+        block: 'center',
+      });
+      form.focusField(error.errorFields[0].name);
+      message.error(`表单验证失败， 原因：${error.errorFields[0].errors[0]}`);
+    }
+  }, [form, initialValues?.id, onOk]);
 
   return {
     formValues,
