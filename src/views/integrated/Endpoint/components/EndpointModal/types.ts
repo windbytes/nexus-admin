@@ -59,8 +59,6 @@ export interface UseEndpointTypeConfigReturn {
  * 端点表单 Hook 返回值
  */
 export interface UseEndpointFormReturn {
-  /** 表单实例 */
-  form: ReturnType<typeof import('antd').Form.useForm>[0];
   /** 表单值 */
   formValues: Record<string, any>;
   /** 处理表单值变化 */
@@ -100,4 +98,3 @@ export interface UseTestTabReturn {
   /** 设置响应内容 */
   setResponseContent: (value: string) => void;
 }
-

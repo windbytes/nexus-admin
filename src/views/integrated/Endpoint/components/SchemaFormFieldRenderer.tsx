@@ -180,7 +180,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
 
   return (
     <Form.Item
-      name={field.field}
+      name={['config', field.field]}
       label={field.label}
       rules={rules}
       tooltip={field.description}

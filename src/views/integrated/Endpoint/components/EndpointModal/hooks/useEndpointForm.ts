@@ -1,4 +1,5 @@
 import { App, Form } from 'antd';
+import type { FormInstance } from 'antd/lib';
 import { useCallback, useEffect, useState } from 'react';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import type { UseEndpointFormReturn } from '../types';
@@ -10,17 +11,18 @@ import type { UseEndpointFormReturn } from '../types';
 export const useEndpointForm = (
   open: boolean,
   initialValues: Partial<Endpoint> | undefined,
+  form: FormInstance,
   onOk: (values: any) => void
 ): UseEndpointFormReturn => {
   const { message } = App.useApp();
-  const [form] = Form.useForm();
+
   const [formValues, setFormValues] = useState<Record<string, any>>({});
 
   // 监听端点类型和模式变化
   const endpointTypeName = Form.useWatch('endpointType', form);
   const selectedMode = Form.useWatch('mode', form);
   // 监听是否启用指数退避策略
-  const useExponentialBackoff = Form.useWatch('useExponentialBackoff', form);
+  const useExponentialBackoff = Form.useWatch(['config', 'retryStrategy', 'useExponentialBackoff'], form);
 
   /**
    * 监听表单值变化，用于字段显示条件判断
@@ -36,19 +38,8 @@ export const useEndpointForm = (
    */
   useEffect(() => {
     if (open && initialValues) {
-      const config = initialValues.config || {};
-
-      // 第一阶段：只设置基础信息和配置信息（不包括 retryStrategy）
-      const formValuesData = {
-        ...initialValues,
-        ...config,
-      };
-
-      // 移除 config 对象，因为已经展平了
-      delete formValuesData.config;
-
-      form.setFieldsValue(formValuesData);
-      setFormValues(formValuesData);
+      form.setFieldsValue(initialValues);
+      setFormValues(initialValues);
     } else if (!open) {
       form.resetFields();
       setFormValues({});
@@ -56,55 +47,7 @@ export const useEndpointForm = (
   }, [open, initialValues, form]);
 
   /**
-   * 第二阶段：在 endpointType 和 mode 设置完成后，设置重试策略
-   * 这个阶段确保 RetryStrategyForm 已经渲染（虽然可能是隐藏的）
-   */
-  useEffect(() => {
-    if (open && initialValues && endpointTypeName && selectedMode) {
-      const config = initialValues.config || {};
-      let retryStrategy = config['retryStrategy'] || {};
-
-      // 如果 retryStrategy 是字符串，尝试解析为对象
-      if (typeof retryStrategy === 'string') {
-        try {
-          retryStrategy = JSON.parse(retryStrategy);
-        } catch (e) {
-          console.warn('解析 retryStrategy JSON 失败:', e);
-          retryStrategy = {};
-        }
-      }
-
-      // 将 retryStrategy 中的字段展平并转换类型
-      if (retryStrategy && typeof retryStrategy === 'object' && Object.keys(retryStrategy).length > 0) {
-        const retryStrategyValues: Record<string, any> = {
-          // 设置默认值（如果后端没有返回某些字段）
-          useExponentialBackoff: false,
-        };
-
-        Object.keys(retryStrategy).forEach((key) => {
-          if (retryStrategy[key] !== undefined && retryStrategy[key] !== null) {
-            let value = retryStrategy[key];
-            // 对于数字字段，将字符串转换为数字类型（适配后端可能返回字符串的情况）
-            if (
-              ['maximumRedeliveries', 'redeliveryDelay', 'backOffMultiplier', 'maximumRedeliveryDelay'].includes(key) &&
-              typeof value === 'string'
-            ) {
-              value = Number(value);
-            }
-            retryStrategyValues[key] = value;
-          }
-        });
-
-        form.setFieldsValue(retryStrategyValues);
-
-        // 更新 formValues 状态
-        setFormValues((prev) => ({ ...prev, ...retryStrategyValues }));
-      }
-    }
-  }, [open, initialValues, endpointTypeName, selectedMode, form]);
-
-  /**
-   * 处理确定 - 优化：使用 useCallback 缓存
+   * 处理确定
    * 接受 schemaFields 参数，避免循环依赖
    */
   const handleOk = useCallback(
@@ -178,6 +121,12 @@ export const useEndpointForm = (
 
         onOk(submitData);
       } catch (error: any) {
+        // 滚动到第一个错误字段
+        form.scrollToField(error.errorFields[0].name, {
+          behavior: 'smooth',
+          block: 'center',
+        });
+        form.focusField(error.errorFields[0].name);
         message.error(`表单验证失败， 原因：${error.errorFields[0].errors[0]}`);
       }
     },
@@ -185,7 +134,6 @@ export const useEndpointForm = (
   );
 
   return {
-    form,
     formValues,
     handleValuesChange,
     handleOk,

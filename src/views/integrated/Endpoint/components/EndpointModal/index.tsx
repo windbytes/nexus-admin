@@ -25,16 +25,16 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   onCancel,
 }) => {
   const nameRef = useRef<InputRef | null>(null);
-
+  const [form] = Form.useForm();
   // 使用端点表单 Hook
-  const endpointForm = useEndpointForm(open, initialValues, onOk);
+  const endpointForm = useEndpointForm(open, initialValues, form, onOk);
 
   // 使用端点类型配置 Hook
   const endpointTypeConfig = useEndpointTypeConfig(
     open,
     endpointForm.endpointTypeName,
     endpointForm.selectedMode,
-    endpointForm.form,
+    form,
     initialValues
   );
 
@@ -47,6 +47,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
   const handleOpenChange = (open: boolean) => {
     if (open) {
       nameRef.current?.focus();
+      form.setFieldValue('maximumRedeliveryDelay', 10000);
     }
   };
 
@@ -57,7 +58,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       label: '属性配置',
       children: (
         <Form
-          form={endpointForm.form}
+          form={form}
           layout="horizontal"
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 18 }}
@@ -83,11 +84,10 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
               />
             )}
 
-          {/* 重试策略表单 - 始终渲染，通过 hidden 属性控制显示/隐藏 */}
-          <RetryStrategyForm
-            useExponentialBackoff={endpointForm.useExponentialBackoff}
-            hidden={!endpointTypeConfig.selectedEndpointTypeConfig?.supportRetry}
-          />
+          {/* 重试策略表单 */}
+          {endpointTypeConfig.selectedEndpointTypeConfig?.supportRetry && (
+            <RetryStrategyForm useExponentialBackoff={endpointForm.useExponentialBackoff} />
+          )}
         </Form>
       ),
     },
