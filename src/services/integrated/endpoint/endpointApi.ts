@@ -346,9 +346,8 @@ export const endpointService = {
    * 删除端点
    */
   async deleteEndpoint(id: string): Promise<boolean> {
-    const response = await HttpRequest.post<boolean>({
-      url: EndpointAction.delete,
-      params: { id },
+    const response = await HttpRequest.delete<boolean>({
+      url: `${EndpointAction.delete}/${id}`,
     });
     return response;
   },
