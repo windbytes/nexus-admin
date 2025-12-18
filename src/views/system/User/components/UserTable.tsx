@@ -4,7 +4,6 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { UserModel } from '@/services/system/user/type';
-import { usePreferencesStore } from '@/stores/store';
 import { getColumns } from '../columns';
 
 interface UserTableProps {
@@ -44,12 +43,11 @@ const UserTable = memo<UserTableProps>(
     canUpdateStatus,
   }) => {
     const { t } = useTranslation();
-    const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
     const { scrollConfig, tableWrapperRef } = useTableScroll();
 
     const columns = useMemo(
-      () => getColumns(onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus),
-      [onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus]
+      () => getColumns(onEdit, onDetail, t, getMoreActions, onStatusChange, canUpdateStatus),
+      [onEdit, onDetail, t, getMoreActions, onStatusChange, canUpdateStatus]
     );
 
     const rowSelection = useMemo(

@@ -1,12 +1,11 @@
-import DragModal from '@/components/modal/DragModal';
-import { SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App, Input, Space } from 'antd';
+import { App } from 'antd';
 import type React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
 import CategorySidebar from './components/CategorySidebar';
 import TemplateGrid from './components/TemplateGrid';
-import TemplateTypeDropdown from './components/TemplateTypeDropdown';
+import TemplateHeaders from './Headers';
 import { templateService } from './services';
 import './styles.css';
 import type { AppTemplate, TemplateSearchParams, TemplateType } from './types';
@@ -111,9 +110,9 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreat
     <DragModal
       footer={null}
       centered
-      style={{ height: '95vh' }}
-      styles={{ body: { height: 'calc(95vh - 92px)', overflowY: 'auto' } }}
-      width="95%"
+      style={{ height: '90vh' }}
+      styles={{ body: { height: 'calc(90vh - 92px)', overflowY: 'auto' } }}
+      width="80%"
       open={open}
       title={
         <TemplateHeaders
@@ -145,56 +144,6 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreat
 };
 
 export default memo(AppTemplates);
-
-/**
- * 弹窗头部组件
- */
-const TemplateHeaders: React.FC<TemplateHeadersProps> = ({
-  searchKeyword,
-  selectedTypes,
-  filterOptions,
-  onTypeChange,
-  onSearch,
-}) => {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="min-w-[180px] pl-5">
-        <span className="text-lg font-medium">从应用模板创建</span>
-      </div>
-      <div className="flex-1 max-w-[548px] p-1.5 flex items-center">
-        <Space.Compact>
-          <Space.Addon>
-            <TemplateTypeDropdown
-              selectedTypes={selectedTypes}
-              onTypeChange={onTypeChange}
-              filterOptions={filterOptions}
-            />
-          </Space.Addon>
-          <Input
-            className="w-full h-10"
-            size="large"
-            placeholder="搜索所有模版..."
-            prefix={<SearchOutlined className="text-gray-400" />}
-
-            value={searchKeyword}
-            onChange={(e) => onSearch(e.target.value)}
-            onPressEnter={(e) => onSearch((e.target as any).value)}
-          />
-        </Space.Compact>
-        
-      </div>
-      <div className="w-[180px] h-8" />
-    </div>
-  );
-};
-
-interface TemplateHeadersProps {
-  searchKeyword: string;
-  selectedTypes: TemplateType[];
-  filterOptions: Array<{ label: string; value: TemplateType; count: number }>;
-  onTypeChange: (types: TemplateType[]) => void;
-  onSearch: (keyword: string) => void;
-}
 
 /**
  * 应用模板弹窗参数

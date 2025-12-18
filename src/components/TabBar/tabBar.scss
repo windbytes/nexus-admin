@@ -57,7 +57,7 @@
 
         // 激活态关闭按钮
         .ant-tabs-tab-remove {
-          color: rgba(22, 119, 255, 0.6) !important;
+          color: var(--ant-color-primary) !important;
 
           &:hover {
             color: var(--ant-color-primary) !important;

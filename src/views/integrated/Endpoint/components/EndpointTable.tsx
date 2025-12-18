@@ -131,7 +131,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'log',
-        label: '操作日志',
+        label: '变更记录',
         icon: <FileTextOutlined />,
         onClick: () => onLog(record),
       },
@@ -140,7 +140,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'callChainTrace',
-        label: '调用链路追踪',
+        label: '链路追踪',
         icon: <LinkOutlined />,
         onClick: () => {
           onCallChainTrace(record);
@@ -148,7 +148,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'dependencies',
-        label: '依赖关系图谱',
+        label: '关系图谱',
         icon: <ApiOutlined />,
         onClick: () => {
           onDependencies(record);

@@ -1,7 +1,6 @@
-import type { ThemeModeType } from '@/types/app';
-import type { BuiltinThemePreset } from '@/types/app';
 import { AlertOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import type React from 'react';
+import type { BuiltinThemePreset, ThemeModeType } from '@/types/app';
 
 export interface LanguageOption {
   label: string;
@@ -66,7 +65,7 @@ export const BUILTIN_THEME_PRESETS: BuiltinThemePreset[] = [
     type: 'sky-blue',
   },
   {
-    color: 'rgb(11, 208, 146)',
+    color: '#5ea500',
     type: 'green',
   },
   {
@@ -86,7 +85,7 @@ export const BUILTIN_THEME_PRESETS: BuiltinThemePreset[] = [
     type: 'deep-blue',
   },
   {
-    color: 'rgb(193, 66, 11)',
+    color: '#f54a00',
     type: 'orange',
   },
   {

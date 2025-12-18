@@ -3,11 +3,8 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["unplugin-icons/types/react"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -21,9 +18,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".", // 项目根目录
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     /* Linting - 更严格的类型检查 */
     "strict": true,
@@ -48,8 +43,5 @@
     "noStrictGenericChecks": false,
     "useUnknownInCatchVariables": true
   },
-  "include": [
-    "src",
-    "public/font"
-  ]
+  "include": ["src", "public/font"]
 }
