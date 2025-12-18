@@ -164,14 +164,22 @@ const Endpoint: React.FC = () => {
 
         {/* 表格区域 */}
         <Card
-          className="flex-1"
+          className="flex-1 min-h-0 flex flex-col"
           classNames={{
             body: 'flex flex-col flex-1',
           }}
+          title={
+            <div className="flex items-center justify-between">
+              <h2>端点列表</h2>
+              {/* 表格操作按钮 */}
+              <EndpointTableActions
+                {...actionHandlers}
+                selectedRowKeys={state.selectedRowKeys}
+                loading={tableLoading}
+              />
+            </div>
+          }
         >
-          {/* 表格操作按钮 */}
-          <EndpointTableActions {...actionHandlers} selectedRowKeys={state.selectedRowKeys} loading={tableLoading} />
-
           {/* 端点表格 */}
           <EndpointTable
             data={result?.records || []}

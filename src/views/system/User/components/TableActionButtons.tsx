@@ -1,12 +1,13 @@
 import {
   ColumnHeightOutlined,
+  DownOutlined,
   PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Icon } from '@iconify/react';
-import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import { App, Badge, Button, Divider, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { MyIcon } from '@/components/MyIcon';
 import { usePermission } from '@/hooks/usePermission';
@@ -153,15 +154,9 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   ];
 
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            {t('common.operation.add')}
-          </Button>
-        )}
-
         {canBatchImport && (
           <Upload
             accept=".xlsx,.xls"
@@ -187,21 +182,28 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {canBatchExport && (
           <Space.Compact>
-            <Dropdown menu={{ items: exportItems }}>
-              <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-sm! block" />}>
-                {t('common.operation.export')}
-              </Button>
+            <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-sm! block" />}>
+              {t('common.operation.export')}
+            </Button>
+            <Dropdown menu={{ items: exportItems }} placement="bottom">
+              <Button icon={<DownOutlined />} />
             </Dropdown>
           </Space.Compact>
         )}
 
         {/* 批量操作下拉菜单 */}
-        <Dropdown disabled={selectedRows.length === 0} menu={{ items: batchItems }} placement="bottomLeft">
-          <Button icon={<Icon icon="fluent:options-24-regular" className="text-sm! block" />}>
+        <Space.Compact>
+          <Button
+            disabled={selectedRows.length === 0}
+            icon={<Icon icon="fluent:options-24-regular" className="text-sm! block" />}
+          >
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
-        </Dropdown>
+          <Dropdown disabled={selectedRows.length === 0} menu={{ items: batchItems }} placement="bottom">
+            <Button icon={<DownOutlined />} />
+          </Dropdown>
+        </Space.Compact>
 
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
@@ -217,8 +219,13 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             {t('common.operation.recycle')}
           </Button>
         )}
+        {canAdd && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            {t('common.operation.add')}
+          </Button>
+        )}
       </Space>
-
+      <Divider orientation="vertical" />
       {/* 右侧表格工具按钮 */}
       <Space size="small">
         <Tooltip title="刷新数据">

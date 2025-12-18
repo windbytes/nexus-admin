@@ -61,21 +61,6 @@ const UserTable = memo<UserTableProps>(
       [selectedRowKeys, onSelectionChange]
     );
 
-    const pagination = useMemo(
-      () => ({
-        current: searchParams.pageNum,
-        pageSize: searchParams.pageSize,
-        total,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total: number) => `共 ${total} 条`,
-        onChange: onPageChange,
-      }),
-      [searchParams.pageNum, searchParams.pageSize, total, onPageChange]
-    );
-
-    const rowClassName = useMemo(() => (record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : ''), []);
-
     return (
       <div className="flex-1 min-h-0" ref={tableWrapperRef}>
         <Table
@@ -84,11 +69,19 @@ const UserTable = memo<UserTableProps>(
           dataSource={data}
           rowKey="id"
           rowSelection={rowSelection as TableProps<UserModel>['rowSelection']}
-          pagination={pagination}
+          pagination={{
+            current: searchParams.pageNum,
+            pageSize: searchParams.pageSize,
+            total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total: number) => `共 ${total} 条`,
+            onChange: onPageChange,
+          }}
           loading={loading}
           size="middle"
           scroll={scrollConfig}
-          rowClassName={rowClassName}
+          rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
           className="h-full"
         />
       </div>
