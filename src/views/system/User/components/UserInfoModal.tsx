@@ -1,9 +1,9 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { DatePicker, Form, Input, message, Select, Upload } from 'antd';
+import { DatePicker, Form, Input, type InputRef, message, Select, Upload } from 'antd';
 import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import type { UserModel } from '@/services/system/user/type';
 
@@ -26,7 +26,9 @@ interface UserInfoModalProps {
 const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, userInfo, action }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
+  const usernameRef = useRef<InputRef>(null);
+
+  const imageUrl = Form.useWatch('avatar', form);
 
   // 初始化表单数据
   useEffect(() => {
@@ -39,12 +41,18 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
         birthday: userInfo.birthday ? dayjs(userInfo.birthday) : undefined,
       };
       form.setFieldsValue(formData);
-      setImageUrl(userInfo.avatar);
-    } else {
-      form.resetFields();
-      setImageUrl(undefined);
     }
-  }, [userInfo, form, visible]);
+  }, [userInfo, visible]);
+
+  /**
+   * 弹窗打开关闭的回调
+   * @param open 弹窗是否打开
+   */
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      usernameRef.current?.focus({ cursor: 'end' });
+    }
+  };
 
   /**
    * 确认回调
@@ -72,7 +80,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
    */
   const handleCancel = () => {
     form.resetFields();
-    setImageUrl(undefined);
     onCancel();
   };
 
@@ -97,7 +104,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
     }
     if (info.file.status === 'done') {
       setLoading(false);
-      setImageUrl(info.file.response.url);
     }
   };
 
@@ -117,6 +123,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
       okButtonProps={{ disabled: action === 'view' }}
       onCancel={handleCancel}
       width={600}
+      afterOpenChange={handleAfterOpenChange}
     >
       <Form
         form={form}
@@ -135,7 +142,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
           name="username"
           rules={[{ required: true }, { min: 3, message: '用户名至少3个字符' }]}
         >
-          <Input placeholder="请输入用户名" autoFocus />
+          <Input ref={usernameRef} placeholder="请输入用户名" autoFocus />
         </Form.Item>
 
         <Form.Item label="真实姓名" name="realName" rules={[{ required: true }]}>

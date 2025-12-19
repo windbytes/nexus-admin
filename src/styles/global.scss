@@ -111,13 +111,17 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-// /* 调整整个系统Modal的样式 */
+/* 调整整个系统Modal的样式 */
+// .ant-modal:not(.ant-modal-confirm) .ant-modal-container {
+//   padding: 0;
+// }
+
 // .ant-modal:not(.ant-modal-confirm) .ant-modal-content {
 //   padding: 0;
 // }
 
 // .ant-modal:not(.ant-modal-confirm) .ant-modal-header {
-//   padding: 20px 24px;
+//   padding: var(--ant-modal-content-padding);
 //   // display: flex;
 //   align-items: center;
 //   margin-bottom: 0;

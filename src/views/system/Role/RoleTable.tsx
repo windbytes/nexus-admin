@@ -32,7 +32,7 @@ const RoleTable: React.FC<RoleTableProps> = ({ tableData, loading, columns, onRo
         columns={columns || []}
         loading={loading}
         rowKey="id"
-        scroll={scrollConfig}
+        scroll={{ y: scrollConfig.y }}
         rowSelection={{ ...rowSelection }}
       />
     </div>

@@ -77,8 +77,8 @@ const UserTable = memo<UserTableProps>(
             onChange: onPageChange,
           }}
           loading={loading}
-          size="middle"
-          scroll={scrollConfig}
+          size="small"
+          scroll={{ y: scrollConfig.y }}
           rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
           className="h-full"
         />

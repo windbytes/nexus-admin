@@ -114,11 +114,11 @@ export const getColumns = (
   },
   {
     title: '操作',
-    width: 80,
+    width: 120,
     dataIndex: 'action',
     fixed: 'right',
     align: 'center',
-    render: (_: any, record: UserModel) => (
+    render: (_, record: UserModel) => (
       <Space size={0}>
         <Button type="link" onClick={() => handleDetail(record)}>
           {t('common.operation.detail')}
@@ -126,10 +126,9 @@ export const getColumns = (
         <Button type="link" onClick={() => handleEdit(record)}>
           {t('common.operation.edit')}
         </Button>
-        <Dropdown menu={{ items: handleMore(record) ?? [] }} placement="bottomRight" trigger={['click']}>
-          <Button type="link">
+        <Dropdown menu={{ items: handleMore(record) ?? [] }} placement="bottom" trigger={['hover']}>
+          <Button type="link" icon={<DownOutlined />} iconPlacement="end">
             {t('common.operation.more')}
-            <DownOutlined />
           </Button>
         </Dropdown>
       </Space>

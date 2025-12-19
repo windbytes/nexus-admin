@@ -171,8 +171,8 @@ const User = () => {
 
       {/* 用户列表 */}
       <Card
-        className="flex-1 min-h-0 flex flex-col"
-        classNames={{ body: 'flex flex-col flex-1' }}
+        className="grow min-h-0 flex flex-col"
+        classNames={{ body: 'flex flex-col grow' }}
         title={
           <div className="flex items-center justify-between">
             <Space>
