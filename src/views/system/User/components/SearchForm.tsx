@@ -56,7 +56,17 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             <Form.Item name="username" label="用户名" colon={false}>
               <Input placeholder="请输入用户名" allowClear autoComplete="off" className="rounded-md" />
             </Form.Item>
-
+            <Form.Item name="status" label="状态" colon={false}>
+              <Select
+                allowClear
+                placeholder="请选择状态"
+                className="rounded-md"
+                options={[
+                  { value: 1, label: '启用' },
+                  { value: 0, label: '停用' },
+                ]}
+              />
+            </Form.Item>
             <Form.Item name="realName" label="真实姓名" colon={false}>
               <Input placeholder="请输入真实姓名" allowClear autoComplete="off" className="rounded-md" />
             </Form.Item>
@@ -69,18 +79,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
                 options={[
                   { value: '1', label: '男' },
                   { value: '2', label: '女' },
-                ]}
-              />
-            </Form.Item>
-
-            <Form.Item name="status" label="状态" colon={false}>
-              <Select
-                allowClear
-                placeholder="请选择状态"
-                className="rounded-md"
-                options={[
-                  { value: 1, label: '启用' },
-                  { value: 0, label: '停用' },
                 ]}
               />
             </Form.Item>
@@ -132,7 +130,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             </Button>
             <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
               {showAdvanced ? <UpOutlined /> : <DownOutlined />}
-              {showAdvanced ? '收起' : '展开'}
+              {showAdvanced ? '高级筛选' : '收起筛选'}
             </Button>
           </div>
         </Form>

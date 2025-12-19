@@ -177,7 +177,11 @@ const User = () => {
           <div className="flex items-center justify-between">
             <Space>
               <h2>用户列表</h2>
-              <span className="text-sm">已选择 {selectedRowKeys.length} 项</span>
+              <span className="text-sm">
+                {selectedRowKeys.length === 0
+                  ? '请选择用户后进行批量操作'
+                  : `已选择 ${selectedRowKeys.length} 项，共 ${result?.totalRow || 0} 条`}
+              </span>
             </Space>
             <TableActionButtons
               handleAdd={handleAdd}

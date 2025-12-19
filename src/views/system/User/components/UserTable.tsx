@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { UserModel } from '@/services/system/user/type';
 import { getColumns } from '../columns';
+import '@/styles/table.full.scss';
 
 interface UserTableProps {
   data: UserModel[];
@@ -46,8 +47,8 @@ const UserTable = memo<UserTableProps>(
     const { scrollConfig, tableWrapperRef } = useTableScroll();
 
     const columns = useMemo(
-      () => getColumns(onEdit, onDetail, t, getMoreActions, onStatusChange, canUpdateStatus),
-      [onEdit, onDetail, t, getMoreActions, onStatusChange, canUpdateStatus]
+      () => getColumns(onEdit, t, getMoreActions, onStatusChange, canUpdateStatus),
+      [onEdit, t, getMoreActions, onStatusChange, canUpdateStatus]
     );
 
     const rowSelection = useMemo(
@@ -60,7 +61,7 @@ const UserTable = memo<UserTableProps>(
     );
 
     return (
-      <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+      <div className="grow min-h-0" ref={tableWrapperRef}>
         <Table
           bordered
           columns={columns || []}
@@ -73,14 +74,20 @@ const UserTable = memo<UserTableProps>(
             total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total: number) => `共 ${total} 条`,
+            showTotal: (total: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${total} 条`,
+            hideOnSinglePage: false,
             onChange: onPageChange,
           }}
           loading={loading}
           size="small"
           scroll={{ y: scrollConfig.y }}
           rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
-          className="h-full"
+          onRow={(record: UserModel) => ({
+            onDoubleClick: () => onDetail(record),
+          })}
+          classNames={{
+            root: 'full-height-table',
+          }}
         />
       </div>
     );

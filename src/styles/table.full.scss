@@ -50,3 +50,10 @@ classNames={{
 .full-height-table .ant-pagination {
     flex: 0 0 auto;
 }
+
+/* 8. 设置边框 */
+.full-height-table .ant-table.ant-table-bordered>.ant-table-container {
+    border-bottom: var(--ant-line-width) var(--ant-line-type) var(--ant-table-border-color);
+    border-end-start-radius: var(--ant-table-header-border-radius);
+    border-end-end-radius: var(--ant-table-header-border-radius);
+}
