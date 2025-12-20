@@ -1,9 +1,9 @@
 import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import { Button, Card, Spin, Tabs, type TabsProps } from 'antd';
 import { groupBy } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { BubbleLoading } from '@/components/icons';
 import MessageList, { type MessageListType } from './MessageList';
 import styles from './message-box.module.scss';
 
@@ -114,7 +114,7 @@ const Notify: React.FC = () => {
         body: 'h-full p-3',
       }}
     >
-      <Spin spinning={loading} indicator={<Icon icon="eos-icons:bubble-loading" width={24} />} className="block">
+      <Spin spinning={loading} indicator={<BubbleLoading width={24} />} className="block">
         <Tabs
           items={tabList}
           defaultActiveKey="message"

@@ -1,10 +1,10 @@
 import { ExclamationCircleFilled, ImportOutlined, PlusOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { App, Button, Space } from 'antd';
 import type React from 'react';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DeleteDismiss24Filled } from '@/components/icons';
 
 interface RoleActionButtonsProps {
   onAddRoleClick: () => void;
@@ -44,7 +44,7 @@ const RoleActionButtons: React.FC<RoleActionButtonsProps> = ({ onAddRoleClick, s
       <Button
         type="default"
         danger
-        icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]!" />}
+        icon={<DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />}
         disabled={selRows.length === 0}
         onClick={onBatchDelete}
       >

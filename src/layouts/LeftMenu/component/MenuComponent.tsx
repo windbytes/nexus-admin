@@ -1,13 +1,12 @@
-import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps, Spin } from 'antd';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
+import { BubbleLoading } from '@/components/icons';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
-
 import {
   buildMenuItems,
   createInitialMenuState,
@@ -142,7 +141,7 @@ const MenuComponent = () => {
   return (
     <>
       {loading ? (
-        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={24} />} spinning />
+        <Spin indicator={<BubbleLoading width={24} />} spinning />
       ) : (
         <Menu
           className="side-menu"

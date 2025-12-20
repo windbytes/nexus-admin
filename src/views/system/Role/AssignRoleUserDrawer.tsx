@@ -9,7 +9,6 @@ import {
   WarningOutlined,
   WomanOutlined,
 } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   App,
@@ -31,6 +30,7 @@ import {
 } from 'antd';
 import { isEqual } from 'lodash-es';
 import { memo, useRef, useState } from 'react';
+import { DeleteDismiss24Filled } from '@/components/icons';
 import { roleService } from '@/services/system/role/roleApi';
 import type { UserSearchParams } from '@/services/system/role/type';
 import { usePreferencesStore } from '@/stores/store';
@@ -135,15 +135,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
             icon={<WarningOutlined style={{ color: colorError }} />}
           >
             <Tooltip title="移除用户">
-              <Button
-                type="text"
-                icon={
-                  <Icon
-                    icon="fluent:delete-dismiss-24-filled"
-                    className="text-sm block text-[var(--ant-color-error)]"
-                  />
-                }
-              />
+              <Button type="text" icon={<DeleteDismiss24Filled className="text-sm block text-(--ant-color-error)" />} />
             </Tooltip>
           </Popconfirm>
         );

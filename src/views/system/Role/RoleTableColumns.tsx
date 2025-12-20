@@ -1,10 +1,10 @@
 import { ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { TableProps } from 'antd';
 import { App, Button, Dropdown, Space, Switch, Tooltip } from 'antd';
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
+import { CalendarEdit16, Copy16, DeleteDismiss24Filled, PlantDetails, UserPlus } from '@/components/icons';
 import type { RoleState } from '@/services/system/role/type';
 import { usePreferencesStore } from '@/stores/store';
 
@@ -36,7 +36,7 @@ const getRoleTableColumns = ({
       {
         key: 'edit',
         label: '编辑',
-        icon: <Icon icon="fluent-color:calendar-edit-16" className="text-sm! block" />,
+        icon: <CalendarEdit16 className="text-sm! block" />,
         onClick: () => {
           dispatch({
             openEditModal: true,
@@ -48,7 +48,7 @@ const getRoleTableColumns = ({
       {
         key: 'delete',
         label: '删除',
-        icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]" />,
+        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)" />,
         onClick: () => {
           modal.confirm({
             title: '删除角色',
@@ -63,7 +63,7 @@ const getRoleTableColumns = ({
       {
         key: 'copy',
         label: '复制',
-        icon: <Icon icon="fluent-color:copy-16" className="text-xl! block" />,
+        icon: <Copy16 className="text-xl! block" />,
         onClick: () => {
           message.warning('复制功能暂未实现');
         },
@@ -150,7 +150,7 @@ const getRoleTableColumns = ({
             <Tooltip title="详情">
               <Button
                 type="text"
-                icon={<Icon icon="ix:plant-details" style={{ color: colorPrimary }} className="text-sm block" />}
+                icon={<PlantDetails style={{ color: colorPrimary }} className="text-sm block" />}
                 onClick={() => {
                   dispatch({
                     openEditModal: true,
@@ -163,7 +163,7 @@ const getRoleTableColumns = ({
             <Tooltip title="分配用户">
               <Button
                 type="text"
-                icon={<Icon icon="la:user-plus" style={{ color: colorPrimary }} className="text-sm block" />}
+                icon={<UserPlus style={{ color: colorPrimary }} className="text-sm block" />}
                 onClick={() => {
                   dispatch({
                     openEditModal: false,

@@ -1,7 +1,7 @@
-import { Icon } from '@iconify/react';
 import { Layout, Spin } from 'antd';
 import { memo, type ReactNode, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { BubbleLoading } from '@/components/icons';
 import KeepAlive from '@/components/KeepAlive';
 import { ErrorFallback } from './ErrorBoundary';
 
@@ -23,7 +23,7 @@ const Content = memo(({ children }: ContentProps) => {
   const loadingFallback = useMemo(
     () => (
       <div className="h-full flex items-center justify-center min-h-[400px]">
-        <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} size="large" />
+        <Spin indicator={<BubbleLoading width={48} />} size="large" />
       </div>
     ),
     []
