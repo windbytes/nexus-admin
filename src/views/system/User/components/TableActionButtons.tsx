@@ -1,21 +1,34 @@
 import {
   ColumnHeightOutlined,
+  DownOutlined,
   PlusOutlined,
   ReloadOutlined,
   SettingOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
+import {
+  ColumnEdit24Regular,
+  CsvOutline,
+  DeleteDismiss24Filled,
+  FileTypeExcel,
+  FolderExport,
+  FolderImport,
+  PdfIcon,
+  Recycle,
+  ResetPasswordIcon,
+  Status24Regular,
+} from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import { usePermission } from '@/hooks/usePermission';
+import type { UserModel } from '@/services/system/user/type';
 
 interface TableActionButtonsProps {
   handleAdd: () => void;
   handleBatchDelete: () => void;
   refetch: () => void;
-  selectedRows: any[];
+  selectedRows: UserModel[];
 }
 
 // 表格操作按钮
@@ -41,7 +54,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'csv',
       label: '导出为CSV',
-      icon: <Icon icon="teenyicons:csv-outline" className="text-sm! block text-orange-400" />,
+      icon: <CsvOutline className="text-sm! block! text-orange-400" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -52,7 +65,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'excel',
       label: '导出为Excel',
-      icon: <Icon icon="vscode-icons:file-type-excel" className="text-sm! block" />,
+      icon: <FileTypeExcel className="text-sm! block!" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -63,7 +76,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'pdf',
       label: '导出为PDF',
-      icon: <Icon icon="material-icon-theme:pdf" className="text-sm! block" />,
+      icon: <PdfIcon className="text-sm! block" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -97,7 +110,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'updateStatus',
       label: '批量更新状态',
-      icon: <Icon icon="fluent:status-24-regular" className="text-sm! block" />,
+      icon: <Status24Regular className="text-sm! block" />,
       onClick: () => {
         if (!canBatchUpdateStatus) {
           modal.error({
@@ -115,7 +128,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'resetPassword',
       label: '批量重置密码',
-      icon: <Icon icon="hugeicons:reset-password" className="text-sm! block" />,
+      icon: <ResetPasswordIcon className="text-sm! block!" />,
       disabled: selectedRows.length === 0 || !canBatchResetPassword,
       onClick: () => {
         if (!canBatchResetPassword) {
@@ -137,7 +150,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'delete',
       label: '批量删除',
-      icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]" />,
+      icon: <DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)" />,
       disabled: selectedRows.length === 0 || !canBatchDelete,
       onClick: () => {
         if (!canBatchDelete) {
@@ -153,7 +166,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   ];
 
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
         {canAdd && (
@@ -161,7 +174,6 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             {t('common.operation.add')}
           </Button>
         )}
-
         {canBatchImport && (
           <Upload
             accept=".xlsx,.xls"
@@ -179,34 +191,34 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               }
             }}
           >
-            <Button icon={<Icon icon="material-icon-theme:folder-import" className="text-sm! block" />}>
-              {t('common.operation.import')}
-            </Button>
+            <Button icon={<FolderImport className="text-sm! block!" />}>{t('common.operation.import')}</Button>
           </Upload>
         )}
 
         {canBatchExport && (
           <Space.Compact>
-            <Dropdown menu={{ items: exportItems }}>
-              <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-sm! block" />}>
-                {t('common.operation.export')}
-              </Button>
+            <Button icon={<FolderExport className="text-sm! block!" />}>{t('common.operation.export')}</Button>
+            <Dropdown menu={{ items: exportItems }} placement="bottom">
+              <Button icon={<DownOutlined />} />
             </Dropdown>
           </Space.Compact>
         )}
 
         {/* 批量操作下拉菜单 */}
-        <Dropdown disabled={selectedRows.length === 0} menu={{ items: batchItems }} placement="bottomLeft">
-          <Button icon={<Icon icon="fluent:options-24-regular" className="text-sm! block" />}>
+        <Space.Compact>
+          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="text-sm! block!" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
-        </Dropdown>
+          <Dropdown disabled={selectedRows.length === 0} menu={{ items: batchItems }} placement="bottom">
+            <Button icon={<DownOutlined />} />
+          </Dropdown>
+        </Space.Compact>
 
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
           <Button
-            icon={<Icon icon="fa:recycle" className="text-sm! block text-green-500!" />}
+            icon={<Recycle className="text-sm! block! text-green-500!" />}
             onClick={() => {
               modal.error({
                 title: '功能暂未开放',
@@ -218,7 +230,6 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
           </Button>
         )}
       </Space>
-
       {/* 右侧表格工具按钮 */}
       <Space size="small">
         <Tooltip title="刷新数据">
@@ -232,7 +243,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         <Tooltip title="列设置">
           <Button
-            icon={<Icon icon="fluent:column-edit-24-regular" className="text-sm block" />}
+            icon={<ColumnEdit24Regular className="text-sm block!" />}
             type="text"
             onClick={() =>
               modal.error({

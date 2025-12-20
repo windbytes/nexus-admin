@@ -1,9 +1,9 @@
 import { ExclamationCircleFilled } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import type { MenuProps } from 'antd';
 import { App } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DeleteDismiss24Filled, History48Regular, PasswordReset48Regular } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { UserModel } from '@/services/system/user/type';
 
@@ -88,7 +88,7 @@ export const useUserTableActions = ({
       {
         key: 'updatePwd',
         label: '修改密码',
-        icon: <Icon icon="fluent:password-reset-48-regular" className="text-sm! block text-orange-300" />,
+        icon: <PasswordReset48Regular className="text-sm! block text-orange-300" />,
         disabled: !permissions.canUpdatePassword,
         onClick: () => {
           if (!permissions.canUpdatePassword) {
@@ -126,7 +126,7 @@ export const useUserTableActions = ({
       {
         key: 'operation',
         label: '操作记录',
-        icon: <Icon icon="fluent-color:history-48" className="text-sm! block" />,
+        icon: <History48Regular className="text-sm! block" />,
         disabled: !permissions.canViewOperationLog,
         onClick: () => {
           if (!permissions.canViewOperationLog) {
@@ -145,7 +145,7 @@ export const useUserTableActions = ({
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]!" />,
+        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
         disabled: !permissions.canDeleteUser,
         onClick: () => {
           if (!permissions.canDeleteUser) {
@@ -159,6 +159,13 @@ export const useUserTableActions = ({
             title: '删除用户',
             icon: <ExclamationCircleFilled />,
             content: '确定删除该用户吗？数据删除后请在回收站中恢复！',
+            okButtonProps: {
+              danger: true,
+              type: 'default',
+            },
+            cancelButtonProps: {
+              type: 'primary',
+            },
             onOk() {
               logicDeleteUserMutation.mutate([record.id]);
             },

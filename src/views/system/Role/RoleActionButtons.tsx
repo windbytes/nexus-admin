@@ -1,15 +1,17 @@
 import { ExclamationCircleFilled, ImportOutlined, PlusOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { App, Button, Space } from 'antd';
 import type React from 'react';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DeleteDismiss24Filled } from '@/components/icons';
+import type { RoleModel } from '@/services/system/role/type';
 
 interface RoleActionButtonsProps {
   onAddRoleClick: () => void;
-  selRows: any[];
+  selRows: RoleModel[];
   logicDeleteUserMutation: UseMutationResult<any, any, any, unknown>;
+  onImportRoleClick: () => void;
 }
 
 /**
@@ -17,7 +19,12 @@ interface RoleActionButtonsProps {
  * @param props 参数
  * @returns 操作按钮
  */
-const RoleActionButtons: React.FC<RoleActionButtonsProps> = ({ onAddRoleClick, selRows, logicDeleteUserMutation }) => {
+const RoleActionButtons: React.FC<RoleActionButtonsProps> = ({
+  onAddRoleClick,
+  selRows,
+  logicDeleteUserMutation,
+  onImportRoleClick,
+}) => {
   const { modal } = App.useApp();
   const { t } = useTranslation();
   // 批量处理删除
@@ -38,13 +45,13 @@ const RoleActionButtons: React.FC<RoleActionButtonsProps> = ({ onAddRoleClick, s
       <Button type="primary" icon={<PlusOutlined />} onClick={onAddRoleClick}>
         {t('common.operation.add')}
       </Button>
-      <Button type="default" icon={<ImportOutlined />}>
+      <Button type="default" icon={<ImportOutlined />} onClick={onImportRoleClick}>
         {t('common.operation.import')}
       </Button>
       <Button
         type="default"
         danger
-        icon={<Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]!" />}
+        icon={<DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)!" />}
         disabled={selRows.length === 0}
         onClick={onBatchDelete}
       >

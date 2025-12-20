@@ -4,8 +4,8 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { UserModel } from '@/services/system/user/type';
-import { usePreferencesStore } from '@/stores/store';
 import { getColumns } from '../columns';
+import '@/styles/table.full.scss';
 
 interface UserTableProps {
   data: UserModel[];
@@ -44,12 +44,11 @@ const UserTable = memo<UserTableProps>(
     canUpdateStatus,
   }) => {
     const { t } = useTranslation();
-    const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
     const { scrollConfig, tableWrapperRef } = useTableScroll();
 
     const columns = useMemo(
-      () => getColumns(onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus),
-      [onEdit, onDetail, t, colorPrimary, getMoreActions, onStatusChange, canUpdateStatus]
+      () => getColumns(onEdit, t, getMoreActions, onStatusChange, canUpdateStatus),
+      [onEdit, t, getMoreActions, onStatusChange, canUpdateStatus]
     );
 
     const rowSelection = useMemo(
@@ -61,35 +60,34 @@ const UserTable = memo<UserTableProps>(
       [selectedRowKeys, onSelectionChange]
     );
 
-    const pagination = useMemo(
-      () => ({
-        current: searchParams.pageNum,
-        pageSize: searchParams.pageSize,
-        total,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total: number) => `共 ${total} 条`,
-        onChange: onPageChange,
-      }),
-      [searchParams.pageNum, searchParams.pageSize, total, onPageChange]
-    );
-
-    const rowClassName = useMemo(() => (record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : ''), []);
-
     return (
-      <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+      <div className="grow min-h-0 min-w-0" ref={tableWrapperRef}>
         <Table
           bordered
           columns={columns || []}
           dataSource={data}
           rowKey="id"
           rowSelection={rowSelection as TableProps<UserModel>['rowSelection']}
-          pagination={pagination}
+          pagination={{
+            current: searchParams.pageNum,
+            pageSize: searchParams.pageSize,
+            total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${total} 条`,
+            hideOnSinglePage: false,
+            onChange: onPageChange,
+          }}
           loading={loading}
           size="middle"
-          scroll={scrollConfig}
-          rowClassName={rowClassName}
-          className="h-full"
+          scroll={{ x: '100%', y: scrollConfig.y }}
+          rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
+          onRow={(record: UserModel) => ({
+            onDoubleClick: () => onDetail(record),
+          })}
+          classNames={{
+            root: 'full-height-table',
+          }}
         />
       </div>
     );

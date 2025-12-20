@@ -47,7 +47,7 @@ export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
   meta: FlowNodeMeta;
 
   info?: {
-    icon: string;
+    icon: React.ReactNode | string;
     description: string;
   };
   canAdd?: (ctx: FreeLayoutPluginContext) => boolean;

@@ -1,8 +1,8 @@
-import { SearchOutlined, RedoOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
-import { Button, Card, ConfigProvider, Form, Input, Select, Space, DatePicker } from 'antd';
+import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
+import { Button, Card, ConfigProvider, DatePicker, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface RoleSearchFormProps {
   onFinish: (values: any) => void;
@@ -108,13 +108,6 @@ const RoleSearchForm: React.FC<RoleSearchFormProps> = ({ onFinish, isLoading }) 
           <div className="flex justify-end mt-4">
             <Space>
               <Button
-                type="link"
-                icon={expanded ? <UpOutlined /> : <DownOutlined />}
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? '收起' : '展开'}
-              </Button>
-              <Button
                 type="default"
                 icon={<RedoOutlined />}
                 onClick={() => {
@@ -125,6 +118,13 @@ const RoleSearchForm: React.FC<RoleSearchFormProps> = ({ onFinish, isLoading }) 
               </Button>
               <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
                 {t('common.operation.search')}
+              </Button>
+              <Button
+                type="link"
+                icon={expanded ? <UpOutlined /> : <DownOutlined />}
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? '收起' : '展开'}
               </Button>
             </Space>
           </div>

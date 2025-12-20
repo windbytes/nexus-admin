@@ -1,6 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import Icons from 'unplugin-icons/vite';
 import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
@@ -31,6 +32,10 @@ export default defineConfig(({ mode }) => {
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
+      }),
+      // 将iconify图标转换成react组件（本地化）
+      Icons({
+        compiler: 'jsx',
       }),
       mockDevServerPlugin({
         prefix: '/api',
@@ -117,17 +122,7 @@ export default defineConfig(({ mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: [
-        'react',
-        'react-dom',
-        'antd',
-        'lodash-es',
-        'dayjs',
-        'axios',
-        'echarts',
-        '@ant-design/icons',
-        '@iconify/react',
-      ],
+      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
     },
     // css预处理器
     css: {

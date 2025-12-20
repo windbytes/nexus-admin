@@ -1,17 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+import { Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
 import { useCallback, useReducer, useState } from 'react';
 import type { UserModel } from '@/services/system/user/type';
 import { userService } from '@/services/system/user/userApi';
-import {
-  Operation,
-  SearchForm,
-  TableActionButtons,
-  UserCard,
-  UserInfoModal,
-  UserPasswordModal,
-  UserTable,
-} from './components';
+import { Operation, SearchForm, TableActionButtons, UserInfoModal, UserPasswordModal, UserTable } from './components';
 import { useUserMutations, useUserPermissions, useUserTableActions } from './hooks/index';
 import type { UserSearchParams } from './types';
 
@@ -172,18 +165,29 @@ const User = () => {
   }, [handleBatchDelete, selectedRows]);
 
   return (
-    <div className="user-management-container h-full flex flex-col gap-2">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
       {/* 用户列表 */}
-      <UserCard selectedCount={selectedRowKeys.length}>
-        <TableActionButtons
-          handleAdd={handleAdd}
-          handleBatchDelete={handleBatchDeleteClick}
-          refetch={refetch}
-          selectedRows={selectedRows}
-        />
+      <Card
+        className="grow min-h-0 flex flex-col"
+        classNames={{ body: 'flex grow' }}
+        title={
+          <div className="flex items-center">
+            <h2>用户列表</h2>
+            <Divider orientation="vertical" />
+            <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
+            <Divider orientation="vertical" />
+            <TableActionButtons
+              handleAdd={handleAdd}
+              handleBatchDelete={handleBatchDeleteClick}
+              refetch={refetch}
+              selectedRows={selectedRows}
+            />
+          </div>
+        }
+      >
         <UserTable
           data={result?.records || []}
           loading={isLoading}
@@ -198,7 +202,7 @@ const User = () => {
           getMoreActions={getMoreActions}
           canUpdateStatus={permissions.canUpdateStatus}
         />
-      </UserCard>
+      </Card>
 
       {/* 编辑弹窗 */}
       <UserInfoModal

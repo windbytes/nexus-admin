@@ -37,7 +37,7 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
   const hasSelected = selectedRowKeys.length > 0;
 
   return (
-    <div className="mb-4 flex justify-between items-center">
+    <div className="flex grow justify-between items-center">
       <Space size="small">
         <Button
           type="primary"
@@ -50,17 +50,18 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
         <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelected || loading}>
           批量删除
         </Button>
-        <Button icon={<ImportOutlined />} onClick={onImport}>
+        <Button icon={<ImportOutlined className="text-(--ant-orange-5)!" />} onClick={onImport}>
           导入
         </Button>
-        <Button icon={<ExportOutlined />} onClick={onBatchExport} disabled={!hasSelected || loading}>
+        <Button
+          icon={<ExportOutlined className="text-(--ant-green-5)!" />}
+          onClick={onBatchExport}
+          disabled={!hasSelected || loading}
+        >
           批量导出
         </Button>
       </Space>
-
-      <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-        刷新
-      </Button>
+      <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
     </div>
   );
 };

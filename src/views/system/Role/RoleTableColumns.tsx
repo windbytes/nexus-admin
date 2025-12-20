@@ -1,12 +1,11 @@
-import { ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
+import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type { TableProps } from 'antd';
-import { App, Button, Dropdown, Space, Switch, Tooltip } from 'antd';
+import { App, Button, Dropdown, Switch } from 'antd';
 import { useCallback } from 'react';
-import { useShallow } from 'zustand/shallow';
-import type { RoleState } from '@/services/system/role/type';
-import { usePreferencesStore } from '@/stores/store';
+import { useTranslation } from 'react-i18next';
+import { CalendarEdit16, Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
+import type { RoleModel, RoleState } from '@/services/system/role/type';
 
 interface RoleTableColumnsProps {
   dispatch: React.Dispatch<Partial<RoleState>>;
@@ -23,20 +22,16 @@ const getRoleTableColumns = ({
   dispatch,
   logicDeleteUserMutation,
   toggleRoleStatusMutation,
-}: RoleTableColumnsProps): TableProps['columns'] => {
+}: RoleTableColumnsProps): TableProps<RoleModel>['columns'] => {
   const { modal, message } = App.useApp();
-  const { colorPrimary } = usePreferencesStore(
-    useShallow((state) => ({
-      colorPrimary: state.preferences.theme.colorPrimary,
-    }))
-  );
+  const { t } = useTranslation();
   // 更多操作
   const more = useCallback(
-    (row: any) => [
+    (row: RoleModel) => [
       {
         key: 'edit',
         label: '编辑',
-        icon: <Icon icon="fluent-color:calendar-edit-16" className="text-sm! block" />,
+        icon: <CalendarEdit16 className="text-sm! block" />,
         onClick: () => {
           dispatch({
             openEditModal: true,
@@ -46,9 +41,22 @@ const getRoleTableColumns = ({
         },
       },
       {
+        key: 'assign',
+        label: '分配用户',
+        icon: <UserPlus className="text-sm! block" />,
+        onClick: () => {
+          dispatch({
+            openEditModal: false,
+            currentRow: row,
+            action: 'user',
+            openRoleUserModal: true,
+          });
+        },
+      },
+      {
         key: 'delete',
         label: '删除',
-        icon: <Icon icon="fluent:delete-dismiss-24-filled" className="text-sm! block text-[var(--ant-color-error)]" />,
+        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)" />,
         onClick: () => {
           modal.confirm({
             title: '删除角色',
@@ -63,7 +71,7 @@ const getRoleTableColumns = ({
       {
         key: 'copy',
         label: '复制',
-        icon: <Icon icon="fluent-color:copy-16" className="text-xl! block" />,
+        icon: <Copy16Regular className="text-sm! block text-(--ant-blue-4)" />,
         onClick: () => {
           message.warning('复制功能暂未实现');
         },
@@ -75,7 +83,7 @@ const getRoleTableColumns = ({
   /**
    * 表格列配置
    */
-  const columns: TableProps['columns'] = [
+  const columns: TableProps<RoleModel>['columns'] = [
     {
       title: '编码',
       width: 80,
@@ -140,40 +148,26 @@ const getRoleTableColumns = ({
     },
     {
       title: '操作',
-      width: '12%',
+      width: 90,
       dataIndex: 'action',
       fixed: 'right',
       align: 'center',
       render(_, record) {
         return (
-          <Space size={0}>
-            <Tooltip title="详情">
-              <Button
-                type="text"
-                icon={<Icon icon="ix:plant-details" style={{ color: colorPrimary }} className="text-sm block" />}
-                onClick={() => {
-                  dispatch({
-                    openEditModal: true,
-                    currentRow: record,
-                    action: 'view',
-                  });
-                }}
-              />
-            </Tooltip>
-            <Tooltip title="分配用户">
-              <Button
-                type="text"
-                icon={<Icon icon="la:user-plus" style={{ color: colorPrimary }} className="text-sm block" />}
-                onClick={() => {
-                  dispatch({
-                    openEditModal: false,
-                    currentRow: record,
-                    action: 'user',
-                    openRoleUserModal: true,
-                  });
-                }}
-              />
-            </Tooltip>
+          <div>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => {
+                dispatch({
+                  openEditModal: true,
+                  currentRow: record,
+                  action: 'edit',
+                });
+              }}
+            >
+              {t('common.operation.edit')}
+            </Button>
             {/* <Tooltip title="授权菜单">
               <Button
                 type="text"
@@ -190,10 +184,12 @@ const getRoleTableColumns = ({
                 }}
               />
             </Tooltip> */}
-            <Dropdown menu={{ items: more(record) }} placement="bottomRight" trigger={['click']}>
-              <Button type="text" icon={<MoreOutlined className="text-xl" />} />
+            <Dropdown menu={{ items: more(record) }} placement="bottom" trigger={['hover']}>
+              <Button size="small" type="link" icon={<DownOutlined />} iconPlacement="end">
+                {t('common.operation.more')}
+              </Button>
             </Dropdown>
-          </Space>
+          </div>
         );
       },
     },

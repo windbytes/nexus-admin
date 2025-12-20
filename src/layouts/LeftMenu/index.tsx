@@ -37,7 +37,7 @@ const LeftMenu: React.FC = () => {
 
   return (
     <Layout.Sider
-      className="nexus-layout-sider"
+      className="nexus-layout-sider shrink-0"
       trigger={null}
       collapsedWidth={64}
       style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}

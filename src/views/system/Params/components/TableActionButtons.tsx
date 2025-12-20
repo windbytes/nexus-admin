@@ -1,8 +1,8 @@
-import { usePermission } from '@/hooks/usePermission';
 import { DeleteOutlined, DownloadOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import { Button, Dropdown, Space, Upload } from 'antd';
 import type React from 'react';
+import { FolderExport, FolderImport } from '@/components/icons';
+import { usePermission } from '@/hooks/usePermission';
 
 interface TableActionButtonsProps {
   onAdd: () => void;
@@ -73,16 +73,13 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {canImport && (
           <Upload accept=".xlsx,.xls,.csv" showUploadList={false} beforeUpload={handleFileUpload}>
-            <Button icon={<Icon icon="material-icon-theme:folder-import" className="text-xl! block" />}>导入</Button>
+            <Button icon={<FolderImport className="text-xl! block" />}>导入</Button>
           </Upload>
         )}
 
         {canExport && (
-          <Dropdown
-            menu={{ items: exportMenuItems }}
-            placement="bottomLeft"
-          >
-            <Button icon={<Icon icon="material-icon-theme:folder-export" className="text-xl! block" />}>导出</Button>
+          <Dropdown menu={{ items: exportMenuItems }} placement="bottomLeft">
+            <Button icon={<FolderExport className="text-xl! block" />}>导出</Button>
           </Dropdown>
         )}
 

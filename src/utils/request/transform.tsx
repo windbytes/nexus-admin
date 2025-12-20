@@ -2,19 +2,20 @@
  * axios中对数据的中转处理
  */
 /* 数据处理 */
+
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { t } from 'i18next';
+import type React from 'react';
 import { HttpCodeEnum, RequestEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
 import { useUserStore } from '@/stores/userStore';
 import type { RequestOptions } from '@/types/axios';
 import type { Response } from '@/types/global';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { t } from 'i18next';
-import type React from 'react';
-import { HttpRequest } from '.';
 import { antdUtils } from '../antdUtil';
 import { encrypt } from '../encrypt';
 import { isString } from '../is';
 import { setObjToUrlParams } from '../utils';
+import { HttpRequest } from '.';
 import { joinTimestamp } from './helper';
 
 // 标记是否正在刷新token
@@ -183,7 +184,7 @@ export const transform: AxiosTransform = {
         }
       } else {
         // 兼容restful风格
-        config.url = config.url + params;
+        config.url += params;
         config.params = undefined;
       }
     }

@@ -1,5 +1,5 @@
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { useCallback } from 'react';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 
 interface TestResult {
   status: 'success' | 'failed' | 'testing';
@@ -55,4 +55,3 @@ export const useEndpointTest = () => {
 
   return { executeTest };
 };
-

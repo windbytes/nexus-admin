@@ -4,7 +4,7 @@ export const initialData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_0',
-      type: 'http',
+      type: 'start',
       meta: {
         position: {
           x: 180,

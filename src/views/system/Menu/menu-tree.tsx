@@ -1,10 +1,10 @@
 import { CaretDownOutlined, ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
-import { Icon } from '@iconify/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Button, Card, Input, Modal, Space, Spin, Tooltip, Tree, Upload } from 'antd';
 import type React from 'react';
-import { type Key, useCallback, useId, useState } from 'react';
+import { type Key, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BubbleLoading } from '@/components/icons';
 import { usePermission } from '@/hooks/usePermission';
 import { type MenuExportParams, menuService } from '@/services/system/menu/menuApi';
 import { transformData } from '@/utils/utils';
@@ -122,83 +122,68 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
   });
 
   // 选中菜单树节点
-  const onSelect = useCallback(
-    (selectedKeys: Key[], info: any) => {
-      setSelectedKeys(selectedKeys);
-      onSelectMenu(info.node);
-    },
-    [onSelectMenu]
-  );
+  const onSelect = (selectedKeys: Key[], info: any) => {
+    setSelectedKeys(selectedKeys);
+    onSelectMenu(info.node);
+  };
 
   /**
    * 验证文件格式
    * @param file 文件对象
    * @returns 是否通过验证
    */
-  const validateFileFormat = useCallback(
-    (file: File): boolean => {
-      const allowedTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-        'application/vnd.ms-excel', // .xls
-      ];
+  const validateFileFormat = (file: File): boolean => {
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+    ];
 
-      if (!allowedTypes.includes(file.type)) {
-        modal.error({
-          title: '文件格式不支持',
-          content: '只支持 Excel 文件格式 (.xlsx, .xls)。请选择正确的文件格式后重试。',
-        });
-        return false;
-      }
+    if (!allowedTypes.includes(file.type)) {
+      modal.error({
+        title: '文件格式不支持',
+        content: '只支持 Excel 文件格式 (.xlsx, .xls)。请选择正确的文件格式后重试。',
+      });
+      return false;
+    }
 
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        modal.error({
-          title: '文件过大',
-          content: '文件大小不能超过 10MB。请选择较小的文件后重试。',
-        });
-        return false;
-      }
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      modal.error({
+        title: '文件过大',
+        content: '文件大小不能超过 10MB。请选择较小的文件后重试。',
+      });
+      return false;
+    }
 
-      return true;
-    },
-    [modal]
-  );
+    return true;
+  };
 
   /**
    * 处理文件上传
    * @param file 文件对象
    */
-  const handleFileUpload = useCallback(
-    async (file: File) => {
-      if (!validateFileFormat(file)) {
-        return false;
-      }
-
-      try {
-        await importMenuMutation.mutateAsync(file);
-      } catch (error) {
-        // 错误已在mutation中处理
-      }
-
-      return false; // 阻止自动上传
-    },
-    [validateFileFormat, importMenuMutation]
-  );
+  const handleFileUpload = async (file: File) => {
+    if (!validateFileFormat(file)) {
+      return false;
+    }
+    await importMenuMutation.mutateAsync(file);
+    return false; // 阻止自动上传
+  };
 
   /**
    * 导出菜单
    */
-  const handleExport = useCallback(() => {
+  const handleExport = () => {
     setExportParams({ name: searchText });
     setExportModalVisible(true);
-  }, [searchText]);
+  };
 
   /**
    * 确认导出
    */
-  const confirmExport = useCallback(() => {
+  const confirmExport = () => {
     exportMenuMutation.mutate(exportParams);
-  }, [exportParams, exportMenuMutation]);
+  };
 
   // 检索菜单数据
   return (
@@ -243,7 +228,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
           className="my-2"
         />
         {isLoading ? (
-          <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={24} />} />
+          <Spin indicator={<BubbleLoading width={24} />} />
         ) : (
           <Tree
             showLine

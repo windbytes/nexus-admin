@@ -67,9 +67,9 @@ const translation = {
   maximize: 'Maximize',
   reload: 'Reload',
   openInNewWindow: 'Open in new window',
-  closeLeftTabs: 'Close left tabs',
-  closeRightTabs: 'Close right tabs',
-  closeOtherTabs: 'Close other tabs',
-  closeAllTabs: 'Close all tabs',
+  closeLeftTabs: 'Close left',
+  closeRightTabs: 'Close right',
+  closeOtherTabs: 'Close other',
+  closeAllTabs: 'Close all',
 };
 export default translation;

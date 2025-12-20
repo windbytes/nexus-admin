@@ -1,6 +1,3 @@
-import { usePermission } from '@/hooks/usePermission';
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 import {
   ApiOutlined,
   CopyOutlined,
@@ -8,15 +5,18 @@ import {
   DownOutlined,
   EditOutlined,
   ExportOutlined,
-  EyeOutlined,
   FileTextOutlined,
   HistoryOutlined,
   LinkOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
-import { Button, Dropdown, Space, Switch, Table, Tag, Tooltip } from 'antd';
-import React from 'react';
+import { Button, Dropdown, Switch, Table, Tag, Tooltip } from 'antd';
+import type React from 'react';
+import { usePermission } from '@/hooks/usePermission';
+import useTableScroll from '@/hooks/useTableScroll';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
 
 interface EndpointTableProps {
   /** 数据源 */
@@ -79,6 +79,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   const canExport = usePermission(['integrated:endpoint:export']);
   const canDelete = usePermission(['integrated:endpoint:delete']);
 
+  const { scrollConfig, tableWrapperRef } = useTableScroll();
+
   /**
    * 获取端点类型标签颜色
    */
@@ -98,8 +100,8 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
    * 获取端点类型名称
    */
   const getEndpointTypeName = (type: string): string => {
-    const option = ENDPOINT_TYPE_OPTIONS.find((opt) => opt.value === type);
-    return option?.label || type;
+    const option = ENDPOINT_TYPE_OPTIONS?.find((opt) => opt.value === type);
+    return (option?.label as string) || type;
   };
 
   /**
@@ -128,7 +130,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'log',
-        label: '操作日志',
+        label: '变更记录',
         icon: <FileTextOutlined />,
         onClick: () => onLog(record),
       },
@@ -137,7 +139,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'callChainTrace',
-        label: '调用链路追踪',
+        label: '链路追踪',
         icon: <LinkOutlined />,
         onClick: () => {
           onCallChainTrace(record);
@@ -145,7 +147,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       },
       {
         key: 'dependencies',
-        label: '依赖关系图谱',
+        label: '关系图谱',
         icon: <ApiOutlined />,
         onClick: () => {
           onDependencies(record);
@@ -256,46 +258,43 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       width: 120,
       fixed: 'right',
       render: (_, record) => (
-        <Space size="small">
-          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)}>
-            查看
-          </Button>
-
+        <>
           {canEdit && (
             <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
               编辑
             </Button>
           )}
-
           <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['hover']}>
             <Button type="link" size="small">
               更多 <DownOutlined />
             </Button>
           </Dropdown>
-        </Space>
+        </>
       ),
     },
   ];
 
   return (
-    <Table<Endpoint>
-      rowKey="id"
-      bordered
-      size="middle"
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      pagination={pagination}
-      scroll={{ x: 'max-content' }}
-      rowSelection={{
-        selectedRowKeys,
-        onChange: onSelectionChange,
-      }}
-      onRow={(record) => ({
-        onDoubleClick: () => onView(record),
-      })}
-    />
+    <div className="flex-1 min-h-0 min-w-0" ref={tableWrapperRef}>
+      <Table<Endpoint>
+        rowKey="id"
+        bordered
+        size="middle"
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        pagination={pagination}
+        scroll={{ x: '100%', y: scrollConfig.y }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: onSelectionChange,
+        }}
+        onRow={(record) => ({
+          onDoubleClick: () => onView(record),
+        })}
+      />
+    </div>
   );
 };
 
-export default React.memo(EndpointTable);
+export default EndpointTable;

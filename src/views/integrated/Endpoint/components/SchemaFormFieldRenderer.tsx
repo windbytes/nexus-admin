@@ -1,8 +1,8 @@
+import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
+import React, { memo } from 'react';
 import JSONDynamicForm from '@/components/base/JSONDynamicForm';
 import CodeEditor from '@/components/CodeEditor';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
-import React, { memo } from 'react';
 
 const { TextArea, Password } = Input;
 
@@ -25,7 +25,9 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
    * 只有当 field.showCondition 改变时才重新创建
    */
   const conditionFunc = React.useMemo(() => {
-    if (!field.showCondition) return null;
+    if (!field.showCondition) {
+      return null;
+    }
 
     try {
       const condition = field.showCondition.trim();
@@ -63,7 +65,9 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
    * 将函数创建和函数执行分离，优化性能
    */
   const shouldShow = React.useMemo(() => {
-    if (!conditionFunc) return true; // 没有条件或条件创建失败时默认显示
+    if (!conditionFunc) {
+      return true; // 没有条件或条件创建失败时默认显示
+    }
 
     try {
       return Boolean(conditionFunc(formValues));
@@ -114,7 +118,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
       case 'TextArea':
         return <TextArea {...rest} />;
 
-      case 'JSON':
+      case 'JSON': {
         const editorMode = rest['editorMode'] || 'editor'; // 默认为编辑器模式
 
         if (editorMode === 'form') {
@@ -140,14 +144,16 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
             />
           );
         }
+      }
 
       case 'Select':
         return (
           <Select
             {...rest}
-            filterOption={(input, option) =>
-              ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase())
-            }
+            showSearch={{
+              filterOption: (input, option) =>
+                ((option?.label ?? '') as string).toLowerCase().includes(input.toLowerCase()),
+            }}
           />
         );
 
@@ -174,7 +180,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
 
   return (
     <Form.Item
-      name={field.field}
+      name={['config', field.field]}
       label={field.label}
       rules={rules}
       tooltip={field.description}

@@ -1,7 +1,7 @@
-import type { Endpoint, EndpointFormData } from '@/services/integrated/endpoint/endpointApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { App } from 'antd';
 import { useCallback } from 'react';
+import type { Endpoint, EndpointFormData } from '@/services/integrated/endpoint/endpointApi';
 
 interface EndpointHandlersOptions {
   modalActions: {
@@ -80,8 +80,14 @@ export const useEndpointHandlers = ({
           icon: <ExclamationCircleOutlined />,
           content: `确定要删除端点"${record.name}"吗？此操作不可恢复。`,
           okText: '确定',
-          okType: 'danger',
+          okButtonProps: {
+            type: 'default',
+            danger: true,
+          },
           cancelText: '取消',
+          cancelButtonProps: {
+            type: 'primary',
+          },
           onOk: () => {
             mutations.deleteEndpoint.mutate(record.id);
           },

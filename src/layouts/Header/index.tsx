@@ -68,7 +68,10 @@ const Header = () => {
   return (
     <>
       {headerEnable ? (
-        <Layout.Header className="ant-layout-header header-container" style={{ backgroundColor: colorBgContainer }}>
+        <Layout.Header
+          className="ant-layout-header header-container shrink-0"
+          style={{ backgroundColor: colorBgContainer }}
+        >
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
             {/* 侧边栏切换按钮 */}

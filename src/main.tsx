@@ -35,6 +35,7 @@ const GlobalProvider: React.FC = () => {
     <ConfigProvider
       theme={{
         hashed: false,
+        // 配置使用零运行时，因此需要手动引入 antd/dist/antd.css，详情参考 {@link https://ant.design/docs/react/customize-theme-cn#zero-runtime}
         zeroRuntime: true,
         token: {
           colorPrimary: colorPrimary,

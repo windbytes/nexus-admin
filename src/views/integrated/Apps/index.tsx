@@ -1,20 +1,19 @@
 import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SearchOutlined, SolutionOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-
+import { useDebounceFn } from 'ahooks';
+import { Button, Checkbox, Input, type InputRef, Segmented, type SegmentedProps, Space, Spin } from 'antd';
+import { isEqual } from 'lodash-es';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TagManagementModal from '@/components/base/tag-management';
 import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
+import { BubbleLoading } from '@/components/icons';
 import { usePermission } from '@/hooks/usePermission';
 import type { App, AppSearchParams } from '@/services/integrated/apps/app';
 import { appsService } from '@/services/integrated/apps/appsApi';
 import { useTagStore } from '@/stores/useTagStore.ts';
 import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
-import { Icon } from '@iconify/react';
-import { useDebounceFn } from 'ahooks';
-import { Button, Checkbox, Input, Segmented, Space, Spin, type InputRef, type SegmentedProps } from 'antd';
-import { isEqual } from 'lodash-es';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import AppCard from './AppCard';
 import './apps.scss';
 /**
@@ -150,7 +149,7 @@ const Apps: React.FC = () => {
                 size="large"
                 ref={searchRef}
                 placeholder={t('common.placeholder')}
-                onPressEnter={(e: any) => handleSearch(e.target.value)}
+                onPressEnter={(e: React.KeyboardEvent<HTMLInputElement>) => handleSearch(e.currentTarget.value)}
               />
               <Button
                 size="large"
@@ -177,7 +176,7 @@ const Apps: React.FC = () => {
         </div>
         {/* 应用列表 */}
         {isLoading ? (
-          <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} />
+          <Spin indicator={<BubbleLoading width={48} />} />
         ) : (
           <div className="flex-1 overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
             {/* 新建应用卡片 */}
