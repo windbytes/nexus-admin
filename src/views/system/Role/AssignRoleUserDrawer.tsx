@@ -289,9 +289,6 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
               </Col>
               <Col span={6} style={{ textAlign: 'right' }}>
                 <Space>
-                  <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
-                    检索
-                  </Button>
                   <Button
                     type="default"
                     icon={<RedoOutlined />}
@@ -301,20 +298,31 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
                   >
                     重置
                   </Button>
+                  <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
+                    检索
+                  </Button>
                 </Space>
               </Col>
             </Row>
           </Form>
         </Card>
-        <Card className="mt-4! flex-1 min-h-0" styles={{ body: { height: '100%' } }}>
-          <Space>
-            <Button type="primary" onClick={addUser} icon={<PlusOutlined />}>
-              添加用户
-            </Button>
-            <Button icon={<DeleteOutlined />} danger disabled={selRows.length === 0} onClick={() => deleteBatch()}>
-              批量删除
-            </Button>
-          </Space>
+        <Card
+          className="mt-4! flex-1 min-h-0"
+          styles={{ body: { height: '100%' } }}
+          title={
+            <div className="flex items-center justify-between">
+              <span>用户列表</span>
+              <Space>
+                <Button type="primary" onClick={addUser} icon={<PlusOutlined />}>
+                  添加用户
+                </Button>
+                <Button icon={<DeleteOutlined />} danger disabled={selRows.length === 0} onClick={() => deleteBatch()}>
+                  批量删除
+                </Button>
+              </Space>
+            </div>
+          }
+        >
           {/* 表格数据 */}
           <Table
             className="mt-2"
@@ -330,14 +338,11 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
               showQuickJumper: true,
               hideOnSinglePage: false,
               showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${total} 条`,
               total: data?.totalRow || 0,
-              onChange(page, pageSize) {
-                onPageSizeChange(page, pageSize);
-              },
+              onChange: onPageSizeChange,
             }}
-            scroll={{ x: 'max-content' }}
-            rowSelection={{ ...rowSelection }}
+            rowSelection={rowSelection}
           />
         </Card>
       </Drawer>

@@ -4,7 +4,7 @@ import type { TableProps } from 'antd';
 import { App, Button, Dropdown, Space, Switch, Tooltip } from 'antd';
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { CalendarEdit16, Copy16, DeleteDismiss24Filled, PlantDetails, UserPlus } from '@/components/icons';
+import { CalendarEdit16, Copy16Regular, DeleteDismiss24Filled, PlantDetails, UserPlus } from '@/components/icons';
 import type { RoleState } from '@/services/system/role/type';
 import { usePreferencesStore } from '@/stores/store';
 
@@ -63,7 +63,7 @@ const getRoleTableColumns = ({
       {
         key: 'copy',
         label: '复制',
-        icon: <Copy16 className="text-xl! block" />,
+        icon: <Copy16Regular className="text-xl! block" />,
         onClick: () => {
           message.warning('复制功能暂未实现');
         },
