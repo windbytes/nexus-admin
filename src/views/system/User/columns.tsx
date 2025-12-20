@@ -1,5 +1,5 @@
 import { DownOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
-import { Button, Dropdown, type MenuProps, Space, Switch, type TableProps } from 'antd';
+import { Button, Dropdown, type MenuProps, Switch, type TableProps } from 'antd';
 import type { UserModel } from '@/services/system/user/type';
 
 /**
@@ -125,16 +125,16 @@ export const getColumns = (
     fixed: 'right',
     align: 'center',
     render: (_, record: UserModel) => (
-      <Space size={0}>
-        <Button type="link" onClick={() => handleEdit(record)}>
+      <>
+        <Button size="small" type="link" onClick={() => handleEdit(record)}>
           {t('common.operation.edit')}
         </Button>
         <Dropdown menu={{ items: handleMore(record) ?? [] }} placement="bottom" trigger={['hover']}>
-          <Button type="link" icon={<DownOutlined />} iconPlacement="end">
+          <Button size="small" type="link" icon={<DownOutlined />} iconPlacement="end">
             {t('common.operation.more')}
           </Button>
         </Dropdown>
-      </Space>
+      </>
     ),
   },
 ];

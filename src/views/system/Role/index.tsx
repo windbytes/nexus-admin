@@ -4,7 +4,7 @@ import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useReducer, useState } from 'react';
 import { roleService } from '@/services/system/role/roleApi';
-import type { RoleSearchParams, RoleState } from '@/services/system/role/type';
+import type { RoleModel, RoleSearchParams, RoleState } from '@/services/system/role/type';
 import RoleMenuDrawer from './AssignRoleMenuDrawer';
 import RoleUserDrawer from './AssignRoleUserDrawer';
 import RoleActionButtons from './RoleActionButtons';
@@ -118,7 +118,7 @@ const Role: React.FC = () => {
   /**
    * 多行选中的配置
    */
-  const rowSelection: TableProps['rowSelection'] = {
+  const rowSelection: TableProps<RoleModel>['rowSelection'] = {
     // 行选中的回调
     onChange(_selectedRowKeys, selectedRows) {
       dispatch({
@@ -132,7 +132,7 @@ const Role: React.FC = () => {
   /**
    * 表格行双击显示预览
    */
-  const onRow = (record: any) => {
+  const onRow = (record: RoleModel) => {
     return {
       onDoubleClick: () => {
         dispatch({
@@ -153,6 +153,13 @@ const Role: React.FC = () => {
       currentRow: null,
       action: 'add',
     });
+  };
+
+  /**
+   * 导入角色
+   */
+  const onImportRoleClick = () => {
+    console.log('导入角色');
   };
 
   /**
@@ -180,7 +187,7 @@ const Role: React.FC = () => {
    * 点击确定的回调
    * @param roleData 角色数据
    */
-  const onEditOk = async (roleData: Record<string, any>) => {
+  const onEditOk = async (roleData: RoleModel) => {
     if (state.currentRow == null) {
       // 新增数据
       addRoleMutation.mutate(roleData);
@@ -208,13 +215,30 @@ const Role: React.FC = () => {
         {/* 菜单检索条件栏 */}
         <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
         {/* 查询表格 */}
-        <Card className="flex-1 mt-2!" styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
-          {/* 操作按钮 */}
-          <RoleActionButtons
-            onAddRoleClick={onAddRoleClick}
-            selRows={state.selectedRows}
-            logicDeleteUserMutation={logicDeleteUserMutation}
-          />
+        <Card
+          className="grow min-h-0 flex flex-col"
+          classNames={{ body: 'flex flex-col grow' }}
+          title={
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2>角色列表</h2>
+                <span className="text-sm! text-gray-500">
+                  {state.selectedRows.length === 0
+                    ? '请选择角色后进行批量操作'
+                    : `已选择 ${state.selectedRows.length} 项，共 ${tableData?.totalRow || 0} 条`}
+                </span>
+              </div>
+
+              {/* 操作按钮 */}
+              <RoleActionButtons
+                onAddRoleClick={onAddRoleClick}
+                selRows={state.selectedRows}
+                logicDeleteUserMutation={logicDeleteUserMutation}
+                onImportRoleClick={onImportRoleClick}
+              />
+            </div>
+          }
+        >
           {/* 表格数据 */}
           <RoleTable
             tableData={tableData?.records || []}

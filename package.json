@@ -61,7 +61,6 @@
     "@biomejs/biome": "^2.3.10",
     "@flowgram.ai/ts-config": "^1.0.6",
     "@iconify/json": "^2.2.419",
-    "@iconify/react": "^6.0.2",
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@tailwindcss/vite": "^4.1.18",

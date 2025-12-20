@@ -165,7 +165,7 @@ const User = () => {
   }, [handleBatchDelete, selectedRows]);
 
   return (
-    <div className="user-management-container h-full flex flex-col gap-2">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
@@ -177,7 +177,7 @@ const User = () => {
           <div className="flex items-center justify-between">
             <Space>
               <h2>用户列表</h2>
-              <span className="text-sm">
+              <span className="text-sm! text-gray-500">
                 {selectedRowKeys.length === 0
                   ? '请选择用户后进行批量操作'
                   : `已选择 ${selectedRowKeys.length} 项，共 ${result?.totalRow || 0} 条`}

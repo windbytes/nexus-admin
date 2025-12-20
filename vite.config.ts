@@ -122,17 +122,7 @@ export default defineConfig(({ mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: [
-        'react',
-        'react-dom',
-        'antd',
-        'lodash-es',
-        'dayjs',
-        'axios',
-        'echarts',
-        '@ant-design/icons',
-        '@iconify/react',
-      ],
+      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
     },
     // css预处理器
     css: {

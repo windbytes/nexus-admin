@@ -22,12 +22,13 @@ import {
 } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import { usePermission } from '@/hooks/usePermission';
+import type { UserModel } from '@/services/system/user/type';
 
 interface TableActionButtonsProps {
   handleAdd: () => void;
   handleBatchDelete: () => void;
   refetch: () => void;
-  selectedRows: any[];
+  selectedRows: UserModel[];
 }
 
 // 表格操作按钮
