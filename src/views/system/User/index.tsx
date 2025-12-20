@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card, Space } from 'antd';
+import { Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
 import { useCallback, useReducer, useState } from 'react';
 import type { UserModel } from '@/services/system/user/type';
@@ -172,17 +172,13 @@ const User = () => {
       {/* 用户列表 */}
       <Card
         className="grow min-h-0 flex flex-col"
-        classNames={{ body: 'flex flex-col grow' }}
+        classNames={{ body: 'flex grow' }}
         title={
-          <div className="flex items-center justify-between">
-            <Space>
-              <h2>用户列表</h2>
-              <span className="text-sm! text-gray-500">
-                {selectedRowKeys.length === 0
-                  ? '请选择用户后进行批量操作'
-                  : `已选择 ${selectedRowKeys.length} 项，共 ${result?.totalRow || 0} 条`}
-              </span>
-            </Space>
+          <div className="flex items-center">
+            <h2>用户列表</h2>
+            <Divider orientation="vertical" />
+            <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
+            <Divider orientation="vertical" />
             <TableActionButtons
               handleAdd={handleAdd}
               handleBatchDelete={handleBatchDeleteClick}

@@ -6,7 +6,7 @@ import {
   SettingOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { App, Badge, Button, Divider, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   ColumnEdit24Regular,
@@ -166,9 +166,14 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   ];
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
+        {canAdd && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            {t('common.operation.add')}
+          </Button>
+        )}
         {canBatchImport && (
           <Upload
             accept=".xlsx,.xls"
@@ -224,13 +229,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             {t('common.operation.recycle')}
           </Button>
         )}
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            {t('common.operation.add')}
-          </Button>
-        )}
       </Space>
-      <Divider orientation="vertical" />
       {/* 右侧表格工具按钮 */}
       <Space size="small">
         <Tooltip title="刷新数据">

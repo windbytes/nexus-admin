@@ -74,9 +74,8 @@ const DriverTable: React.FC<DriverTableProps> = ({
       dataIndex: 'id',
       key: 'id',
       fixed: 'left',
-      width: 70,
+      width: 50,
       align: 'center',
-      hidden: true, // 隐藏序号列
       render: (_: string, __: DatabaseDriver, index: number) => {
         const pageNum = (pagination as TablePaginationConfig)?.current || 1;
         const pageSize = (pagination as TablePaginationConfig)?.pageSize || 20;
@@ -87,10 +86,9 @@ const DriverTable: React.FC<DriverTableProps> = ({
       title: '驱动名称',
       dataIndex: 'name',
       key: 'name',
-      width: 180,
+      width: 200,
       fixed: 'left',
-      ellipsis: true,
-      sorter: (a: DatabaseDriver, b: DatabaseDriver) => a.name.localeCompare(b.name),
+      ellipsis: { showTitle: true },
       render: (value: string) => (
         <div className="flex items-center gap-2">
           <DatabaseOutlined className="text-blue-500!" />
@@ -182,7 +180,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
     {
       title: '操作',
       key: 'action',
-      width: 120,
+      width: 140,
       align: 'center',
       fixed: 'right',
       render: (_: string, record: DatabaseDriver) => (
@@ -191,7 +189,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
             <Button
               type="text"
               size="small"
-              icon={<EditOutlined className="text-blue-500! hover:text-blue-600!" />}
+              icon={<EditOutlined className="text-base! text-blue-500! hover:text-blue-600!" />}
               onClick={() => onEdit(record)}
             />
           </Tooltip>
@@ -199,7 +197,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
             <Button
               type="text"
               size="small"
-              icon={<DownloadOutlined className="text-green-500! hover:text-green-600!" />}
+              icon={<DownloadOutlined className="text-base! text-green-500! hover:text-green-600!" />}
               onClick={() => onDownload(record)}
             />
           </Tooltip>
@@ -207,7 +205,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
             <Button
               type="text"
               size="small"
-              icon={<DeleteOutlined className="text-red-500! hover:text-red-600!" />}
+              icon={<DeleteOutlined className="text-base! text-red-500! hover:text-red-600!" />}
               onClick={() => onDelete(record)}
             />
           </Tooltip>
@@ -223,7 +221,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
   };
 
   return (
-    <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+    <div className="flex-1 min-h-0 min-w-0" ref={tableWrapperRef}>
       <Table
         bordered
         columns={columns}
@@ -232,7 +230,7 @@ const DriverTable: React.FC<DriverTableProps> = ({
         loading={loading}
         rowSelection={rowSelection}
         pagination={pagination as TablePaginationConfig}
-        scroll={scrollConfig}
+        scroll={{ x: '100%', y: scrollConfig.y }}
         size="middle"
         classNames={{
           root: 'full-height-table',

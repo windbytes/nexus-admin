@@ -5,15 +5,14 @@ import {
   DownOutlined,
   EditOutlined,
   ExportOutlined,
-  EyeOutlined,
   FileTextOutlined,
   HistoryOutlined,
   LinkOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { TablePaginationConfig, TableProps } from 'antd';
-import { Button, Dropdown, Space, Switch, Table, Tag, Tooltip } from 'antd';
-import React from 'react';
+import { Button, Dropdown, Switch, Table, Tag, Tooltip } from 'antd';
+import type React from 'react';
 import { usePermission } from '@/hooks/usePermission';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
@@ -259,29 +258,24 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
       width: 120,
       fixed: 'right',
       render: (_, record) => (
-        <Space size="small">
-          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => onView(record)}>
-            查看
-          </Button>
-
+        <>
           {canEdit && (
             <Button type="link" size="small" icon={<EditOutlined />} onClick={() => onEdit(record)}>
               编辑
             </Button>
           )}
-
           <Dropdown menu={{ items: getMoreMenuItems(record) }} trigger={['hover']}>
             <Button type="link" size="small">
               更多 <DownOutlined />
             </Button>
           </Dropdown>
-        </Space>
+        </>
       ),
     },
   ];
 
   return (
-    <div className="flex-1 min-h-0" ref={tableWrapperRef}>
+    <div className="flex-1 min-h-0 min-w-0" ref={tableWrapperRef}>
       <Table<Endpoint>
         rowKey="id"
         bordered
@@ -290,7 +284,7 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
         dataSource={data}
         loading={loading}
         pagination={pagination}
-        scroll={scrollConfig}
+        scroll={{ x: '100%', y: scrollConfig.y }}
         rowSelection={{
           selectedRowKeys,
           onChange: onSelectionChange,
@@ -303,4 +297,4 @@ const EndpointTable: React.FC<EndpointTableProps> = ({
   );
 };
 
-export default React.memo(EndpointTable);
+export default EndpointTable;

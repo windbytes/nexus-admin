@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from '@tanstack/react-router';
-import { Card, Spin } from 'antd';
+import { Card, Divider, Spin } from 'antd';
 import type React from 'react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { EndpointFormData, EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
@@ -169,8 +169,11 @@ const Endpoint: React.FC = () => {
             body: 'flex flex-col flex-1',
           }}
           title={
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <h2>端点列表</h2>
+              <Divider orientation="vertical" />
+              <span className="text-sm! text-gray-500">{`已选 ${state.selectedRowKeys.length} 项`}</span>
+              <Divider orientation="vertical" />
               {/* 表格操作按钮 */}
               <EndpointTableActions
                 {...actionHandlers}

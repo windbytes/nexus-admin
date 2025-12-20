@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Card, type TableProps } from 'antd';
+import { Card, Divider, type TableProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useReducer, useState } from 'react';
@@ -219,16 +219,11 @@ const Role: React.FC = () => {
           className="grow min-h-0 flex flex-col"
           classNames={{ body: 'flex flex-col grow' }}
           title={
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h2>角色列表</h2>
-                <span className="text-sm! text-gray-500">
-                  {state.selectedRows.length === 0
-                    ? '请选择角色后进行批量操作'
-                    : `已选择 ${state.selectedRows.length} 项，共 ${tableData?.totalRow || 0} 条`}
-                </span>
-              </div>
-
+            <div className="flex items-center">
+              <h2>角色列表</h2>
+              <Divider orientation="vertical" />
+              <span className="text-sm! text-gray-500">{`已选 ${state.selectedRows.length} 项`}</span>
+              <Divider orientation="vertical" />
               {/* 操作按钮 */}
               <RoleActionButtons
                 onAddRoleClick={onAddRoleClick}

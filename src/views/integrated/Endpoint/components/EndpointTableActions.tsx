@@ -1,5 +1,5 @@
 import { DeleteOutlined, ExportOutlined, ImportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Divider, Space } from 'antd';
+import { Button, Space } from 'antd';
 import React from 'react';
 
 interface EndpointTableActionsProps {
@@ -37,17 +37,8 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
   const hasSelected = selectedRowKeys.length > 0;
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex grow justify-between items-center">
       <Space size="small">
-        <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelected || loading}>
-          批量删除
-        </Button>
-        <Button icon={<ImportOutlined />} onClick={onImport}>
-          导入
-        </Button>
-        <Button icon={<ExportOutlined />} onClick={onBatchExport} disabled={!hasSelected || loading}>
-          批量导出
-        </Button>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -56,9 +47,21 @@ const EndpointTableActions: React.FC<EndpointTableActionsProps> = ({
         >
           新增
         </Button>
-        <Divider vertical />
-        <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
+        <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelected || loading}>
+          批量删除
+        </Button>
+        <Button icon={<ImportOutlined className="text-(--ant-orange-5)!" />} onClick={onImport}>
+          导入
+        </Button>
+        <Button
+          icon={<ExportOutlined className="text-(--ant-green-5)!" />}
+          onClick={onBatchExport}
+          disabled={!hasSelected || loading}
+        >
+          批量导出
+        </Button>
       </Space>
+      <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
     </div>
   );
 };

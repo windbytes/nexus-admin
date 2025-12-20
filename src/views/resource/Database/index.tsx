@@ -1,6 +1,6 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Card } from 'antd';
+import { App, Card, Divider } from 'antd';
 import type React from 'react';
 import { useReducer, useState } from 'react';
 import type { DatabaseDriver, DriverFormData, DriverSearchParams } from '@/services/resource/database/driverApi';
@@ -164,9 +164,13 @@ const Database: React.FC = () => {
       title: '确认删除',
       icon: <ExclamationCircleOutlined />,
       content: `确定要删除驱动"${record.name}"吗？此操作不可恢复。`,
-      okText: '确定',
-      okType: 'danger',
-      cancelText: '取消',
+      okButtonProps: {
+        danger: true,
+        type: 'default',
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
       onOk: () => {
         deleteDriverMutation.mutate(record.id);
       },
@@ -186,9 +190,13 @@ const Database: React.FC = () => {
       title: '确认批量删除',
       icon: <ExclamationCircleOutlined />,
       content: `确定要删除选中的 ${state.selectedRowKeys.length} 个驱动吗？此操作不可恢复。`,
-      okText: '确定',
-      okType: 'danger',
-      cancelText: '取消',
+      okButtonProps: {
+        danger: true,
+        type: 'default',
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
       onOk: () => {
         batchDeleteDriverMutation.mutate(state.selectedRowKeys as string[]);
       },
@@ -264,27 +272,32 @@ const Database: React.FC = () => {
     batchDownloadDriverMutation.isPending;
 
   return (
-    <div className="h-full flex flex-col gap-3">
+    <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
       <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
 
       {/* 表格区域 */}
       <Card
-        className="flex-1"
-        classNames={{
-          body: 'flex flex-col flex-1 h-full',
-        }}
+        className="grow min-h-0 flex flex-col"
+        classNames={{ body: 'flex grow' }}
+        title={
+          <div className="flex items-center">
+            <h2>驱动列表</h2>
+            <Divider orientation="vertical" />
+            <span className="text-sm! text-gray-500">{`已选 ${state.selectedRowKeys.length} 项`}</span>
+            <Divider orientation="vertical" />
+            {/* 表格操作按钮 */}
+            <DriverTableActions
+              onAdd={handleAdd}
+              onBatchDelete={handleBatchDelete}
+              onBatchDownload={handleBatchDownload}
+              onRefresh={refetch}
+              selectedRowKeys={state.selectedRowKeys}
+              loading={tableLoading}
+            />
+          </div>
+        }
       >
-        {/* 表格操作按钮 */}
-        <DriverTableActions
-          onAdd={handleAdd}
-          onBatchDelete={handleBatchDelete}
-          onBatchDownload={handleBatchDownload}
-          onRefresh={refetch}
-          selectedRowKeys={state.selectedRowKeys}
-          loading={tableLoading}
-        />
-
         {/* 驱动表格 */}
         <DriverTable
           data={result?.records || []}

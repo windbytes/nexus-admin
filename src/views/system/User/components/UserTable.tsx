@@ -61,7 +61,7 @@ const UserTable = memo<UserTableProps>(
     );
 
     return (
-      <div className="grow min-h-0" ref={tableWrapperRef}>
+      <div className="grow min-h-0 min-w-0" ref={tableWrapperRef}>
         <Table
           bordered
           columns={columns || []}
@@ -80,7 +80,7 @@ const UserTable = memo<UserTableProps>(
           }}
           loading={loading}
           size="middle"
-          scroll={{ y: scrollConfig.y }}
+          scroll={{ x: '100%', y: scrollConfig.y }}
           rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
           onRow={(record: UserModel) => ({
             onDoubleClick: () => onDetail(record),

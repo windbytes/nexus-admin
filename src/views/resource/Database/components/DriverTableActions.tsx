@@ -1,6 +1,6 @@
-import type React from 'react';
+import { DeleteOutlined, DownloadOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
+import type React from 'react';
 import { memo } from 'react';
 
 interface DriverTableActionsProps {
@@ -20,7 +20,7 @@ const DriverTableActions: React.FC<DriverTableActionsProps> = memo(
     const hasSelection = selectedRowKeys.length > 0;
 
     return (
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex grow items-center justify-between">
         <Space>
           <Tooltip title="新增驱动">
             <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
@@ -29,40 +29,26 @@ const DriverTableActions: React.FC<DriverTableActionsProps> = memo(
           </Tooltip>
 
           <Tooltip title={hasSelection ? `删除选中的 ${selectedRowKeys.length} 项` : '请先选择要删除的驱动'}>
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={onBatchDelete}
-              disabled={!hasSelection || loading}
-            >
+            <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelection || loading}>
               批量删除
             </Button>
           </Tooltip>
 
-          <Tooltip
-            title={hasSelection ? `下载选中的 ${selectedRowKeys.length} 个驱动` : '请先选择要下载的驱动'}
-          >
-            <Button
-              icon={<DownloadOutlined />}
-              onClick={onBatchDownload}
-              disabled={!hasSelection || loading}
-            >
+          <Tooltip title={hasSelection ? `下载选中的 ${selectedRowKeys.length} 个驱动` : '请先选择要下载的驱动'}>
+            <Button icon={<DownloadOutlined />} onClick={onBatchDownload} disabled={!hasSelection || loading}>
               批量下载
             </Button>
           </Tooltip>
         </Space>
 
         <Tooltip title="刷新数据">
-          <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-            刷新
-          </Button>
+          <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} loading={loading} />
         </Tooltip>
       </div>
     );
-  },
+  }
 );
 
 DriverTableActions.displayName = 'DriverTableActions';
 
 export default DriverTableActions;
-
