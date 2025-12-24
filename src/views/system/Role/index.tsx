@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, Divider, type TableProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleModel, RoleSearchParams, RoleState } from '@/services/system/role/type';
 import RoleMenuDrawer from './AssignRoleMenuDrawer';
@@ -37,6 +37,8 @@ const Role: React.FC = () => {
       selectedRows: [],
       // 当前操作
       action: '',
+      // 表格数据总数
+      total: 0,
     }
   );
 
@@ -55,6 +57,15 @@ const Role: React.FC = () => {
     queryKey: ['sys_roles', searchParams],
     queryFn: () => roleService.getRoleListPage({ ...searchParams }),
   });
+
+  // 同步分页总数
+  useEffect(() => {
+    if (searchParams.pageNum === 1) {
+      dispatch({
+        total: tableData?.totalRow,
+      });
+    }
+  }, [searchParams.pageNum, tableData?.totalRow]);
 
   // 处理检索
   const handleSearch = (values: RoleSearchParams) => {
@@ -248,7 +259,7 @@ const Role: React.FC = () => {
               hideOnSinglePage: false,
               showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
-              total: tableData?.totalRow || 0,
+              total: state.total,
               onChange(page, pageSize) {
                 setSearchParams({
                   ...searchParams,

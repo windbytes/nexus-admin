@@ -39,7 +39,7 @@ export interface RoleModel {
 /**
  * 角色查询参数
  */
-export interface RoleSearchParams extends PageQueryParams{
+export interface RoleSearchParams extends PageQueryParams {
   /**
    * 角色编码
    */
@@ -68,6 +68,8 @@ export interface RoleState {
   selectedRows: any[];
   // 当前操作
   action: string;
+  // 表格数据总数
+  total: number;
 }
 
 /**

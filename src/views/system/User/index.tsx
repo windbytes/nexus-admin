@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
-import { useCallback, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import type { UserModel } from '@/services/system/user/type';
 import { userService } from '@/services/system/user/userApi';
 import { Operation, SearchForm, TableActionButtons, UserInfoModal, UserPasswordModal, UserTable } from './components';
@@ -18,6 +18,7 @@ interface UserState {
   currentRow: Partial<UserModel> | null;
   selectedRows: Partial<UserModel>[];
   action: string;
+  total: number;
 }
 
 /**
@@ -37,6 +38,7 @@ const User = () => {
       currentRow: null,
       selectedRows: [],
       action: '',
+      total: 0,
     }
   );
 
@@ -62,6 +64,15 @@ const User = () => {
     queryKey: ['sys_users', searchParams],
     queryFn: () => userService.queryUserListPage({ ...searchParams }),
   });
+
+  // 同步分页总数
+  useEffect(() => {
+    if (searchParams.pageNum === 1) {
+      dispatch({
+        total: result?.totalRow,
+      });
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 成功回调
   const handleSuccess = useCallback(() => {
@@ -192,7 +203,7 @@ const User = () => {
           data={result?.records || []}
           loading={isLoading}
           searchParams={searchParams}
-          total={result?.totalRow || 0}
+          total={state.total}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={handleSelectionChange}
           onPageChange={handlePageChange}

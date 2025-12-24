@@ -4,7 +4,7 @@ import type { TableProps } from 'antd';
 import { App, Button, Dropdown, Switch } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarEdit16, Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
+import { Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
 import type { RoleModel, RoleState } from '@/services/system/role/type';
 
 interface RoleTableColumnsProps {
@@ -28,18 +28,6 @@ const getRoleTableColumns = ({
   // 更多操作
   const more = useCallback(
     (row: RoleModel) => [
-      {
-        key: 'edit',
-        label: '编辑',
-        icon: <CalendarEdit16 className="text-sm! block" />,
-        onClick: () => {
-          dispatch({
-            openEditModal: true,
-            currentRow: row,
-            action: 'edit',
-          });
-        },
-      },
       {
         key: 'assign',
         label: '分配用户',

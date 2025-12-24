@@ -1,5 +1,5 @@
-import useTableScroll from "@/hooks/useTableScroll";
-import { Table, type TableProps } from "antd";
+import { Table, type TableProps } from 'antd';
+import useTableScroll from '@/hooks/useTableScroll';
 
 // 定义表格需要的参数
 interface DictTableProps {
@@ -22,17 +22,10 @@ interface DictTableProps {
  * @param props 参数
  * @returns 表格
  */
-const DictTable: React.FC<DictTableProps> = ({
-  tableData,
-  loading,
-  columns,
-  onRow,
-  rowSelection,
-  pagination
-}) => {
+const DictTable: React.FC<DictTableProps> = ({ tableData, loading, columns, onRow, rowSelection, pagination }) => {
   const { scrollConfig, tableWrapperRef } = useTableScroll('max-content');
   return (
-    <div className='flex-1 min-h-0' ref={tableWrapperRef}>
+    <div className="flex-1 min-h-0" ref={tableWrapperRef}>
       <Table
         size="small"
         onRow={onRow}
@@ -47,7 +40,6 @@ const DictTable: React.FC<DictTableProps> = ({
         rowSelection={{ ...rowSelection }}
       />
     </div>
-    
   );
 };
 export default DictTable;

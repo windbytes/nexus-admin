@@ -24,14 +24,14 @@ const RoleTable: React.FC<RoleTableProps> = ({ tableData, loading, columns, onRo
     <div className="flex-1 min-h-0" ref={tableWrapperRef}>
       <Table<RoleModel>
         size="middle"
-        onRow={onRow as any}
+        onRow={onRow}
         bordered
-        pagination={pagination as any}
+        pagination={pagination}
         dataSource={tableData || []}
         columns={columns || []}
         loading={loading}
         rowKey="id"
-        scroll={{ y: scrollConfig.y }}
+        scroll={{ x: '100%', y: scrollConfig.y }}
         rowSelection={{ ...rowSelection }}
         rowClassName={(record: RoleModel) => (!record.status ? 'opacity-60 bg-gray-50' : '')}
         classNames={{
