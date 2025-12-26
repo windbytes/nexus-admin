@@ -43,6 +43,8 @@ export interface LoginResponse {
   userId: string;
   /** 用户名 */
   username: string;
+  /** 访问令牌 */
+  accessToken: string;
   /** 首页路径 */
   homePath?: string;
   /** 用户角色列表 */
@@ -56,7 +58,7 @@ const LoginApi = {
   /**
    * 登录
    */
-  login: '/login',
+  login: '/auth/login',
   /**
    * 获取验证码
    */

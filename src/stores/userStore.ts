@@ -1,6 +1,6 @@
-import type { RoleModel } from '@/services/system/role/type';
 import { create } from 'zustand';
-import { persist, type PersistOptions } from 'zustand/middleware';
+import { type PersistOptions, persist } from 'zustand/middleware';
+import type { RoleModel } from '@/services/system/role/type';
 
 // 定义用户信息的store
 interface UserState {
@@ -8,6 +8,8 @@ interface UserState {
   loginUser: string;
   isLogin: boolean;
   homePath: string;
+  // 访问token
+  accessToken: string;
   // 当前角色ID
   roleId: string;
   // 当前角色Code
@@ -16,7 +18,7 @@ interface UserState {
   currentRoleId: string;
   // 用户角色列表
   userRoles: RoleModel[];
-  login: (loginUser: string, roleId: string, roleCode: string) => void;
+  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
   logout: () => void;
   setHomePath: (homePath: string) => void;
   setCurrentRoleId: (roleId: string) => void;
@@ -31,11 +33,13 @@ export const useUserStore = create<UserState>()(
       loginUser: '',
       isLogin: false,
       homePath: '/home',
+      accessToken: '',
       roleId: '',
       roleCode: '',
       currentRoleId: '',
       userRoles: [],
-      login: (loginUser = '', roleId = '', roleCode = '') => set({ loginUser, isLogin: true, roleId, roleCode }),
+      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '') =>
+        set({ loginUser, isLogin: true, roleId, roleCode, accessToken }),
       logout: () =>
         set({
           loginUser: '',

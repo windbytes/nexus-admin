@@ -238,6 +238,11 @@ export const transform: AxiosTransform = {
     }
     // 将加密配置放到请求头里面
     config.headers['X-Encrypted'] = cpt;
+    // 添加访问令牌
+    const accessToken = useUserStore.getState().accessToken;
+    config.headers.Authorization = options.authenticationScheme
+      ? `${options.authenticationScheme} ${accessToken}`
+      : accessToken;
     return config;
   },
 

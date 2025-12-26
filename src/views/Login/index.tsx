@@ -40,7 +40,7 @@ const Login: React.FC = () => {
   // 角色选择相关状态
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [loginData, setLoginData] = useState<LoginResponse | null>(null);
+  const loginData = useRef<LoginResponse | null>(null);
   // 动画状态
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
@@ -60,7 +60,7 @@ const Login: React.FC = () => {
    */
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
-    const currentLoginData = loginResponseData || loginData;
+    const currentLoginData = loginResponseData || loginData.current;
     if (!currentLoginData) {
       return;
     }
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
         return;
       }
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, currentLoginData.accessToken);
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels = rolesToUse.map((role) => ({
@@ -192,7 +192,7 @@ const Login: React.FC = () => {
         case HttpCodeEnum.SUCCESS:
           {
             // 保存登录数据
-            setLoginData(loginResponse);
+            loginData.current = loginResponse;
 
             // 检查角色信息
             if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
@@ -258,7 +258,7 @@ const Login: React.FC = () => {
   return (
     <div className={`w-full h-full flex flex-col ${isAnimating ? styles['login-page-animated'] : ''}`}>
       {/* 标题 */}
-      <div className="h-[80px] flex items-center justify-between px-40">
+      <div className="h-20 flex items-center justify-between px-40">
         <div className="flex items-center">
           <img
             className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`}
