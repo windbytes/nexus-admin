@@ -50,11 +50,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
       }}
     >
       <Card className="mb-4">
-        <Form form={form} onFinish={onSearch} labelCol={{ lg: { span: 6 }, md: { span: 7 }, sm: { span: 8 } }}>
+        <Form form={form} onFinish={onSearch} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
           {/* 基础搜索 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Form.Item name="username" label="用户名" colon={false}>
-              <Input placeholder="请输入用户名" allowClear autoComplete="off" className="rounded-md" />
+              <Input placeholder="请输入用户名" allowClear autoComplete="off" />
             </Form.Item>
             <Form.Item name="status" label="状态" colon={false}>
               <Select
@@ -68,14 +68,13 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
               />
             </Form.Item>
             <Form.Item name="realName" label="真实姓名" colon={false}>
-              <Input placeholder="请输入真实姓名" allowClear autoComplete="off" className="rounded-md" />
+              <Input placeholder="请输入真实姓名" allowClear autoComplete="off" />
             </Form.Item>
 
             <Form.Item name="sex" label="性别" colon={false}>
               <Select
                 allowClear
                 placeholder="请选择性别"
-                className="rounded-md"
                 options={[
                   { value: '1', label: '男' },
                   { value: '2', label: '女' },
@@ -88,22 +87,21 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           {showAdvanced && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <Form.Item name="email" label="邮箱" colon={false}>
-                <Input placeholder="请输入邮箱" allowClear autoComplete="off" className="rounded-md" />
+                <Input placeholder="请输入邮箱" allowClear autoComplete="off" />
               </Form.Item>
 
               <Form.Item name="phone" label="手机号" colon={false}>
-                <Input placeholder="请输入手机号" allowClear autoComplete="off" className="rounded-md" />
+                <Input placeholder="请输入手机号" allowClear autoComplete="off" />
               </Form.Item>
 
               <Form.Item name="createTime" label="创建时间" colon={false}>
-                <RangePicker className="w-full rounded-md" placeholder={['开始时间', '结束时间']} />
+                <RangePicker className="w-full" placeholder={['开始时间', '结束时间']} />
               </Form.Item>
 
               <Form.Item name="roleId" label="角色" colon={false}>
                 <Select
                   allowClear
                   placeholder="请选择角色"
-                  className="rounded-md"
                   options={[
                     { value: 'admin', label: '管理员' },
                     { value: 'user', label: '普通用户' },
@@ -116,21 +114,15 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
 
           {/* 操作按钮 */}
           <div className="flex gap-3 justify-end">
-            <Button type="default" icon={<RedoOutlined />} onClick={handleReset} className="rounded-md">
+            <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
               {t('common.operation.reset')}
             </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isLoading}
-              icon={<SearchOutlined />}
-              className="rounded-md shadow-sm"
-            >
+            <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
               {t('common.operation.search')}
             </Button>
             <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
               {showAdvanced ? <UpOutlined /> : <DownOutlined />}
-              {showAdvanced ? '高级筛选' : '收起筛选'}
+              {showAdvanced ? '收起筛选' : '高级筛选'}
             </Button>
           </div>
         </Form>

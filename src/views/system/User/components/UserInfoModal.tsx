@@ -131,11 +131,12 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
         validateMessages={{
-          required: '${label}不能为空',
+          required: "'${name}'不能为空",
           types: {
             email: '请输入正确的邮箱格式',
           },
         }}
+        initialValues={{ sex: '1', password: '12345678' }}
       >
         <Form.Item
           label="用户名"
