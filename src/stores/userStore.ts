@@ -18,7 +18,7 @@ interface UserState {
   currentRoleId: string;
   // 用户角色列表
   userRoles: RoleModel[];
-  login: (loginUser: string, roleId: string, roleCode: string, accessToken?: string) => void;
+  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
   logout: () => void;
   setHomePath: (homePath: string) => void;
   setCurrentRoleId: (roleId: string) => void;

@@ -10,8 +10,7 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
   return new RAxios(
     deepMerge(
       {
-        // authenticationScheme: 'Bearer',
-        authenticationScheme: '',
+        authenticationScheme: 'Bearer',
         withCredentials: true,
         timeout: 0,
         headers: { 'Content-Type': ContentTypeEnum.JSON },

@@ -44,7 +44,7 @@ export interface LoginResponse {
   /** 用户名 */
   username: string;
   /** 访问令牌 */
-  accessToken?: string;
+  accessToken: string;
   /** 首页路径 */
   homePath?: string;
   /** 用户角色列表 */
