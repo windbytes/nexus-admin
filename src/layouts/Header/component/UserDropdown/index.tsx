@@ -9,7 +9,8 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Avatar, Dropdown, type MenuProps, message } from 'antd';
+import { useNavigate } from '@tanstack/react-router';
+import { App, Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,14 +35,19 @@ const UserDropdown: React.FC = () => {
       isLogin: state.isLogin,
       currentRoleId: state.currentRoleId,
       roleCode: state.roleCode,
+      roleName: state.roleName,
+      email: state.email,
       switchRole: state.switchRole,
+      clear: state.clear,
     }))
   );
+  const navigate = useNavigate();
   const { resetTabs } = useTabStore(
     useShallow((state) => ({
       resetTabs: state.resetTabs,
     }))
   );
+  const { modal } = App.useApp();
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
@@ -111,6 +117,12 @@ const UserDropdown: React.FC = () => {
       label: (
         <div className="avatar flex items-center">
           <Avatar size="large" src={avatar} />
+          <div className="flex flex-col flex-1 shrink-0 ml-2">
+            <span className="block text-sm font-medium truncate">
+              {userStore.loginUser} - {userStore.roleName}
+            </span>
+            <span className="block mt-0.5 text-xs text-gray-500 truncate">{userStore.email}</span>
+          </div>
         </div>
       ),
     },
@@ -243,7 +255,24 @@ const UserDropdown: React.FC = () => {
       label: t('layout.header.userDropdown.refresh'),
       icon: <SyncOutlined />,
       onClick: () => {
-        // 后端的缓存信息（相当于把缓存数据刷新）
+        // 清除本地的登录信息
+        modal.confirm({
+          title: t('layout.header.userDropdown.refresh'),
+          icon: <ExclamationCircleOutlined />,
+          content: '清除本地缓存的信息后，需要用户重新登录，是否继续？',
+          onOk: async () => {
+            // 清理角色相关的缓存
+            queryClient.removeQueries({ queryKey: ['user-roles'] });
+            // 清理菜单缓存
+            queryClient.removeQueries({ queryKey: ['menu-list'] });
+            // 清理用户信息
+            userStore.clear();
+            // 修改回document.title
+            document.title = 'nexus';
+            // 跳转登录界面
+            navigate({ to: '/login', replace: true });
+          },
+        });
       },
     },
     {
@@ -271,7 +300,7 @@ const UserDropdown: React.FC = () => {
   ];
   return (
     <Dropdown
-      trigger={['click']}
+      trigger={['click', 'hover']}
       menu={{ items, triggerSubMenuAction: 'hover' }}
       placement="bottomLeft"
       classNames={{

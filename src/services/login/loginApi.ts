@@ -45,6 +45,10 @@ export interface LoginResponse {
   username: string;
   /** 访问令牌 */
   accessToken: string;
+  /** 当前登录的角色名称 */
+  roleName: string;
+  /** 登录用户邮箱 */
+  email?: string;
   /** 首页路径 */
   homePath?: string;
   /** 用户角色列表 */

@@ -14,11 +14,23 @@ interface UserState {
   roleId: string;
   // 当前角色Code
   roleCode: string;
+  // 当前角色名称
+  roleName: string;
+  // 登录用户邮箱
+  email?: string;
   // 当前角色ID
   currentRoleId: string;
   // 用户角色列表
   userRoles: RoleModel[];
-  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
+  login: (
+    loginUser: string,
+    roleId: string,
+    roleCode: string,
+    accessToken: string,
+    roleName: string,
+    email?: string
+  ) => void;
+  clear(): void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   setHomePath: (homePath: string) => void;
@@ -37,15 +49,25 @@ export const useUserStore = create<UserState>()(
       accessToken: '',
       roleId: '',
       roleCode: '',
+      roleName: '',
+      email: '',
       currentRoleId: '',
       userRoles: [],
-      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '') =>
-        set({ loginUser, isLogin: true, roleId, roleCode, accessToken }),
+      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '', roleName = '', email = '') =>
+        set({ loginUser, isLogin: true, roleId, roleCode, accessToken, roleName, email }),
+      clear: () =>
+        set({
+          loginUser: '',
+          isLogin: false,
+          roleId: '',
+          roleCode: '',
+          currentRoleId: '',
+          userRoles: [],
+        }),
       logout: () =>
         set({
           loginUser: '',
           isLogin: false,
-          homePath: '/home',
           roleId: '',
           roleCode: '',
           currentRoleId: '',

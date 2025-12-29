@@ -78,7 +78,14 @@ const Login: React.FC = () => {
         return;
       }
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, currentLoginData.accessToken);
+      userStore.login(
+        currentLoginData.username,
+        selectedRole.id,
+        selectedRole.roleCode,
+        currentLoginData.accessToken,
+        currentLoginData.roleName,
+        currentLoginData.email
+      );
       userStore.setCurrentRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels = rolesToUse.map((role) => ({
