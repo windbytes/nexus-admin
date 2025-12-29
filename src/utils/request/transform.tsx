@@ -365,7 +365,9 @@ export const transform: AxiosTransform = {
         isRefreshing = true;
         try {
           // 调用刷新token的接口
-          await commonService.refreshToken();
+          const newToken = await commonService.refreshToken();
+          // 更新用户状态中的token
+          userStore.setAccessToken(newToken);
           // 执行等待的请求
           onTokenRefreshed();
           // 重新发起原始请求(这里需要注意一点的是，内部的url可能是有前缀的，所以需要把前缀去掉)

@@ -20,6 +20,7 @@ interface UserState {
   userRoles: RoleModel[];
   login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
   logout: () => void;
+  setAccessToken: (token: string) => void;
   setHomePath: (homePath: string) => void;
   setCurrentRoleId: (roleId: string) => void;
   setUserRoles: (roles: RoleModel[]) => void;
@@ -50,6 +51,7 @@ export const useUserStore = create<UserState>()(
           currentRoleId: '',
           userRoles: [],
         }),
+      setAccessToken: (token: string) => set({ accessToken: token }),
       setHomePath: (homePath: string) => set({ homePath }),
       setCurrentRoleId: (roleId: string) => set({ currentRoleId: roleId }),
       setUserRoles: (roles: RoleModel[]) => set({ userRoles: roles }),

@@ -38,7 +38,7 @@ interface ICommonService {
   /**
    * 刷新token
    */
-  refreshToken(): Promise<void>;
+  refreshToken(): Promise<string>;
 }
 
 /**
@@ -71,12 +71,12 @@ export const commonService: ICommonService = {
   /**
    * 刷新token
    */
-  refreshToken(): Promise<void> {
-    return HttpRequest.post(
+  refreshToken(): Promise<string> {
+    return HttpRequest.post<string>(
       {
         url: CommonApi.refreshToken,
       },
-      { successMessageMode: 'none', skipAuthInterceptor: true, isReturnNativeResponse: true }
+      { successMessageMode: 'none', skipAuthInterceptor: true }
     );
   },
 };
