@@ -81,11 +81,10 @@ export const useUserStore = create<UserState>()(
         set((state) => {
           const newRole = state.userRoles.find((role) => role.id === roleId);
           if (newRole) {
-            return {
-              currentRoleId: roleId,
-              roleId: newRole.id,
-              roleCode: newRole.roleCode,
-            };
+            state.roleName = newRole.roleName;
+            state.roleCode = newRole.roleCode;
+            state.currentRoleId = roleId;
+            state.roleId = roleId;
           }
           return state;
         });

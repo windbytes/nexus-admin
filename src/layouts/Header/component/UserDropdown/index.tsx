@@ -12,12 +12,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { App, Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import avatar from '@/assets/images/avatar.png';
 import { useLogout } from '@/hooks/useLogout';
-import { commonService } from '@/services/common';
 import { frameworkService } from '@/services/framework/frameworkApi';
 import { usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
@@ -39,6 +38,7 @@ const UserDropdown: React.FC = () => {
       email: state.email,
       switchRole: state.switchRole,
       clear: state.clear,
+      setUserRoles: state.setUserRoles,
     }))
   );
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const UserDropdown: React.FC = () => {
 
   const handleLogout = useLogout();
 
-  // 使用 React Query 获取用户角色列表
+  // 使用 React Query 获取用户角色列表（然后需要更新store中的内容，以应对重新给用户分配了角色后，不用重新登录）
   const {
     data: userRoles = [],
     isLoading: loading,
@@ -64,6 +64,10 @@ const UserDropdown: React.FC = () => {
     queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser),
     enabled: userStore.isLogin && Boolean(userStore.loginUser),
   });
+
+  useEffect(() => {
+    userStore.setUserRoles(userRoles);
+  }, [userRoles]);
 
   // 使用 useMemo 计算当前角色信息，避免无限循环
   const currentRoleInfo = useMemo(() => {
@@ -79,12 +83,8 @@ const UserDropdown: React.FC = () => {
   // 角色切换的 mutation
   const roleSwitchMutation = useMutation({
     mutationFn: async (roleId: string) => {
-      // 更新当前角色
+      // 更新当前角色调用整体刷新后，App.tsx中会处理重新加载菜单
       userStore.switchRole(roleId);
-
-      // 重新获取菜单数据（为后续菜单重新加载做准备）
-      await commonService.getMenuListByRoleId(roleId);
-
       return roleId;
     },
     onSuccess: () => {

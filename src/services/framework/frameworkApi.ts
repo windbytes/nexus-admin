@@ -11,6 +11,11 @@ export const FrameworkApi = {
   getUserRolesByUserName: '/sys/framework/queryRolesByUserName',
 
   /**
+   * 根据角色ID获取角色信息
+   */
+  getUserRoleByRoleId: '/system/role/getRole',
+
+  /**
    * 上传文件分片
    */
   uploadChunk: '/files/uploadChunk',
@@ -41,6 +46,11 @@ interface IFrameworkService {
    * 根据用户名获取角色列表
    */
   getUserRolesByUserName(username: string): Promise<RoleModel[]>;
+
+  /**
+   * 根据角色ID获取角色信息
+   */
+  getUserRoleByRoleId(roleId: string): Promise<RoleModel>;
 
   /**
    * 上传分片
@@ -104,6 +114,22 @@ export const frameworkService: IFrameworkService = {
       },
       { successMessageMode: 'none' }
     );
+  },
+
+  /**
+   * 根据角色ID获取角色信息
+   * @param roleId 角色ID
+   * @returns 角色信息
+   */
+  async getUserRoleByRoleId(roleId: string): Promise<RoleModel> {
+    const response = await HttpRequest.get<RoleModel>(
+      {
+        url: `${FrameworkApi.getUserRoleByRoleId}/${roleId}`,
+        adapter: 'fetch',
+      },
+      { successMessageMode: 'none' }
+    );
+    return response;
   },
 
   /**
