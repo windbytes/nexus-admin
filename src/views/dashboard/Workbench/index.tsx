@@ -23,7 +23,7 @@ import './Workbench.module.scss';
  * @returns 工作台组件
  */
 const Workbench: React.FC = () => {
-  const { data: workbenchData, isLoading } = useQuery({
+  const { data: workbenchData, isFetching } = useQuery({
     queryKey: ['workbench'],
     queryFn: mockWorkbenchData,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -40,7 +40,7 @@ const Workbench: React.FC = () => {
           {/* 流程运行时间趋势图 */}
           <Card
             hoverable
-            loading={isLoading}
+            loading={isFetching}
             title="流程运行时间趋势图 (近7日)"
             className="mainCard"
             styles={{
@@ -53,27 +53,27 @@ const Workbench: React.FC = () => {
           </Card>
 
           {/* 热门流程 TOP5 */}
-          <Card hoverable loading={isLoading} title="热门流程 TOP5" className="mainCard">
+          <Card hoverable loading={isFetching} title="热门流程 TOP5" className="mainCard">
             <HotFlowsTable />
           </Card>
 
           {/* 失败流程列表 */}
-          <Card hoverable loading={isLoading} title="失败流程列表" className="mainCard">
+          <Card hoverable loading={isFetching} title="失败流程列表" className="mainCard">
             <FailedFlowsList />
           </Card>
 
           {/* 等待人工处理的流程 */}
-          <Card hoverable loading={isLoading} title="等待人工处理的流程" className="mainCard">
+          <Card hoverable loading={isFetching} title="等待人工处理的流程" className="mainCard">
             <PendingFlowsList />
           </Card>
 
           {/* 流程类别占比 - 移动到左侧 */}
-          <Card hoverable loading={isLoading} title="流程类别分布" className="mainCard">
+          <Card hoverable loading={isFetching} title="流程类别分布" className="mainCard">
             <FlowCategoryChart />
           </Card>
 
           {/* 项目介绍 */}
-          <Card hoverable loading={isLoading} className="mainCard">
+          <Card hoverable loading={isFetching} className="mainCard">
             <ProjectDescription />
           </Card>
         </Col>
@@ -83,7 +83,7 @@ const Workbench: React.FC = () => {
           {/* 快捷入口 */}
           <Card
             hoverable
-            loading={isLoading}
+            loading={isFetching}
             title="快捷入口"
             className="sidebarCard"
             extra={<a href="/dashboard/workbench">管理</a>}
@@ -92,19 +92,19 @@ const Workbench: React.FC = () => {
           </Card>
 
           {/* 最近访问 */}
-          <Card hoverable loading={isLoading} title="最近访问" className="sidebarCard">
+          <Card hoverable loading={isFetching} title="最近访问" className="sidebarCard">
             <RecentVisits />
           </Card>
 
           {/* 待办提醒 / 异常警报 */}
-          <Card hoverable loading={isLoading} title="待办提醒 / 异常警报" className="sidebarCard">
+          <Card hoverable loading={isFetching} title="待办提醒 / 异常警报" className="sidebarCard">
             <TodoReminders />
           </Card>
 
           {/* 公告 */}
           <Card
             hoverable
-            loading={isLoading}
+            loading={isFetching}
             title="公告"
             className="sidebarCard"
             extra={<a href="/announcements">查看更多</a>}
@@ -115,7 +115,7 @@ const Workbench: React.FC = () => {
           {/* 帮助文档 */}
           <Card
             hoverable
-            loading={isLoading}
+            loading={isFetching}
             title="帮助文档"
             className="mainCard"
             extra={<a href="/help">查看更多</a>}

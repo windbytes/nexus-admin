@@ -56,7 +56,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
     const navigate = useNavigate();
 
     // 使用 useQuery 加载端点列表
-    const { data: endpoints, isLoading: loadingEndpoints } = useQuery({
+    const { data: endpoints, isFetching: loadingEndpoints } = useQuery({
       queryKey: ['endpoints', { endpointType: 'database', status: true }],
       queryFn: () => dataModeService.getEndpoints({ endpointType: 'database', status: true }),
       enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询

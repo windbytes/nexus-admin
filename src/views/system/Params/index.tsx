@@ -1,16 +1,16 @@
-import {
-  sysParamService,
-  type ExportOptions,
-  type SysParam,
-  type SysParamFormData,
-  type SysParamSearchParams,
-} from '@/services/system/params';
-import { clearAllParamCache, deleteParamCache, updateParamCache } from '@/utils/paramService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Card, Modal } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useCallback, useState } from 'react';
+import {
+  type ExportOptions,
+  type SysParam,
+  type SysParamFormData,
+  type SysParamSearchParams,
+  sysParamService,
+} from '@/services/system/params';
+import { clearAllParamCache, deleteParamCache, updateParamCache } from '@/utils/paramService';
 import ParamDrawer from './components/ParamDrawer';
 import ParamTable from './components/ParamTable';
 import SearchForm from './components/SearchForm';
@@ -42,7 +42,7 @@ const Params: React.FC = () => {
   // 查询参数列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['sys_params', searchParams],
@@ -300,7 +300,7 @@ const Params: React.FC = () => {
 
   // 计算加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending ||
@@ -313,7 +313,7 @@ const Params: React.FC = () => {
       {/* 搜索表单 */}
       <SearchForm
         onSearch={handleSearch}
-        loading={isLoading}
+        loading={isFetching}
         expanded={searchExpanded}
         onToggleExpand={handleToggleSearchExpand}
       />

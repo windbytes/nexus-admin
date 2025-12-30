@@ -1,8 +1,8 @@
-import type { DictSearchParams, DictState } from '@/services/system/dict/type';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card, type TableProps } from 'antd';
 import { isEqual } from 'lodash-es';
 import { useReducer, useState } from 'react';
+import type { DictSearchParams, DictState } from '@/services/system/dict/type';
 import DictTable from './DictTable';
 import getDictTableColumns from './DictTableColumn';
 import DictSearchForm from './SearchForm';
@@ -38,7 +38,7 @@ const Dict: React.FC = () => {
 
   // 查询字典数据
   const {
-    isLoading,
+    isFetching,
     data: result,
     refetch,
   } = useQuery({
@@ -129,47 +129,48 @@ const Dict: React.FC = () => {
   const handleBatchDelete = () => {};
 
   return (
-    <>
-      <div className="h-full flex flex-col gap-2">
-        {/* 搜索表单 */}
-        <DictSearchForm onSearch={handleSearch} />
-        {/* 查询表格 */}
-        <Card style={{ flex: 1, marginTop: '8px', minHeight: 0 }} styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
-          {/* 操作按钮 */}
-          <TableActionButtons
-            handleAdd={handleAdd}
-            handleBatchDelete={handleBatchDelete}
-            refetch={refetch}
-            selectedRows={[]}
-          />
+    <div className="h-full flex flex-col gap-2">
+      {/* 搜索表单 */}
+      <DictSearchForm onSearch={handleSearch} />
+      {/* 查询表格 */}
+      <Card
+        style={{ flex: 1, marginTop: '8px', minHeight: 0 }}
+        styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}
+      >
+        {/* 操作按钮 */}
+        <TableActionButtons
+          handleAdd={handleAdd}
+          handleBatchDelete={handleBatchDelete}
+          refetch={refetch}
+          selectedRows={[]}
+        />
 
-          {/* 表格数据 */}
-          <DictTable
-            tableData={result?.records || []}
-            loading={isLoading}
-            columns={columns}
-            onRow={onRow}
-            rowSelection={rowSelection}
-            pagination={{
-              pageSize: searchParams.pageSize,
-              current: searchParams.pageNum,
-              showQuickJumper: true,
-              hideOnSinglePage: false,
-              showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
-              total: result?.totalRow || 0,
-              onChange(page, pageSize) {
-                setSearchParams({
-                  ...searchParams,
-                  pageNum: page,
-                  pageSize: pageSize,
-                });
-              },
-            }}
-          />
-        </Card>
-      </div>
-    </>
+        {/* 表格数据 */}
+        <DictTable
+          tableData={result?.records || []}
+          loading={isFetching}
+          columns={columns}
+          onRow={onRow}
+          rowSelection={rowSelection}
+          pagination={{
+            pageSize: searchParams.pageSize,
+            current: searchParams.pageNum,
+            showQuickJumper: true,
+            hideOnSinglePage: false,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            total: result?.totalRow || 0,
+            onChange(page, pageSize) {
+              setSearchParams({
+                ...searchParams,
+                pageNum: page,
+                pageSize: pageSize,
+              });
+            },
+          }}
+        />
+      </Card>
+    </div>
   );
 };
 export default Dict;

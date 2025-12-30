@@ -1,11 +1,11 @@
-import { useECharts } from '@/hooks/useECharts';
-import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { TableProps } from 'antd';
 import { Button, Card, Col, DatePicker, Empty, Row, Space, Spin, Statistic, Table } from 'antd';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { useECharts } from '@/hooks/useECharts';
+import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 
 /**
  * 使用统计组件
@@ -21,13 +21,13 @@ const UsageStatistics: React.FC = () => {
    */
   const {
     data: statistics,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['permission-statistics', timeRange],
     queryFn: () =>
       permissionAuditService.getPermissionStatistics(
-        timeRange ? { startTime: timeRange[0], endTime: timeRange[1] } : undefined,
+        timeRange ? { startTime: timeRange[0], endTime: timeRange[1] } : undefined
       ),
   });
 
@@ -80,7 +80,7 @@ const UsageStatistics: React.FC = () => {
         sorter: (a: any, b: any) => a.usageRate - b.usageRate,
       },
     ],
-    [],
+    []
   );
 
   /**
@@ -109,14 +109,16 @@ const UsageStatistics: React.FC = () => {
         sorter: (a: any, b: any) => a.usageRate - b.usageRate,
       },
     ],
-    [],
+    []
   );
 
   /**
    * 渲染按钮使用图表
    */
   const renderButtonUsageChart = useCallback(() => {
-    if (!statistics?.topUsedButtons?.length) return null;
+    if (!statistics?.topUsedButtons?.length) {
+      return null;
+    }
 
     const option = {
       title: {
@@ -155,7 +157,9 @@ const UsageStatistics: React.FC = () => {
    * 渲染接口使用图表
    */
   const renderInterfaceUsageChart = useCallback(() => {
-    if (!statistics?.topUsedInterfaces?.length) return null;
+    if (!statistics?.topUsedInterfaces?.length) {
+      return null;
+    }
 
     const option = {
       title: {
@@ -190,7 +194,7 @@ const UsageStatistics: React.FC = () => {
     return <div ref={interfaceUsageChartRef} style={{ width: '100%', height: '300px' }} />;
   }, [statistics?.topUsedInterfaces, interfaceUsageChartRef]);
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="flex items-center justify-center h-64">
         <Spin size="large" />
@@ -216,7 +220,7 @@ const UsageStatistics: React.FC = () => {
             />
           </Space>
           <Space>
-            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading}>
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isFetching}>
               刷新
             </Button>
             <Button type="primary" icon={<DownloadOutlined />} onClick={handleExport}>
@@ -230,22 +234,38 @@ const UsageStatistics: React.FC = () => {
       <Row gutter={16}>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="总按钮数" value={statistics?.totalButtons || 0} styles={{content: {color: '#1890ff'}}}/>
+            <Statistic
+              title="总按钮数"
+              value={statistics?.totalButtons || 0}
+              styles={{ content: { color: '#1890ff' } }}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="启用按钮数" value={statistics?.activeButtons || 0} styles={{content: {color: '#52c41a'}}} />
+            <Statistic
+              title="启用按钮数"
+              value={statistics?.activeButtons || 0}
+              styles={{ content: { color: '#52c41a' } }}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="总接口数" value={statistics?.totalInterfaces || 0} styles={{content: {color: '#722ed1'}}} />
+            <Statistic
+              title="总接口数"
+              value={statistics?.totalInterfaces || 0}
+              styles={{ content: { color: '#722ed1' } }}
+            />
           </Card>
         </Col>
         <Col span={6}>
           <Card size="small">
-            <Statistic title="使用接口数" value={statistics?.usedInterfaces || 0} styles={{content: {color: '#faad14'}}} />
+            <Statistic
+              title="使用接口数"
+              value={statistics?.usedInterfaces || 0}
+              styles={{ content: { color: '#faad14' } }}
+            />
           </Card>
         </Col>
       </Row>

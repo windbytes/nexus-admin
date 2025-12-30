@@ -57,7 +57,7 @@ const User = () => {
 
   // 查询用户数据
   const {
-    isLoading,
+    isFetching,
     data: result,
     refetch,
   } = useQuery({
@@ -178,7 +178,7 @@ const User = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+      <SearchForm onSearch={handleSearch} isLoading={isFetching} />
 
       {/* 用户列表 */}
       <Card
@@ -201,7 +201,7 @@ const User = () => {
       >
         <UserTable
           data={result?.records || []}
-          loading={isLoading}
+          loading={isFetching}
           searchParams={searchParams}
           total={state.total}
           selectedRowKeys={selectedRowKeys}

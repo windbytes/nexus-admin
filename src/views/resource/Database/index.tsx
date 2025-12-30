@@ -61,7 +61,7 @@ const Database: React.FC = () => {
   // 查询驱动列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['driver_list', searchParams],
@@ -264,7 +264,7 @@ const Database: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     deleteDriverMutation.isPending ||
     batchDeleteDriverMutation.isPending ||
     updateStatusMutation.isPending ||
@@ -274,7 +274,7 @@ const Database: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
+      <DriverSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card

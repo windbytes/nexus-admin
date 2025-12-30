@@ -1,10 +1,10 @@
-import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
-import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
 import { lazy, useCallback, useReducer, useState } from 'react';
+import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
+import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import DataModeSearchForm from './components/DataModeSearchForm';
 import DataModeTable from './components/DataModeTable';
 import DataModeTableActions from './components/DataModeTableActions';
@@ -68,7 +68,7 @@ const DataMode: React.FC = () => {
   // 查询数据模式列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['datamode_list', searchParams],
@@ -98,7 +98,7 @@ const DataMode: React.FC = () => {
     mutationFn: (id: string) => dataModeService.deleteDataMode(id),
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   // 批量删除数据模式 mutation
@@ -110,7 +110,7 @@ const DataMode: React.FC = () => {
         selectedRows: [],
       });
       refetch();
-    }
+    },
   });
 
   // 更新数据模式状态 mutation
@@ -118,7 +118,7 @@ const DataMode: React.FC = () => {
     mutationFn: (data: DataModeFormData) => dataModeService.updateDataMode(data),
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   // 导出Schema mutation
@@ -323,7 +323,7 @@ const DataMode: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     deleteDataModeMutation.isPending ||
     batchDeleteDataModeMutation.isPending ||
     updateStatusMutation.isPending ||
@@ -332,7 +332,7 @@ const DataMode: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <DataModeSearchForm onSearch={handleSearch} loading={isLoading} />
+      <DataModeSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card className="flex-1">
@@ -387,11 +387,7 @@ const DataMode: React.FC = () => {
       />
 
       {/* 导入Schema弹窗 */}
-      <DataModeImportModal
-        open={state.importModalVisible}
-        onOk={handleImportSuccess}
-        onCancel={handleImportCancel}
-      />
+      <DataModeImportModal open={state.importModalVisible} onOk={handleImportSuccess} onCancel={handleImportCancel} />
     </div>
   );
 };

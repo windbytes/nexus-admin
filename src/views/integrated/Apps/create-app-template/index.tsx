@@ -37,14 +37,14 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreat
   });
 
   // 搜索模板
-  const { data: searchResult, isLoading: searchLoading } = useQuery({
+  const { data: searchResult, isFetching: searchLoading } = useQuery({
     queryKey: ['template_search', searchParams],
     queryFn: () => templateService.searchTemplates(searchParams),
     enabled: !!searchParams,
   });
 
   // 根据分类获取模板
-  const { data: categoryTemplates = [], isLoading: categoryLoading } = useQuery({
+  const { data: categoryTemplates = [], isFetching: categoryLoading } = useQuery({
     queryKey: ['template_category', selectedCategory],
     queryFn: () => templateService.getTemplatesByCategory(selectedCategory),
     enabled: selectedCategory !== 'recommended',

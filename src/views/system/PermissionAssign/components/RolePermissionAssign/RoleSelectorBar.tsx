@@ -1,10 +1,10 @@
+import { UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Space } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
-import { memo } from 'react';
 import type React from 'react';
-import { roleService } from '@/services/system/role/roleApi';
+import { memo } from 'react';
 import { UniversalRoleSelector } from '@/components/UniversalRoleSelector';
+import { roleService } from '@/services/system/role/roleApi';
 
 /**
  * 角色选择栏组件Props
@@ -22,15 +22,11 @@ interface RoleSelectorBarProps {
  * 角色选择栏组件
  * 使用通用角色选择组件，专门负责角色选择功能
  */
-const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({
-  currentRoleCode,
-  onRoleChange,
-  loading = false,
-}) => {
+const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({ currentRoleCode, onRoleChange, loading = false }) => {
   /**
    * 查询角色列表
    */
-  const { data: roleListResponse, isLoading: roleListLoading } = useQuery({
+  const { data: roleListResponse, isFetching: roleListLoading } = useQuery({
     queryKey: ['role-list'],
     queryFn: () => roleService.getRoleList({}),
   });

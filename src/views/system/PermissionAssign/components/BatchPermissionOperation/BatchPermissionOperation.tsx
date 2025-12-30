@@ -1,16 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { useState, useCallback, memo } from 'react';
 import type React from 'react';
+import { memo, useCallback, useState } from 'react';
 import { permissionAssignService } from '@/services/system/permission/PermissionAssign/permissionAssignApi';
 import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
 import { roleService } from '@/services/system/role/roleApi';
-import {
-  OperationConfigBar,
-  RoleSelector,
-  PermissionSelector,
-  BatchOperationModal,
-} from './index';
+import { BatchOperationModal, OperationConfigBar, PermissionSelector, RoleSelector } from './index';
 
 /**
  * 批量权限操作组件
@@ -27,7 +22,7 @@ const BatchPermissionOperation: React.FC = memo(() => {
   /**
    * 查询角色列表
    */
-  const { data: roleListResponse, isLoading: roleListLoading } = useQuery({
+  const { data: roleListResponse, isFetching: roleListLoading } = useQuery({
     queryKey: ['role-list-page'],
     queryFn: () => roleService.getRoleListPage({ pageNum: 1, pageSize: 100 }),
   });
@@ -35,7 +30,7 @@ const BatchPermissionOperation: React.FC = memo(() => {
   /**
    * 查询权限列表
    */
-  const { data: permissionList, isLoading: permissionListLoading } = useQuery({
+  const { data: permissionList, isFetching: permissionListLoading } = useQuery({
     queryKey: ['permission-list', permissionType],
     queryFn: () => {
       switch (permissionType) {
@@ -64,7 +59,7 @@ const BatchPermissionOperation: React.FC = memo(() => {
       operation: 'assign' | 'revoke';
     }) => {
       const promises = roleIds.map((roleId) =>
-        permissionAssignService.assignRolePermission(roleId, permissionType, permissionIds),
+        permissionAssignService.assignRolePermission(roleId, permissionType, permissionIds)
       );
       return Promise.all(promises);
     },

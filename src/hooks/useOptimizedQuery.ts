@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { requestDeduplication } from '@/utils/requestDeduplication';
 
@@ -34,13 +34,7 @@ export const useOptimizedQuery = <T>(
     }
 
     const url = queryKey.join('/');
-    return requestDeduplication.deduplicate(
-      url,
-      'GET',
-      queryFn,
-      undefined,
-      deduplicateTTL
-    );
+    return requestDeduplication.deduplicate(url, 'GET', queryFn, undefined, deduplicateTTL);
   }, [queryFn, queryKey, deduplicate, deduplicateTTL]);
 
   return useQuery({
@@ -72,24 +66,14 @@ export const useOptimizedMutation = <TData, TVariables>(
   }
 ) => {
   const queryClient = useQueryClient();
-  const {
-    onSuccess,
-    onError,
-    invalidateQueries = [],
-    optimisticUpdate,
-    rollbackOnError = true,
-  } = options || {};
+  const { onSuccess, onError, invalidateQueries = [], optimisticUpdate, rollbackOnError = true } = options || {};
 
   const mutation = useMutation({
     mutationFn,
     onMutate: async (variables) => {
       // 取消所有相关的查询，避免冲突
       if (invalidateQueries.length > 0) {
-        await Promise.all(
-          invalidateQueries.map((queryKey) =>
-            queryClient.cancelQueries({ queryKey })
-          )
-        );
+        await Promise.all(invalidateQueries.map((queryKey) => queryClient.cancelQueries({ queryKey })));
       }
 
       // 执行乐观更新

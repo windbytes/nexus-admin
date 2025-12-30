@@ -24,7 +24,7 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
   });
 
   // 查询没分配给当前角色的用户数据
-  const { isLoading, data, refetch } = useQuery({
+  const { isFetching, data, refetch } = useQuery({
     queryKey: ['sys_role_user_not_in_role', [roleId, searchParams]],
     queryFn: () => roleService.getUserNotInRoleByPage(roleId, searchParams),
     enabled: open,
@@ -187,7 +187,7 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
             </Col>
             <Col span={6} style={{ textAlign: 'right' }}>
               <Space>
-                <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
+                <Button type="primary" htmlType="submit" loading={isFetching} icon={<SearchOutlined />}>
                   检索
                 </Button>
                 <Button
@@ -209,7 +209,7 @@ const AddUser: React.FC<AddUserProps> = ({ open, onOk, onCancel, roleId }) => {
           size="small"
           bordered
           rowKey="id"
-          loading={isLoading}
+          loading={isFetching}
           columns={columns}
           pagination={{
             pageSize: searchParams.pageSize,

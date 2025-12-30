@@ -1,41 +1,41 @@
-import type React from 'react';
+import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Table, Tag, Button, Avatar, type TableProps } from 'antd';
-import { UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Avatar, Button, Table, type TableProps, Tag } from 'antd';
+import type React from 'react';
 import type { PendingFlow } from '../../mockData';
 
 // 模拟获取等待处理流程数据的API
 const fetchPendingFlowsData = async (): Promise<PendingFlow[]> => {
   // 模拟API延迟
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
   return [
     {
       id: '1',
       name: '财务审批流程',
       waitingTime: '30分钟',
       priority: 'high',
-      assignee: '张经理'
+      assignee: '张经理',
     },
     {
       id: '2',
       name: '人事变动申请',
       waitingTime: '2小时',
       priority: 'medium',
-      assignee: '李主管'
+      assignee: '李主管',
     },
     {
       id: '3',
       name: '设备采购申请',
       waitingTime: '1天',
       priority: 'low',
-      assignee: '王总监'
-    }
+      assignee: '王总监',
+    },
   ];
 };
 
 export const PendingFlowsList: React.FC = () => {
-  const { data: pendingFlows, isLoading } = useQuery({
+  const { data: pendingFlows, isFetching } = useQuery({
     queryKey: ['pendingFlowsData'],
     queryFn: fetchPendingFlowsData,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -67,14 +67,12 @@ export const PendingFlowsList: React.FC = () => {
     }
   };
 
-  const columns:TableProps['columns'] = [
+  const columns: TableProps['columns'] = [
     {
       title: '流程名称',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => (
-        <span className="font-medium text-gray-800">{name}</span>
-      ),
+      render: (name: string) => <span className="font-medium text-gray-800">{name}</span>,
     },
     {
       title: '等待时间',
@@ -91,11 +89,7 @@ export const PendingFlowsList: React.FC = () => {
       title: '优先级',
       dataIndex: 'priority',
       key: 'priority',
-      render: (priority: string) => (
-        <Tag color={getPriorityColor(priority)}>
-          {getPriorityText(priority)}
-        </Tag>
-      ),
+      render: (priority: string) => <Tag color={getPriorityColor(priority)}>{getPriorityText(priority)}</Tag>,
     },
     {
       title: '处理人',
@@ -113,22 +107,19 @@ export const PendingFlowsList: React.FC = () => {
       key: 'action',
       align: 'center',
       render: (_: any, record: any) => (
-        <Button 
-          type="primary" 
-          size="small"
-        >
+        <Button type="primary" size="small">
           处理
         </Button>
       ),
     },
   ];
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((index) => (
           <div key={index} className="animate-pulse">
-            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded" />
           </div>
         ))}
       </div>
@@ -136,11 +127,7 @@ export const PendingFlowsList: React.FC = () => {
   }
 
   if (!pendingFlows || pendingFlows.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        暂无等待处理的流程
-      </div>
-    );
+    return <div className="text-center py-8 text-gray-500">暂无等待处理的流程</div>;
   }
 
   return (
@@ -151,7 +138,7 @@ export const PendingFlowsList: React.FC = () => {
       rowKey="id"
       size="small"
       className="custom-table"
-      loading={isLoading}
+      loading={isFetching}
     />
   );
 };

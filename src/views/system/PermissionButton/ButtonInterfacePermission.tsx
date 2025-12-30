@@ -61,7 +61,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
 
   // 查询按钮接口权限数据
   const {
-    isLoading,
+    isFetching,
     data: initialData,
     refetch,
   } = useQuery({
@@ -251,7 +251,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
             variant="outlined"
             icon={<ReloadOutlined />}
             onClick={handleRefresh}
-            loading={isLoading}
+            loading={isFetching}
           >
             刷新
           </Button>
@@ -260,7 +260,7 @@ const ButtonInterfacePermission: React.FC<ButtonInterfacePermissionProps> = ({ b
     >
       <Table
         columns={columns}
-        loading={isLoading}
+        loading={isFetching}
         dataSource={state.permissionList}
         rowKey="id"
         className="interface-permission-table"

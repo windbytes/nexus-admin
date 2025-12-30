@@ -55,7 +55,7 @@ const UserDropdown: React.FC = () => {
   // 使用 React Query 获取用户角色列表（然后需要更新store中的内容，以应对重新给用户分配了角色后，不用重新登录）
   const {
     data: userRoles = [],
-    isLoading: loading,
+    isLoading: isFetching,
     error: rolesError,
   } = useQuery({
     queryKey: ['dropdwon-user-roles', userStore.loginUser],
@@ -158,14 +158,14 @@ const UserDropdown: React.FC = () => {
         </div>
       ),
       icon: <UserOutlined />,
-      disabled: loading || !currentRoleInfo.hasRoles || roleSwitchMutation.isPending,
+      disabled: isFetching || !currentRoleInfo.hasRoles || roleSwitchMutation.isPending,
       popupStyle: {
         width: 220,
       },
       popupOffset: [2, 8],
       children: [
         // 加载状态
-        ...(loading
+        ...(isFetching
           ? [
               {
                 key: 'loading',

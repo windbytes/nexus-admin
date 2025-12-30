@@ -50,7 +50,7 @@ const Role: React.FC = () => {
 
   // 查询表格数据
   const {
-    isLoading,
+    isFetching,
     data: tableData,
     refetch,
   } = useQuery({
@@ -224,7 +224,7 @@ const Role: React.FC = () => {
     <>
       <div className="h-full flex flex-col gap-2">
         {/* 菜单检索条件栏 */}
-        <RoleSearchForm onFinish={handleSearch} isLoading={isLoading} />
+        <RoleSearchForm onFinish={handleSearch} isLoading={isFetching} />
         {/* 查询表格 */}
         <Card
           className="grow min-h-0 flex flex-col"
@@ -248,7 +248,7 @@ const Role: React.FC = () => {
           {/* 表格数据 */}
           <RoleTable
             tableData={tableData?.records || []}
-            loading={isLoading}
+            loading={isFetching}
             columns={columns}
             onRow={onRow}
             rowSelection={rowSelection}

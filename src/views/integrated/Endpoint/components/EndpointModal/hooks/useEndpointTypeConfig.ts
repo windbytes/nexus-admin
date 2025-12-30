@@ -25,7 +25,7 @@ export const useEndpointTypeConfig = (
   /**
    * 获取所有启用的端点类型配置列表
    */
-  const { data: endpointTypeListModule, isLoading: typeListLoading } = useQuery({
+  const { data: endpointTypeListModule, isFetching: typeListLoading } = useQuery({
     queryKey: ['endpoint_type_list_for_modal'],
     queryFn: async () => {
       const result = await endpointConfigService.getEndpointTypeList({

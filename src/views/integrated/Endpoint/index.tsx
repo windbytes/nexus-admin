@@ -65,7 +65,7 @@ const Endpoint: React.FC = () => {
   // 查询端点列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['endpoint_list', searchParams],
@@ -154,13 +154,13 @@ const Endpoint: React.FC = () => {
   };
 
   // 表格加载状态
-  const tableLoading = isLoading || mutations.isLoading;
+  const tableLoading = isFetching || mutations.isLoading;
 
   return (
     <>
       <div className="h-full flex flex-col gap-2">
         {/* 搜索表单 */}
-        <EndpointSearchForm onSearch={handleSearch} loading={isLoading} />
+        <EndpointSearchForm onSearch={handleSearch} loading={isFetching} />
 
         {/* 表格区域 */}
         <Card

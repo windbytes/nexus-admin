@@ -1,7 +1,7 @@
-import { memo } from 'react';
 import type React from 'react';
-import type { RoleModel } from '@/services/system/role/type';
+import { memo } from 'react';
 import { UniversalRoleSelector } from '@/components/UniversalRoleSelector';
+import type { RoleModel } from '@/services/system/role/type';
 
 /**
  * 角色选择栏组件Props
@@ -25,28 +25,23 @@ interface RoleSelectorBarProps {
  * 角色选择栏组件
  * 使用通用角色选择组件，负责角色选择和刷新操作
  */
-const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({
-  currentRoleCode,
-  roleList = [],
-  isLoading = false,
-  showRefreshButton = true,
-  onRoleSelect,
-  onRefresh,
-}) => {
-  return (
-    <UniversalRoleSelector
-      roles={roleList}
-      selectedRole={currentRoleCode}
-      mode="select-with-refresh"
-      onSelect={onRoleSelect}
-      onRefresh={onRefresh}
-      loading={isLoading}
-      showRefreshButton={showRefreshButton}
-      placeholder="请选择要查看权限的角色"
-      width={300}
-    />
-  );
-});
+const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(
+  ({ currentRoleCode, roleList = [], isLoading = false, showRefreshButton = true, onRoleSelect, onRefresh }) => {
+    return (
+      <UniversalRoleSelector
+        roles={roleList}
+        selectedRole={currentRoleCode}
+        mode="select-with-refresh"
+        onSelect={onRoleSelect}
+        onRefresh={onRefresh}
+        loading={isLoading}
+        showRefreshButton={showRefreshButton}
+        placeholder="请选择要查看权限的角色"
+        width={300}
+      />
+    );
+  }
+);
 
 RoleSelectorBar.displayName = 'RoleSelectorBar';
 

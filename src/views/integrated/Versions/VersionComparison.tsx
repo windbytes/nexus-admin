@@ -1,9 +1,9 @@
+import { Alert, Col, Row, Select, Spin, Typography } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
-import { Select, Typography, Row, Col, Alert, Spin } from 'antd';
-import DragModal from '@/components/modal/DragModal';
 import { DiffEditor } from '@/components/DiffEditor';
-import { useVersionList, useCompareVersions } from './useVersionQueries';
+import DragModal from '@/components/modal/DragModal';
+import { useCompareVersions, useVersionList } from './useVersionQueries';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -38,19 +38,19 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
       pageNum: 1,
       pageSize: 100,
     },
-    visible,
+    visible
   );
 
   const versions = versionResult?.records || [];
 
   // 使用 React Query 获取版本对比数据
-  const { data: comparisonResult, isLoading: comparisonLoading } = useCompareVersions(
+  const { data: comparisonResult, isFetching: comparisonLoading } = useCompareVersions(
     {
       workflowId,
       baseVersion,
       targetVersion,
     },
-    visible && !!baseVersion && !!targetVersion && baseVersion !== targetVersion,
+    visible && !!baseVersion && !!targetVersion && baseVersion !== targetVersion
   );
 
   const deltas = comparisonResult?.deltas || [];
@@ -72,7 +72,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
         ],
       },
       null,
-      2,
+      2
     );
   };
 
@@ -98,7 +98,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
         ],
       },
       null,
-      2,
+      2
     );
   };
 
@@ -115,7 +115,9 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     };
   };
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   const summary = getChangeSummary();
 

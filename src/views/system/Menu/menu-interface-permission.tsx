@@ -71,7 +71,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
 
   // 查询菜单接口权限数据
   const {
-    isLoading,
+    isFetching,
     data: initialData,
     refetch,
   } = useQuery({
@@ -619,7 +619,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
           variant="outlined"
           icon={<ReloadOutlined />}
           onClick={handleRefresh}
-          loading={isLoading}
+          loading={isFetching}
         >
           刷新
         </Button>
@@ -627,7 +627,7 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
     >
       <Table
         columns={columns}
-        loading={isLoading}
+        loading={isFetching}
         dataSource={state.permissionList}
         rowKey="id"
         pagination={{

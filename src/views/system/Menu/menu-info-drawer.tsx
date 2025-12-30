@@ -171,7 +171,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
   );
 
   // 使用 useQuery 获取目录数据
-  const { data: allDirectoryData, isLoading } = useQuery({
+  const { data: allDirectoryData, isFetching } = useQuery({
     queryKey: ['sys_menu_directory'],
     queryFn: async () => {
       return await menuService.getDirectory();
@@ -302,7 +302,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           <Form.Item name="parentId" label="上级菜单" rules={[{ required: true, message: '请选择上级菜单!' }]}>
             <TreeSelect
               showSearch
-              loading={isLoading}
+              loading={isFetching}
               style={{ width: '100%' }}
               styles={TREE_SELECT_STYLES}
               placeholder="请选择上级目录"

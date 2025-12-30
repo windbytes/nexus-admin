@@ -73,7 +73,7 @@ const Web: React.FC = () => {
   });
 
   // 查询Web服务列表
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isFetching } = useQuery({
     queryKey: ['webServiceList', searchParams],
     queryFn: () => webServiceApi.getWebServiceList(searchParams),
   });
@@ -273,7 +273,7 @@ const Web: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     saveWebServiceMutation.isPending ||
     deleteWebServiceMutation.isPending ||
     batchDeleteMutation.isPending ||
@@ -282,7 +282,7 @@ const Web: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <WebServiceSearchForm onSearch={handleSearch} loading={isLoading} />
+      <WebServiceSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card

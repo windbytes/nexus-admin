@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, Table, Select, DatePicker, Button, Tag, Descriptions, Modal } from 'antd';
 import { EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo, useId } from 'react';
-import type React from 'react';
-import {
-  permissionAuditService,
-  type PermissionChangeLog,
-} from '@/services/system/permission/PermissionAudit/permissionAuditApi';
+import { useQuery } from '@tanstack/react-query';
 import type { TableProps } from 'antd';
+import { Button, Card, DatePicker, Descriptions, Modal, Select, Table, Tag } from 'antd';
+import type React from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
+import {
+  type PermissionChangeLog,
+  permissionAuditService,
+} from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 
 /**
  * 变更日志组件
@@ -33,7 +33,7 @@ const ChangeLog: React.FC = () => {
    */
   const {
     data: changeLogResponse,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['permission-change-log', searchParams],
@@ -192,7 +192,7 @@ const ChangeLog: React.FC = () => {
         ),
       },
     ],
-    [searchParams.pageNumber, searchParams.pageSize, getOperationTypeTag, getTargetTypeTag, handleViewDetail],
+    [searchParams.pageNumber, searchParams.pageSize, getOperationTypeTag, getTargetTypeTag, handleViewDetail]
   );
 
   return (
@@ -267,7 +267,7 @@ const ChangeLog: React.FC = () => {
               搜索
             </Button>
             <Button onClick={handleResetSearch}>重置</Button>
-            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading}>
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isFetching}>
               刷新
             </Button>
           </div>
@@ -280,7 +280,7 @@ const ChangeLog: React.FC = () => {
           <Table<PermissionChangeLog>
             columns={columns}
             dataSource={changeLogResponse?.records || []}
-            loading={isLoading}
+            loading={isFetching}
             rowKey="id"
             pagination={{
               current: searchParams.pageNumber,

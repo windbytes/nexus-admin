@@ -67,7 +67,7 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
   /**
    * 查询目录数据
    */
-  const { data: allDirectoryData, isLoading } = useQuery({
+  const { data: allDirectoryData, isFetching } = useQuery({
     queryKey: ['sys_menu_directory'],
     queryFn: async () => {
       return await menuService.getDirectory();
@@ -174,13 +174,14 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ open, button, onOk, onCancel,
 
             <Form.Item name="parentId" label="所属菜单" rules={[{ required: true, message: '请选择所属菜单' }]}>
               <TreeSelect
-                showSearch
-                loading={isLoading}
+                showSearch={{
+                  treeNodeFilterProp: 'title',
+                }}
+                loading={isFetching}
                 style={{ width: '100%' }}
                 styles={{ popup: { root: { maxHeight: 400, overflow: 'auto' } } }}
                 placeholder="请选择所属菜单"
                 treeData={directoryData}
-                treeNodeFilterProp="title"
               />
             </Form.Item>
 

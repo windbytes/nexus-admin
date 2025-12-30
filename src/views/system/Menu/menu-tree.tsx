@@ -36,7 +36,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
   const hasExportPermission = usePermission(['system:menu:export']);
 
   // 查询菜单数据
-  const { isLoading, data, refetch } = useQuery({
+  const { isFetching, data, refetch } = useQuery({
     // 依赖searchText, 当searchText变化时，会重新执行queryFn
     queryKey: ['sys_menu', searchText],
     queryFn: async () => {
@@ -227,7 +227,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ onSelectMenu, onOpenDrawer }) => {
           onSearch={() => refetch()}
           className="my-2"
         />
-        {isLoading ? (
+        {isFetching ? (
           <Spin indicator={<BubbleLoading width={24} />} />
         ) : (
           <Tree

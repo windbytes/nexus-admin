@@ -26,7 +26,7 @@ const App: React.FC = () => {
   const { notification, message, modal } = AntdApp.useApp();
 
   // 使用 TanStack Query 获取菜单数据
-  const { isLoading, refetch } = useQuery({
+  const { isFetching, refetch } = useQuery({
     queryKey: ['menuData', roleId],
     queryFn: async () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
@@ -53,7 +53,7 @@ const App: React.FC = () => {
     }
   }, [isLogin, roleId]);
 
-  return <>{isLoading ? <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen /> : <Router />}</>;
+  return <>{isFetching ? <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen /> : <Router />}</>;
 };
 
 export default App;

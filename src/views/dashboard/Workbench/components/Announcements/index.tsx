@@ -1,43 +1,43 @@
-import type React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tag } from 'antd';
+import type React from 'react';
 import type { Announcement } from '../../mockData';
 
 // 模拟获取公告数据的API
 const fetchAnnouncementsData = async (): Promise<Announcement[]> => {
   // 模拟API延迟
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
   return [
     {
       id: '1',
       type: 'activity',
       title: '流程管理最新优惠活动',
-      time: '2小时前'
+      time: '2小时前',
     },
     {
       id: '2',
       type: 'message',
       title: '新增流程尚未通过审核',
-      time: '4小时前'
+      time: '4小时前',
     },
     {
       id: '3',
       type: 'notification',
       title: '当前产品试用期即将截止',
-      time: '6小时前'
+      time: '6小时前',
     },
     {
       id: '4',
       type: 'notification',
       title: '1月新系统升级计划通知',
-      time: '1天前'
-    }
+      time: '1天前',
+    },
   ];
 };
 
 export const Announcements: React.FC = () => {
-  const { data: announcements, isLoading } = useQuery({
+  const { data: announcements, isFetching } = useQuery({
     queryKey: ['announcementsData'],
     queryFn: fetchAnnouncementsData,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -69,12 +69,12 @@ export const Announcements: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="space-y-3">
         {[1, 2, 3, 4].map((index) => (
           <div key={index} className="animate-pulse">
-            <div className="h-16 bg-gray-200 rounded-lg"></div>
+            <div className="h-16 bg-gray-200 rounded-lg" />
           </div>
         ))}
       </div>
@@ -82,11 +82,7 @@ export const Announcements: React.FC = () => {
   }
 
   if (!announcements || announcements.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        暂无公告数据
-      </div>
-    );
+    return <div className="text-center py-8 text-gray-500">暂无公告数据</div>;
   }
 
   return (

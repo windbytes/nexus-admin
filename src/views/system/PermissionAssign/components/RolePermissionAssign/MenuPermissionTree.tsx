@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Table, Tag } from 'antd';
-import { useMemo, memo } from 'react';
-import type React from 'react';
-import { menuService } from '@/services/system/menu/menuApi';
 import type { ColumnsType } from 'antd/es/table';
-import type { MenuModel } from '@/services/system/menu/type';
+import type React from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { menuService } from '@/services/system/menu/menuApi';
+import type { MenuModel } from '@/services/system/menu/type';
 
 /**
  * 菜单权限树组件Props
@@ -24,11 +24,10 @@ const MenuPermissionTree: React.FC<MenuPermissionTreeProps> = memo(({ checkedKey
   /**
    * 查询菜单树数据
    */
-  const { data: menuList, isLoading } = useQuery({
+  const { data: menuList, isFetching } = useQuery({
     queryKey: ['menu-tree'],
     queryFn: () => menuService.getAllMenus({}),
   });
-
 
   /**
    * 获取所有菜单ID（包括子菜单）
@@ -48,7 +47,6 @@ const MenuPermissionTree: React.FC<MenuPermissionTreeProps> = memo(({ checkedKey
     return ids;
   };
 
-
   /**
    * 表格列定义
    */
@@ -57,9 +55,7 @@ const MenuPermissionTree: React.FC<MenuPermissionTreeProps> = memo(({ checkedKey
       title: '菜单名称',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => (
-        <span className="font-medium">{t(name)}</span>
-      ),
+      render: (name: string) => <span className="font-medium">{t(name)}</span>,
     },
     {
       title: '菜单路径',
@@ -91,43 +87,46 @@ const MenuPermissionTree: React.FC<MenuPermissionTreeProps> = memo(({ checkedKey
   /**
    * Table 行选择配置
    */
-  const rowSelection = useMemo(() => ({
-    selectedRowKeys: checkedKeys,
-    onChange: (selectedRowKeys: React.Key[]) => {
-      onCheck(selectedRowKeys as string[]);
-    },
-    onSelectAll: (selected: boolean) => {
-      if (selected) {
-        // 全选时，选择所有菜单（包括子菜单）
-        const allIds = getAllMenuIds(menuList || []);
-        onCheck(allIds);
-      } else {
-        // 取消全选时，清空所有选择
-        onCheck([]);
-      }
-    },
-    getCheckboxProps: (record: MenuModel) => ({
-      name: record.name,
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys: checkedKeys,
+      onChange: (selectedRowKeys: React.Key[]) => {
+        onCheck(selectedRowKeys as string[]);
+      },
+      onSelectAll: (selected: boolean) => {
+        if (selected) {
+          // 全选时，选择所有菜单（包括子菜单）
+          const allIds = getAllMenuIds(menuList || []);
+          onCheck(allIds);
+        } else {
+          // 取消全选时，清空所有选择
+          onCheck([]);
+        }
+      },
+      getCheckboxProps: (record: MenuModel) => ({
+        name: record.name,
+      }),
     }),
-  }), [checkedKeys, menuList, onCheck]);
+    [checkedKeys, menuList, onCheck]
+  );
 
   return (
-      <Table
-        columns={columns}
-        dataSource={menuList || []}
-        loading={isLoading}
-        rowKey="id"
-        rowSelection={rowSelection}
-        pagination={false}
-        bordered
-        size="middle"
-        scroll={{ x: 'max-content', y: 'calc(100vh - 536px)' }}
-        expandable={{
-          defaultExpandAllRows: true,
-          childrenColumnName: 'children',
-        }}
-        className="h-full mt-4 menu-permission-table"
-      />
+    <Table
+      columns={columns}
+      dataSource={menuList || []}
+      loading={isFetching}
+      rowKey="id"
+      rowSelection={rowSelection}
+      pagination={false}
+      bordered
+      size="middle"
+      scroll={{ x: 'max-content', y: 'calc(100vh - 536px)' }}
+      expandable={{
+        defaultExpandAllRows: true,
+        childrenColumnName: 'children',
+      }}
+      className="h-full mt-4 menu-permission-table"
+    />
   );
 });
 

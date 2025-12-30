@@ -59,7 +59,7 @@ const ButtonTree: React.FC<ButtonTreeProps> = ({ onSelectButton, selectedButtonI
    */
   const {
     data: allDirectoryData,
-    isLoading: menuLoading,
+    isFetching: menuLoading,
     refetch,
   } = useQuery({
     queryKey: ['sys_menu_directory'],

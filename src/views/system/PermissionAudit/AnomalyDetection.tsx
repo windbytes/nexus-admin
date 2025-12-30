@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Table, Select, Button, Space, Tag, Modal, message, App } from 'antd';
-import { ReloadOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { useState, useCallback, useMemo, useId } from 'react';
-import type React from 'react';
-import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
+import { CheckOutlined, CloseOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TableProps } from 'antd';
+import { App, Button, Card, Modal, message, Select, Space, Table, Tag } from 'antd';
+import type React from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
+import { permissionAuditService } from '@/services/system/permission/PermissionAudit/permissionAuditApi';
 
 /**
  * 异常检测组件
@@ -27,7 +27,7 @@ const AnomalyDetection: React.FC = () => {
    */
   const {
     data: anomalyResponse,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['anomaly-detection', searchParams],
@@ -101,7 +101,7 @@ const AnomalyDetection: React.FC = () => {
         },
       });
     },
-    [handleAnomalyMutation, modal],
+    [handleAnomalyMutation, modal]
   );
 
   /**
@@ -118,7 +118,7 @@ const AnomalyDetection: React.FC = () => {
         },
       });
     },
-    [handleAnomalyMutation, modal],
+    [handleAnomalyMutation, modal]
   );
 
   /**
@@ -264,7 +264,7 @@ const AnomalyDetection: React.FC = () => {
       handleResolveAnomaly,
       handleIgnoreAnomaly,
       handleAnomalyMutation.isPending,
-    ],
+    ]
   );
 
   return (
@@ -292,7 +292,7 @@ const AnomalyDetection: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isLoading}>
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} loading={isFetching}>
               刷新
             </Button>
           </div>
@@ -305,7 +305,7 @@ const AnomalyDetection: React.FC = () => {
           <Table
             columns={columns}
             dataSource={anomalyResponse?.records || []}
-            loading={isLoading}
+            loading={isFetching}
             rowKey="id"
             pagination={{
               current: searchParams.pageNumber,

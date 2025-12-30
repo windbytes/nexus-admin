@@ -122,7 +122,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             </Button>
             <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
               {showAdvanced ? <UpOutlined /> : <DownOutlined />}
-              {showAdvanced ? '收起筛选' : '高级筛选'}
+              {showAdvanced ? '收起' : '展开'}
             </Button>
           </div>
         </Form>

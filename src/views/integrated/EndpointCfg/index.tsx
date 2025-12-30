@@ -1,12 +1,13 @@
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { App, Card, Form, Skeleton } from 'antd';
+import type React from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   EndpointTypeConfig,
   EndpointTypeSearchParams,
   SchemaField,
 } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Card, Form, Skeleton } from 'antd';
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ActionButtons from './components/ActionButtons';
 import EndpointTypeForm from './components/EndpointTypeForm';
 import EndpointTypeList from './components/EndpointTypeList';
@@ -46,7 +47,7 @@ const EndpointConfig: React.FC = () => {
    */
   const {
     data: configListData,
-    isLoading: listLoading,
+    isFetching: listLoading,
     refetch: refetchList,
   } = useQuery({
     queryKey: ['endpoint_config_list', queryParams],
@@ -426,7 +427,9 @@ const EndpointConfig: React.FC = () => {
    * 获取预览配置数据 - 使用useMemo缓存
    */
   const previewConfig = useMemo((): EndpointTypeConfig | null => {
-    if (!previewVisible) return null; // 未打开预览时不需要计算
+    if (!previewVisible) {
+      return null; // 未打开预览时不需要计算
+    }
 
     if (isEditing) {
       // 编辑模式，使用当前表单数据

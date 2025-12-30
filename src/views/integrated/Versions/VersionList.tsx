@@ -1,14 +1,14 @@
-import { type WorkflowVersion, VersionStatus } from '@/services/integrated/version/model';
+import { PlusOutlined } from '@ant-design/icons';
+import { App, Button, Card, Col, Empty, Input, Pagination, Row, Select, Spin } from 'antd';
+import type React from 'react';
+import { useMemo, useState } from 'react';
+import { VersionStatus, type WorkflowVersion } from '@/services/integrated/version/model';
 import {
   useDeleteVersion,
   usePublishVersion,
   useRollbackVersion,
   useVersionList,
 } from '@/views/integrated/Versions/useVersionQueries';
-import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Card, Col, Empty, Input, Pagination, Row, Select, Spin } from 'antd';
-import type React from 'react';
-import { useMemo, useState } from 'react';
 import ReleaseConfirmation from './ReleaseConfirmation';
 import VersionListItem from './VersionListItem';
 
@@ -79,7 +79,7 @@ const VersionList: React.FC<VersionListProps> = ({
   );
 
   // 使用 React Query 获取版本列表
-  const { data: versionResult, isLoading, error } = useVersionList(queryParams);
+  const { data: versionResult, isFetching, error } = useVersionList(queryParams);
 
   // 版本数据和分页信息
   const versions = versionResult?.records || [];
@@ -254,7 +254,7 @@ const VersionList: React.FC<VersionListProps> = ({
             // paddingRight: '8px', // 为滚动条留出空间
           }}
         >
-          {isLoading ? (
+          {isFetching ? (
             <div className="flex justify-center items-center h-64">
               <Spin size="large" />
             </div>

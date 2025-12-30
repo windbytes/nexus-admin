@@ -16,7 +16,6 @@
     "strictPropertyInitialization": false,
     "noEmit": true,
     "jsx": "react-jsx",
-    "ignoreDeprecations": "6.0",
     "baseUrl": ".", // 项目根目录
     "paths": {
       "@/*": ["src/*"]

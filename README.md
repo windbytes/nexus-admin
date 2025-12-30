@@ -22,7 +22,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 ### 前端技术栈
 
 - **React 19.2** - 现代化的用户界面框架
-- **Ant Design 6.x** - 企业级 UI 组件库
+- **Ant Design 6.x** - 企业级 UI 组件库（采用零运行时，因此需要手动引入 antd/dist/antd.css，详情参考 {@link https://ant.design/docs/react/customize-theme-cn#zero-runtime}）
 - **Vite(rolldown)** - 快速的前端构建工具
 - **TypeScript** - 类型安全的 JavaScript 超集
 - **Zustand** - 轻量级状态管理
@@ -30,14 +30,15 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 - **TanStack Query** - 强大的数据获取和缓存
 - **ECharts** - 数据可视化图表库
 - **Sass** - CSS 预处理器
+- **keepalive-for-react** - react版keepalive（注意：不能升级到5.0.7，他与Tanstack Router搭配不是很好，升级了会出现content区域切换的时候刷新两次）
 
 ### 后端技术栈
 
-- **Spring Boot 3.x** - 企业级 Java 应用框架
+- **Spring Boot 3.x** - 企业级 Java 应用框架（等sa-token适配spring4后再考虑整体迁移到springboot4 - 哎：可惜undertow不支持springboot4）
 - **JDK 25** - 最新的 Java 开发工具包
-- **MyBatis-Flex** - 灵活的 ORM 框架
+- **MyBatis-Flex** - 灵活的 ORM 框架（1.11.5已支持springboot4）
 - **Apache Camel** - 企业集成模式框架
-- **Sa-token** -- 权限校验
+- **Sa-token** -- 权限校验（咱不支持springboot4，所以只能继续用springboot3）
 - **Redis** -- 缓存实现与分布式锁
 
 ### 开发工具

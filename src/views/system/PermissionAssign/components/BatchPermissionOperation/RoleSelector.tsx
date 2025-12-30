@@ -1,7 +1,7 @@
-import { memo } from 'react';
 import type React from 'react';
-import type { RoleModel } from '@/services/system/role/type';
+import { memo } from 'react';
 import { UniversalRoleSelector } from '@/components/UniversalRoleSelector';
+import type { RoleModel } from '@/services/system/role/type';
 
 /**
  * 角色选择组件Props
@@ -21,23 +21,20 @@ interface RoleSelectorProps {
  * 角色选择组件
  * 使用通用角色选择组件，负责角色选择和多选展示
  */
-const RoleSelector: React.FC<RoleSelectorProps> = memo(({
-  selectedRoles,
-  roleList = [],
-  isLoading = false,
-  onRoleSelect,
-}) => {
-  return (
-    <UniversalRoleSelector
-      roles={roleList}
-      selectedRoles={selectedRoles}
-      mode="multiple"
-      onSelect={onRoleSelect}
-      loading={isLoading}
-      placeholder="请选择角色"
-    />
-  );
-});
+const RoleSelector: React.FC<RoleSelectorProps> = memo(
+  ({ selectedRoles, roleList = [], isLoading = false, onRoleSelect }) => {
+    return (
+      <UniversalRoleSelector
+        roles={roleList}
+        selectedRoles={selectedRoles}
+        mode="multiple"
+        onSelect={onRoleSelect}
+        loading={isLoading}
+        placeholder="请选择角色"
+      />
+    );
+  }
+);
 
 RoleSelector.displayName = 'RoleSelector';
 

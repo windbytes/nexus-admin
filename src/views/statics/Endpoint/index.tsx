@@ -1,9 +1,9 @@
-import type { EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
-import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 import { useQuery } from '@tanstack/react-query';
 import { Spin } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
+import type { EndpointSearchParams } from '@/services/integrated/endpoint/endpointApi';
+import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 import EndpointCharts from './components/EndpointCharts';
 import EndpointStatistics from './components/EndpointStatistics';
 import { useEndpointStatistics } from './hooks/useEndpointStatistics';
@@ -24,7 +24,7 @@ const Endpoint: React.FC = () => {
   });
 
   // 查询端点列表
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isFetching } = useQuery({
     queryKey: ['endpoint_statistics', searchParams],
     queryFn: () => endpointService.getEndpointList(searchParams),
   });
@@ -32,7 +32,7 @@ const Endpoint: React.FC = () => {
   // 计算统计数据
   const statisticsData = useEndpointStatistics(result?.records || [], result?.totalRow || 0);
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="h-full flex items-center justify-center">
         <Spin size="large" tip="加载统计数据中..." />

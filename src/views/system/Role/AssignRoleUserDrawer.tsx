@@ -59,7 +59,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
   });
 
   // 查询用户数据
-  const { isLoading, data, refetch } = useQuery({
+  const { isFetching, data, refetch } = useQuery({
     queryKey: ['sys_role_users_drawer', [roleId, searchParams]],
     queryFn: () => roleService.getRoleUser(roleId, searchParams),
     enabled: open,
@@ -298,7 +298,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
                   >
                     重置
                   </Button>
-                  <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
+                  <Button type="primary" htmlType="submit" loading={isFetching} icon={<SearchOutlined />}>
                     检索
                   </Button>
                 </Space>
@@ -329,7 +329,7 @@ const RoleUserDrawer: React.FC<RoleUserDrawerProps> = ({ open, roleId, onCancel 
             size="small"
             columns={columns}
             dataSource={data?.records || []}
-            loading={isLoading}
+            loading={isFetching}
             bordered
             rowKey="id"
             pagination={{

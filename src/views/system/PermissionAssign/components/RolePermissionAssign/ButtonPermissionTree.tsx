@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { Table, Spin, Empty, Tag } from 'antd';
-import { useMemo, memo } from 'react';
-import type React from 'react';
-import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { Empty, Spin, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { MenuModel } from '@/services/system/menu/type';
-import { addIcon } from '@/utils/optimized-icons';
+import type React from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { MenuModel } from '@/services/system/menu/type';
+import { permissionButtonService } from '@/services/system/permission/PermissionButton/permissionButtonApi';
+import { addIcon } from '@/utils/optimized-icons';
 
 // 菜单类型枚举
 const MenuType = {
@@ -15,7 +15,6 @@ const MenuType = {
   SUB_ROUTE: 2,
   PERMISSION_BUTTON: 3,
 } as const;
-type MenuType = (typeof MenuType)[keyof typeof MenuType];
 
 /**
  * 按钮权限树组件Props
@@ -35,7 +34,7 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
   /**
    * 查询权限按钮列表
    */
-  const { data: menuList, isLoading } = useQuery({
+  const { data: menuList, isFetching } = useQuery({
     queryKey: ['permission-buttons'],
     queryFn: () => permissionButtonService.getButtonList({}),
   });
@@ -72,9 +71,7 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
         <div className="flex items-center space-x-2">
           {record.icon && addIcon(record.icon)}
           <span className="font-medium">{t(name)}</span>
-          {record.menuType === MenuType.PERMISSION_BUTTON && (
-            <Tag color="blue">按钮</Tag>
-          )}
+          {record.menuType === MenuType.PERMISSION_BUTTON && <Tag color="blue">按钮</Tag>}
         </div>
       ),
     },
@@ -114,29 +111,32 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
   /**
    * Table 行选择配置 - 只允许选中菜单类型为3（按钮）的行
    */
-  const rowSelection = useMemo(() => ({
-    selectedRowKeys: checkedKeys,
-    onChange: (selectedRowKeys: React.Key[]) => {
-      onCheck(selectedRowKeys as string[]);
-    },
-    onSelectAll: (selected: boolean) => {
-      if (selected) {
-        // 全选时，只选择所有按钮类型的菜单
-        const allButtonIds = getAllButtonIds(menuList || []);
-        onCheck(allButtonIds);
-      } else {
-        // 取消全选时，清空所有选择
-        onCheck([]);
-      }
-    },
-    getCheckboxProps: (record: MenuModel) => ({
-      name: record.name,
-      // 只允许选中菜单类型为3的行
-      disabled: record.menuType !== MenuType.PERMISSION_BUTTON,
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys: checkedKeys,
+      onChange: (selectedRowKeys: React.Key[]) => {
+        onCheck(selectedRowKeys as string[]);
+      },
+      onSelectAll: (selected: boolean) => {
+        if (selected) {
+          // 全选时，只选择所有按钮类型的菜单
+          const allButtonIds = getAllButtonIds(menuList || []);
+          onCheck(allButtonIds);
+        } else {
+          // 取消全选时，清空所有选择
+          onCheck([]);
+        }
+      },
+      getCheckboxProps: (record: MenuModel) => ({
+        name: record.name,
+        // 只允许选中菜单类型为3的行
+        disabled: record.menuType !== MenuType.PERMISSION_BUTTON,
+      }),
     }),
-  }), [checkedKeys, menuList, onCheck]);
+    [checkedKeys, menuList, onCheck]
+  );
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="flex items-center justify-center h-64">
         <Spin size="large" />
@@ -152,7 +152,7 @@ const ButtonPermissionTree: React.FC<ButtonPermissionTreeProps> = memo(({ checke
     <Table<MenuModel>
       columns={columns}
       dataSource={menuList || []}
-      loading={isLoading}
+      loading={isFetching}
       rowKey="id"
       rowSelection={rowSelection}
       pagination={false}
