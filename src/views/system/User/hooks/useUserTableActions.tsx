@@ -65,6 +65,13 @@ export const useUserTableActions = ({
     });
   }, [dispatch]);
 
+  // 处理回收站
+  const handleRecycle = useCallback(() => {
+    dispatch({
+      openRecycleModal: true,
+    });
+  }, [dispatch]);
+
   // 处理状态变更
   const handleStatusChange = useCallback(
     (record: UserModel, checked: boolean) => {
@@ -117,9 +124,8 @@ export const useUserTableActions = ({
             });
             return;
           }
-          modal.error({
-            title: '功能暂未开放',
-            content: '分配角色功能正在开发中，敬请期待。',
+          dispatch({
+            openAssignRoleModal: true,
           });
         },
       },
@@ -196,6 +202,7 @@ export const useUserTableActions = ({
     handleEdit,
     handleDetail,
     handleAdd,
+    handleRecycle,
     handleStatusChange,
     getMoreActions,
     handleBatchDelete,

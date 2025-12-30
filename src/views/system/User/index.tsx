@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import type { UserModel } from '@/services/system/user/type';
 import { userService } from '@/services/system/user/userApi';
 import { Operation, SearchForm, TableActionButtons, UserInfoModal, UserPasswordModal, UserTable } from './components';
+import AssignRoleModal from './components/AssignRoleModal';
+import RecycleModal from './components/RecycleModal';
 import { useUserMutations, useUserPermissions, useUserTableActions } from './hooks/index';
 import type { UserSearchParams } from './types';
 
@@ -15,6 +17,10 @@ interface UserState {
   openEditModal: boolean;
   openPasswordModal: boolean;
   openOperationModal: boolean;
+  // 打开回收站
+  openRecycleModal: boolean;
+  // 打开角色分配弹窗
+  openAssignRoleModal: boolean;
   currentRow: Partial<UserModel> | null;
   selectedRows: Partial<UserModel>[];
   action: string;
@@ -35,6 +41,8 @@ const User = () => {
       openEditModal: false,
       openPasswordModal: false,
       openOperationModal: false,
+      openRecycleModal: false,
+      openAssignRoleModal: false,
       currentRow: null,
       selectedRows: [],
       action: '',
@@ -75,14 +83,14 @@ const User = () => {
   }, [searchParams.pageNum, result?.totalRow]);
 
   // 成功回调
-  const handleSuccess = useCallback(() => {
+  const handleSuccess = () => {
     dispatch({
       selectedRows: [],
     });
     setSelectedRowKeys([]);
     setSelectedRows([]);
     refetch();
-  }, [refetch]);
+  };
 
   // Mutations
   const { logicDeleteUserMutation, updateStatusMutation, handleSubmit } = useUserMutations({
@@ -91,7 +99,7 @@ const User = () => {
   });
 
   // 表格操作
-  const { handleEdit, handleDetail, handleAdd, handleStatusChange, getMoreActions, handleBatchDelete } =
+  const { handleEdit, handleDetail, handleAdd, handleRecycle, handleStatusChange, getMoreActions, handleBatchDelete } =
     useUserTableActions({
       permissions,
       dispatch,
@@ -101,79 +109,80 @@ const User = () => {
     });
 
   // 处理搜索
-  const handleSearch = useCallback(
-    (values: UserSearchParams) => {
-      const search = {
-        ...values,
-        pageNum: searchParams.pageNum,
-        pageSize: searchParams.pageSize,
-      };
-      // 判断参数是否发生变化
-      if (isEqual(search, searchParams)) {
-        // 参数没有变化，手动刷新数据
-        refetch();
-        return;
-      }
-      setSearchParams((prev: UserSearchParams) => ({ ...prev, ...search }));
-    },
-    [searchParams, refetch]
-  );
+  const handleSearch = (values: UserSearchParams) => {
+    const search = {
+      ...values,
+      pageNum: searchParams.pageNum,
+      pageSize: searchParams.pageSize,
+    };
+    // 判断参数是否发生变化
+    if (isEqual(search, searchParams)) {
+      // 参数没有变化，手动刷新数据
+      refetch();
+      return;
+    }
+    setSearchParams((prev: UserSearchParams) => ({ ...prev, ...search }));
+  };
 
   // 处理分页变化
-  const handlePageChange = useCallback((page: number, pageSize?: number) => {
+  const handlePageChange = (page: number, pageSize?: number) => {
     setSearchParams((prev) => ({
       ...prev,
       pageNum: page,
       pageSize: pageSize || prev.pageSize,
     }));
-  }, []);
+  };
 
   // 处理行选择变化
-  const handleSelectionChange = useCallback((keys: string[], rows: UserModel[]) => {
+  const handleSelectionChange = (keys: string[], rows: UserModel[]) => {
     setSelectedRowKeys(keys);
     setSelectedRows(rows);
     dispatch({
       selectedRows: rows,
     });
-  }, []);
+  };
 
   // 关闭编辑弹窗
-  const handleCloseEditModal = useCallback(() => {
+  const handleCloseEditModal = () => {
     dispatch({
       openEditModal: false,
       currentRow: null,
     });
-  }, []);
+  };
 
   // 关闭密码弹窗
-  const handleClosePasswordModal = useCallback(() => {
+  const handleClosePasswordModal = () => {
     dispatch({
       openPasswordModal: false,
     });
-  }, []);
+  };
 
   // 关闭操作记录弹窗
-  const handleCloseOperationModal = useCallback(() => {
+  const handleCloseOperationModal = () => {
     dispatch({
       openOperationModal: false,
     });
-  }, []);
+  };
+
+  // 关闭回收站弹窗
+  const handleCloseRecycleModal = () => {
+    dispatch({
+      openRecycleModal: false,
+    });
+  };
 
   // 处理表单提交成功
-  const handleModalOk = useCallback(
-    (values: Partial<UserModel>) => {
-      handleSubmit(values);
-      dispatch({
-        openEditModal: false,
-      });
-    },
-    [handleSubmit]
-  );
+  const handleModalOk = (values: Partial<UserModel>) => {
+    handleSubmit(values);
+    dispatch({
+      openEditModal: false,
+    });
+  };
 
   // 批量删除
-  const handleBatchDeleteClick = useCallback(() => {
+  const handleBatchDeleteClick = () => {
     handleBatchDelete(selectedRows);
-  }, [handleBatchDelete, selectedRows]);
+  };
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -193,6 +202,7 @@ const User = () => {
             <TableActionButtons
               handleAdd={handleAdd}
               handleBatchDelete={handleBatchDeleteClick}
+              handleRecycle={handleRecycle}
               refetch={refetch}
               selectedRows={selectedRows}
             />
@@ -237,6 +247,28 @@ const User = () => {
         userInfo={state.currentRow || {}}
         visible={state.openOperationModal}
         onCancel={handleCloseOperationModal}
+      />
+
+      {/* 回收站弹窗 */}
+      <RecycleModal
+        visible={state.openRecycleModal}
+        onCancel={handleCloseRecycleModal}
+        onOk={handleCloseRecycleModal}
+      />
+      {/* 角色分配表格穿梭框弹窗 */}
+      <AssignRoleModal
+        visible={state.openAssignRoleModal}
+        onCancel={() => {
+          dispatch({
+            openAssignRoleModal: false,
+          });
+        }}
+        onOk={() => {
+          // 暂时这么写，需要点击确定的时候保存数据
+          dispatch({
+            openAssignRoleModal: false,
+          });
+        }}
       />
     </div>
   );

@@ -32,6 +32,11 @@ const UserAction = {
   queryUserListPage: '/system/user/queryUserListPage',
 
   /**
+   * 分页查询回收站用户列表
+   */
+  queryRecycleUserListPage: '/system/user/queryRecycleUserListPage',
+
+  /**
    * 批量锁定用户
    */
   lockBatchUser: '/system/user/lockBatchUser',
@@ -90,6 +95,13 @@ export interface IUserService {
    * @returns 用户列表、分页信息
    */
   queryUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>>;
+
+  /**
+   * 分页查询回收站用户列表
+   * @param searchParams 查询参数（包括分页）
+   * @returns 用户列表、分页信息
+   */
+  queryRecycleUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>>;
 
   /**
    * 批量更新用户状态
@@ -189,7 +201,24 @@ export const userService: IUserService = {
   },
 
   /**
-   * 批量更新用户状态
+   * 分页查询回收站用户列表
+   * @param searchParams 查询参数（包括分页）
+   * @returns 用户列表、分页信息
+   */
+  async queryRecycleUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>> {
+    const response = await HttpRequest.post(
+      {
+        url: UserAction.queryRecycleUserListPage,
+        data: searchParams,
+      },
+      {
+        successMessageMode: 'none',
+      }
+    );
+    return response;
+  },
+
+  /* 批量更新用户状态
    * @param ids 用户ID列表
    * @param status 用户状态
    * @returns 更新结果

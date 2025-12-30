@@ -26,6 +26,7 @@ import type { UserModel } from '@/services/system/user/type';
 
 interface TableActionButtonsProps {
   handleAdd: () => void;
+  handleRecycle: () => void;
   handleBatchDelete: () => void;
   refetch: () => void;
   selectedRows: UserModel[];
@@ -34,6 +35,7 @@ interface TableActionButtonsProps {
 // 表格操作按钮
 const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   handleAdd,
+  handleRecycle,
   handleBatchDelete,
   refetch,
   selectedRows,
@@ -191,14 +193,17 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               }
             }}
           >
-            <Button icon={<FolderImport className="text-sm! block!" />}>{t('common.operation.import')}</Button>
+            <Button icon={<FolderImport className="block!" />}>{t('common.operation.import')}</Button>
           </Upload>
         )}
 
         {canBatchExport && (
           <Space.Compact>
-            <Button icon={<FolderExport className="text-sm! block!" />}>{t('common.operation.export')}</Button>
-            <Dropdown menu={{ items: exportItems }} placement="bottom">
+            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
+              {t('common.operation.export')}
+              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+            </Button>
+            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
               <Button icon={<DownOutlined />} />
             </Dropdown>
           </Space.Compact>
@@ -206,7 +211,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>
-          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="text-sm! block!" />}>
+          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="block!" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
@@ -217,15 +222,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
-          <Button
-            icon={<Recycle className="text-sm! block! text-green-500!" />}
-            onClick={() => {
-              modal.error({
-                title: '功能暂未开放',
-                content: '回收站功能正在开发中，敬请期待。',
-              });
-            }}
-          >
+          <Button icon={<Recycle className="block! text-green-500!" />} onClick={handleRecycle}>
             {t('common.operation.recycle')}
           </Button>
         )}
