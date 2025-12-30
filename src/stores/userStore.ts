@@ -14,27 +14,14 @@ interface UserState {
   roleId: string;
   // 当前角色Code
   roleCode: string;
-  // 当前角色名称
-  roleName: string;
-  // 登录用户邮箱
-  email?: string;
-  // 当前角色ID
-  currentRoleId: string;
   // 用户角色列表
   userRoles: RoleModel[];
-  login: (
-    loginUser: string,
-    roleId: string,
-    roleCode: string,
-    accessToken: string,
-    roleName: string,
-    email?: string
-  ) => void;
+  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
   clear(): void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   setHomePath: (homePath: string) => void;
-  setCurrentRoleId: (roleId: string) => void;
+  setRoleId: (roleId: string) => void;
   setUserRoles: (roles: RoleModel[]) => void;
   switchRole: (roleId: string) => void;
 }
@@ -53,15 +40,14 @@ export const useUserStore = create<UserState>()(
       email: '',
       currentRoleId: '',
       userRoles: [],
-      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '', roleName = '', email = '') =>
-        set({ loginUser, isLogin: true, roleId, roleCode, accessToken, roleName, email }),
+      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '') =>
+        set({ loginUser, isLogin: true, roleId, roleCode, accessToken }),
       clear: () =>
         set({
           loginUser: '',
           isLogin: false,
           roleId: '',
           roleCode: '',
-          currentRoleId: '',
           userRoles: [],
         }),
       logout: () =>
@@ -70,20 +56,17 @@ export const useUserStore = create<UserState>()(
           isLogin: false,
           roleId: '',
           roleCode: '',
-          currentRoleId: '',
           userRoles: [],
         }),
       setAccessToken: (token: string) => set({ accessToken: token }),
       setHomePath: (homePath: string) => set({ homePath }),
-      setCurrentRoleId: (roleId: string) => set({ currentRoleId: roleId }),
+      setRoleId: (roleId: string) => set({ roleId: roleId }),
       setUserRoles: (roles: RoleModel[]) => set({ userRoles: roles }),
       switchRole: (roleId: string) => {
         set((state) => {
           const newRole = state.userRoles.find((role) => role.id === roleId);
           if (newRole) {
-            state.roleName = newRole.roleName;
             state.roleCode = newRole.roleCode;
-            state.currentRoleId = roleId;
             state.roleId = roleId;
           }
           return state;

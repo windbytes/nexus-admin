@@ -76,6 +76,11 @@ export interface UserModel {
    * 角色ID
    */
   roleId: string;
+
+  /**
+   * 角色名称
+   */
+  roleName: string;
 }
 
 /**

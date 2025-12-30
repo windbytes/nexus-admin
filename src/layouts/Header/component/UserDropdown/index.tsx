@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { App, Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import avatar from '@/assets/images/avatar.png';
@@ -31,11 +31,9 @@ const UserDropdown: React.FC = () => {
   const userStore = useUserStore(
     useShallow((state) => ({
       loginUser: state.loginUser,
+      loginRoleId: state.roleId,
       isLogin: state.isLogin,
-      currentRoleId: state.currentRoleId,
       roleCode: state.roleCode,
-      roleName: state.roleName,
-      email: state.email,
       switchRole: state.switchRole,
       clear: state.clear,
       setUserRoles: state.setUserRoles,
@@ -60,25 +58,32 @@ const UserDropdown: React.FC = () => {
     isLoading: loading,
     error: rolesError,
   } = useQuery({
-    queryKey: ['user-roles', userStore.loginUser],
-    queryFn: () => frameworkService.getUserRolesByUserName(userStore.loginUser),
-    enabled: userStore.isLogin && Boolean(userStore.loginUser),
+    queryKey: ['dropdwon-user-roles', userStore.loginUser],
+    queryFn: async () => {
+      const userRoles = await frameworkService.getUserRolesByUserName(userStore.loginUser);
+      userStore.setUserRoles(userRoles);
+      return userRoles;
+    },
+    enabled: userStore.isLogin && Boolean(userStore.isLogin),
   });
 
-  useEffect(() => {
-    userStore.setUserRoles(userRoles);
-  }, [userRoles]);
+  // 获取用户基础信息后
+  const { data: userInfo } = useQuery({
+    queryKey: ['dropdown-user-info', userStore.loginUser, userStore.loginRoleId],
+    queryFn: () => frameworkService.getCurrentUserInfo(userStore.loginUser, userStore.loginRoleId),
+    enabled: userStore.isLogin && Boolean(userStore.isLogin) && !!userStore.loginRoleId,
+  });
 
   // 使用 useMemo 计算当前角色信息，避免无限循环
   const currentRoleInfo = useMemo(() => {
-    const currentRoleId = userStore.currentRoleId;
+    const currentRoleId = userStore.loginRoleId;
     const currentRole = userRoles.find((role) => role.id === currentRoleId);
     return {
       currentRoleId,
       currentRoleName: currentRole?.roleName || userStore.roleCode || '未选择角色',
       hasRoles: userRoles.length > 0,
     };
-  }, [userRoles, userStore.currentRoleId, userStore.roleCode]);
+  }, [userRoles, userStore.loginRoleId, userStore.roleCode]);
 
   // 角色切换的 mutation
   const roleSwitchMutation = useMutation({
@@ -119,9 +124,9 @@ const UserDropdown: React.FC = () => {
           <Avatar size="large" src={avatar} />
           <div className="flex flex-col flex-1 shrink-0 ml-2">
             <span className="block text-sm font-medium truncate">
-              {userStore.loginUser} - {userStore.roleName}
+              {userStore.loginUser} - {userInfo?.roleName}
             </span>
-            <span className="block mt-0.5 text-xs text-gray-500 truncate">{userStore.email}</span>
+            <span className="block mt-0.5 text-xs text-gray-500 truncate">{userInfo?.email}</span>
           </div>
         </div>
       ),
