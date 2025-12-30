@@ -14,6 +14,7 @@ import type { EndpointModalProps } from './types';
 
 /**
  * 端点信息弹窗
+ * @todo 需要调整结构，采用分步表单配置
  */
 const EndpointModal: React.FC<EndpointModalProps> = ({
   open,
