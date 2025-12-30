@@ -35,7 +35,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 - **Spring Boot 3.x** - 企业级 Java 应用框架
 - **JDK 25** - 最新的 Java 开发工具包
-- **MyBatis-Plus** - 灵活的 ORM 框架
+- **MyBatis-Flex** - 灵活的 ORM 框架
 - **Apache Camel** - 企业集成模式框架
 - **Sa-token** -- 权限校验
 - **Redis** -- 缓存实现与分布式锁
