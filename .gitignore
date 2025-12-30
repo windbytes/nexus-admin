@@ -7,5 +7,6 @@ dist
 bun.lock
 *.DS_Store
 *.idea
-*.vscode
+.vscode
 *.lock
+.cursor

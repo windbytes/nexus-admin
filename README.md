@@ -23,7 +23,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 - **React 19.2** - 现代化的用户界面框架
 - **Ant Design 6.x** - 企业级 UI 组件库
-- **Vite** - 快速的前端构建工具
+- **Vite(rolldown)** - 快速的前端构建工具
 - **TypeScript** - 类型安全的 JavaScript 超集
 - **Zustand** - 轻量级状态管理
 - **Tanstack Router** - 客户端路由管理
@@ -223,8 +223,8 @@ nexus-admin/
 
 - **Node.js**: >= 22.12.0
 - **Bun**: 最新版本
-- **Java**: JDK 21+
-- **数据库**: MySQL 8.0+ 或 PostgreSQL 13+
+- **Java**: JDK 25
+- **数据库**: PostgreSQL 13+
 
 ### 安装依赖
 
@@ -262,7 +262,7 @@ VITE_API_BASE_URL=http://localhost:9193
 VITE_APP_TITLE=Nexus Admin
 
 # 生产环境
-VITE_API_BASE_URL=https://api.nexus.com
+VITE_API_BASE_URL=https://xxx.xxx.com
 VITE_APP_TITLE=Nexus 集成平台
 ```
 
@@ -288,7 +288,7 @@ server: {
 
 ### 数据加密
 
-- **传输加密**: 所有 API 请求使用 HTTPS 加密传输
+- **传输加密**: 所有 API 请求使用 HTTPS 加密传输（生产环境下）
 - **数据加密**: 敏感数据使用 AES 加密存储
 - **密码加密**: 用户密码使用 BCrypt 加密
 
@@ -297,7 +297,6 @@ server: {
 - **RBAC 模型**: 基于角色的访问控制
 - **菜单权限**: 动态菜单权限控制
 - **接口权限**: API 接口级别的权限验证
-- **数据权限**: 行级数据权限控制
 
 ## 📊 监控和日志
 
@@ -366,17 +365,15 @@ rsync -av dist/ user@server:/var/www/nexus-admin/
 
 ## 🔮 未来规划
 
-### 短期目标 (v1.1)
+### 短期目标 (v1.0)
 
 - [ ] 支持更多 Apache Camel 组件
 - [ ] 增强工作流可视化编辑器
 - [ ] 添加更多数据源连接器
 - [ ] 完善监控和告警功能
 
-### 长期目标 (v2.0)
+### 长期目标 (v1.1)
 
-- [ ] 微服务架构升级
-- [ ] 云原生部署支持
 - [ ] AI 辅助集成配置
 - [ ] MQ实现消息削峰
 - [ ] 多租户支持
