@@ -7,6 +7,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ColumnEdit24Regular,
@@ -21,36 +22,37 @@ import {
   Status24Regular,
 } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
-import { usePermission } from '@/hooks/usePermission';
 import type { UserModel } from '@/services/system/user/type';
+import type { ModalType } from '../hooks/useUserModals';
+import { useUserPermissions } from '../hooks/useUserPermissions';
 
 interface TableActionButtonsProps {
-  handleAdd: () => void;
-  handleRecycle: () => void;
   handleBatchDelete: () => void;
   refetch: () => void;
-  selectedRows: UserModel[];
+  selectedRows: Key[];
+  openModal: (name: ModalType, record?: UserModel) => void;
 }
 
 // 表格操作按钮
 const TableActionButtons: React.FC<TableActionButtonsProps> = ({
-  handleAdd,
-  handleRecycle,
   handleBatchDelete,
   refetch,
   selectedRows,
+  openModal,
 }) => {
   const { message, modal } = App.useApp();
   const { t } = useTranslation();
   // 权限检查
-  const canAdd = usePermission(['sys:user:add']);
-  const canBatchDelete = usePermission(['sys:user:delete']);
-  const canBatchImport = usePermission(['sys:user:import']);
-  const canBatchExport = usePermission(['sys:user:export']);
-  const canRecover = usePermission(['sys:user:recover']);
-  const canBatchResetPassword = usePermission(['sys:user:resetPassword']);
-  const canBatchAssignRole = usePermission(['sys:user:assignRole']);
-  const canBatchUpdateStatus = usePermission(['sys:user:updateStatus']);
+  const {
+    canAdd,
+    canDeleteUser,
+    canBatchImport,
+    canBatchExport,
+    canRecover,
+    canBatchResetPassword,
+    canBatchAssignRole,
+    canUpdateStatus,
+  } = useUserPermissions();
   // 导出选项
   const exportItems: MenuProps['items'] = [
     {
@@ -114,7 +116,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       label: '批量更新状态',
       icon: <Status24Regular className="text-sm! block" />,
       onClick: () => {
-        if (!canBatchUpdateStatus) {
+        if (!canUpdateStatus) {
           modal.error({
             title: '权限不足',
             content: '您没有批量更新用户状态的权限，请联系管理员获取相应权限。',
@@ -153,9 +155,9 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       key: 'delete',
       label: '批量删除',
       icon: <DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)" />,
-      disabled: selectedRows.length === 0 || !canBatchDelete,
+      disabled: selectedRows.length === 0 || !canDeleteUser,
       onClick: () => {
-        if (!canBatchDelete) {
+        if (!canDeleteUser) {
           modal.error({
             title: '权限不足',
             content: '您没有批量删除用户的权限，请联系管理员获取相应权限。',
@@ -172,7 +174,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
         {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
             {t('common.operation.add')}
           </Button>
         )}
@@ -222,7 +224,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
-          <Button icon={<Recycle className="block! text-green-500!" />} onClick={handleRecycle}>
+          <Button icon={<Recycle className="block! text-green-500!" />} onClick={() => openModal('recycle')}>
             {t('common.operation.recycle')}
           </Button>
         )}

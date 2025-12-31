@@ -8,7 +8,7 @@ import DragModal from '@/components/modal/DragModal';
 import type { UserModel } from '@/services/system/user/type';
 
 interface UserInfoModalProps {
-  visible: boolean;
+  open: boolean;
   action: string;
   onOk: (values: Partial<UserModel>) => void;
   onCancel: () => void;
@@ -23,7 +23,7 @@ interface UserInfoModalProps {
  * @param userInfo 用户信息
  * @returns
  */
-const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, userInfo, action }) => {
+const UserInfoModal: React.FC<UserInfoModalProps> = ({ open, onOk, onCancel, userInfo, action }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const usernameRef = useRef<InputRef>(null);
@@ -32,7 +32,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
 
   // 初始化表单数据
   useEffect(() => {
-    if (!visible) {
+    if (!open) {
       return;
     }
     if (userInfo) {
@@ -42,7 +42,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
       };
       form.setFieldsValue(formData);
     }
-  }, [userInfo, visible]);
+  }, [userInfo, open]);
 
   /**
    * 弹窗打开关闭的回调
@@ -118,7 +118,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({ visible, onOk, onCancel, 
   return (
     <DragModal
       title={action === 'view' ? '用户详情' : action === 'add' ? '新增用户' : '编辑用户'}
-      open={visible}
+      open={open}
       onOk={handleOk}
       okButtonProps={{ disabled: action === 'view' }}
       onCancel={handleCancel}

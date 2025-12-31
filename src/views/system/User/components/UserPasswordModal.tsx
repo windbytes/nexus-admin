@@ -1,20 +1,19 @@
-import { useMutation } from '@tanstack/react-query';
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { App, Col, Form, Input, type InputRef, Progress, Row } from 'antd';
+import { Col, Form, Input, type InputRef, Progress, Row } from 'antd';
 import { keys, values } from 'lodash-es';
 import type React from 'react';
 import { memo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import type { UserModel } from '@/services/system/user/type';
-import { userService } from '@/services/system/user/userApi';
-import { strengthMeterOptions } from '../config';
-import styles from '../strengthMeter.module.scss';
+import { strengthMeterOptions } from '../constants';
+import { useUserActions } from '../hooks/useUserAction';
+import styles from '../index.module.scss';
 
 interface UserPasswordModalProps {
   open: boolean;
   onClose: () => void;
-  userInfo: Partial<UserModel>;
+  userInfo: Partial<UserModel> | null;
   onOk: () => void;
 }
 
@@ -22,7 +21,7 @@ interface UserPasswordModalProps {
  * 更新用户密码弹窗
  */
 const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, userInfo, onOk }) => {
-  const { modal, message } = App.useApp();
+  const { updateUserPassword } = useUserActions({ currentRow: userInfo, onSuccess: onOk });
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const passwordRef = useRef<InputRef>(null);
@@ -52,7 +51,7 @@ const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, us
       .validateFields()
       .then((values) => {
         const { id, password } = values;
-        updatePassword.mutate({ id, password });
+        updateUserPassword(id, password);
       })
       .catch((errorInfo) => {
         // 滚动并聚焦到第一个错误字段
@@ -68,23 +67,21 @@ const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, us
     }
   };
 
-  // 更新用户密码
-  const updatePassword = useMutation({
-    mutationFn: ({ id, password }: { id: string; password: string }) => userService.changeUserPwd(id, password),
-    onSuccess: () => {
-      message.success('更新用户密码成功');
-      onOk();
-    },
-    onError: (error) => {
-      modal.error({
-        title: '更新用户密码失败',
-        content: error.message,
-      });
-    },
-  });
+  /**  * 取消回调
+   */
+  const handleCancel = () => {
+    form.resetFields();
+    onClose();
+  };
 
   return (
-    <DragModal title="更新用户密码" open={open} onCancel={onClose} onOk={handleOk} afterOpenChange={onAfterOpenChange}>
+    <DragModal
+      title="更新用户密码"
+      open={open}
+      onCancel={handleCancel}
+      onOk={handleOk}
+      afterOpenChange={onAfterOpenChange}
+    >
       <Form form={form} labelCol={{ span: 4 }} wrapperCol={{ span: 19 }}>
         {/* 隐藏的用户ID */}
         <Form.Item name="id" hidden>

@@ -9,7 +9,7 @@ import type { UserSearchParams } from '../types';
  * 回收站
  * @returns
  */
-const RecycleModal: React.FC<RecycleModalProps> = ({ visible, onCancel, onOk }) => {
+const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => {
   const [searchParams, setSearchParams] = useState<UserSearchParams>({
     pageNum: 1,
     pageSize: 10,
@@ -19,12 +19,12 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ visible, onCancel, onOk }) 
   const { isFetching, data, refetch } = useQuery({
     queryKey: ['sys_user_recycle', searchParams],
     queryFn: () => userService.queryRecycleUserListPage(searchParams),
-    enabled: visible,
+    enabled: open,
   });
 
   return (
     <DragModal
-      open={visible}
+      open={open}
       onCancel={onCancel}
       title="回收站"
       width={800}
@@ -45,7 +45,7 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ visible, onCancel, onOk }) 
 export default RecycleModal;
 
 interface RecycleModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onOk: () => void;
 }

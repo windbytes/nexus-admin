@@ -11,7 +11,7 @@ const { RangePicker } = DatePicker;
  */
 interface SearchFormProps {
   onSearch: (values: UserSearchParams) => void;
-  isLoading: boolean;
+  loading: boolean;
 }
 
 /**
@@ -19,7 +19,7 @@ interface SearchFormProps {
  * @param onSearch 搜索回调
  * @returns 搜索表单
  */
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -117,7 +117,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
               {t('common.operation.reset')}
             </Button>
-            <Button type="primary" htmlType="submit" loading={isLoading} icon={<SearchOutlined />}>
+            <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
               {t('common.operation.search')}
             </Button>
             <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
