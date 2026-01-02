@@ -16,7 +16,7 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
   });
 
   // 查询回收站数据
-  const { isFetching, data, refetch } = useQuery({
+  const { isFetching, data } = useQuery({
     queryKey: ['sys_user_recycle', searchParams],
     queryFn: () => userService.queryRecycleUserListPage(searchParams),
     enabled: open,
