@@ -4,6 +4,7 @@ import useTableScroll from '@/hooks/useTableScroll';
 import type { UserModel } from '@/services/system/user/type';
 import type { ModalType } from '../../hooks/useUserModals';
 import { useUserTableColumns } from './useUserTableColumn';
+import '@/styles/table.full.scss';
 
 interface UserTableProps {
   // 数据源
@@ -45,7 +46,7 @@ const UserTable: React.FC<UserTableProps> = (props) => {
     openModal,
     onSuccess,
   } = props;
-  // 窗口管理hook
+  // 表格滚动配置
   const { scrollConfig, tableWrapperRef } = useTableScroll();
   // 获取表格列定义
   const columns = useUserTableColumns({

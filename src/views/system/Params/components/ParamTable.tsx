@@ -1,11 +1,12 @@
-import type React from 'react';
-import { Table, Button, Space, Tooltip, Tag, Switch } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { SysParam } from '@/services/system/params';
-import { DATA_TYPE_OPTIONS, CATEGORY_OPTIONS } from '@/services/system/params';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
+import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
+import type React from 'react';
 import { usePermission } from '@/hooks/usePermission';
-
+import useTableScroll from '@/hooks/useTableScroll';
+import type { SysParam } from '@/services/system/params';
+import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
+import '@/styles/table.full.scss';
 interface ParamTableProps {
   data: SysParam[];
   loading: boolean;
@@ -43,6 +44,8 @@ const ParamTable: React.FC<ParamTableProps> = ({
   const canEdit = usePermission(['param:edit']);
   const canDelete = usePermission(['param:delete']);
   const canChangeStatus = usePermission(['param:edit']);
+  // 表格滚动配置
+  const { scrollConfig, tableWrapperRef } = useTableScroll();
 
   // 获取数据类型标签
   const getDataTypeLabel = (value: string) => {
@@ -118,7 +121,7 @@ const ParamTable: React.FC<ParamTableProps> = ({
       key: 'status',
       align: 'center',
       width: 100,
-      render: (value: boolean, record: SysParam) => (
+      render: (value: boolean, record: SysParam) =>
         canChangeStatus ? (
           <Switch
             checked={value}
@@ -128,8 +131,7 @@ const ParamTable: React.FC<ParamTableProps> = ({
           />
         ) : (
           <Tag color={value ? 'green' : 'red'}>{value ? '启用' : '禁用'}</Tag>
-        )
-      ),
+        ),
     },
     {
       title: '创建时间',
@@ -138,7 +140,9 @@ const ParamTable: React.FC<ParamTableProps> = ({
       align: 'center',
       width: 180,
       render: (value: string) => {
-        if (!value) return '-';
+        if (!value) {
+          return '-';
+        }
         return new Date(value).toLocaleString('zh-CN');
       },
     },
@@ -182,16 +186,21 @@ const ParamTable: React.FC<ParamTableProps> = ({
   };
 
   return (
-    <Table
-      bordered
-      columns={columns}
-      dataSource={data}
-      rowKey="id"
-      loading={loading}
-      rowSelection={rowSelection}
-      pagination={pagination}
-      scroll={{ x: 'max-content' }}
-    />
+    <div className="grow min-h-0 min-w-0" ref={tableWrapperRef}>
+      <Table
+        bordered
+        columns={columns}
+        dataSource={data}
+        rowKey="id"
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={pagination}
+        scroll={{ x: '100%', y: scrollConfig.y }}
+        classNames={{
+          root: 'full-height-table',
+        }}
+      />
+    </div>
   );
 };
 

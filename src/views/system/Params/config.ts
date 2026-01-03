@@ -3,7 +3,7 @@
  */
 
 // 是否使用模拟数据（开发阶段设置为true，生产环境设置为false）
-export const USE_MOCK_DATA = process.env.NODE_ENV === 'development';
+export const USE_MOCK_DATA = import.meta.env.MODE === 'development';
 
 // 分页配置
 export const DEFAULT_PAGE_SIZE = 10;
