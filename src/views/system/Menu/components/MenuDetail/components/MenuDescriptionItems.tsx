@@ -1,7 +1,7 @@
-import { Popconfirm, Switch, Tag } from 'antd';
 import type { DescriptionsProps } from 'antd';
-import type React from 'react';
+import { Popconfirm, Switch, Tag } from 'antd';
 import type { MenuModel } from '@/services/system/menu/type';
+import { MENU_TYPE } from '../../../constants';
 
 interface MenuDescriptionItemsProps {
   menu: MenuModel | null;
@@ -12,20 +12,24 @@ interface MenuDescriptionItemsProps {
 /**
  * 菜单描述项生成函数
  */
-const MenuDescriptionItems = ({ menu, onToggleStatus, canEditMenu }: MenuDescriptionItemsProps): DescriptionsProps['items'] => {
+const MenuDescriptionItems = ({
+  menu,
+  onToggleStatus,
+  canEditMenu,
+}: MenuDescriptionItemsProps): DescriptionsProps['items'] => {
   const items: DescriptionsProps['items'] = [
     {
       key: '1',
       label: '菜单类型',
       children: (() => {
         switch (menu?.menuType) {
-          case 0:
+          case MENU_TYPE.TOP_LEVEL:
             return <Tag color="red">目录</Tag>;
-          case 1:
+          case MENU_TYPE.SUB_MENU:
             return <Tag color="green">子菜单</Tag>;
-          case 2:
+          case MENU_TYPE.SUB_ROUTE:
             return <Tag color="blue">子路由</Tag>;
-          case 3:
+          case MENU_TYPE.PERMISSION_BUTTON:
             return <Tag color="orange">权限按钮</Tag>;
           default:
             return '';
@@ -95,4 +99,3 @@ const MenuDescriptionItems = ({ menu, onToggleStatus, canEditMenu }: MenuDescrip
 };
 
 export default MenuDescriptionItems;
-

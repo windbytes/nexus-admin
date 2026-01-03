@@ -14,18 +14,19 @@ export type MenuDetailProps = {
   /**
    * 打开抽屉
    * @param name 操作类型
+   * @param record 可选的菜单数据（用于编辑或新增时的父菜单）
    */
-  openModal: (name: ModalType) => void;
+  openModal: (name: ModalType, record?: MenuModel) => void;
   /**
    * 删除菜单
    * @param menuId 菜单ID
    */
-  onDeleteMenu: (menuId: string) => Promise<void>;
+  onDeleteMenu: (menuId: string) => void;
   /**
    * 复制菜单
    * @param menuData 要复制的菜单数据
    */
-  onCopyMenu: (menuData: any) => void;
+  onCopyMenu: (menuData: Partial<MenuModel>) => void;
 };
 
 /**
@@ -101,12 +102,17 @@ const MenuDetail: React.FC<MenuDetailProps> = ({ menu, openModal, onDeleteMenu, 
         extra={
           <Space>
             {permissions.canAddMenu && (
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add', menu || undefined)}>
                 {t('common.operation.add')}子菜单
               </Button>
             )}
             {permissions.canEditMenu && (
-              <Button color="orange" variant="outlined" icon={<EditOutlined />} onClick={() => openModal('edit')}>
+              <Button
+                color="orange"
+                variant="outlined"
+                icon={<EditOutlined />}
+                onClick={() => openModal('edit', menu || undefined)}
+              >
                 {t('common.operation.edit')}
               </Button>
             )}
