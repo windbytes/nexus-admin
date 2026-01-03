@@ -1,51 +1,26 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
-import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
-import type React from 'react';
-import { usePermission } from '@/hooks/usePermission';
-import useTableScroll from '@/hooks/useTableScroll';
+import { Button, Switch, Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
 import type { SysParam } from '@/services/system/params';
 import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
-import '@/styles/table.full.scss';
-interface ParamTableProps {
-  data: SysParam[];
-  loading: boolean;
-  selectedRowKeys: React.Key[];
-  onSelectionChange: (selectedRowKeys: React.Key[], selectedRows: SysParam[]) => void;
+import { useParamPermissions } from '../../hooks/useParamPermissions';
+
+interface UseParamTableColumnProps {
+  // 编辑回调
   onEdit: (record: SysParam) => void;
+  // 删除回调
   onDelete: (record: SysParam) => void;
+  // 状态变更回调
   onStatusChange: (record: SysParam, checked: boolean) => void;
-  pagination?: TableProps<SysParam>['pagination'];
 }
 
 /**
- * 参数表格
- * @param data 数据
- * @param loading 加载状态
- * @param selectedRowKeys 选中行
- * @param onSelectionChange 选择行
- * @param onEdit 编辑
- * @param onDelete 删除
- * @param onStatusChange 状态改变
- * @param pagination 分页
- * @returns
+ * @description: 参数表格列配置hook
  */
-const ParamTable: React.FC<ParamTableProps> = ({
-  data,
-  loading,
-  selectedRowKeys,
-  onSelectionChange,
-  onEdit,
-  onDelete,
-  onStatusChange,
-  pagination,
-}) => {
-  // 权限判定
-  const canEdit = usePermission(['param:edit']);
-  const canDelete = usePermission(['param:delete']);
-  const canChangeStatus = usePermission(['param:edit']);
-  // 表格滚动配置
-  const { scrollConfig, tableWrapperRef } = useTableScroll();
+export const useParamTableColumns = (props: UseParamTableColumnProps) => {
+  const { onEdit, onDelete, onStatusChange } = props;
+  const { t } = useTranslation();
+  const { canEdit, canDelete } = useParamPermissions();
 
   // 获取数据类型标签
   const getDataTypeLabel = (value: string) => {
@@ -59,7 +34,6 @@ const ParamTable: React.FC<ParamTableProps> = ({
     return option?.label || value;
   };
 
-  // 表格列配置
   const columns: TableProps<SysParam>['columns'] = [
     {
       title: '序号',
@@ -122,7 +96,7 @@ const ParamTable: React.FC<ParamTableProps> = ({
       align: 'center',
       width: 100,
       render: (value: boolean, record: SysParam) =>
-        canChangeStatus ? (
+        canEdit ? (
           <Switch
             checked={value}
             onChange={(checked) => onStatusChange(record, checked)}
@@ -143,7 +117,7 @@ const ParamTable: React.FC<ParamTableProps> = ({
         if (!value) {
           return '-';
         }
-        return new Date(value).toLocaleString('zh-CN');
+        return value;
       },
     },
     {
@@ -153,55 +127,21 @@ const ParamTable: React.FC<ParamTableProps> = ({
       align: 'center',
       fixed: 'right',
       render: (_: any, record: SysParam) => (
-        <Space size="small">
+        <>
           {canEdit && (
-            <Tooltip title="编辑">
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => onEdit(record)}
-                className="text-blue-500 hover:text-blue-600"
-              />
-            </Tooltip>
+            <Button size="small" type="link" onClick={() => onEdit(record)}>
+              {t('common.operation.edit')}
+            </Button>
           )}
           {canDelete && (
-            <Tooltip title="删除">
-              <Button
-                type="text"
-                icon={<DeleteOutlined />}
-                onClick={() => onDelete(record)}
-                className="text-red-500 hover:text-red-600"
-              />
-            </Tooltip>
+            <Button size="small" type="link" danger onClick={() => onDelete(record)}>
+              {t('common.operation.delete')}
+            </Button>
           )}
-        </Space>
+        </>
       ),
     },
   ];
 
-  // 行选择配置
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectionChange,
-  };
-
-  return (
-    <div className="grow min-h-0 min-w-0" ref={tableWrapperRef}>
-      <Table
-        bordered
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={pagination}
-        scroll={{ x: '100%', y: scrollConfig.y }}
-        classNames={{
-          root: 'full-height-table',
-        }}
-      />
-    </div>
-  );
+  return columns;
 };
-
-export default ParamTable;

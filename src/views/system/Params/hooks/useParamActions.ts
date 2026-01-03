@@ -120,8 +120,13 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
     confirm({
       title: '确认删除',
       content: `确定要删除参数"${record.name}"吗？`,
-      okText: '确定',
-      cancelText: '取消',
+      okButtonProps: {
+        type: 'default',
+        danger: true,
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
       onOk: () => {
         deleteParamMutation.mutate({ id: record.id, code: record.code });
       },
