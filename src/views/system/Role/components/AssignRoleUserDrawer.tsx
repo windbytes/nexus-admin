@@ -33,6 +33,7 @@ import { memo, useRef, useState } from 'react';
 import { DeleteDismiss24Filled } from '@/components/icons';
 import { roleService } from '@/services/system/role/roleApi';
 import type { UserSearchParams } from '@/services/system/role/type';
+import type { UserModel } from '@/services/system/user/type';
 import { usePreferencesStore } from '@/stores/store';
 import AddUserModal from './AddUserModal';
 
@@ -48,7 +49,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
   // 检索表单
   const [form] = Form.useForm();
   // 当前选中的行数据
-  const [selRows, setSelectedRows] = useState<any[]>([]);
+  const [selRows, setSelectedRows] = useState<UserModel[]>([]);
   // 第一个检索框
   const ref = useRef<InputRef>(null);
 
@@ -86,7 +87,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
   /**
    * 定义表格的列
    */
-  const columns: TableProps['columns'] = [
+  const columns: TableProps<UserModel>['columns'] = [
     {
       title: 'id',
       dataIndex: 'id',
@@ -126,16 +127,19 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
       width: 80,
       fixed: 'right',
       align: 'center',
-      render: (_text, record) => {
+      render: (_text, record: UserModel) => {
         return (
           <Popconfirm
             title="移除用户"
             description="确定从该角色下移除当前用户吗？"
-            onConfirm={() => deleteRoleUser(record['id'])}
+            onConfirm={() => deleteRoleUser(record.id)}
             icon={<WarningOutlined style={{ color: colorError }} />}
           >
             <Tooltip title="移除用户">
-              <Button type="text" icon={<DeleteDismiss24Filled className="text-sm block text-(--ant-color-error)" />} />
+              <Button
+                type="text"
+                icon={<DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />}
+              />
             </Tooltip>
           </Popconfirm>
         );
@@ -177,7 +181,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
   /**
    * 多行选中的配置
    */
-  const rowSelection: TableProps['rowSelection'] = {
+  const rowSelection: TableProps<UserModel>['rowSelection'] = {
     // 行选中的回调
     onChange(_selectedRowKeys, selectedRows) {
       setSelectedRows(selectedRows);
@@ -199,7 +203,6 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
    */
   const cancelAddUser = () => {
     setOpenAddUser(false);
-    ref.current?.focus();
   };
 
   /**
@@ -243,6 +246,12 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
     cancelAddUser();
   };
 
+  const afterOpenChange = (open: boolean) => {
+    if (open) {
+      ref.current?.focus();
+    }
+  };
+
   return (
     <ConfigProvider
       theme={{
@@ -261,6 +270,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
         extra={<Button type="text" icon={<CloseOutlined />} onClick={onCancel} />}
         onClose={onCancel}
         classNames={{ footer: 'text-right', body: 'flex flex-col' }}
+        afterOpenChange={afterOpenChange}
       >
         <Card>
           <Form form={form} onFinish={onFinish}>
@@ -324,7 +334,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
           }
         >
           {/* 表格数据 */}
-          <Table
+          <Table<UserModel>
             className="mt-2"
             size="small"
             columns={columns}
@@ -361,4 +371,3 @@ export interface AssignRoleUserDrawerProps {
   // 点击取消的回调
   onCancel: (e: any) => void;
 }
-
