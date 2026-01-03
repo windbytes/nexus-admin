@@ -1,4 +1,3 @@
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -10,6 +9,7 @@ import type { TablePaginationConfig } from 'antd';
 import { Button, Drawer, Empty, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
 
 const { Text } = Typography;
 
@@ -26,7 +26,7 @@ interface EndpointLogDrawerProps {
   /** 是否显示 */
   open: boolean;
   /** 端点信息 */
-  endpoint: Endpoint | null;
+  endpoint: EndpointModel | null;
   /** 关闭回调 */
   onClose: () => void;
 }
@@ -62,7 +62,9 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
    * 加载日志数据（模拟）
    */
   const loadLogs = useCallback(() => {
-    if (!endpoint) return;
+    if (!endpoint) {
+      return;
+    }
 
     setLoading(true);
     // 模拟API请求
@@ -200,13 +202,7 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
   ];
 
   return (
-    <Drawer
-      title={`操作日志 - ${endpoint?.name || ''}`}
-      placement="right"
-      size={900}
-      open={open}
-      onClose={onClose}
-    >
+    <Drawer title={`操作日志 - ${endpoint?.name || ''}`} placement="right" size={900} open={open} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* 过滤器 */}
         <Space className="w-full" size="middle">
@@ -255,4 +251,3 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
 };
 
 export default EndpointLogDrawer;
-

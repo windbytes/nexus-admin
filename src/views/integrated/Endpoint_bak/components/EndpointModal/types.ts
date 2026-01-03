@@ -1,4 +1,4 @@
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 
 /**
@@ -12,7 +12,7 @@ export interface EndpointModalProps {
   /** 加载状态 */
   loading: boolean;
   /** 初始值 */
-  initialValues?: Partial<EndpointModel> | undefined;
+  initialValues?: Partial<Endpoint> | undefined;
   /** 是否查看模式 */
   isViewMode?: boolean;
   /** 确认回调 */

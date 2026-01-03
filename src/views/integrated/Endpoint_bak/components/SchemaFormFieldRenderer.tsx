@@ -1,5 +1,5 @@
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
-import React, { memo } from 'react';
+import { useMemo } from 'react';
 import JSONDynamicForm from '@/components/base/JSONDynamicForm';
 import CodeEditor from '@/components/CodeEditor';
 import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
@@ -16,15 +16,14 @@ interface SchemaFormFieldRendererProps {
 /**
  * Schema表单字段渲染组件
  * 根据字段配置动态渲染对应的表单组件
- * 使用 memo 避免不必要的重渲染
  */
-const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ field, formValues = {} }) => {
+const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = ({ field, formValues = {} }) => {
   const { message } = App.useApp();
   /**
    * 创建并缓存显示条件函数
    * 只有当 field.showCondition 改变时才重新创建
    */
-  const conditionFunc = React.useMemo(() => {
+  const conditionFunc = useMemo(() => {
     if (!field.showCondition) {
       return null;
     }
@@ -64,7 +63,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
    * 检查字段是否应该显示
    * 将函数创建和函数执行分离，优化性能
    */
-  const shouldShow = React.useMemo(() => {
+  const shouldShow = useMemo(() => {
     if (!conditionFunc) {
       return true; // 没有条件或条件创建失败时默认显示
     }
@@ -80,7 +79,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
   /**
    * 解析验证规则
    */
-  const rules = React.useMemo(() => {
+  const rules = useMemo(() => {
     const baseRules: any[] = [];
 
     // 解析自定义验证规则
@@ -189,7 +188,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = memo(({ 
       {renderFormControl()}
     </Form.Item>
   );
-});
+};
 
 SchemaFormFieldRenderer.displayName = 'SchemaFormFieldRenderer';
 

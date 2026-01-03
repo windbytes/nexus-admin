@@ -1,6 +1,5 @@
 import { Divider, Form, InputNumber, Space, Switch } from 'antd';
 import type React from 'react';
-import { memo } from 'react';
 
 interface RetryStrategyFormProps {
   /** 是否启用指数退避 */
@@ -10,7 +9,7 @@ interface RetryStrategyFormProps {
 /**
  * 重试策略表单组件
  */
-const RetryStrategyForm: React.FC<RetryStrategyFormProps> = memo(({ useExponentialBackoff }) => {
+const RetryStrategyForm: React.FC<RetryStrategyFormProps> = ({ useExponentialBackoff }) => {
   return (
     <>
       <Divider titlePlacement="start">重试策略</Divider>
@@ -78,7 +77,7 @@ const RetryStrategyForm: React.FC<RetryStrategyFormProps> = memo(({ useExponenti
       </Form.Item>
     </>
   );
-});
+};
 
 RetryStrategyForm.displayName = 'RetryStrategyForm';
 

@@ -1,12 +1,13 @@
-import { PlusOutlined, DeleteOutlined, EditOutlined, CopyOutlined } from '@ant-design/icons';
-import { App, Button, Card, Descriptions, Popconfirm, Space, Switch, Tag, type DescriptionsProps } from 'antd';
+import { CopyOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { App, Button, Card, Descriptions, Space } from 'antd';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { MenuModel } from '@/services/system/menu/type';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { menuService } from '@/services/system/menu/menuApi';
-import { useMenuPermissions } from '../hooks/useMenuPermissions';
-import type { ModalType } from '../hooks/useMenuModals';
+import type { MenuModel } from '@/services/system/menu/type';
+import type { ModalType } from '../../hooks/useMenuModals';
+import { useMenuPermissions } from '../../hooks/useMenuPermissions';
+import MenuDescriptionItems from './components/MenuDescriptionItems';
 
 export type MenuDetailProps = {
   menu: MenuModel | null;
@@ -45,90 +46,27 @@ const MenuDetail: React.FC<MenuDetailProps> = ({ menu, openModal, onDeleteMenu, 
     },
   });
 
+  /**
+   * 切换菜单状态
+   */
+  const handleToggleStatus = (id: string, status: boolean) => {
+    toggleMenuStatusMutation.mutate({ id, status });
+  };
+
   // 选中的菜单的描述列表
-  const items: DescriptionsProps['items'] = [
-    {
-      key: '1',
-      label: '菜单类型',
-      children: (() => {
-        switch (menu?.menuType) {
-          case 0:
-            return <Tag color="red">目录</Tag>;
-          case 1:
-            return <Tag color="green">子菜单</Tag>;
-          case 2:
-            return <Tag color="blue">子路由</Tag>;
-          case 3:
-            return <Tag color="orange">权限按钮</Tag>;
-          default:
-            return '';
-        }
-      })(),
-    },
-    {
-      key: '2',
-      label: '菜单状态',
-      children: (
-        <Popconfirm
-          title="切换菜单状态"
-          description={`确定${menu?.status ? '禁用' : '启用'}菜单吗？`}
-          onConfirm={() => {
-            if (menu?.id) {
-              toggleMenuStatusMutation.mutate({ id: menu.id, status: !menu.status });
-            }
-          }}
-        >
-          <Switch size="small" checked={menu?.status} disabled={!permissions.canEditMenu} />
-        </Popconfirm>
-      ),
-    },
-    {
-      key: '3',
-      label: '菜单名称',
-      children: menu?.name,
-    },
-    {
-      key: '4',
-      label: '组件路径',
-      children: menu?.component,
-    },
-    {
-      key: '5',
-      label: '路由名称',
-      children: menu?.componentName,
-    },
-    {
-      key: '6',
-      label: '路由路径',
-      children: menu?.url,
-    },
-    {
-      key: '7',
-      label: '路由参数',
-      children: JSON.stringify(menu?.routeQuery ? menu.routeQuery : '{}'),
-    },
-    {
-      key: '8',
-      label: '菜单排序',
-      children: menu?.sortNo,
-    },
-    {
-      key: '9',
-      label: '是否隐藏',
-      children: <Tag color={menu?.hidden ? 'red' : 'green'}>{menu?.hidden ? '是' : '否'}</Tag>,
-    },
-    {
-      key: '10',
-      label: '是否缓存',
-      children: <Tag color={menu?.keepAlive ? 'green' : 'red'}>{menu?.keepAlive ? '是' : '否'}</Tag>,
-    },
-  ];
+  const items = MenuDescriptionItems({
+    menu,
+    onToggleStatus: handleToggleStatus,
+    canEditMenu: permissions.canEditMenu,
+  });
 
   /**
    * 删除菜单
    */
   const handleDelete = () => {
-    if (!menu?.id) return;
+    if (!menu?.id) {
+      return;
+    }
     // 需要做级联删除的判定
     modal.confirm({
       title: '删除菜单',
@@ -168,12 +106,7 @@ const MenuDetail: React.FC<MenuDetailProps> = ({ menu, openModal, onDeleteMenu, 
               </Button>
             )}
             {permissions.canEditMenu && (
-              <Button
-                color="orange"
-                variant="outlined"
-                icon={<EditOutlined />}
-                onClick={() => openModal('edit')}
-              >
+              <Button color="orange" variant="outlined" icon={<EditOutlined />} onClick={() => openModal('edit')}>
                 {t('common.operation.edit')}
               </Button>
             )}
@@ -195,4 +128,3 @@ const MenuDetail: React.FC<MenuDetailProps> = ({ menu, openModal, onDeleteMenu, 
 };
 
 export default MenuDetail;
-
