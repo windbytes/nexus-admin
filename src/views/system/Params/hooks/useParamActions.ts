@@ -29,7 +29,6 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
       if (data.code && data.value) {
         updateParamCache(data.code, data.value);
       }
-      message.success('新增参数成功');
       onSuccess?.();
     },
     onError: (error: any) => {
@@ -46,7 +45,6 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
       if (data.code && data.value) {
         updateParamCache(data.code, data.value);
       }
-      message.success('更新参数成功');
       onSuccess?.();
     },
     onError: (error: any) => {
@@ -63,7 +61,6 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
       if (code) {
         deleteParamCache(code);
       }
-      message.success('删除参数成功');
       onSuccess?.();
     },
     onError: (error: any) => {
@@ -84,7 +81,6 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
           }
         });
       }
-      message.success('批量删除参数成功');
       onSuccess?.();
     },
     onError: (error: any) => {
@@ -137,8 +133,13 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
     confirm({
       title: '确认批量删除',
       content: `确定要删除选中的 ${ids.length} 个参数吗？`,
-      okText: '确定',
-      cancelText: '取消',
+      okButtonProps: {
+        type: 'default',
+        danger: true,
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
       onOk: () => {
         batchDeleteParamsMutation.mutate({ ids, codes });
       },
@@ -175,9 +176,6 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       message.success('导出参数成功');
-    },
-    onError: (error: any) => {
-      message.error(`导出参数失败: ${error.message || '未知错误'}`);
     },
   });
 

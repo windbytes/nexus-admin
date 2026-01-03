@@ -145,6 +145,9 @@ const MenuComponent = () => {
       ) : (
         <Menu
           className="side-menu"
+          classNames={{
+            root: 'border-e-0!',
+          }}
           mode="inline"
           theme={mode}
           inlineCollapsed={collapsed}

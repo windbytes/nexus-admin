@@ -22,7 +22,7 @@
     .ant-tabs-tab {
       border: none !important; // 移除默认边框
       background: transparent !important; // 默认透明
-      margin: 0 4px 0 0 !important; // Tab 间距
+      margin: 0 !important; // Tab 间距
       padding: 6px 16px !important; // 内边距
       border-radius: 8px 8px 0 0 !important; // 上圆角
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);

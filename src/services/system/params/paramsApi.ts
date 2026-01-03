@@ -1,6 +1,6 @@
-import { HttpRequest } from '@/utils/request';
 import type { PageResult } from '@/types/global';
-import type { SysParam, SysParamSearchParams, SysParamFormData, ParamCategory, ExportOptions } from './type';
+import { HttpRequest } from '@/utils/request';
+import type { ExportOptions, ParamCategory, SysParam, SysParamFormData, SysParamSearchParams } from './type';
 
 /**
  * 系统参数操作枚举
@@ -148,7 +148,7 @@ export const sysParamService: ISysParamService = {
         data: params,
         adapter: 'fetch',
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
     return response;
   },
@@ -163,7 +163,7 @@ export const sysParamService: ISysParamService = {
       {
         url: `${SysParamAction.getParamById}/${id}`,
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
     return response;
   },
@@ -179,7 +179,7 @@ export const sysParamService: ISysParamService = {
         url: `${SysParamAction.getParamByCode}/${code}`,
         adapter: 'fetch',
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
     return response;
   },
@@ -284,13 +284,12 @@ export const sysParamService: ISysParamService = {
       params = searchParams || {};
     }
 
-    const response = await HttpRequest.get<Blob>(
+    const response = await HttpRequest.postDownload<Blob>(
       {
         url: SysParamAction.exportParams,
         params,
-        responseType: 'blob',
       },
-      { successMessageMode: 'none', errorMessageMode: 'none' },
+      { successMessageMode: 'none', errorMessageMode: 'none' }
     );
     return response;
   },
