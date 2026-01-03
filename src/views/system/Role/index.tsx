@@ -1,57 +1,44 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Card, Divider, type TableProps } from 'antd';
+import { ExclamationCircleFilled } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { App, Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
-import { useEffect, useReducer, useState } from 'react';
+import { type Key, useEffect, useState } from 'react';
 import { roleService } from '@/services/system/role/roleApi';
-import type { RoleModel, RoleSearchParams, RoleState } from '@/services/system/role/type';
-import RoleMenuDrawer from './AssignRoleMenuDrawer';
-import RoleUserDrawer from './AssignRoleUserDrawer';
-import RoleActionButtons from './RoleActionButtons';
-import RoleInfoModal from './RoleInfoModal';
-import RoleSearchForm from './RoleSearchForm';
-import RoleTable from './RoleTable';
-import getRoleTableColumns from './RoleTableColumns';
+import type { RoleModel, RoleSearchParams } from '@/services/system/role/type';
+import AssignRoleMenuDrawer from './components/AssignRoleMenuDrawer';
+import AssignRoleUserDrawer from './components/AssignRoleUserDrawer';
+import RoleInfoModal from './components/RoleInfoModal';
+import RoleTable from './components/RoleTable';
+import SearchForm from './components/SearchForm';
+import TableActionButtons from './components/TableActionButtons';
+import { useRoleActions } from './hooks/useRoleAction';
+import { useRoleModals } from './hooks/useRoleModal';
+import { useRolePermissions } from './hooks/useRolePermissions';
 
 /**
- * 系统角色维护
- * @returns
+ * 角色页面主组件
  */
 const Role: React.FC = () => {
-  // 定义状态（合并的状态）
-  const [state, dispatch] = useReducer(
-    (prev: RoleState, action: Partial<RoleState>) => ({
-      ...prev,
-      ...action,
-    }),
-    {
-      // 编辑窗口的打开状态
-      openEditModal: false,
-      // 角色用户分配窗口的打开状态
-      openRoleUserModal: false,
-      // 角色菜单分配窗口的打开状态
-      openRoleMenuModal: false,
-      // 当前编辑的行数据
-      currentRow: null,
-      // 当前选中的行数据
-      selectedRows: [],
-      // 当前操作
-      action: '',
-      // 表格数据总数
-      total: 0,
-    }
-  );
-
-  // 查询参数（包含分页参数）
+  const { modal } = App.useApp();
+  // 窗口管理hook
+  const { modal: modalName, current, closeModal, openModal } = useRoleModals();
+  // 选中的行
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  // 表格数据总数
+  const [total, setTotal] = useState<number>(0);
+  // 查询参数
   const [searchParams, setSearchParams] = useState<RoleSearchParams>({
     pageNum: 1,
     pageSize: 20,
   });
+  // 权限列表
+  const permissions = useRolePermissions();
 
-  // 查询表格数据
+  // 查询角色数据
   const {
     isFetching,
-    data: tableData,
+    data: result,
     refetch,
   } = useQuery({
     queryKey: ['sys_roles', searchParams],
@@ -61,19 +48,30 @@ const Role: React.FC = () => {
   // 同步分页总数
   useEffect(() => {
     if (searchParams.pageNum === 1) {
-      dispatch({
-        total: tableData?.totalRow,
-      });
+      setTotal(result?.totalRow || 0);
     }
-  }, [searchParams.pageNum, tableData?.totalRow]);
+  }, [searchParams.pageNum, result?.totalRow]);
 
-  // 处理检索
+  // 通用成功回调
+  const handleSuccess = () => {
+    setSelectedRowKeys([]);
+    refetch();
+  };
+
+  // 角色操作hook
+  const { deleteRoles, handleModalSave } = useRoleActions({
+    currentRow: current,
+    onSuccess: handleSuccess,
+  });
+
+  // 处理搜索
   const handleSearch = (values: RoleSearchParams) => {
     const search = {
       ...values,
       pageNum: searchParams.pageNum,
       pageSize: searchParams.pageSize,
     };
+    // 判断参数是否发生变化
     if (isEqual(search, searchParams)) {
       // 参数没有变化，手动刷新数据
       refetch();
@@ -82,209 +80,116 @@ const Role: React.FC = () => {
     setSearchParams((prev: RoleSearchParams) => ({ ...prev, ...search }));
   };
 
-  // 处理逻辑删除角色
-  const logicDeleteUserMutation = useMutation({
-    mutationFn: (ids: string[]) => roleService.deleteBatchRole(ids),
-    onSuccess() {
-      dispatch({
-        selectedRows: [],
+  // 处理分页变化
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      pageNum: page,
+      pageSize: pageSize || prev.pageSize,
+    }));
+  };
+
+  // 处理行选择变化
+  const handleSelectionChange = (keys: Key[], _rows: RoleModel[]) => {
+    setSelectedRowKeys(keys as string[]);
+  };
+
+  // 批量删除
+  const handleBatchDelete = (ids: string[]) => {
+    if (!permissions.canDeleteRole) {
+      modal.error({
+        title: '权限不足',
+        content: '您没有删除角色的权限，请联系管理员获取相应权限。',
       });
-      refetch();
-    },
-  });
-
-  // 切换角色状态mutation
-  const toggleRoleStatusMutation = useMutation({
-    mutationFn: (params: { id: string; status: boolean }) => roleService.changeStatus(params),
-    onSuccess() {
-      refetch();
-    },
-  });
-
-  // 添加角色mutation
-  const addRoleMutation = useMutation({
-    mutationFn: (roleData: Record<string, any>) => roleService.addRole(roleData),
-    onSuccess() {
-      dispatch({
-        openEditModal: false,
-        currentRow: null,
-        action: 'ok',
-      });
-      refetch();
-    },
-  });
-
-  // 编辑角色mutation
-  const editRoleMutation = useMutation({
-    mutationFn: (roleData: Record<string, any>) => roleService.editRole(roleData),
-    onSuccess() {
-      dispatch({
-        openEditModal: false,
-        currentRow: null,
-        action: 'ok',
-      });
-    },
-  });
-
-  /**
-   * 多行选中的配置
-   */
-  const rowSelection: TableProps<RoleModel>['rowSelection'] = {
-    // 行选中的回调
-    onChange(_selectedRowKeys, selectedRows) {
-      dispatch({
-        selectedRows,
-      });
-    },
-    columnWidth: 32,
-    fixed: true,
-  };
-
-  /**
-   * 表格行双击显示预览
-   */
-  const onRow = (record: RoleModel) => {
-    return {
-      onDoubleClick: () => {
-        dispatch({
-          openEditModal: true,
-          currentRow: record,
-          action: 'view',
-        });
-      },
-    };
-  };
-
-  /**
-   * 新增角色
-   */
-  const onAddRoleClick = () => {
-    dispatch({
-      openEditModal: true,
-      currentRow: null,
-      action: 'add',
-    });
-  };
-
-  /**
-   * 导入角色
-   */
-  const onImportRoleClick = () => {
-    console.log('导入角色');
-  };
-
-  /**
-   * 取消
-   */
-  const onCancel = () => {
-    dispatch({
-      openEditModal: false,
-      currentRow: null,
-      action: 'cancel',
-    });
-  };
-
-  /**
-   * 隐藏抽屉
-   */
-  const hideDrawer = () => {
-    dispatch({
-      openRoleUserModal: false,
-      openRoleMenuModal: false,
-    });
-  };
-
-  /**
-   * 点击确定的回调
-   * @param roleData 角色数据
-   */
-  const onEditOk = async (roleData: RoleModel) => {
-    if (state.currentRow == null) {
-      // 新增数据
-      addRoleMutation.mutate(roleData);
-    } else {
-      // 编辑数据
-      editRoleMutation.mutate({
-        ...roleData,
-        id: state.currentRow.id,
-      });
+      return;
     }
+    modal.confirm({
+      title: '删除角色',
+      icon: <ExclamationCircleFilled />,
+      content: '确定删除选中的角色吗？数据删除后将无法恢复！',
+      okButtonProps: {
+        danger: true,
+        type: 'default',
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
+      onOk() {
+        deleteRoles(ids);
+      },
+    });
   };
 
-  /**
-   * 获取表格列配置
-   */
-  const columns = getRoleTableColumns({
-    dispatch,
-    logicDeleteUserMutation,
-    toggleRoleStatusMutation,
-  });
+  // 处理菜单分配确认
+  const handleAssignMenu = () => {
+    closeModal();
+    handleSuccess();
+  };
+
+  // 处理用户分配确认
+  const handleAssignUser = () => {
+    closeModal();
+  };
 
   return (
     <>
       <div className="h-full flex flex-col gap-2">
-        {/* 菜单检索条件栏 */}
-        <RoleSearchForm onFinish={handleSearch} isLoading={isFetching} />
-        {/* 查询表格 */}
+        {/* 角色搜索栏 */}
+        <SearchForm onSearch={handleSearch} loading={isFetching} />
+        {/* 角色数据表格 */}
         <Card
           className="grow min-h-0 flex flex-col"
-          classNames={{ body: 'flex flex-col grow' }}
+          classNames={{ body: 'flex grow' }}
           title={
             <div className="flex items-center">
               <h2>角色列表</h2>
               <Divider orientation="vertical" />
-              <span className="text-sm! text-gray-500">{`已选 ${state.selectedRows.length} 项`}</span>
+              <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
               <Divider orientation="vertical" />
-              {/* 操作按钮 */}
-              <RoleActionButtons
-                onAddRoleClick={onAddRoleClick}
-                selRows={state.selectedRows}
-                logicDeleteUserMutation={logicDeleteUserMutation}
-                onImportRoleClick={onImportRoleClick}
+              <TableActionButtons
+                handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
+                refetch={refetch}
+                selectedRows={selectedRowKeys}
+                openModal={openModal}
               />
             </div>
           }
         >
-          {/* 表格数据 */}
           <RoleTable
-            tableData={tableData?.records || []}
+            datasource={result?.records || []}
             loading={isFetching}
-            columns={columns}
-            onRow={onRow}
-            rowSelection={rowSelection}
             pagination={{
+              pageNum: searchParams.pageNum,
               pageSize: searchParams.pageSize,
-              current: searchParams.pageNum,
-              showQuickJumper: true,
-              hideOnSinglePage: false,
-              showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
-              total: state.total,
-              onChange(page, pageSize) {
-                setSearchParams({
-                  ...searchParams,
-                  pageNum: page,
-                  pageSize: pageSize,
-                });
-              },
+              total: total,
             }}
+            selectedRowKeys={selectedRowKeys}
+            currentRow={current}
+            onSelectionChange={handleSelectionChange}
+            onPageChange={handlePageChange}
+            onSuccess={handleSuccess}
+            openModal={openModal}
           />
         </Card>
       </div>
-
-      {/* 编辑弹窗 */}
-      <RoleInfoModal params={state} onCancel={onCancel} onOk={onEditOk} />
-      {/* 权限分配抽屉 */}
-      <RoleMenuDrawer
-        roleId={state.currentRow?.id}
-        onOk={hideDrawer}
-        open={state.openRoleMenuModal}
-        onCancel={hideDrawer}
+      {/* 编辑/新增角色弹窗 */}
+      <RoleInfoModal
+        open={modalName === 'add' || modalName === 'edit' || modalName === 'view'}
+        onOk={handleModalSave}
+        onCancel={closeModal}
+        roleInfo={current}
+        action={modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit'}
+      />
+      {/* 菜单分配抽屉 */}
+      <AssignRoleMenuDrawer
+        open={modalName === 'assignMenu'}
+        roleId={current?.id || ''}
+        onOk={handleAssignMenu}
+        onCancel={closeModal}
       />
       {/* 用户分配抽屉 */}
-      <RoleUserDrawer roleId={state.currentRow?.id} onCancel={hideDrawer} open={state.openRoleUserModal} />
+      <AssignRoleUserDrawer open={modalName === 'assignUser'} roleId={current?.id || ''} onCancel={closeModal} />
     </>
   );
 };
-
 export default Role;
