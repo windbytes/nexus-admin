@@ -2,6 +2,7 @@ import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant
 import { Button, type InputRef, Space, type TableProps, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import type { InterfacePermission } from '@/services/system/menu/menuApi';
+import { useMenuPermissions } from '../../../hooks/useMenuPermissions';
 import EditCell from './EditCell';
 
 interface TableColumnsProps {
@@ -23,8 +24,6 @@ interface TableColumnsProps {
       name?: string;
     };
   };
-  hasEditPermission: boolean;
-  hasDeletePermission: boolean;
   isPending: boolean;
   codeInputRef: React.RefObject<InputRef | null>;
   remarkInputRef: React.RefObject<InputRef | null>;
@@ -42,8 +41,6 @@ interface TableColumnsProps {
  */
 export const useTableColumns = ({
   state,
-  hasEditPermission,
-  hasDeletePermission,
   isPending,
   codeInputRef,
   remarkInputRef,
@@ -53,6 +50,7 @@ export const useTableColumns = ({
   onEdit,
   onDelete,
 }: TableColumnsProps): TableProps<InterfacePermission>['columns'] => {
+  const { canEditInterfacePermission, canDeleteInterfacePermission } = useMenuPermissions();
   return [
     {
       title: '序号',
@@ -199,12 +197,12 @@ export const useTableColumns = ({
 
         return (
           <Space size="small">
-            {hasEditPermission && (
+            {canEditInterfacePermission && (
               <Tooltip title="编辑">
                 <Button type="link" icon={<EditOutlined />} size="small" onClick={() => onEdit(record)} />
               </Tooltip>
             )}
-            {hasDeletePermission && (
+            {canDeleteInterfacePermission && (
               <Tooltip title="删除">
                 <Button
                   type="link"

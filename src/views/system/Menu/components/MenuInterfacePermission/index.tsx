@@ -63,8 +63,6 @@ const MenuInterfacePermission: React.FC<MenuInterfacePermissionProps> = ({ menu 
       editForm: state.editForm,
       errors: state.errors,
     },
-    hasEditPermission: permissions.canEditInterfacePermission,
-    hasDeletePermission: permissions.canDeleteInterfacePermission,
     isPending: savePermissionMutation.isPending,
     codeInputRef,
     remarkInputRef,
