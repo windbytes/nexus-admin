@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { App, Modal } from 'antd';
+import { App } from 'antd';
 import type { ExportOptions, SysParam, SysParamFormData, SysParamSearchParams } from '@/services/system/params';
 import { sysParamService } from '@/services/system/params';
 import { clearAllParamCache, deleteParamCache, updateParamCache } from '@/utils/paramService';
@@ -11,13 +11,11 @@ interface UseParamActionsProps {
   onSuccess?: () => void;
 }
 
-const { confirm } = Modal;
-
 /**
  * 系统参数操作相关的 hooks
  */
 export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps) => {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const queryClient = useQueryClient();
 
   // 新增参数
@@ -117,7 +115,7 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
 
   // 删除参数（带确认）
   const deleteParam = (record: SysParam) => {
-    confirm({
+    modal.confirm({
       title: '确认删除',
       content: `确定要删除参数"${record.name}"吗？`,
       okButtonProps: {
@@ -135,7 +133,7 @@ export const useParamActions = ({ currentRow, onSuccess }: UseParamActionsProps)
 
   // 批量删除参数（带确认）
   const batchDeleteParams = (ids: number[], codes: string[]) => {
-    confirm({
+    modal.confirm({
       title: '确认批量删除',
       content: `确定要删除选中的 ${ids.length} 个参数吗？`,
       okButtonProps: {
