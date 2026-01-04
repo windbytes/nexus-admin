@@ -176,7 +176,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       title: '操作',
       width: 90,
       dataIndex: 'action',
-      fixed: 'right',
+      fixed: 'end',
       align: 'center',
       render: (_, record: RoleModel) => (
         <>

@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card, Divider } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { type Key, useEffect, useState } from 'react';
+import ProTable from '@/components/ProTable';
 import type { SysParam } from '@/services/system/params';
 import { sysParamService } from '@/services/system/params';
 import ParamDrawer from './components/ParamDrawer';
-import ParamTable from './components/ParamTable';
 import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
 import { PAGINATION_CONFIG } from './config';
@@ -14,6 +13,7 @@ import { useParamActions } from './hooks/useParamActions';
 import { useParamModals } from './hooks/useParamModals';
 import type { ParamSearchParams } from './types';
 import './styles/params.module.scss';
+import { useParamTableColumns } from './hooks/useParamTableColumn';
 
 /**
  * 系统参数管理页面主组件
@@ -147,6 +147,13 @@ const Params: React.FC = () => {
     return '';
   };
 
+  // 获取表格列定义
+  const columns = useParamTableColumns({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onStatusChange: handleStatusChange,
+  });
+
   return (
     <>
       <div className="h-full flex flex-col params-container gap-2">
@@ -158,46 +165,47 @@ const Params: React.FC = () => {
           onToggleExpand={handleToggleSearchExpand}
         />
         {/* 参数数据表格 */}
-        <Card
-          className="grow min-h-0 flex flex-col"
-          classNames={{ body: 'flex grow' }}
-          title={
-            <div className="flex items-center">
-              <h2>参数列表</h2>
-              <Divider orientation="vertical" />
-              <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
-              <Divider orientation="vertical" />
-              <TableActionButtons
-                handleBatchDelete={handleBatchDelete}
-                refetch={refetch}
-                selectedRows={selectedRowKeys}
-                openModal={openModal}
-                onImport={handleImport}
-                onExport={handleExport}
-              />
-            </div>
+        <ProTable<SysParam>
+          title="参数列表"
+          columns={columns}
+          dataSource={result?.records || []}
+          loading={isFetching}
+          rowKey="id"
+          actionButtons={
+            <TableActionButtons
+              handleBatchDelete={handleBatchDelete}
+              refetch={refetch}
+              selectedRows={selectedRowKeys}
+              openModal={openModal}
+              onImport={handleImport}
+              onExport={handleExport}
+            />
           }
-        >
-          <ParamTable
-            data={result?.records || []}
-            loading={isFetching}
-            selectedRowKeys={selectedRowKeys}
-            onSelectionChange={handleSelectionChange}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onStatusChange={handleStatusChange}
-            pagination={{
-              pageSize: searchParams.pageSize,
-              current: searchParams.pageNum,
-              ...PAGINATION_CONFIG,
-              showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-              total: total,
-              onChange(page, pageSize) {
-                handlePageChange(page, pageSize);
-              },
-            }}
-          />
-        </Card>
+          onRefresh={refetch}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          pagination={{
+            pageSize: searchParams.pageSize,
+            current: searchParams.pageNum,
+            ...PAGINATION_CONFIG,
+            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+            total: total,
+            onChange(page, pageSize) {
+              handlePageChange(page, pageSize);
+            },
+          }}
+          bordered
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
       </div>
       {/* 新增/编辑抽屉 */}
       <ParamDrawer

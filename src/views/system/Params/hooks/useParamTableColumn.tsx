@@ -3,7 +3,7 @@ import { Button, Switch, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { SysParam } from '@/services/system/params';
 import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
-import { useParamPermissions } from '../../hooks/useParamPermissions';
+import { useParamPermissions } from './useParamPermissions';
 
 interface UseParamTableColumnProps {
   // 编辑回调
@@ -36,33 +36,24 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
 
   const columns: TableProps<SysParam>['columns'] = [
     {
-      title: '序号',
-      dataIndex: 'id',
-      key: 'id',
-      fixed: 'left',
-      width: 80,
-      render: (_: any, __: any, index: number) => index + 1,
-    },
-    {
       title: '参数名称',
       dataIndex: 'name',
       key: 'name',
       width: 160,
-      fixed: 'left',
+      fixed: 'start',
       ellipsis: true,
     },
     {
       title: '参数标识',
       dataIndex: 'code',
       key: 'code',
-      width: 150,
+      width: 120,
       ellipsis: true,
     },
     {
       title: '参数内容',
       dataIndex: 'value',
       key: 'value',
-      width: 200,
       ellipsis: true,
       render: (value: string) => value || '-',
     },
@@ -70,15 +61,15 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       title: '参数分类',
       dataIndex: 'category',
       key: 'category',
-      width: 120,
       align: 'center',
+      width: 100,
       render: (value: string) => <Tag color="blue">{getCategoryLabel(value)}</Tag>,
     },
     {
       title: '数据类型',
       dataIndex: 'dataType',
       key: 'dataType',
-      width: 100,
+      width: 120,
       render: (value: string) => <Tag color="green">{getDataTypeLabel(value)}</Tag>,
     },
     {
@@ -94,7 +85,7 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       dataIndex: 'status',
       key: 'status',
       align: 'center',
-      width: 100,
+      width: 120,
       render: (value: boolean, record: SysParam) =>
         canEdit ? (
           <Switch
@@ -125,7 +116,7 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       key: 'action',
       width: 140,
       align: 'center',
-      fixed: 'right',
+      fixed: 'end',
       render: (_: any, record: SysParam) => (
         <>
           {canEdit && (
