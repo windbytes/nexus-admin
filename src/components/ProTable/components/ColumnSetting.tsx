@@ -2,6 +2,7 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   DragOutlined,
+  PushpinOutlined,
   SettingOutlined,
   VerticalAlignBottomOutlined,
   VerticalAlignTopOutlined,
@@ -96,7 +97,7 @@ function SortableItem({ column, onToggle, onFixedChange, onMoveUp, onMoveDown, i
           trigger={['click']}
         >
           <Button type="text" size="small">
-            {column.fixed === 'left' ? '左' : column.fixed === 'right' ? '右' : '固定'}
+            {column.fixed === 'left' ? '左' : column.fixed === 'right' ? '右' : <PushpinOutlined />}
           </Button>
         </Dropdown>
       </div>
