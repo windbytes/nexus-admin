@@ -63,7 +63,7 @@ const User: React.FC = () => {
   };
 
   // 用户操作hook
-  const { deleteUsers, handleModalSave } = useUserActions({
+  const { deleteUsers, handleModalSave, assignRole } = useUserActions({
     currentRow: current,
     onSuccess: handleSuccess,
   });
@@ -126,9 +126,9 @@ const User: React.FC = () => {
 
   // 处理角色分配确认
   const handleAssignRole = (targetKeys: string[]) => {
-    // 调用接口分配角色
-    console.log('分配角色ID集合：', targetKeys);
-    // 关闭窗口
+    if (current?.id) {
+      assignRole(current.id, targetKeys);
+    }
     closeModal();
   };
 
@@ -212,8 +212,7 @@ const User: React.FC = () => {
       {/* 角色分配表格穿梭框弹窗 */}
       <AssignRoleModal
         open={modalName === 'assignRole'}
-        dataSource={[]}
-        userRoleIds={[]}
+        username={current?.username || ''}
         onCancel={closeModal}
         onOk={handleAssignRole}
       />

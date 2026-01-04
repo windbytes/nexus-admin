@@ -60,6 +60,19 @@ export const useUserActions = ({ currentRow, onSuccess }: UseUserMutationsProps)
     },
   });
 
+  // 分配角色mutation
+  const assignRoleMutation = useMutation({
+    mutationFn: ({ userId, roleIds }: { userId: string; roleIds: string[] }) => userService.assignRole(userId, roleIds),
+    onSuccess: () => {
+      onSuccess?.();
+    },
+  });
+
+  // 分配角色
+  const assignRole = (userId: string, roleIds: string[]) => {
+    assignRoleMutation.mutate({ userId, roleIds });
+  };
+
   // 更新用户密码
   const updateUserPassword = (id: string, password: string) => {
     updatePasswordMutation.mutate({ id, password });
@@ -90,5 +103,6 @@ export const useUserActions = ({ currentRow, onSuccess }: UseUserMutationsProps)
     updateUserStatus,
     deleteUsers,
     updateUserPassword,
+    assignRole,
   };
 };

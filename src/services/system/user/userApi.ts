@@ -55,6 +55,11 @@ const UserAction = {
    * 修改用户密码
    */
   changeUserPwd: '/system/user/modifyPwd',
+
+  /**
+   * 分配角色
+   */
+  assignRole: '/system/user/assignRole',
 };
 
 /**
@@ -125,6 +130,14 @@ export interface IUserService {
    * @returns 修改结果
    */
   changeUserPwd(id: string, newPassword: string): Promise<boolean>;
+
+  /**
+   * 分配角色
+   * @param userId 用户ID
+   * @param roleIds 角色ID列表
+   * @returns 分配结果
+   */
+  assignRole(userId: string, roleIds: string[]): Promise<boolean>;
 }
 
 /**
@@ -258,6 +271,20 @@ export const userService: IUserService = {
     const response = await HttpRequest.post({
       url: UserAction.changeUserPwd,
       data: { id, password: newPassword },
+    });
+    return response;
+  },
+
+  /**
+   * 分配角色
+   * @param userId 用户ID
+   * @param roleIds 角色ID列表
+   * @returns 分配结果
+   */
+  async assignRole(userId: string, roleIds: string[]): Promise<boolean> {
+    const response = await HttpRequest.post({
+      url: UserAction.assignRole,
+      data: { userId, roleIds },
     });
     return response;
   },
