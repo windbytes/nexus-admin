@@ -1,20 +1,21 @@
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App, Card, Divider } from 'antd';
+import { App } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { type Key, useEffect, useState } from 'react';
+import ProTable from '@/components/ProTable';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleModel, RoleSearchParams } from '@/services/system/role/type';
 import AssignRoleMenuDrawer from './components/AssignRoleMenuDrawer';
 import AssignRoleUserDrawer from './components/AssignRoleUserDrawer';
 import RoleInfoModal from './components/RoleInfoModal';
-import RoleTable from './components/RoleTable';
 import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
 import { useRoleActions } from './hooks/useRoleAction';
 import { useRoleModals } from './hooks/useRoleModal';
 import { useRolePermissions } from './hooks/useRolePermissions';
+import { useRoleTableColumns } from './hooks/useRoleTableColumn';
 
 /**
  * 角色页面主组件
@@ -131,46 +132,68 @@ const Role: React.FC = () => {
     closeModal();
   };
 
+  // 获取表格列定义
+  const columns = useRoleTableColumns({
+    currentRow: current,
+    onSuccess: handleSuccess,
+    openModal,
+  });
+
+  // 打开详情
+  const handleOpenDetail = (record: RoleModel) => {
+    openModal('view', record);
+  };
+
   return (
     <>
       <div className="h-full flex flex-col gap-2">
         {/* 角色搜索栏 */}
         <SearchForm onSearch={handleSearch} loading={isFetching} />
         {/* 角色数据表格 */}
-        <Card
-          className="grow min-h-0 flex flex-col"
-          classNames={{ body: 'flex grow' }}
-          title={
-            <div className="flex items-center">
-              <h2>角色列表</h2>
-              <Divider orientation="vertical" />
-              <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
-              <Divider orientation="vertical" />
-              <TableActionButtons
-                handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
-                refetch={refetch}
-                selectedRows={selectedRowKeys}
-                openModal={openModal}
-              />
-            </div>
+        <ProTable<RoleModel>
+          title="角色列表"
+          columns={columns}
+          dataSource={result?.records || []}
+          loading={isFetching}
+          rowKey="id"
+          actionButtons={
+            <TableActionButtons
+              handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
+              refetch={refetch}
+              selectedRows={selectedRowKeys}
+              openModal={openModal}
+            />
           }
-        >
-          <RoleTable
-            datasource={result?.records || []}
-            loading={isFetching}
-            pagination={{
-              pageNum: searchParams.pageNum,
-              pageSize: searchParams.pageSize,
-              total: total,
-            }}
-            selectedRowKeys={selectedRowKeys}
-            currentRow={current}
-            onSelectionChange={handleSelectionChange}
-            onPageChange={handlePageChange}
-            onSuccess={handleSuccess}
-            openModal={openModal}
-          />
-        </Card>
+          onRefresh={refetch}
+          rowSelection={{
+            type: 'checkbox' as const,
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          pagination={{
+            current: searchParams.pageNum,
+            pageSize: searchParams.pageSize,
+            total: total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${total} 条`,
+            hideOnSinglePage: false,
+            onChange: handlePageChange,
+          }}
+          rowClassName={(record: RoleModel) => (!record.status ? 'opacity-60 bg-gray-50' : '')}
+          onRow={(record: RoleModel) => ({
+            onDoubleClick: () => handleOpenDetail(record),
+          })}
+          bordered
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
       </div>
       {/* 编辑/新增角色弹窗 */}
       <RoleInfoModal

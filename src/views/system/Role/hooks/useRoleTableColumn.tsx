@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { RoleModel } from '@/services/system/role/type';
-import { useRoleActions } from '../../hooks/useRoleAction';
-import type { ModalType } from '../../hooks/useRoleModal';
-import { useRolePermissions } from '../../hooks/useRolePermissions';
+import { useRoleActions } from './useRoleAction';
+import type { ModalType } from './useRoleModal';
+import { useRolePermissions } from './useRolePermissions';
 
 interface UseRoleTableColumnProps {
   // 当前操作行的数据
@@ -195,4 +195,3 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
 
   return columns;
 };
-

@@ -1,9 +1,10 @@
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App, Card, Divider } from 'antd';
+import { App } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { type Key, useEffect, useState } from 'react';
+import ProTable from '@/components/ProTable';
 import type { UserModel } from '@/services/system/user/type';
 import { userService } from '@/services/system/user/userApi';
 import AssignRoleModal from './components/AssignRoleModal';
@@ -13,10 +14,10 @@ import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
 import UserInfoModal from './components/UserInfoModal';
 import UserPasswordModal from './components/UserPasswordModal';
-import UserTable from './components/UserTable';
 import { useUserActions } from './hooks/useUserAction';
 import { useUserModals } from './hooks/useUserModals';
 import { useUserPermissions } from './hooks/useUserPermissions';
+import { useUserTableColumns } from './hooks/useUserTableColumn';
 import type { UserSearchParams } from './types';
 
 /**
@@ -131,46 +132,68 @@ const User: React.FC = () => {
     closeModal();
   };
 
+  // 获取表格列定义
+  const columns = useUserTableColumns({
+    currentRow: current,
+    onSuccess: handleSuccess,
+    openModal,
+  });
+
+  // 打开详情
+  const handleOpenDetail = (record: UserModel) => {
+    openModal('view', record);
+  };
+
   return (
     <>
       <div className="h-full flex flex-col gap-2">
         {/* 用户搜索栏 */}
         <SearchForm onSearch={handleSearch} loading={isFetching} />
         {/* 用户数据表格 */}
-        <Card
-          className="grow min-h-0 flex flex-col"
-          classNames={{ body: 'flex grow' }}
-          title={
-            <div className="flex items-center">
-              <h2>用户列表</h2>
-              <Divider orientation="vertical" />
-              <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
-              <Divider orientation="vertical" />
-              <TableActionButtons
-                handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
-                refetch={refetch}
-                selectedRows={selectedRowKeys}
-                openModal={openModal}
-              />
-            </div>
+        <ProTable<UserModel>
+          title="用户列表"
+          columns={columns}
+          dataSource={result?.records || []}
+          loading={isFetching}
+          rowKey="id"
+          actionButtons={
+            <TableActionButtons
+              handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
+              refetch={refetch}
+              selectedRows={selectedRowKeys}
+              openModal={openModal}
+            />
           }
-        >
-          <UserTable
-            datasource={result?.records || []}
-            loading={isFetching}
-            pagination={{
-              pageNum: searchParams.pageNum,
-              pageSize: searchParams.pageSize,
-              total: total,
-            }}
-            selectedRowKeys={selectedRowKeys}
-            currentRow={current}
-            onSelectionChange={handleSelectionChange}
-            onPageChange={handlePageChange}
-            onSuccess={handleSuccess}
-            openModal={openModal}
-          />
-        </Card>
+          onRefresh={refetch}
+          rowSelection={{
+            type: 'checkbox' as const,
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          pagination={{
+            current: searchParams.pageNum,
+            pageSize: searchParams.pageSize,
+            total: total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${total} 条`,
+            hideOnSinglePage: false,
+            onChange: handlePageChange,
+          }}
+          rowClassName={(record: UserModel) => (record.status === 0 ? 'opacity-60 bg-gray-50' : '')}
+          onRow={(record: UserModel) => ({
+            onDoubleClick: () => handleOpenDetail(record),
+          })}
+          bordered
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
       </div>
       {/* 编辑/新增用户弹窗 */}
       <UserInfoModal

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { DeleteDismiss24Filled, History48Regular, PasswordReset48Regular } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { UserModel } from '@/services/system/user/type';
-import { useUserActions } from '../../hooks/useUserAction';
-import type { ModalType } from '../../hooks/useUserModals';
-import { useUserPermissions } from '../../hooks/useUserPermissions';
+import { useUserActions } from './useUserAction';
+import type { ModalType } from './useUserModals';
+import { useUserPermissions } from './useUserPermissions';
 
 interface UseUserTableColumnProps {
   // 当前操作行的数据

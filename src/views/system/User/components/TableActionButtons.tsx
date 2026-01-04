@@ -1,12 +1,5 @@
-import {
-  ColumnHeightOutlined,
-  DownOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SettingOutlined,
-  UnorderedListOutlined,
-} from '@ant-design/icons';
-import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
 import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -228,73 +221,6 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             {t('common.operation.recycle')}
           </Button>
         )}
-      </Space>
-      {/* 右侧表格工具按钮 */}
-      <Space size="small">
-        <Tooltip title="刷新数据">
-          <Button
-            icon={<ReloadOutlined />}
-            type="text"
-            onClick={refetch}
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="列设置">
-          <Button
-            icon={<ColumnEdit24Regular className="text-sm block!" />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格列设置功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格大小">
-          <Button
-            icon={<ColumnHeightOutlined className="text-sm block" />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格大小调整功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格密度">
-          <Button
-            icon={<UnorderedListOutlined />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格密度调整功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格设置">
-          <Button
-            icon={<SettingOutlined />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格设置功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
       </Space>
     </div>
   );
