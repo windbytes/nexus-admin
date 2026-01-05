@@ -60,6 +60,11 @@ const UserAction = {
    * 分配角色
    */
   assignRole: '/system/user/assignRole',
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   */
+  restoreUsers: '/system/user/recoverFromRecycle',
 };
 
 /**
@@ -138,6 +143,13 @@ export interface IUserService {
    * @returns 分配结果
    */
   assignRole(userId: string, roleIds: string[]): Promise<boolean>;
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   * @param ids 用户ID列表
+   * @returns 恢复结果
+   */
+  restoreUsers(ids: string[]): Promise<boolean>;
 }
 
 /**
@@ -285,6 +297,19 @@ export const userService: IUserService = {
     const response = await HttpRequest.post({
       url: UserAction.assignRole,
       data: { userId, roleIds },
+    });
+    return response;
+  },
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   * @param ids 用户ID列表
+   * @returns 恢复结果
+   */
+  async restoreUsers(ids: string[]): Promise<boolean> {
+    const response = await HttpRequest.post({
+      url: UserAction.restoreUsers,
+      data: ids,
     });
     return response;
   },

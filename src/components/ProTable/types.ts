@@ -1,4 +1,4 @@
-import type { TableProps } from 'antd';
+import type { CardProps, TableProps } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import type { ReactNode } from 'react';
 
@@ -48,6 +48,8 @@ export interface ColumnSetting {
  * ProTable 组件属性
  */
 export interface ProTableProps<T = unknown> extends Omit<TableProps<T>, 'columns' | 'title'> {
+  /** 卡片是否边框 */
+  cardVariant?: CardProps['variant'];
   /** 表格列配置 */
   columns: ProColumnType<T>[];
   /** 表格标题 */

@@ -16,6 +16,7 @@ function ProTable<T = unknown>(props: ProTableProps<T>) {
   const {
     columns,
     title,
+    cardVariant = 'borderless',
     showTitle = true,
     showToolbar = true,
     actionButtons,
@@ -47,7 +48,7 @@ function ProTable<T = unknown>(props: ProTableProps<T>) {
   return (
     <Card
       className="pro-table-card"
-      variant="borderless"
+      variant={cardVariant}
       classNames={cardClassNames}
       title={
         <Toolbar
