@@ -1,5 +1,5 @@
 import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, ConfigProvider, Form, Input } from 'antd';
+import { Button, Card, ConfigProvider, Form, Input, type InputRef } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { UserSearchParams } from '../../types';
 
@@ -8,13 +8,14 @@ import type { UserSearchParams } from '../../types';
  */
 interface SearchFormProps {
   onSearch: (values: UserSearchParams) => void;
+  usernameRef: React.RefObject<InputRef | null>;
   loading: boolean;
 }
 
 /**
  * 回收站搜索表单（简化版）
  */
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
+const SearchForm: React.FC<SearchFormProps> = ({ onSearch, usernameRef, loading }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation();
 
@@ -40,7 +41,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
         <Form form={form} onFinish={onSearch} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Form.Item name="username" label="用户名" colon={false}>
-              <Input placeholder="请输入用户名" allowClear autoComplete="off" />
+              <Input placeholder="请输入用户名" autoFocus allowClear autoComplete="off" ref={usernameRef} />
             </Form.Item>
             <Form.Item name="realName" label="真实姓名" colon={false}>
               <Input placeholder="请输入真实姓名" allowClear autoComplete="off" />

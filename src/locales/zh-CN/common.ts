@@ -7,6 +7,7 @@ const translation = {
     confirm: '确认',
     cancel: '取消',
     delete: '删除',
+    batchDelete: '批量删除',
     edit: '编辑',
     add: '新增',
     save: '保存',

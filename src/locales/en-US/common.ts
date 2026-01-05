@@ -7,6 +7,7 @@ const translation = {
     confirm: 'confirm',
     cancel: 'cancel',
     delete: 'delete',
+    batchDelete: 'batch delete',
     edit: 'edit',
     add: 'add',
     save: 'save',

@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Space } from 'antd';
+import { Button, type InputRef, Space } from 'antd';
 import { isEqual } from 'lodash-es';
 import type { Key } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Recycle } from '@/components/icons';
 import DragModal from '@/components/modal/DragModal';
 import ProTable from '@/components/ProTable';
@@ -36,6 +36,8 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
     pageNum: 1,
     pageSize: 20,
   });
+  // 用户名输入框ref
+  const usernameRef = useRef<InputRef | null>(null);
 
   // 查询回收站数据
   const {
@@ -110,6 +112,12 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
     }
   }, [open]);
 
+  const handleAfterOpenChange = (open: boolean) => {
+    if (open) {
+      usernameRef.current?.focus();
+    }
+  };
+
   return (
     <DragModal
       open={open}
@@ -129,10 +137,11 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
           </Button>
         </Space>
       }
+      afterOpenChange={handleAfterOpenChange}
     >
       <div className="flex flex-col gap-4 h-full">
         {/* 搜索区域 */}
-        <SearchForm onSearch={handleSearch} loading={isFetching} />
+        <SearchForm onSearch={handleSearch} usernameRef={usernameRef} loading={isFetching} />
 
         {/* 表格区域 */}
         <ProTable<UserModel>
