@@ -139,7 +139,6 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       key: 'sex',
       width: 80,
       align: 'center',
-      sorter: (a: UserModel, b: UserModel) => a.sex.localeCompare(b.sex),
       render: (text: number) => {
         if (text === 1) {
           return (

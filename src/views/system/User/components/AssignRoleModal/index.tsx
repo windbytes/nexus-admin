@@ -106,11 +106,6 @@ const AssignRoleModal: React.FC<AssignRoleModalProps> = (props) => {
           </Button>
         </Space>
       }
-      styles={{
-        body: {
-          padding: '16px',
-        },
-      }}
     >
       <Spin spinning={loading}>
         {!hasData ? (

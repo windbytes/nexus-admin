@@ -37,7 +37,7 @@ export interface UserModel {
   /**
    * 性别
    */
-  sex: string;
+  sex: number;
 
   /**
    * 状态

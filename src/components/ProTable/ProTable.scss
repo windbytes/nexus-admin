@@ -12,7 +12,7 @@
 .pro-table-wrapper {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
 
   .pro-table {
     height: 100%;

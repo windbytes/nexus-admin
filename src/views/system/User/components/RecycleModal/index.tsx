@@ -129,13 +129,6 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
           </Button>
         </Space>
       }
-      styles={{
-        body: {
-          padding: '16px',
-          maxHeight: 'calc(100vh - 200px)',
-          overflow: 'auto',
-        },
-      }}
     >
       <div className="flex flex-col gap-4 h-full">
         {/* 搜索区域 */}

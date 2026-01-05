@@ -1,3 +1,4 @@
+import { ManOutlined, WomanOutlined } from '@ant-design/icons';
 import { Button, type TableProps } from 'antd';
 import type { UserModel } from '@/services/system/user/type';
 
@@ -23,7 +24,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
       dataIndex: 'username',
       title: '用户名',
       key: 'username',
-      width: 140,
+      width: 100,
       align: 'left',
     },
     {
@@ -33,6 +34,29 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
       width: 120,
       align: 'left',
       render: (text: string) => <span>{text || '-'}</span>,
+    },
+    {
+      dataIndex: 'sex',
+      title: '性别',
+      key: 'sex',
+      width: 80,
+      align: 'center',
+      render: (text: number) => {
+        if (text === 1) {
+          return (
+            <span>
+              <ManOutlined className="text-blue-500! mr-1" />男
+            </span>
+          );
+        } else if (text === 2) {
+          return (
+            <span>
+              <WomanOutlined className="text-pink-500! mr-1" />女
+            </span>
+          );
+        }
+        return <span className="text-gray-400">-</span>;
+      },
     },
     {
       dataIndex: 'email',
