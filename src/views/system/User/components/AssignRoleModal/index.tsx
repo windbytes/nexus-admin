@@ -32,14 +32,14 @@ const AssignRoleModal: React.FC<AssignRoleModalProps> = (props) => {
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
 
   // 查询所有角色列表
-  const { data: allRoles = [], isLoading: rolesLoading } = useQuery<RoleModel[]>({
+  const { data: allRoles = [], isFetching: rolesLoading } = useQuery<RoleModel[]>({
     queryKey: ['sys_all_roles'],
     queryFn: () => roleService.getRoleList({}),
     enabled: open, // 只在弹窗打开时查询
   });
 
   // 查询用户已拥有的角色
-  const { data: userRoles = [], isLoading: userRolesLoading } = useQuery<RoleModel[]>({
+  const { data: userRoles = [], isFetching: userRolesLoading } = useQuery<RoleModel[]>({
     queryKey: ['sys_user_roles', username],
     queryFn: () => frameworkService.getUserRolesByUserName(username),
     enabled: open && !!username, // 只在弹窗打开且有用户名时查询
