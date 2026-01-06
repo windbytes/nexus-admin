@@ -25,8 +25,8 @@ interface ComponentState {
     name?: string;
   };
   pagination: {
-    current: number;
-    pageSize: number;
+    current?: number;
+    pageSize?: number;
     total: number;
     totalPage: number;
   };
@@ -118,8 +118,6 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
         permissionList: initialData.records,
         nextId: initialData.records.length + 1,
         pagination: {
-          current: initialData.pageNumber,
-          pageSize: initialData.pageSize,
           total: initialData.totalRow,
           totalPage: initialData.totalPage,
         },
@@ -339,4 +337,3 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
     handleDelete,
   };
 };
-
