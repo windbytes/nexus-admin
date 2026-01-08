@@ -30,7 +30,7 @@ function ProTable<T = unknown>(props: ProTableProps<T>) {
   } = props;
 
   // 密度管理
-  const { density, changeDensity } = useDensity('middle');
+  const { density, changeDensity } = useDensity(tableProps.size || 'middle');
 
   // 列配置管理
   const { columnSettings, updateSettings, resetSettings, processedColumns } = useColumnSettings(

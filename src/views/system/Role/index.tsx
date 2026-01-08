@@ -156,6 +156,7 @@ const Role: React.FC = () => {
           dataSource={result?.records || []}
           loading={isFetching}
           rowKey="id"
+          size="small"
           actionButtons={
             <TableActionButtons
               handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
