@@ -28,7 +28,7 @@ const Login: React.FC = () => {
   const [form] = Form.useForm();
   const inputRef = useRef(null);
   const navigate = useNavigate();
-  const { setMenus } = useMenuStore();
+  const { setMenus, setButtonPermissions } = useMenuStore();
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
@@ -99,7 +99,10 @@ const Login: React.FC = () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
-
+      // 获取角色配置的权限点（按钮权限）
+      const buttonPermissions = await commonService.getPermissionsByRoleId(roleId);
+      setButtonPermissions(buttonPermissions);
+      queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
       let homePath = currentLoginData.homePath;
       if (!homePath) {

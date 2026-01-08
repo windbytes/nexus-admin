@@ -8,6 +8,9 @@ const CommonApi = {
   // 根据token获取菜单（多用于框架上根据角色获取菜单那种）
   getMenuListByRoleId: '/system/menu/getMenusByRole',
 
+  // 获取角色配置的权限点（按钮权限）
+  getButtonPermissionsByRoleId: '/system/permission/getButtonPermissionsByRoleId',
+
   /**
    * 退出登录
    */
@@ -29,6 +32,12 @@ interface ICommonService {
    * @returns 菜单列表
    */
   getMenuListByRoleId(roleId: string): Promise<RouteItem[]>;
+
+  /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]>;
 
   /**
    * 用户退出登录
@@ -57,6 +66,18 @@ export const commonService: ICommonService = {
         params: { roleId },
         adapter: 'fetch',
       },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   * @returns 权限点列表
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]> {
+    return HttpRequest.get(
+      { url: CommonApi.getButtonPermissionsByRoleId, params: { roleId }, adapter: 'fetch' },
       { successMessageMode: 'none' }
     );
   },

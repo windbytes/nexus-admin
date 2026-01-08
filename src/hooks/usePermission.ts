@@ -1,7 +1,5 @@
-import { useRouterState } from '@tanstack/react-router';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
-import { findMenuByPath } from '@/utils/utils';
 
 /**
  * 结合当前菜单权限，判断用户是否有权限
@@ -10,20 +8,15 @@ import { findMenuByPath } from '@/utils/utils';
  * @returns {boolean} 是否有权限
  */
 export function usePermission(requiredPermissions: string[], mode: 'AND' | 'OR' = 'OR'): boolean {
-  const { caches: menuCaches } = useMenuStore();
+  const { buttonPermissions } = useMenuStore();
   const { loginUser } = useUserStore();
-  // 当前路由的pathname
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  // 获取当前菜单的权限（如果传入了 currentMenuKey）
-  const currentMenu = findMenuByPath(pathname, menuCaches);
-  const menuPermission = currentMenu?.meta?.permissionList || []; // 例如："user:view"
   // 判断是否是管理员
   const isAdmin = loginUser === 'admin';
   if (isAdmin) {
     return true;
   }
   if (mode === 'AND') {
-    return requiredPermissions.every((perm) => menuPermission.includes(perm));
+    return requiredPermissions.every((perm) => buttonPermissions.includes(perm));
   }
-  return requiredPermissions.some((perm) => menuPermission.includes(perm));
+  return requiredPermissions.some((perm) => buttonPermissions.includes(perm));
 }
