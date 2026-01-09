@@ -169,6 +169,7 @@ const Role: React.FC = () => {
           rowSelection={{
             type: 'checkbox' as const,
             selectedRowKeys,
+            columnWidth: 40,
             onChange: handleSelectionChange,
           }}
           pagination={{

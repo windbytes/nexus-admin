@@ -207,7 +207,7 @@ export function ColumnSettingComponent({ columns, onChange, onReset }: ColumnSet
         >
           列展示
         </Checkbox>
-        <Button type="link" size="small" onClick={handleReset}>
+        <Button type="link" size="small" classNames={{ content: 'text-(--ant-color-primary)' }} onClick={handleReset}>
           重置
         </Button>
       </div>

@@ -1,9 +1,10 @@
 import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Dropdown, type MenuProps, Switch, type TableProps } from 'antd';
+import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { RoleModel } from '@/services/system/role/type';
+import { useUserStore } from '@/stores/userStore';
 import { useRoleActions } from './useRoleAction';
 import type { ModalType } from './useRoleModal';
 import { useRolePermissions } from './useRolePermissions';
@@ -26,6 +27,8 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { t } = useTranslation();
   // 操作hooks
   const { updateRoleStatus, deleteRoles } = useRoleActions({ currentRow, onSuccess });
+  // 获取当前登录的角色
+  const { roleCode } = useUserStore();
 
   // 更多操作菜单项
   const moreActionItems = (record: RoleModel): MenuProps['items'] => {
@@ -121,13 +124,13 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
     },
     {
       title: '名称',
-      width: 160,
+      width: 130,
       dataIndex: 'roleName',
       key: 'roleName',
     },
     {
       title: '类型',
-      width: 120,
+      width: 100,
       dataIndex: 'roleType',
       key: 'roleType',
       align: 'center',
@@ -161,14 +164,40 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       },
     },
     {
-      title: '角色权限范围（访问本人|访问所有数据）',
-      width: 160,
+      title: '角色权限范围',
+      width: 120,
       dataIndex: 'dataScope',
       key: 'dataScope',
     },
     {
+      title: '角色等级',
+      width: 80,
+      dataIndex: 'roleLevel',
+      key: 'roleLevel',
+      align: 'center',
+      render(value) {
+        if (!value) {
+          return <Tag color="green">{value}</Tag>;
+        }
+        return <Tag color="red">{value}</Tag>;
+      },
+    },
+    {
+      title: '内置角色',
+      width: 60,
+      dataIndex: 'isBuiltIn',
+      align: 'center',
+      key: 'isBuiltIn',
+      render(value) {
+        if (!value) {
+          return <Tag color="green">否</Tag>;
+        }
+        return <Tag color="red">是</Tag>;
+      },
+    },
+    {
       title: '描述',
-      width: 160,
+      width: 120,
       dataIndex: 'remark',
       key: 'remark',
     },
@@ -178,18 +207,34 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
-      render: (_, record: RoleModel) => (
-        <>
-          <Button size="small" type="link" onClick={() => openModal('edit', record)}>
-            {t('common.operation.edit')}
-          </Button>
-          <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
-            <Button size="small" type="link" icon={<DownOutlined />} iconPlacement="end">
-              {t('common.operation.more')}
+      render(_, record: RoleModel) {
+        if (roleCode !== record.roleCode && record.isBuiltIn) {
+          return null;
+        }
+        return (
+          <>
+            <Button
+              size="small"
+              type="link"
+              classNames={{ content: 'text-(--ant-color-primary)' }}
+              onClick={() => openModal('edit', record)}
+            >
+              {t('common.operation.edit')}
             </Button>
-          </Dropdown>
-        </>
-      ),
+            <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
+              <Button
+                size="small"
+                type="link"
+                classNames={{ content: 'text-(--ant-color-primary)' }}
+                icon={<DownOutlined className="text-(--ant-color-primary)!" />}
+                iconPlacement="end"
+              >
+                {t('common.operation.more')}
+              </Button>
+            </Dropdown>
+          </>
+        );
+      },
     },
   ];
 

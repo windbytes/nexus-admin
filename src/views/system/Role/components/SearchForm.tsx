@@ -1,8 +1,8 @@
 import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
-import { Button, Card, ConfigProvider, DatePicker, Form, Input, Select, Space } from 'antd';
+import { Button, Card, ConfigProvider, DatePicker, Form, Input, Select } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { RoleSearchParams } from '../types';
+import type { RoleSearchParams } from '@/services/system/role/type';
 
 /**
  * 搜索表单属性
@@ -117,8 +117,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
             <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
               {t('common.operation.search')}
             </Button>
-            <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
-              {expanded ? <UpOutlined /> : <DownOutlined />}
+            <Button type="link" onClick={toggleAdvanced} classNames={{ content: 'text-(--ant-color-primary)' }}>
+              {expanded ? (
+                <UpOutlined className="text-(--ant-color-primary)!" />
+              ) : (
+                <DownOutlined className="text-(--ant-color-primary)!" />
+              )}
               {expanded ? '收起' : '展开'}
             </Button>
           </div>
@@ -129,4 +133,3 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
 };
 
 export default SearchForm;
-

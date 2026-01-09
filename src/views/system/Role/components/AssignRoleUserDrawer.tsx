@@ -117,8 +117,18 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
       dataIndex: 'sex',
       width: 80,
       align: 'center',
-      render: (text) => {
-        return text === 1 ? <ManOutlined className="text-blue-400!" /> : <WomanOutlined className="text-pink-400!" />;
+      render: (text: number) => {
+        return text === 1 ? (
+          <>
+            <ManOutlined className="text-blue-400!" />
+            <span className="ml-1">男</span>
+          </>
+        ) : (
+          <>
+            <WomanOutlined className="text-pink-400!" />
+            <span className="ml-1">女</span>
+          </>
+        );
       },
     },
     {
@@ -269,7 +279,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
         closeIcon={false}
         extra={<Button type="text" icon={<CloseOutlined />} onClick={onCancel} />}
         onClose={onCancel}
-        classNames={{ footer: 'text-right', body: 'flex flex-col' }}
+        classNames={{ body: 'flex flex-col gap-4' }}
         afterOpenChange={afterOpenChange}
       >
         <Card>
@@ -317,8 +327,10 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
           </Form>
         </Card>
         <Card
-          className="mt-4! flex-1 min-h-0"
-          styles={{ body: { height: '100%' } }}
+          classNames={{
+            root: 'flex-1 flex flex-col',
+            body: 'flex-1',
+          }}
           title={
             <div className="flex items-center justify-between">
               <span>用户列表</span>
