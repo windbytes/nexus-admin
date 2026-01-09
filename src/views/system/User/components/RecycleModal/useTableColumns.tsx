@@ -95,7 +95,12 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
       fixed: 'end',
       align: 'center',
       render: (_, record: UserModel) => (
-        <Button size="small" type="link" onClick={() => onRestore(record.id)}>
+        <Button
+          size="small"
+          type="link"
+          classNames={{ content: 'text-(--ant-color-primary)' }}
+          onClick={() => onRestore(record.id)}
+        >
           恢复
         </Button>
       ),

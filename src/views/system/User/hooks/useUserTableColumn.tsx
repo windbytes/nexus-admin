@@ -217,11 +217,22 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       align: 'center',
       render: (_, record: UserModel) => (
         <>
-          <Button size="small" type="link" onClick={() => openModal('edit', record)}>
+          <Button
+            size="small"
+            type="link"
+            classNames={{ content: 'text-(--ant-color-primary)' }}
+            onClick={() => openModal('edit', record)}
+          >
             {t('common.operation.edit')}
           </Button>
           <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
-            <Button size="small" type="link" icon={<DownOutlined />} iconPlacement="end">
+            <Button
+              size="small"
+              type="link"
+              classNames={{ content: 'text-(--ant-color-primary)' }}
+              icon={<DownOutlined className="text-(--ant-color-primary)!" />}
+              iconPlacement="end"
+            >
               {t('common.operation.more')}
             </Button>
           </Dropdown>

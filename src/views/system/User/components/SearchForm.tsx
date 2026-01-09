@@ -120,8 +120,16 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
             <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
               {t('common.operation.search')}
             </Button>
-            <Button type="link" onClick={toggleAdvanced} className="text-blue-500 flex items-center gap-1">
-              {showAdvanced ? <UpOutlined /> : <DownOutlined />}
+            <Button
+              type="link"
+              onClick={toggleAdvanced}
+              classNames={{ content: 'text-(--ant-color-primary) flex items-center gap-1' }}
+            >
+              {showAdvanced ? (
+                <UpOutlined className="text-(--ant-color-primary)!" />
+              ) : (
+                <DownOutlined className="text-(--ant-color-primary)!" />
+              )}
               {showAdvanced ? '收起' : '展开'}
             </Button>
           </div>
