@@ -185,9 +185,9 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
     {
       title: '内置角色',
       width: 60,
-      dataIndex: 'isBuiltIn',
+      dataIndex: 'isBuiltin',
       align: 'center',
-      key: 'isBuiltIn',
+      key: 'isBuiltin',
       render(value) {
         if (!value) {
           return <Tag color="green">否</Tag>;
