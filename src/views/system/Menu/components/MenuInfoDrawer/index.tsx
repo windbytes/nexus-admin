@@ -252,7 +252,7 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
           isFetching={isFetching}
           onMenuTypeChange={handleMenuTypeChange}
         />
-        {showRouteFields && <RouteInfoForm menuType={menuType} onIconSelect={handleIconSelect} />}
+        <RouteInfoForm menuType={menuType} onIconSelect={handleIconSelect} showRouteFields={showRouteFields} />
         <Form.Item name="status" label="状态">
           <Switch checkedChildren="正常" unCheckedChildren="停用" />
         </Form.Item>

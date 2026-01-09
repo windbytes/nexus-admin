@@ -1,9 +1,4 @@
-import {
-  MinusCircleOutlined,
-  PlusOutlined,
-  QuestionCircleFilled,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, QuestionCircleFilled, SettingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Form, Input, InputNumber, Space, Switch, Tooltip } from 'antd';
 import type React from 'react';
 import OptimizedIconPanel from '@/components/IconPanel/optimized-icon-panel';
@@ -12,12 +7,13 @@ import { MENU_TYPE, type MenuType } from '../../../constants';
 interface RouteInfoFormProps {
   menuType: MenuType;
   onIconSelect: (icon: string) => void;
+  showRouteFields: boolean;
 }
 
 /**
  * 路由信息表单组件
  */
-const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect }) => {
+const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect, showRouteFields }) => {
   const ICON_PANEL_CLASSNAMES = {
     root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
   };
@@ -46,7 +42,6 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect })
       {menuType === MENU_TYPE.SUB_MENU && (
         <>
           <Form.Item
-            name="component"
             label="前端组件"
             rules={[
               {
@@ -57,7 +52,9 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect })
           >
             <Space.Compact className="w-full">
               <Space.Addon>views/</Space.Addon>
-              <Input allowClear placeholder="请输入前端组件" autoComplete="off" />
+              <Form.Item name="component" noStyle>
+                <Input allowClear placeholder="请输入前端组件" autoComplete="off" />
+              </Form.Item>
               <Space.Addon>/index.tsx</Space.Addon>
             </Space.Compact>
           </Form.Item>
@@ -69,9 +66,11 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect })
           </Form.Item>
         </>
       )}
-      <Form.Item name="originalIcon" label="菜单图标">
+      <Form.Item label="菜单图标">
         <Space.Compact className="w-full">
-          <Input allowClear placeholder="请选择菜单图标" autoComplete="off" />
+          <Form.Item name="originalIcon" noStyle>
+            <Input allowClear placeholder="请选择菜单图标" autoComplete="off" />
+          </Form.Item>
           <Dropdown
             trigger={['click']}
             placement="bottom"
@@ -87,7 +86,7 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect })
       </Form.Item>
 
       {/* 添加路由参数配置项目 */}
-      {(menuType === MENU_TYPE.SUB_MENU || menuType === MENU_TYPE.SUB_ROUTE) && (
+      {(menuType === MENU_TYPE.SUB_MENU || menuType === MENU_TYPE.SUB_ROUTE) && showRouteFields && (
         <>
           <Form.Item label="路由参数">
             <Form.List name="routeQuery">
@@ -155,4 +154,3 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect })
 RouteInfoForm.displayName = 'RouteInfoForm';
 
 export default RouteInfoForm;
-

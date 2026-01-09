@@ -23,6 +23,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 - **React 19.2** - 现代化的用户界面框架
 - **Ant Design 6.x** - 企业级 UI 组件库（采用零运行时，因此需要手动引入 antd/dist/antd.css，详情参考 {@link https://ant.design/docs/react/customize-theme-cn#zero-runtime}）
+- **Ant Design Form使用是需要注意** - 6.0版本对Form进行了改造，如果其中的Form.Item使用了Space.Compace来包裹会出现通过form.setFieldsValue，表单数据不回显的问题，详情解决方案参考 {@link https://github.com/ant-design/ant-design/issues/56109}
 - **Vite(rolldown)** - 快速的前端构建工具
 - **TypeScript** - 类型安全的 JavaScript 超集
 - **Zustand** - 轻量级状态管理
