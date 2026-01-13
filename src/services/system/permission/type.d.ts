@@ -121,56 +121,6 @@ export interface PermissionResourceModel {
 }
 
 /**
- * 菜单按钮资源模型
- */
-export interface MenuButtonResource {
-  /**
-   * 菜单ID
-   */
-  menuId: string;
-
-  /**
-   * 菜单名称
-   */
-  menuName: string;
-
-  /**
-   * 按钮资源列表
-   */
-  buttons: Array<{
-    id: string;
-    code: string;
-    name: string;
-  }>;
-}
-
-/**
- * 菜单接口资源模型
- */
-export interface MenuInterfaceResource {
-  /**
-   * 菜单ID
-   */
-  menuId: string;
-
-  /**
-   * 菜单名称
-   */
-  menuName: string;
-
-  /**
-   * 接口资源列表
-   */
-  interfaces: Array<{
-    id: string;
-    code: string;
-    name: string;
-    path: string;
-    method: string;
-  }>;
-}
-
-/**
  * 保存权限点请求参数（包含基础信息和资源绑定）
  */
 export interface SavePermissionRequest {

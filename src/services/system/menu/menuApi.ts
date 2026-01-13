@@ -6,6 +6,8 @@ export interface InterfacePermission {
   id: string;
   code: string;
   name: string;
+  // 所属菜单ID
+  menuId: string;
   // 所属菜单名称
   menuName: string;
   path: string;
@@ -239,7 +241,7 @@ interface IMenuService {
    * @returns 创建结果
    */
   createInterfacePermission(
-    data: CreateInterfacePermissionRequest,
+    data: CreateInterfacePermissionRequest
   ): Promise<{ success: boolean; data?: InterfacePermission }>;
 
   /**
@@ -248,7 +250,7 @@ interface IMenuService {
    * @returns 更新结果
    */
   updateInterfacePermission(
-    data: UpdateInterfacePermissionRequest,
+    data: UpdateInterfacePermissionRequest
   ): Promise<{ success: boolean; data?: InterfacePermission }>;
 
   /**
@@ -281,7 +283,7 @@ export const menuService: IMenuService = {
         url: MenuApi.getMenuList,
         params: { roleId },
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
   },
 
@@ -296,7 +298,7 @@ export const menuService: IMenuService = {
         url: MenuApi.getAllMenus,
         params,
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
     return transformMenuData(data);
   },
@@ -309,7 +311,7 @@ export const menuService: IMenuService = {
       {
         url: MenuApi.getDirectory,
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
   },
   /**
@@ -323,7 +325,7 @@ export const menuService: IMenuService = {
         url: MenuApi.addMenu,
         data: params,
       },
-      { errorMessageMode: 'none' },
+      { errorMessageMode: 'none' }
     );
   },
   /**
@@ -337,7 +339,7 @@ export const menuService: IMenuService = {
         url: MenuApi.updateMenu,
         data: params,
       },
-      { errorMessageMode: 'none' },
+      { errorMessageMode: 'none' }
     );
   },
   /**
@@ -351,7 +353,7 @@ export const menuService: IMenuService = {
         url: MenuApi.deleteMenu,
         params: { menuId },
       },
-      { errorMessageMode: 'none', successMessageMode: 'none' },
+      { errorMessageMode: 'none', successMessageMode: 'none' }
     );
   },
   /**
@@ -391,7 +393,7 @@ export const menuService: IMenuService = {
         data: params,
         responseType: 'blob',
       },
-      { successMessageMode: 'none', errorMessageMode: 'none' },
+      { successMessageMode: 'none', errorMessageMode: 'none' }
     );
   },
   /**
@@ -407,7 +409,7 @@ export const menuService: IMenuService = {
         url: MenuApi.importMenus,
         data: formData,
       },
-      { successMessageMode: 'none', errorMessageMode: 'none' },
+      { successMessageMode: 'none', errorMessageMode: 'none' }
     );
   },
   /**
@@ -433,7 +435,7 @@ export const menuService: IMenuService = {
         url: MenuApi.queryInterfacePermissions,
         params,
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
   },
 
@@ -443,7 +445,7 @@ export const menuService: IMenuService = {
    * @returns 创建结果
    */
   createInterfacePermission(
-    data: CreateInterfacePermissionRequest,
+    data: CreateInterfacePermissionRequest
   ): Promise<{ success: boolean; data?: InterfacePermission }> {
     return HttpRequest.post<{ success: boolean; data?: InterfacePermission }>({
       url: MenuApi.createInterfacePermission,
@@ -457,7 +459,7 @@ export const menuService: IMenuService = {
    * @returns 更新结果
    */
   updateInterfacePermission(
-    data: UpdateInterfacePermissionRequest,
+    data: UpdateInterfacePermissionRequest
   ): Promise<{ success: boolean; data?: InterfacePermission }> {
     return HttpRequest.post<{ success: boolean; data?: InterfacePermission }>({
       url: MenuApi.updateInterfacePermission,

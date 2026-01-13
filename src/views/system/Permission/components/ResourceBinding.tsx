@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { Checkbox, Spin, Tabs, Tree, type TreeProps } from 'antd';
+import { Tabs, type TreeProps } from 'antd';
 import { useEffect, useState } from 'react';
-import type { PermissionResourceModel } from '@/services/system/permission/type';
-import { permissionService } from '@/services/system/permission';
+import { useTranslation } from 'react-i18next';
 import { menuService } from '@/services/system/menu/menuApi';
+import { permissionService } from '@/services/system/permission';
+import type { PermissionResourceModel } from '@/services/system/permission/type';
 import { transformData } from '@/utils/utils';
+import ButtonResourceTab from './ButtonResourceTab';
+import InterfaceResourceTab from './InterfaceResourceTab';
 
 interface ResourceBindingProps {
   permissionId?: string;
@@ -15,6 +18,7 @@ interface ResourceBindingProps {
  * 资源绑定组件
  */
 const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChange }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'button' | 'interface'>('button');
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
 
@@ -24,7 +28,7 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
     queryFn: async () => {
       const menus = await menuService.getAllMenus({});
       const expanded: string[] = [];
-      return transformData(menus || [], expanded, (key) => key);
+      return transformData(menus || [], expanded, t);
     },
   });
 
@@ -61,17 +65,15 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
   useEffect(() => {
     if (activeTab === 'button' && buttonResources) {
       const data: any[] = [];
-      buttonResources.forEach((menuResource) => {
-        menuResource.buttons.forEach((button) => {
-          data.push({
-            key: `ACTION_${button.id}`,
-            title: button.name,
-            description: button.code,
-            menuId: menuResource.menuId,
-            menuName: menuResource.menuName,
-            resourceId: button.id,
-            resourceType: 'ACTION',
-          });
+      buttonResources.forEach((button) => {
+        data.push({
+          key: `ACTION_${button.id}`,
+          title: button.name,
+          description: button.description,
+          menuId: button.id,
+          menuName: button.name,
+          resourceId: button.id,
+          resourceType: 'ACTION',
         });
       });
       setButtonTransferData(data);
@@ -88,17 +90,15 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
   useEffect(() => {
     if (activeTab === 'interface' && interfaceResources) {
       const data: any[] = [];
-      interfaceResources.forEach((menuResource) => {
-        menuResource.interfaces.forEach((inter) => {
-          data.push({
-            key: `API_${inter.id}`,
-            title: inter.name,
-            description: `${inter.method} ${inter.path}`,
-            menuId: menuResource.menuId,
-            menuName: menuResource.menuName,
-            resourceId: inter.id,
-            resourceType: 'API',
-          });
+      interfaceResources.forEach((inter) => {
+        data.push({
+          key: `API_${inter.id}`,
+          title: inter.name,
+          description: `${inter.method} ${inter.path}`,
+          menuId: inter.menuId,
+          menuName: inter.menuName,
+          resourceId: inter.id,
+          resourceType: 'API',
         });
       });
       setInterfaceTransferData(data);
@@ -113,7 +113,9 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
 
   // 通知父组件资源变化
   useEffect(() => {
-    if (!onChange) return;
+    if (!onChange) {
+      return;
+    }
 
     const resources: PermissionResourceModel[] = [];
 
@@ -153,19 +155,22 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
     }
   };
 
-  // 过滤按钮资源（根据选中的菜单）
-  const filteredButtonData = selectedMenuId
-    ? buttonTransferData.filter((item) => item.menuId === selectedMenuId)
-    : buttonTransferData;
+  // 按钮资源切换处理
+  const handleButtonToggle = (key: string, checked: boolean) => {
+    if (checked) {
+      setButtonTargetKeys([...buttonTargetKeys, key]);
+    } else {
+      setButtonTargetKeys(buttonTargetKeys.filter((k) => k !== key));
+    }
+  };
 
-  // 过滤接口资源（根据选中的菜单）
-  const filteredInterfaceData = selectedMenuId
-    ? interfaceTransferData.filter((item) => item.menuId === selectedMenuId)
-    : interfaceTransferData;
-
-  // 过滤已选中的资源（用于右侧显示）
-  const getSelectedData = (targetKeys: string[], allData: any[]) => {
-    return targetKeys.map((key) => allData.find((d) => d.key === key)).filter(Boolean);
+  // 接口资源切换处理
+  const handleInterfaceToggle = (key: string, checked: boolean) => {
+    if (checked) {
+      setInterfaceTargetKeys([...interfaceTargetKeys, key]);
+    } else {
+      setInterfaceTargetKeys(interfaceTargetKeys.filter((k) => k !== key));
+    }
   };
 
   return (
@@ -178,150 +183,34 @@ const ResourceBinding: React.FC<ResourceBindingProps> = ({ permissionId, onChang
             key: 'button',
             label: '按钮资源',
             children: (
-              <Spin spinning={buttonLoading || boundLoading}>
-                <div className="flex gap-4 h-[500px]">
-                  {/* 左侧：菜单树 + 按钮列表 */}
-                  <div className="flex-1 border border-gray-200 rounded p-4 flex flex-col">
-                    <div className="mb-4">
-                      <div className="font-semibold mb-2">菜单树</div>
-                      <Tree
-                        showLine
-                        blockNode
-                        treeData={menuTreeData || []}
-                        fieldNames={{ title: 'name', key: 'id', children: 'children' }}
-                        onSelect={onMenuSelect}
-                        defaultExpandAll
-                        className="border border-gray-100 rounded p-2 bg-gray-50"
-                      />
-                    </div>
-                    <div className="flex-1 overflow-auto">
-                      <div className="font-semibold mb-2">按钮资源</div>
-                      <div className="space-y-2">
-                        {filteredButtonData.length === 0 ? (
-                          <div className="text-gray-400 text-center py-8">暂无数据</div>
-                        ) : (
-                          filteredButtonData.map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center p-2 border border-gray-200 rounded hover:bg-blue-50"
-                            >
-                              <Checkbox
-                                checked={buttonTargetKeys.includes(item.key)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setButtonTargetKeys([...buttonTargetKeys, item.key]);
-                                  } else {
-                                    setButtonTargetKeys(buttonTargetKeys.filter((k) => k !== item.key));
-                                  }
-                                }}
-                              >
-                                <div>
-                                  <div className="font-medium">{item.title}</div>
-                                  <div className="text-xs text-gray-500">{item.description}</div>
-                                  <div className="text-xs text-gray-400">{item.menuName}</div>
-                                </div>
-                              </Checkbox>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 右侧：已绑定的按钮资源 */}
-                  <div className="flex-1 border border-gray-200 rounded p-4">
-                    <div className="font-semibold mb-2">已绑定的按钮资源</div>
-                    <div className="space-y-2 overflow-auto max-h-full">
-                      {buttonTargetKeys.length === 0 ? (
-                        <div className="text-gray-400 text-center py-8">暂无绑定</div>
-                      ) : (
-                        getSelectedData(buttonTargetKeys, buttonTransferData).map((item) => (
-                          <div key={item.key} className="p-2 border border-gray-200 rounded bg-blue-50">
-                            <div className="font-medium">{item.title}</div>
-                            <div className="text-xs text-gray-500">{item.description}</div>
-                            <div className="text-xs text-gray-400">{item.menuName}</div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Spin>
+              <ButtonResourceTab
+                menuTreeData={menuTreeData || []}
+                menuLoading={menuLoading}
+                buttonLoading={buttonLoading}
+                boundLoading={boundLoading}
+                selectedMenuId={selectedMenuId}
+                buttonTransferData={buttonTransferData}
+                buttonTargetKeys={buttonTargetKeys}
+                onMenuSelect={onMenuSelect}
+                onButtonToggle={handleButtonToggle}
+              />
             ),
           },
           {
             key: 'interface',
             label: '接口资源',
             children: (
-              <Spin spinning={interfaceLoading || boundLoading}>
-                <div className="flex gap-4 h-[500px]">
-                  {/* 左侧：菜单树 + 接口列表 */}
-                  <div className="flex-1 border border-gray-200 rounded p-4 flex flex-col">
-                    <div className="mb-4">
-                      <div className="font-semibold mb-2">菜单树</div>
-                      <Tree
-                        showLine
-                        blockNode
-                        treeData={menuTreeData || []}
-                        fieldNames={{ title: 'name', key: 'id', children: 'children' }}
-                        onSelect={onMenuSelect}
-                        defaultExpandAll
-                        className="border border-gray-100 rounded p-2 bg-gray-50"
-                      />
-                    </div>
-                    <div className="flex-1 overflow-auto">
-                      <div className="font-semibold mb-2">接口资源</div>
-                      <div className="space-y-2">
-                        {filteredInterfaceData.length === 0 ? (
-                          <div className="text-gray-400 text-center py-8">暂无数据</div>
-                        ) : (
-                          filteredInterfaceData.map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center p-2 border border-gray-200 rounded hover:bg-blue-50"
-                            >
-                              <Checkbox
-                                checked={interfaceTargetKeys.includes(item.key)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setInterfaceTargetKeys([...interfaceTargetKeys, item.key]);
-                                  } else {
-                                    setInterfaceTargetKeys(interfaceTargetKeys.filter((k) => k !== item.key));
-                                  }
-                                }}
-                              >
-                                <div>
-                                  <div className="font-medium">{item.title}</div>
-                                  <div className="text-xs text-gray-500">{item.description}</div>
-                                  <div className="text-xs text-gray-400">{item.menuName}</div>
-                                </div>
-                              </Checkbox>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 右侧：已绑定的接口资源 */}
-                  <div className="flex-1 border border-gray-200 rounded p-4">
-                    <div className="font-semibold mb-2">已绑定的接口资源</div>
-                    <div className="space-y-2 overflow-auto max-h-full">
-                      {interfaceTargetKeys.length === 0 ? (
-                        <div className="text-gray-400 text-center py-8">暂无绑定</div>
-                      ) : (
-                        getSelectedData(interfaceTargetKeys, interfaceTransferData).map((item) => (
-                          <div key={item.key} className="p-2 border border-gray-200 rounded bg-blue-50">
-                            <div className="font-medium">{item.title}</div>
-                            <div className="text-xs text-gray-500">{item.description}</div>
-                            <div className="text-xs text-gray-400">{item.menuName}</div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Spin>
+              <InterfaceResourceTab
+                menuTreeData={menuTreeData || []}
+                menuLoading={menuLoading}
+                interfaceLoading={interfaceLoading}
+                boundLoading={boundLoading}
+                selectedMenuId={selectedMenuId}
+                interfaceTransferData={interfaceTransferData}
+                interfaceTargetKeys={interfaceTargetKeys}
+                onMenuSelect={onMenuSelect}
+                onInterfaceToggle={handleInterfaceToggle}
+              />
             ),
           },
         ]}

@@ -1,13 +1,8 @@
 import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
-import type {
-  MenuButtonResource,
-  MenuInterfaceResource,
-  PermissionModel,
-  PermissionResourceModel,
-  PermissionSearchParams,
-  SavePermissionRequest,
-} from './type';
+import type { InterfacePermission } from '../menu/menuApi';
+import type { MenuModel } from '../menu/type';
+import type { PermissionModel, PermissionResourceModel, PermissionSearchParams, SavePermissionRequest } from './type';
 
 /**
  * 权限点操作枚举
@@ -135,13 +130,13 @@ export interface IPermissionService {
    * 查询菜单按钮资源（用于资源绑定选择）
    * @returns 菜单按钮资源列表
    */
-  queryMenuButtonResources(): Promise<MenuButtonResource[]>;
+  queryMenuButtonResources(): Promise<MenuModel[]>;
 
   /**
    * 查询菜单接口资源（用于资源绑定选择）
    * @returns 菜单接口资源列表
    */
-  queryMenuInterfaceResources(): Promise<MenuInterfaceResource[]>;
+  queryMenuInterfaceResources(): Promise<InterfacePermission[]>;
 
   /**
    * 保存权限点（新增或更新，统一接口）
@@ -284,7 +279,7 @@ export const permissionService: IPermissionService = {
    * 查询菜单按钮资源（用于资源绑定选择）
    * @returns 菜单按钮资源列表
    */
-  async queryMenuButtonResources(): Promise<MenuButtonResource[]> {
+  async queryMenuButtonResources(): Promise<MenuModel[]> {
     const response = await HttpRequest.get(
       {
         url: PermissionAction.queryMenuButtonResources,
@@ -301,7 +296,7 @@ export const permissionService: IPermissionService = {
    * 查询菜单接口资源（用于资源绑定选择）
    * @returns 菜单接口资源列表
    */
-  async queryMenuInterfaceResources(): Promise<MenuInterfaceResource[]> {
+  async queryMenuInterfaceResources(): Promise<InterfacePermission[]> {
     const response = await HttpRequest.get(
       {
         url: PermissionAction.queryMenuInterfaceResources,
