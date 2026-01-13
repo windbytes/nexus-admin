@@ -1,5 +1,4 @@
 import { useMenuStore } from '@/stores/store';
-import { useUserStore } from '@/stores/userStore';
 
 /**
  * 结合当前菜单权限，判断用户是否有权限
@@ -9,10 +8,7 @@ import { useUserStore } from '@/stores/userStore';
  */
 export function usePermission(requiredPermissions: string[], mode: 'AND' | 'OR' = 'OR'): boolean {
   const { buttonPermissions } = useMenuStore();
-  const { loginUser } = useUserStore();
-  // 判断是否是管理员
-  const isAdmin = loginUser === 'admin';
-  if (isAdmin) {
+  if (buttonPermissions.length === 1 && buttonPermissions[0] === '*') {
     return true;
   }
   if (mode === 'AND') {
