@@ -16,13 +16,7 @@ interface PermissionInfoModalProps {
 /**
  * 权限点信息弹窗
  */
-const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
-  open,
-  onOk,
-  onCancel,
-  permissionInfo,
-  action,
-}) => {
+const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({ open, onOk, onCancel, permissionInfo, action }) => {
   const [form] = Form.useForm();
   const [resources, setResources] = useState<PermissionResourceModel[]>([]);
 
@@ -77,6 +71,7 @@ const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
     <DragModal
       title={action === 'add' ? '新增权限点' : '编辑权限点'}
       open={open}
+      centered
       onOk={handleOk}
       onCancel={handleCancel}
       width={1200}
@@ -97,11 +92,7 @@ const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
                 }}
               >
                 <Form.Item label="权限编码" name="permCode" rules={[{ required: true }]}>
-                  <Input
-                    placeholder="请输入权限编码"
-                    disabled={action === 'edit'}
-                    autoComplete="off"
-                  />
+                  <Input placeholder="请输入权限编码" disabled={action === 'edit'} autoComplete="off" />
                 </Form.Item>
 
                 <Form.Item label="权限名称" name="permName" rules={[{ required: true }]}>
@@ -129,9 +120,7 @@ const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
           {
             key: 'resource',
             label: '资源绑定',
-            children: (
-              <ResourceBinding permissionId={permissionInfo?.id} onChange={handleResourceChange} />
-            ),
+            children: <ResourceBinding permissionId={permissionInfo?.id} onChange={handleResourceChange} />,
           },
         ]}
       />

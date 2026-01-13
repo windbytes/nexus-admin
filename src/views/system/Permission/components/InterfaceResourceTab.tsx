@@ -44,7 +44,7 @@ const InterfaceResourceTab: React.FC<InterfaceResourceTabProps> = ({
         <div className="flex-1 border border-gray-200 rounded p-4 flex flex-col min-h-0">
           <div className="mb-4 shrink-0">
             <div className="font-semibold mb-2">菜单树</div>
-            <div className="border border-gray-100 rounded p-2 bg-gray-50 overflow-auto max-h-[200px]">
+            <div className="border border-gray-100 rounded p-2 bg-gray-50 overflow-auto max-h-[250px]">
               <Tree
                 showLine
                 blockNode
