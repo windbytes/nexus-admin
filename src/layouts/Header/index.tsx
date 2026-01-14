@@ -101,7 +101,10 @@ const Header = () => {
                 </Dropdown>
               )}
               <Tooltip placement="bottomRight" title={t('layout.header.setting')}>
-                <SettingOutlined className="text-[18px] cursor-pointer" onClick={() => setSettingMenuModalOpen(true)} />
+                <SettingOutlined
+                  className="my-spin text-[18px] cursor-pointer"
+                  onClick={() => setSettingMenuModalOpen(true)}
+                />
               </Tooltip>
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
