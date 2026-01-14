@@ -69,6 +69,16 @@ const RoleApi = {
   assignRoleUser: '/system/role/assignRoleUser',
 
   /**
+   * 给角色分配权限点
+   */
+  assignRolePermission: '/system/role/assignRolePermission',
+
+  /**
+   * 查询角色已配置的权限点
+   */
+  getRolePermissions: '/system/role/getRolePermissions',
+
+  /**
    * 校验角色编码是否重复
    */
   checkRoleCodeExist: '/system/role/checkRoleCodeExist',
@@ -155,6 +165,21 @@ export interface IRoleService {
    * @returns 结果
    */
   assignRoleUser(roleId: string, userIds: string[], operate: string): Promise<boolean>;
+
+  /**
+   * 分配角色权限点
+   * @param roleId 角色ID
+   * @param permissionIds 权限点ID列表
+   * @returns 结果
+   */
+  assignRolePermission(roleId: string, permissionIds: string[]): Promise<boolean>;
+
+  /**
+   * 查询角色已配置的权限点ID列表
+   * @param roleId 角色ID
+   * @returns 权限点ID列表
+   */
+  getRolePermissions(roleId: string): Promise<string[]>;
 
   /**
    * 获取角色用户
@@ -331,6 +356,35 @@ export const roleService: IRoleService = {
       {
         url: RoleApi.assignRoleUser,
         data: { roleId, userIds, operate },
+      },
+      {
+        successMessageMode: 'none',
+      }
+    );
+  },
+  /**
+   * 分配角色权限点
+   * @param roleId 角色ID
+   * @param permissionIds 权限点ID列表
+   * @returns 结果
+   */
+  async assignRolePermission(roleId: string, permissionIds: string[]): Promise<boolean> {
+    return await HttpRequest.post({
+      url: RoleApi.assignRolePermission,
+      data: { roleId, permissionIds },
+    });
+  },
+  /**
+   * 查询角色已配置的权限点ID列表
+   * @param roleId 角色ID
+   * @returns 权限点ID列表
+   */
+  async getRolePermissions(roleId: string): Promise<string[]> {
+    return await HttpRequest.get(
+      {
+        url: RoleApi.getRolePermissions,
+        params: { roleId },
+        adapter: 'fetch',
       },
       {
         successMessageMode: 'none',

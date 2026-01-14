@@ -23,7 +23,7 @@ interface UseRoleTableColumnProps {
 export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
-  const { canDeleteRole, canAssignMenu, canAssignUser } = useRolePermissions();
+  const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission } = useRolePermissions();
   const { t } = useTranslation();
   // 操作hooks
   const { updateRoleStatus, deleteRoles } = useRoleActions({ currentRow, onSuccess });
@@ -63,6 +63,22 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
             return;
           }
           openModal('assignMenu', record);
+        },
+      },
+      {
+        key: 'assignPermission',
+        label: '分配权限点',
+        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        disabled: !canAssignPermission,
+        onClick: () => {
+          if (!canAssignPermission) {
+            modal.error({
+              title: '权限不足',
+              content: '您没有分配权限点权限的权限，请联系管理员获取相应权限。',
+            });
+            return;
+          }
+          openModal('assignPermission', record);
         },
       },
       {

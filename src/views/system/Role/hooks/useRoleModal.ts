@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { RoleModel } from '@/services/system/role/type';
 
-export type ModalType = 'add' | 'edit' | 'view' | 'assignMenu' | 'assignUser' | null;
+export type ModalType = 'add' | 'edit' | 'view' | 'assignMenu' | 'assignUser' | 'assignPermission' | null;
 
 /**
  * 统一管理角色相关的弹窗状态

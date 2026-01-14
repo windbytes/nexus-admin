@@ -12,6 +12,8 @@ export const useRolePermissions = () => {
   const canDeleteRole = usePermission(['sys:role:delete']);
   // 分配菜单权限
   const canAssignMenu = usePermission(['sys:role:assignMenu']);
+  // 分配权限点权限
+  const canAssignPermission = usePermission(['sys:role:assignPermission']);
   // 分配用户权限
   const canAssignUser = usePermission(['sys:role:assignUser']);
   // 导入角色权限
@@ -24,6 +26,7 @@ export const useRolePermissions = () => {
     canEditRole,
     canDeleteRole,
     canAssignMenu,
+    canAssignPermission,
     canAssignUser,
     canImportRole,
     canExportRole,

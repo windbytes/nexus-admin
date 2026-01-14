@@ -113,7 +113,7 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
     },
     {
       title: '操作',
-      width: 150,
+      width: 120,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',

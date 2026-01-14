@@ -7,6 +7,7 @@ import { type Key, useEffect, useState } from 'react';
 import ProTable from '@/components/ProTable';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleModel, RoleSearchParams } from '@/services/system/role/type';
+import AssignPermission from './components/AssignPermission';
 import AssignRoleMenuDrawer from './components/AssignRoleMenuDrawer';
 import AssignRoleUserDrawer from './components/AssignRoleUserDrawer';
 import RoleInfoModal from './components/RoleInfoModal';
@@ -60,7 +61,7 @@ const Role: React.FC = () => {
   };
 
   // 角色操作hook
-  const { deleteRoles, handleModalSave } = useRoleActions({
+  const { deleteRoles, handleModalSave, assignRolePermissionsMutation } = useRoleActions({
     currentRow: current,
     onSuccess: handleSuccess,
   });
@@ -130,6 +131,11 @@ const Role: React.FC = () => {
   // 处理用户分配确认
   const handleAssignUser = () => {
     closeModal();
+  };
+
+  // 处理权限点分配确认
+  const handleAssignPermission = (permissionIds: string[]) => {
+    assignRolePermissionsMutation.mutate({ roleId: current?.id || '', permissionIds });
   };
 
   // 获取表格列定义
@@ -214,6 +220,13 @@ const Role: React.FC = () => {
       />
       {/* 用户分配抽屉 */}
       <AssignRoleUserDrawer open={modalName === 'assignUser'} roleId={current?.id || ''} onCancel={closeModal} />
+      {/* 权限点分配弹窗 */}
+      <AssignPermission
+        open={modalName === 'assignPermission'}
+        roleId={current?.id || ''}
+        onOk={handleAssignPermission}
+        onCancel={closeModal}
+      />
     </>
   );
 };

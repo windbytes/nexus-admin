@@ -89,6 +89,13 @@ export const useRoleActions = ({ currentRow, onSuccess }: UseRoleActionsProps) =
     },
   });
 
+  // 分配角色权限点
+  const assignRolePermissionsMutation = useMutation({
+    mutationFn: ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) =>
+      roleService.assignRolePermission(roleId, permissionIds),
+    onSuccess,
+  });
+
   // 处理模态框确认
   const handleModalSave = (values: Partial<RoleModel>) => {
     if (currentRow?.id) {
@@ -104,5 +111,6 @@ export const useRoleActions = ({ currentRow, onSuccess }: UseRoleActionsProps) =
     deleteRoles,
     assignRoleMenusMutation,
     assignRoleUsersMutation,
+    assignRolePermissionsMutation,
   };
 };
