@@ -216,6 +216,12 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       width: 120,
       dataIndex: 'remark',
       key: 'remark',
+      render(value) {
+        if (!value) {
+          return '-';
+        }
+        return value;
+      },
     },
     {
       title: '操作',

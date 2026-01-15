@@ -34,11 +34,11 @@ const Content = memo(({ children }: ContentProps) => {
       className="overflow-x-hidden overflow-y-auto h-full relative flex flex-col p-3"
       style={{ overscrollBehavior: 'contain' }}
     >
-      <Suspense fallback={loadingFallback}>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={loadingFallback}>
           <KeepAlive>{children}</KeepAlive>
-        </ErrorBoundary>
-      </Suspense>
+        </Suspense>
+      </ErrorBoundary>
     </Layout.Content>
   );
 });
