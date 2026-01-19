@@ -12,6 +12,7 @@ import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
 import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import type { RoleModel } from '@/services/system/role/type';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
@@ -81,7 +82,7 @@ const Login: React.FC = () => {
       userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, currentLoginData.accessToken);
       userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
-      const roleModels = rolesToUse.map((role) => ({
+      const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
         roleCode: role.roleType, // 使用roleType作为roleCode
         roleName: role.roleName,

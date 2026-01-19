@@ -38,12 +38,12 @@ export interface RoleModel {
   /**
    * 角色等级
    */
-  roleLevel: number;
+  roleLevel?: number;
 
   /**
    * 是否内置角色
    */
-  isBuiltIn: boolean;
+  isBuiltIn?: boolean;
 }
 
 /**
