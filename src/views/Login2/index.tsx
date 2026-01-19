@@ -12,6 +12,7 @@ import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
 import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import type { RoleModel } from '@/services/system/role/type';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
@@ -58,6 +59,9 @@ const Login: React.FC = () => {
   /**
    * 处理角色选择
    */
+  /**
+   * 处理角色选择
+   */
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
     const currentLoginData = loginResponseData || loginData.current;
@@ -77,12 +81,13 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
-
+      const loginResponse = await loginService.confirmRole(currentLoginData.accessToken, selectedRole.id);
+      console.log(loginResponse);
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, currentLoginData.accessToken);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, loginResponse.accessToken);
       userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
-      const roleModels = rolesToUse.map((role) => ({
+      const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
         roleCode: role.roleType, // 使用roleType作为roleCode
         roleName: role.roleName,
@@ -100,7 +105,7 @@ const Login: React.FC = () => {
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
       // 获取角色配置的权限点（按钮权限）
-      const buttonPermissions = await commonService.getPermissionsByRoleId(roleId);
+      const buttonPermissions = loginResponse.permissions;
       setButtonPermissions(buttonPermissions);
       queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
@@ -155,7 +160,7 @@ const Login: React.FC = () => {
    */
   const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key || '';
+    values.captchaKey = data?.key || '';
     setLoading(true);
 
     try {
@@ -196,6 +201,7 @@ const Login: React.FC = () => {
         // 登录成功
         case HttpCodeEnum.SUCCESS:
           {
+            // 保存登录数据
             loginData.current = loginResponse;
 
             // 检查角色信息
@@ -244,7 +250,6 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
-
   /**
    * 刷新验证码
    */

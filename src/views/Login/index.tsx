@@ -78,8 +78,10 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
+      const loginResponse = await loginService.confirmRole(currentLoginData.accessToken, selectedRole.id);
+      console.log(loginResponse);
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, currentLoginData.accessToken);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, loginResponse.accessToken);
       userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels: RoleModel[] = rolesToUse.map((role) => ({
@@ -100,7 +102,7 @@ const Login: React.FC = () => {
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
       // 获取角色配置的权限点（按钮权限）
-      const buttonPermissions = await commonService.getPermissionsByRoleId(roleId);
+      const buttonPermissions = loginResponse.permissions;
       setButtonPermissions(buttonPermissions);
       queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
@@ -155,7 +157,7 @@ const Login: React.FC = () => {
    */
   const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key || '';
+    values.captchaKey = data?.key || '';
     setLoading(true);
 
     try {
@@ -354,7 +356,11 @@ const Login: React.FC = () => {
                 <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Row gutter={8}>
                     <Col span={18}>
-                      <Form.Item name="captcha" noStyle rules={[{ required: true, message: t('login.enterCaptcha') }]}>
+                      <Form.Item
+                        name="captchaCode"
+                        noStyle
+                        rules={[{ required: true, message: t('login.enterCaptcha') }]}
+                      >
                         <Input
                           size="large"
                           allowClear
