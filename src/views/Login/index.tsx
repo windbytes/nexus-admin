@@ -78,15 +78,17 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
-      const loginResponse = await loginService.confirmRole(currentLoginData.accessToken, selectedRole.id);
-      console.log(loginResponse);
+      const { accessToken, permissions } = await loginService.confirmRole(
+        currentLoginData.accessToken,
+        selectedRole.roleCode
+      );
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, loginResponse.accessToken);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, accessToken);
       userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
       const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
-        roleCode: role.roleType, // 使用roleType作为roleCode
+        roleCode: role.roleCode,
         roleName: role.roleName,
         roleType: role.roleType,
         status: role.status,
@@ -102,7 +104,7 @@ const Login: React.FC = () => {
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
       // 获取角色配置的权限点（按钮权限）
-      const buttonPermissions = loginResponse.permissions;
+      const buttonPermissions = permissions;
       setButtonPermissions(buttonPermissions);
       queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
@@ -231,10 +233,10 @@ const Login: React.FC = () => {
             content: (
               <>
                 <p>
-                  {t('common.statusCode')}:{code}
+                  {t('common.errorMsg.statusCode')}:{code}
                 </p>
                 <p>
-                  {t('common.reason')}:{message}
+                  {t('common.errorMsg.reason')}:{message}
                 </p>
               </>
             ),

@@ -46,6 +46,7 @@ export const useUserStore = create<UserState>()(
         set({
           loginUser: '',
           isLogin: false,
+          accessToken: '',
           roleId: '',
           roleCode: '',
           userRoles: [],
@@ -54,6 +55,7 @@ export const useUserStore = create<UserState>()(
         set({
           loginUser: '',
           isLogin: false,
+          accessToken: '',
           roleId: '',
           roleCode: '',
           userRoles: [],
