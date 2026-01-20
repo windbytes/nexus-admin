@@ -186,8 +186,8 @@ const Login: React.FC = () => {
         // 验证码错误或过期
         case HttpCodeEnum.RC300:
         case HttpCodeEnum.RC301:
-          form.setFields([{ name: 'captcha', errors: [message] }]);
-          form.getFieldInstance('captcha').focus();
+          form.setFields([{ name: 'captchaCode', errors: [message] }]);
+          form.getFieldInstance('captchaCode').focus();
           // 刷新验证码
           refetch();
           break;

@@ -275,3 +275,13 @@ export function findMenuByPath(path: string, caches: MenuCaches): MenuEntity | u
   }
   return entity;
 }
+
+// 获取 Cookie 中的 CSRF token
+export function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';')?.shift();
+  }
+  return null;
+}
