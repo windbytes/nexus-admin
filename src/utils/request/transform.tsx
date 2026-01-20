@@ -197,6 +197,10 @@ export const transform: AxiosTransform = {
    * @param options
    */
   requestInterceptors: (config, options) => {
+    const csrfToken = localStorage.getItem('csrfToken');
+    if (csrfToken) {
+      config.headers['X-CSRF-TOKEN'] = csrfToken;
+    }
     config.headers = config.headers || {};
     const cpt = options?.requestOptions?.encrypt;
 
@@ -275,6 +279,12 @@ export const transform: AxiosTransform = {
    * @param res
    */
   responseInterceptors: async (res: AxiosResponse) => {
+    // 从相应头中获取 CSRF token
+    const csrfToken = res.headers['x-csrf-token'];
+    if (csrfToken) {
+      // 存储到 localStorage 或内存中
+      localStorage.setItem('csrfToken', csrfToken);
+    }
     const userStore = useUserStore.getState();
     const config = res.config;
 

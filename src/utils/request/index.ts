@@ -11,7 +11,7 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
     deepMerge(
       {
         authenticationScheme: 'Bearer',
-        withCredentials: true,
+        withCredentials: true, // 允许携带token
         timeout: 0,
         headers: { 'Content-Type': ContentTypeEnum.JSON },
         // 数据处理方式
