@@ -14,12 +14,12 @@ const CommonApi = {
   /**
    * 退出登录
    */
-  logout: '/logout',
+  logout: '/auth/logout',
 
   /**
    * 刷新token
    */
-  refreshToken: '/refreshToken',
+  refreshToken: '/auth/refresh',
 };
 
 /**

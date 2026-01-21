@@ -14,7 +14,7 @@ import type { Response } from '@/types/global';
 import { antdUtils } from '../antdUtil';
 import { encrypt } from '../encrypt';
 import { isString } from '../is';
-import { getCookie, setObjToUrlParams } from '../utils';
+import { setObjToUrlParams } from '../utils';
 import { HttpRequest } from '.';
 import { joinTimestamp } from './helper';
 
@@ -197,11 +197,6 @@ export const transform: AxiosTransform = {
    * @param options
    */
   requestInterceptors: (config, options) => {
-    // 从 Cookie 中读取 XSRF-TOKEN，而不是从响应头
-    const csrfToken = getCookie('XSRF-TOKEN');
-    if (csrfToken) {
-      config.headers['X-CSRF-TOKEN'] = csrfToken;
-    }
     config.headers = config.headers || {};
     const cpt = options?.requestOptions?.encrypt;
 
