@@ -45,11 +45,15 @@ const GlobalProvider: React.FC = () => {
           Layout: {
             headerPadding: '0',
             headerHeight: 'auto',
+            bodyBg: '#f2f3f5',
           },
           Tree: {
             directoryNodeSelectedBg: '#e6f4ff',
             indentSize: 12,
             directoryNodeSelectedColor: 'rgba(0, 0, 0, 0.88)',
+          },
+          Card: {
+            colorBorder: '#e4e7ed',
           },
         },
       }}
