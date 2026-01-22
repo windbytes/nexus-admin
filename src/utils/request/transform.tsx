@@ -355,6 +355,8 @@ export const transform: AxiosTransform = {
         },
         okText: t('common.operation.confirm'),
       });
+      // 清空请求队列，避免重复错误请求
+      onTokenRefreshFailed(new Error(t('login.loginValid')));
       return Promise.reject(t('login.loginValid'));
     }
     // 判断responseCode是否为401(即token失效),添加_retry属性防止重复刷新token
