@@ -307,10 +307,13 @@ export const userService: IUserService = {
    * @returns 恢复结果
    */
   async restoreUsers(ids: string[]): Promise<boolean> {
-    const response = await HttpRequest.post({
-      url: UserAction.restoreUsers,
-      data: ids,
-    });
+    const response = await HttpRequest.post(
+      {
+        url: UserAction.restoreUsers,
+        data: ids,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 };

@@ -130,7 +130,7 @@ export const transform: AxiosTransform = {
     }
     if (options.errorMessageMode === 'modal') {
       antdUtils.modal?.error({
-        title: `${t('common.errorMsg.serverException')},${t('common.errorMsg.statusCode')}(${code})`,
+        title: `${code === HttpCodeEnum.RC403 ? t('common.errorMsg.forbidden') : t('common.errorMsg.serverException')},${t('common.errorMsg.statusCode')}(${code})`,
         content: msg,
         okText: t('common.operation.confirm'),
       });

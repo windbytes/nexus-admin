@@ -18,12 +18,6 @@ export const useRecycleActions = (onSuccess?: () => void) => {
       queryClient.invalidateQueries({ queryKey: ['sys_user_recycle'] });
       onSuccess?.();
     },
-    onError: (error: Error) => {
-      modal.error({
-        title: '恢复失败',
-        content: error.message || '未知错误',
-      });
-    },
   });
 
   // 单个恢复
@@ -72,4 +66,3 @@ export const useRecycleActions = (onSuccess?: () => void) => {
     restoring: restoreUsersMutation.isPending,
   };
 };
-
