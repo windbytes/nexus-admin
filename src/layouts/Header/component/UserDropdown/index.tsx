@@ -124,7 +124,7 @@ const UserDropdown: React.FC = () => {
           <Avatar size="large" src={avatar} />
           <div className="flex flex-col flex-1 shrink-0 ml-2">
             <span className="block text-sm font-medium truncate">
-              {userStore.loginUser} - {userInfo?.roleName}
+              {userInfo?.realName} - {userInfo?.roleName}
             </span>
             <span className="block mt-0.5 text-xs text-gray-500 truncate">{userInfo?.email}</span>
           </div>

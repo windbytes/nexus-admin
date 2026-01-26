@@ -58,6 +58,8 @@ const User: React.FC = () => {
 
   // 通用成功回调
   const handleSuccess = () => {
+    // 关闭窗口
+    closeModal();
     setSelectedRowKeys([]);
     refetch();
   };
