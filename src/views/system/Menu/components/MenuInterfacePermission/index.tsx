@@ -9,7 +9,7 @@ import TableFooter from './components/TableFooter';
 import { useMenuInterfacePermission } from './hooks/useMenuInterfacePermission';
 
 export type MenuInterfacePermissionProps = {
-  menu?: MenuModel;
+  menu: MenuModel | null;
 };
 
 /**

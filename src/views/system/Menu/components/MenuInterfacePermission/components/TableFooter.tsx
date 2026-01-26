@@ -3,7 +3,7 @@ import type React from 'react';
 import type { MenuModel } from '@/services/system/menu/type';
 
 interface TableFooterProps {
-  menu?: MenuModel;
+  menu: MenuModel | null;
   hasUnsavedData: boolean;
   hasAddPermission: boolean;
   onAdd: () => void;
@@ -13,7 +13,7 @@ interface TableFooterProps {
  * 表格底部组件
  */
 const TableFooter: React.FC<TableFooterProps> = ({ menu, hasUnsavedData, hasAddPermission, onAdd }) => {
-  const hasMenuData = !!menu?.id;
+  const hasMenuData = !!(menu && menu.id !== undefined);
 
   let buttonText = '添加一行';
   let buttonType: 'dashed' | 'default' = 'dashed';

@@ -81,7 +81,7 @@ const Menu: React.FC = () => {
           {/* 菜单详情 */}
           <MenuDetail menu={current} openModal={openModal} onDeleteMenu={deleteMenu} onCopyMenu={handleCopyMenu} />
           {/* 菜单接口权限列表 */}
-          <MenuInterfacePermission menu={current || undefined} />
+          <MenuInterfacePermission menu={current} />
         </div>
       </div>
       {/* 菜单信息抽屉 */}

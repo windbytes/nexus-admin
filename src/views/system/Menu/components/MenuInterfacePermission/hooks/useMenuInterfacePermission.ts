@@ -35,7 +35,7 @@ interface ComponentState {
 /**
  * 菜单接口权限管理 Hook
  */
-export const useMenuInterfacePermission = (menu?: MenuModel) => {
+export const useMenuInterfacePermission = (menu: MenuModel | null) => {
   const { modal } = App.useApp();
   const queryClient = useQueryClient();
 
@@ -62,7 +62,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
   } = useQuery({
     queryKey: ['menu-interface-permission', menu?.id, state.pagination.current, state.pagination.pageSize],
     queryFn: async () => {
-      if (!menu?.id) {
+      if (!menu || menu.id === undefined) {
         return { records: [], totalRow: 0, pageNumber: 1, pageSize: 10, totalPage: 0 };
       }
       const response = await menuService.queryInterfacePermissions({
@@ -72,7 +72,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
       });
       return response;
     },
-    enabled: !!menu?.id,
+    enabled: menu != null,
   });
 
   // 保存接口权限的mutation
@@ -81,7 +81,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
       switch (data.type) {
         case 'create':
           return await menuService.createInterfacePermission({
-            menuId: menu?.id || '',
+            menuId: menu?.id ?? '',
             code: data.permission.code,
             remark: data.permission.remark,
             path: data.permission.path,
@@ -105,7 +105,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['menu-interface-permission', menu?.id, state.pagination.current, state.pagination.pageSize],
+        queryKey: ['menu-interface-permission', menu?.id ?? '', state.pagination.current, state.pagination.pageSize],
       });
     },
   });
@@ -118,6 +118,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
         permissionList: initialData.records,
         nextId: initialData.records.length + 1,
         pagination: {
+          ...prev.pagination,
           total: initialData.totalRow,
           totalPage: initialData.totalPage,
         },
@@ -195,6 +196,7 @@ export const useMenuInterfacePermission = (menu?: MenuModel) => {
       method: 'GET',
       name: '',
       menuName: '',
+      menuId: '',
     };
 
     updateState({
