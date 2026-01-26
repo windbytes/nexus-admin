@@ -135,10 +135,12 @@ export default defineConfig(({ mode }) => {
     // 服务器配置以及代理
     server: {
       port: 8000,
+      host: true,
       proxy: {
         '/api': {
           target: 'http://localhost:9193',
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
