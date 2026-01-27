@@ -84,6 +84,26 @@ export const useMenuActions = ({ currentRow, onSuccess }: UseMenuActionsProps) =
     deleteMenuMutation.mutate(id);
   };
 
+  // 批量删除菜单
+  const deleteMenuBatchMutation = useMutation({
+    mutationFn: (ids: string[]) => menuService.deleteMenuBatch(ids),
+    onSuccess: () => {
+      message.success('批量删除菜单成功！');
+      onSuccess?.();
+    },
+    onError: (error) => {
+      modal.error({
+        title: '批量删除菜单失败',
+        content: `批量删除菜单时发生错误：${error.message || '未知错误'}。请检查菜单状态或联系技术支持。`,
+      });
+    },
+  });
+
+  // 批量删除菜单
+  const deleteMenuBatch = (ids: string[]) => {
+    deleteMenuBatchMutation.mutate(ids);
+  };
+
   // 处理模态框确认
   const handleModalSave = (values: Partial<MenuModel>) => {
     if (currentRow?.id) {
@@ -97,6 +117,7 @@ export const useMenuActions = ({ currentRow, onSuccess }: UseMenuActionsProps) =
     handleModalSave,
     updateMenuStatus,
     deleteMenu,
+    deleteMenuBatch,
   };
 };
 

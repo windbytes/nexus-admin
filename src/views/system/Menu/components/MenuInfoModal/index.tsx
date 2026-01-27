@@ -1,9 +1,9 @@
-import { CloseOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Drawer, Form, type InputRef, type RadioChangeEvent, Space, Switch } from 'antd';
+import { Button, Form, type InputRef, type RadioChangeEvent, Space, Switch } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import DragModal from '@/components/modal/DragModal';
 import { menuService } from '@/services/system/menu/menuApi';
 import type { MenuModel } from '@/services/system/menu/type';
 import { addIcon } from '@/utils/optimized-icons';
@@ -63,13 +63,10 @@ export type MenuInfoDrawerProps = {
   onOk: (menu: Partial<MenuModel>) => void;
 };
 
-// 静态样式对象，避免重复创建
-const DRAWER_CLASSNAMES = { footer: 'flex justify-end' };
-
 /**
- * 菜单信息抽屉
+ * 菜单信息弹窗（可拖拽）
  */
-const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose, menu, copiedMenuData, onOk }) => {
+const MenuInfoModal: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose, menu, copiedMenuData, onOk }) => {
   const [form] = Form.useForm();
   const nameRef = useRef<InputRef | null>(null);
   const { t } = useTranslation();
@@ -223,28 +220,45 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
   // 关闭处理
   const handleClose = () => onClose();
 
+  // 判断是否为查看模式
+  const isViewMode = operation === 'view';
+
   return (
-    <Drawer
-      title={`${menu ? '编辑' : '新增'}菜单`}
+    <DragModal
+      title={isViewMode ? '查看菜单' : `${menu ? '编辑' : '新增'}菜单`}
       open={open}
-      size={800}
-      onClose={handleClose}
-      classNames={DRAWER_CLASSNAMES}
-      closeIcon={false}
-      extra={<Button type="text" icon={<CloseOutlined />} onClick={handleClose} />}
+      width={800}
+      centered
+      onCancel={handleClose}
       afterOpenChange={handleAfterOpenChange}
+      destroyOnClose
       footer={
-        <Space>
-          <Button type="default" onClick={handleClose}>
-            取消
-          </Button>
-          <Button type="primary" onClick={onSubmit}>
-            确定
-          </Button>
-        </Space>
+        isViewMode ? (
+          <Space>
+            <Button type="default" onClick={handleClose}>
+              关闭
+            </Button>
+          </Space>
+        ) : (
+          <Space>
+            <Button type="default" onClick={handleClose}>
+              取消
+            </Button>
+            <Button type="primary" onClick={onSubmit}>
+              确定
+            </Button>
+          </Space>
+        )
       }
+      styles={{
+        body: {
+          maxHeight: '70vh',
+          overflowY: 'auto',
+          paddingRight: '8px',
+        },
+      }}
     >
-      <Form form={form} labelCol={{ span: 4 }}>
+      <Form form={form} labelCol={{ span: 4 }} disabled={isViewMode}>
         <BasicInfoForm
           menuType={menuType}
           nameRef={nameRef}
@@ -254,11 +268,11 @@ const MenuInfoDrawer: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClos
         />
         <RouteInfoForm menuType={menuType} onIconSelect={handleIconSelect} showRouteFields={showRouteFields} />
         <Form.Item name="status" label="状态">
-          <Switch checkedChildren="正常" unCheckedChildren="停用" />
+          <Switch checkedChildren="正常" unCheckedChildren="停用" disabled={isViewMode} />
         </Form.Item>
       </Form>
-    </Drawer>
+    </DragModal>
   );
 };
 
-export default MenuInfoDrawer;
+export default MenuInfoModal;
