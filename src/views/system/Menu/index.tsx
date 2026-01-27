@@ -34,10 +34,7 @@ const Menu: React.FC = () => {
   // 选中的行
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   // 查询参数
-  const [searchParams, setSearchParams] = useState<MenuSearchParams>({
-    pageNum: 1,
-    pageSize: 20,
-  });
+  const [searchParams, setSearchParams] = useState<MenuSearchParams>({});
   // 权限列表
   const permissions = useMenuPermissions();
 
@@ -67,18 +64,13 @@ const Menu: React.FC = () => {
 
   // 处理搜索
   const handleSearch = (values: MenuSearchParams) => {
-    const search = {
-      ...values,
-      pageNum: searchParams.pageNum,
-      pageSize: searchParams.pageSize,
-    };
     // 判断参数是否发生变化
-    if (isEqual(search, searchParams)) {
+    if (isEqual(values, searchParams)) {
       // 参数没有变化，手动刷新数据
       refetch();
       return;
     }
-    setSearchParams((prev: MenuSearchParams) => ({ ...prev, ...search }));
+    setSearchParams((prev: MenuSearchParams) => ({ ...prev, ...values }));
   };
 
   // 处理行选择变化
@@ -158,6 +150,7 @@ const Menu: React.FC = () => {
           onRefresh={refetch}
           rowSelection={{
             type: 'checkbox' as const,
+            checkStrictly: false,
             selectedRowKeys,
             onChange: handleSelectionChange,
           }}
@@ -170,6 +163,7 @@ const Menu: React.FC = () => {
             onDoubleClick: () => handleOpenDetail(record),
           })}
           bordered
+          pagination={false}
           cardClassNames={{
             root: 'grow min-h-0 flex flex-col',
             body: 'flex grow',

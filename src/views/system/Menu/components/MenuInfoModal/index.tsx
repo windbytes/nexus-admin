@@ -231,7 +231,7 @@ const MenuInfoModal: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose
       centered
       onCancel={handleClose}
       afterOpenChange={handleAfterOpenChange}
-      destroyOnClose
+      destroyOnHidden
       footer={
         isViewMode ? (
           <Space>
