@@ -1,8 +1,6 @@
-import * as Icons from '@ant-design/icons';
-import React from 'react';
-import { MyIcon } from '@/components/MyIcon/index';
 import type { RouteItem } from '@/types/route';
 import { isObject } from './is';
+import { getIcon as getOptimizedIcon } from './optimized-icons';
 
 export type MenuEntity = RouteItem & {
   id: string;
@@ -69,30 +67,12 @@ export const searchRoute = (path: string, routes: RouteItem[] = []): RouteItem |
   return null;
 };
 
-// 动态渲染 Icon 图标(目前使用antd的图标库和自定义的图标库-iconfont)
-const customIcons: { [key: string]: any } = Icons;
-
 /**
  * 图标库
  * @param name 图表名
  */
 export const getIcon = (name: string | undefined | null) => {
-  if (name && name.indexOf('nexus') > -1) {
-    return <MyIcon type={`${name}`} />;
-  }
-  return addIcon(name);
-};
-
-/**
- * 使用antd的图标库
- * @param name 图标名
- * @returns
- */
-export const addIcon = (name: string | undefined | null) => {
-  if (!name || !customIcons[name]) {
-    return null;
-  }
-  return React.createElement(customIcons[name]);
+  return getOptimizedIcon(name);
 };
 
 /**
@@ -184,7 +164,7 @@ export function matchPathname(routeDef: string, currentPath: string, exact = tru
     }
 
     // 处理动态参数 ($userId)
-    if (routeSegment && routeSegment.startsWith('$')) {
+    if (routeSegment?.startsWith('$')) {
       continue; // 只要该位置有值，就视为匹配
     }
 

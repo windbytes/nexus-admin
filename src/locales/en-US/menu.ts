@@ -36,6 +36,8 @@ const menu = {
   system: {
     main: 'System',
     menu: 'Menu',
+    button: 'Button',
+    api: 'API',
     role: 'Role',
     user: 'User',
     dict: 'Dictionary',

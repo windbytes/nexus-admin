@@ -68,7 +68,7 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect, s
       )}
       <Form.Item label="菜单图标">
         <Space.Compact className="w-full">
-          <Form.Item name="originalIcon" noStyle>
+          <Form.Item name="icon" noStyle>
             <Input allowClear placeholder="请选择菜单图标" autoComplete="off" />
           </Form.Item>
           <Dropdown

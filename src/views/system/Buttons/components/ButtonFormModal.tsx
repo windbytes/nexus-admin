@@ -17,13 +17,7 @@ export interface ButtonFormModalProps {
 /**
  * 页面按钮新增/编辑弹窗
  */
-const ButtonFormModal: React.FC<ButtonFormModalProps> = ({
-  open,
-  menuId,
-  record,
-  onOk,
-  onClose,
-}) => {
+const ButtonFormModal: React.FC<ButtonFormModalProps> = ({ open, menuId, record, onOk, onClose }) => {
   const [form] = Form.useForm();
   const isEdit = !!record?.id;
 
@@ -84,7 +78,7 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({
       centered
       onCancel={onClose}
       afterOpenChange={handleAfterOpenChange}
-      destroyOnClose
+      destroyOnHidden
       footer={
         <Space>
           <Button onClick={onClose}>取消</Button>
@@ -104,21 +98,30 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({
         <Form.Item
           name="code"
           label="按钮编码"
-          rules={[{ required: true, message: '请输入按钮编码' }, { max: 50, message: '最多50个字符' }]}
+          rules={[
+            { required: true, message: '请输入按钮编码' },
+            { max: 50, message: '最多50个字符' },
+          ]}
         >
           <Input placeholder="唯一编码，如 add、edit、delete" maxLength={50} showCount disabled={isEdit} />
         </Form.Item>
         <Form.Item
           name="name"
           label="按钮名称"
-          rules={[{ required: true, message: '请输入按钮名称' }, { max: 100, message: '最多100个字符' }]}
+          rules={[
+            { required: true, message: '请输入按钮名称' },
+            { max: 100, message: '最多100个字符' },
+          ]}
         >
           <Input placeholder="展示用名称" maxLength={100} showCount />
         </Form.Item>
         <Form.Item
           name="permCode"
           label="权限标识"
-          rules={[{ required: true, message: '请输入权限标识' }, { max: 32, message: '最多32个字符' }]}
+          rules={[
+            { required: true, message: '请输入权限标识' },
+            { max: 32, message: '最多32个字符' },
+          ]}
         >
           <Input placeholder="与权限表一致，唯一" maxLength={32} showCount />
         </Form.Item>

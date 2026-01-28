@@ -1,6 +1,6 @@
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App, Empty } from 'antd';
+import { App } from 'antd';
 import type { Key } from 'react';
 import { useState } from 'react';
 import ProTable from '@/components/ProTable';
@@ -34,10 +34,7 @@ const Buttons: React.FC = () => {
     refetch: refetchButtons,
   } = useQuery({
     queryKey: ['sys_page_button', selectedMenuId],
-    queryFn: () =>
-      selectedMenuId
-        ? pageButtonService.queryByMenuId({ menuId: selectedMenuId })
-        : Promise.resolve([]),
+    queryFn: () => (selectedMenuId ? pageButtonService.queryByMenuId({ menuId: selectedMenuId }) : Promise.resolve([])),
     enabled: !!selectedMenuId,
   });
 
@@ -57,6 +54,7 @@ const Buttons: React.FC = () => {
   const columns = useButtonTableColumns({
     openModal,
     onSuccess: () => refetchButtons(),
+    actionsDisabled: !selectedMenuId,
   });
 
   const handleMenuSelect = (menuId: string | null) => {
@@ -81,13 +79,18 @@ const Buttons: React.FC = () => {
     });
   };
 
-  const rightContent = selectedMenuId ? (
+  const rightContent = (
     <ProTable<PageButtonModel>
       title="按钮列表"
       columns={columns}
       dataSource={sortedButtonList}
       loading={buttonLoading}
       rowKey="id"
+      locale={
+        selectedMenuId
+          ? undefined
+          : { emptyText: '请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）' }
+      }
       actionButtons={
         <TableActionButtons
           selectedMenuId={selectedMenuId}
@@ -115,23 +118,14 @@ const Buttons: React.FC = () => {
         },
       }}
     />
-  ) : (
-    <div className="flex-1 flex items-center justify-center border border-gray-200 rounded bg-gray-50/50">
-      <Empty description="请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）" />
-    </div>
   );
 
   return (
-    <div className="h-full flex flex-col gap-2">
-      <div className="flex gap-4 flex-1 min-h-0">
-        <MenuTreePanel
-          menuList={menuList}
-          loading={menuLoading}
-          onSelect={handleMenuSelect}
-        />
+    <>
+      <div className="h-full flex gap-2">
+        <MenuTreePanel menuList={menuList} loading={menuLoading} onSelect={handleMenuSelect} />
         <div className="flex-1 min-w-0 flex flex-col">{rightContent}</div>
       </div>
-
       <ButtonFormModal
         open={modalName === 'add' || modalName === 'edit'}
         menuId={selectedMenuId}
@@ -139,7 +133,7 @@ const Buttons: React.FC = () => {
         onOk={handleModalSave}
         onClose={closeModal}
       />
-    </div>
+    </>
   );
 };
 

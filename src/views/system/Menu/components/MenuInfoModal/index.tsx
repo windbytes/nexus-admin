@@ -172,7 +172,7 @@ const MenuInfoModal: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose
       const formData: Partial<MenuModel> = {
         ...values,
         status: Boolean(values.status),
-        icon: values.originalIcon,
+        leaf: values.route,
         routeQuery: values.routeQuery ? values.routeQuery : [],
       };
       onOk(formData);

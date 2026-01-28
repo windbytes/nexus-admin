@@ -27,13 +27,7 @@ export interface ApiFormModalProps {
 /**
  * 系统接口新增/编辑弹窗
  */
-const ApiFormModal: React.FC<ApiFormModalProps> = ({
-  open,
-  menuId,
-  record,
-  onOk,
-  onClose,
-}) => {
+const ApiFormModal: React.FC<ApiFormModalProps> = ({ open, menuId, record, onOk, onClose }) => {
   const [form] = Form.useForm();
   const isEdit = !!record?.id;
 
@@ -98,7 +92,7 @@ const ApiFormModal: React.FC<ApiFormModalProps> = ({
       centered
       onCancel={onClose}
       afterOpenChange={handleAfterOpenChange}
-      destroyOnClose
+      destroyOnHidden
       footer={
         <Space>
           <Button onClick={onClose}>取消</Button>
@@ -118,36 +112,30 @@ const ApiFormModal: React.FC<ApiFormModalProps> = ({
         <Form.Item
           name="name"
           label="接口名称"
-          rules={[{ required: true, message: '请输入接口名称' }, { max: 64, message: '最多64个字符' }]}
+          rules={[
+            { required: true, message: '请输入接口名称' },
+            { max: 64, message: '最多64个字符' },
+          ]}
         >
           <Input placeholder="如：新增用户" maxLength={64} showCount />
         </Form.Item>
         <Form.Item
           name="path"
           label="接口路径"
-          rules={[{ required: true, message: '请输入接口路径' }, { max: 200, message: '最多200个字符' }]}
+          rules={[
+            { required: true, message: '请输入接口路径' },
+            { max: 200, message: '最多200个字符' },
+          ]}
         >
           <Input placeholder="如：/sys/user/addUser" maxLength={200} showCount />
         </Form.Item>
-        <Form.Item
-          name="method"
-          label="请求方法"
-          rules={[{ required: true, message: '请选择请求方法' }]}
-        >
+        <Form.Item name="method" label="请求方法" rules={[{ required: true, message: '请选择请求方法' }]}>
           <Select options={METHOD_OPTIONS} placeholder="GET / POST / PUT / DELETE 等" allowClear={false} />
         </Form.Item>
-        <Form.Item
-          name="permCode"
-          label="权限标识"
-          rules={[{ max: 32, message: '最多32个字符' }]}
-        >
+        <Form.Item name="permCode" label="权限标识" rules={[{ max: 32, message: '最多32个字符' }]}>
           <Input placeholder="对应 t_sys_permission.permission_code，可选" maxLength={32} showCount />
         </Form.Item>
-        <Form.Item
-          name="remark"
-          label="描述"
-          rules={[{ max: 64, message: '最多64个字符' }]}
-        >
+        <Form.Item name="remark" label="描述" rules={[{ max: 64, message: '最多64个字符' }]}>
           <Input.TextArea placeholder="接口说明" maxLength={64} showCount rows={2} />
         </Form.Item>
         <Form.Item name="isPublic" label="是否公开" valuePropName="checked" initialValue={false}>

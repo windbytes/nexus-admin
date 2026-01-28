@@ -7,13 +7,15 @@ import { getMethodColor } from '../constants';
 interface UseApiTableColumnOptions {
   onEdit: (record: ApiModel) => void;
   onDelete: (record: ApiModel) => void;
+  /** 未选菜单时禁用操作列按钮 */
+  actionsDisabled?: boolean;
 }
 
 /**
  * 系统接口表格列配置
  */
 export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsType<ApiModel> {
-  const { onEdit, onDelete } = options;
+  const { onEdit, onDelete, actionsDisabled = false } = options;
 
   return [
     { title: '接口名称', dataIndex: 'name', key: 'name', width: 160, ellipsis: true },
@@ -48,10 +50,21 @@ export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsTyp
       fixed: 'right',
       render: (_: unknown, record: ApiModel) => (
         <div className="flex gap-1">
-          <Button type="link" size="small" onClick={() => onEdit(record)}>
+          <Button
+            type="link"
+            size="small"
+            disabled={actionsDisabled}
+            onClick={() => onEdit(record)}
+          >
             编辑
           </Button>
-          <Button type="link" size="small" danger onClick={() => onDelete(record)}>
+          <Button
+            type="link"
+            size="small"
+            danger
+            disabled={actionsDisabled}
+            onClick={() => onDelete(record)}
+          >
             删除
           </Button>
         </div>

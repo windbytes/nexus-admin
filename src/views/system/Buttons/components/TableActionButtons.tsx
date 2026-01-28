@@ -30,20 +30,27 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     onAdd();
   };
 
+  const actionsDisabled = !selectedMenuId;
+
   return (
     <div className="flex gap-2">
-      <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={handleAdd}
+        disabled={actionsDisabled}
+      >
         新增
       </Button>
       <Button
         danger
         icon={<DeleteOutlined />}
         onClick={onBatchDelete}
-        disabled={selectedRowKeys.length === 0}
+        disabled={actionsDisabled || selectedRowKeys.length === 0}
       >
         批量删除
       </Button>
-      <Button icon={<ReloadOutlined />} onClick={onRefresh}>
+      <Button icon={<ReloadOutlined />} onClick={onRefresh} disabled={actionsDisabled}>
         刷新
       </Button>
     </div>

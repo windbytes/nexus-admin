@@ -22,7 +22,6 @@ export const useMenuActions = ({ currentRow, onSuccess }: UseMenuActionsProps) =
   const createMenuMutation = useMutation({
     mutationFn: (values: Partial<MenuModel>) => menuService.addMenu(values),
     onSuccess: () => {
-      message.success('新增菜单成功');
       onSuccess?.();
     },
     onError: (error) => {
@@ -42,7 +41,6 @@ export const useMenuActions = ({ currentRow, onSuccess }: UseMenuActionsProps) =
       return menuService.updateMenu({ id: currentRow.id, ...values });
     },
     onSuccess: () => {
-      message.success('修改菜单成功');
       onSuccess?.();
     },
     onError: (error) => {
@@ -120,4 +118,3 @@ export const useMenuActions = ({ currentRow, onSuccess }: UseMenuActionsProps) =
     deleteMenuBatch,
   };
 };
-

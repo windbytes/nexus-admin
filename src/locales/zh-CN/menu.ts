@@ -36,6 +36,8 @@ const menu = {
   system: {
     main: '系统管理',
     menu: '菜单管理',
+    button: '按钮管理',
+    api: '接口管理',
     role: '角色维护',
     user: '用户管理',
     dict: '数据字典',

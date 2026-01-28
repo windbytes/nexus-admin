@@ -8,6 +8,8 @@ import { useButtonActions } from './useButtonActions';
 interface UseButtonTableColumnsProps {
   openModal: (name: ButtonModalType, record?: Partial<PageButtonModel>) => void;
   onSuccess?: () => void;
+  /** 未选菜单时禁用操作列按钮 */
+  actionsDisabled?: boolean;
 }
 
 /**
@@ -15,7 +17,7 @@ interface UseButtonTableColumnsProps {
  */
 export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
   const { modal } = App.useApp();
-  const { openModal, onSuccess } = props;
+  const { openModal, onSuccess, actionsDisabled = false } = props;
   const { deleteButton, toggleStatus } = useButtonActions({ currentRow: null, onSuccess });
 
   const columns: ColumnsType<PageButtonModel> = [
@@ -40,6 +42,7 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
           checked={!!record.status}
           checkedChildren="启用"
           unCheckedChildren="禁用"
+          disabled={actionsDisabled}
           onChange={(checked) => toggleStatus(record.id, checked)}
         />
       ),
@@ -51,13 +54,19 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
       fixed: 'right',
       render: (_: unknown, record: PageButtonModel) => (
         <div className="flex gap-1">
-          <Button type="link" size="small" onClick={() => openModal('edit', record)}>
+          <Button
+            type="link"
+            size="small"
+            disabled={actionsDisabled}
+            onClick={() => openModal('edit', record)}
+          >
             编辑
           </Button>
           <Button
             type="link"
             size="small"
             danger
+            disabled={actionsDisabled}
             onClick={() => {
               modal.confirm({
                 title: '删除按钮',

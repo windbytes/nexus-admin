@@ -1,8 +1,8 @@
-import ProTable from '@/components/ProTable';
-import { Empty } from 'antd';
-import type { ApiModel } from '@/services/system/api/type';
 import type { Key } from 'react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import ProTable from '@/components/ProTable';
+import type { ApiModel } from '@/services/system/api/type';
 import ApiFormModal from './components/ApiFormModal';
 import MenuTree from './components/MenuTree';
 import TableActionButtons from './components/TableActionButtons';
@@ -29,9 +29,13 @@ const Apis: React.FC = () => {
     closeForm,
     refetchApis,
   });
-
-  const menuTreeData = useMenuTreeData(menuList);
-  const columns = useApiTableColumn({ onEdit: openForm, onDelete: handleDelete });
+  const { t } = useTranslation();
+  const menuTreeData = useMenuTreeData(menuList, t);
+  const columns = useApiTableColumn({
+    onEdit: openForm,
+    onDelete: handleDelete,
+    actionsDisabled: !selectedMenuId,
+  });
 
   const sortedApiList = [...apiList].sort((a, b) => (a.path ?? '').localeCompare(b.path ?? ''));
 
@@ -40,15 +44,17 @@ const Apis: React.FC = () => {
     setSelectedRowKeys([]);
   };
 
-  const rightContent = selectedMenuId ? (
+  const rightContent = (
     <ProTable<ApiModel>
       title="接口列表"
       columns={columns}
       dataSource={sortedApiList}
       loading={apiLoading}
       rowKey="id"
+      locale={selectedMenuId ? undefined : { emptyText: '请先在左侧选择要配置接口的菜单（仅叶子/可点击页面）' }}
       actionButtons={
         <TableActionButtons
+          selectedMenuId={selectedMenuId}
           onAdd={handleAdd}
           onBatchDelete={handleBatchDelete}
           onRefresh={refetchApis}
@@ -73,20 +79,12 @@ const Apis: React.FC = () => {
         },
       }}
     />
-  ) : (
-    <div className="flex-1 flex items-center justify-center border border-gray-200 rounded bg-gray-50/50">
-      <Empty description="请先在左侧选择要配置接口的菜单（仅叶子/可点击页面）" />
-    </div>
   );
 
   return (
     <div className="h-full flex flex-col gap-2">
       <div className="flex gap-4 flex-1 min-h-0">
-        <MenuTree
-          treeData={menuTreeData}
-          loading={menuLoading}
-          onSelect={onMenuSelect}
-        />
+        <MenuTree treeData={menuTreeData} loading={menuLoading} onSelect={onMenuSelect} />
         <div className="flex-1 min-w-0 flex flex-col">{rightContent}</div>
       </div>
 

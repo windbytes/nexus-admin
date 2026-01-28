@@ -21,6 +21,9 @@ import styles from './login.module.css';
 
 const { Text } = Typography;
 
+/** 本地存储「记住我」用户名的 key */
+const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
+
 /**
  * 登录模块
  * @returns 组件内容
@@ -55,6 +58,18 @@ const Login: React.FC = () => {
   useEffect(() => {
     setIsAnimating(true);
   }, []);
+
+  // 页面加载时：若本地存在已记住的用户名，回填并勾选「记住我」
+  useEffect(() => {
+    try {
+      const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+      if (savedUsername?.trim()) {
+        form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+      }
+    } catch {
+      // 忽略本地存储不可用等情况
+    }
+  }, [form]);
 
   /**
    * 处理角色选择
@@ -200,6 +215,13 @@ const Login: React.FC = () => {
         // 登录成功
         case HttpCodeEnum.SUCCESS:
           {
+            // 根据「记住我」勾选状态，写入或清除本地用户名
+            if (values.remember) {
+              localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username);
+            } else {
+              localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+            }
+
             // 保存登录数据
             loginData.current = loginResponse;
 
