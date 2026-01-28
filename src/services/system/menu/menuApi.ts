@@ -125,16 +125,6 @@ const MenuApi = {
   importMenus: '/system/menu/import',
   // 验证菜单权限
   checkPermission: '/system/menu/checkPermission',
-  // 查询菜单接口权限列表
-  queryInterfacePermissions: '/system/menuInterface/getMenuInterfacesByMenuId',
-  // 创建菜单接口权限
-  createInterfacePermission: '/system/menuInterface/addMenuInterface',
-  // 更新菜单接口权限
-  updateInterfacePermission: '/system/menuInterface/updateMenuInterface',
-  // 删除菜单接口权限
-  deleteInterfacePermission: '/system/menuInterface/deleteMenuInterface',
-  // 批量删除菜单接口权限
-  batchDeleteInterfacePermissions: '/system/menuInterface/deleteMenuInterfaceBatch',
 };
 
 /**
@@ -227,45 +217,6 @@ interface IMenuService {
    * @returns 验证结果
    */
   checkPermission(menuId: string): Promise<boolean>;
-
-  /**
-   * 查询菜单接口权限列表
-   * @param params 查询参数
-   * @returns 接口权限列表
-   */
-  queryInterfacePermissions(params: QueryInterfacePermissionRequest): Promise<QueryInterfacePermissionResponse>;
-
-  /**
-   * 创建菜单接口权限
-   * @param data 创建参数
-   * @returns 创建结果
-   */
-  createInterfacePermission(
-    data: CreateInterfacePermissionRequest
-  ): Promise<{ success: boolean; data?: InterfacePermission }>;
-
-  /**
-   * 更新菜单接口权限
-   * @param data 更新参数
-   * @returns 更新结果
-   */
-  updateInterfacePermission(
-    data: UpdateInterfacePermissionRequest
-  ): Promise<{ success: boolean; data?: InterfacePermission }>;
-
-  /**
-   * 删除菜单接口权限
-   * @param id 权限ID
-   * @returns 删除结果
-   */
-  deleteInterfacePermission(id: string): Promise<boolean>;
-
-  /**
-   * 批量删除菜单接口权限
-   * @param ids 权限ID数组
-   * @returns 删除结果
-   */
-  batchDeleteInterfacePermissions(ids: string[]): Promise<boolean>;
 }
 
 /**
@@ -421,73 +372,6 @@ export const menuService: IMenuService = {
     return HttpRequest.post({
       url: MenuApi.checkPermission,
       data: { menuId },
-    });
-  },
-
-  /**
-   * 查询菜单接口权限列表
-   * @param params 查询参数
-   * @returns 接口权限列表
-   */
-  queryInterfacePermissions(params: QueryInterfacePermissionRequest): Promise<QueryInterfacePermissionResponse> {
-    return HttpRequest.get<QueryInterfacePermissionResponse>(
-      {
-        url: MenuApi.queryInterfacePermissions,
-        params,
-      },
-      { successMessageMode: 'none' }
-    );
-  },
-
-  /**
-   * 创建菜单接口权限
-   * @param data 创建参数
-   * @returns 创建结果
-   */
-  createInterfacePermission(
-    data: CreateInterfacePermissionRequest
-  ): Promise<{ success: boolean; data?: InterfacePermission }> {
-    return HttpRequest.post<{ success: boolean; data?: InterfacePermission }>({
-      url: MenuApi.createInterfacePermission,
-      data,
-    });
-  },
-
-  /**
-   * 更新菜单接口权限
-   * @param data 更新参数
-   * @returns 更新结果
-   */
-  updateInterfacePermission(
-    data: UpdateInterfacePermissionRequest
-  ): Promise<{ success: boolean; data?: InterfacePermission }> {
-    return HttpRequest.post<{ success: boolean; data?: InterfacePermission }>({
-      url: MenuApi.updateInterfacePermission,
-      data,
-    });
-  },
-
-  /**
-   * 删除菜单接口权限
-   * @param id 权限ID
-   * @returns 删除结果
-   */
-  deleteInterfacePermission(id: string): Promise<boolean> {
-    return HttpRequest.delete<boolean>({
-      url: MenuApi.deleteInterfacePermission,
-      params: { id },
-    });
-  },
-
-  /**
-   * 批量删除菜单接口权限
-   * @param ids 权限ID数组
-   * @returns 删除结果
-   */
-  batchDeleteInterfacePermissions(ids: string[]): Promise<boolean> {
-    return HttpRequest.delete<boolean>({
-      url: MenuApi.batchDeleteInterfacePermissions,
-      data: { ids },
     });
   },
 };

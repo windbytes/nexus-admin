@@ -1,4 +1,4 @@
-import { Button, Form, Input, InputNumber, Space, Switch } from 'antd';
+import { Form, Input, InputNumber, Switch } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
 import DragModal from '@/components/modal/DragModal';
@@ -79,16 +79,9 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({ open, menuId, record,
       onCancel={onClose}
       afterOpenChange={handleAfterOpenChange}
       destroyOnHidden
-      footer={
-        <Space>
-          <Button onClick={onClose}>取消</Button>
-          <Button type="primary" onClick={handleSubmit}>
-            确定
-          </Button>
-        </Space>
-      }
+      onOk={handleSubmit}
     >
-      <Form form={form} layout="vertical" labelCol={{ span: 24 }}>
+      <Form form={form} labelCol={{ span: 4 }}>
         <Form.Item name="id" hidden>
           <input type="hidden" />
         </Form.Item>
