@@ -288,7 +288,7 @@ export const roleService: IRoleService = {
    * @returns 结果
    */
   async changeStatus(params: Partial<RoleModel>): Promise<boolean> {
-    return await HttpRequest.patch({
+    return await HttpRequest.post({
       url: RoleApi.changeStatus,
       data: params,
     });
