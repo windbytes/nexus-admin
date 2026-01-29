@@ -46,19 +46,13 @@ const Console: React.FC = () => {
   return (
     <DragModal
       open={open}
-      wrapClassName="ant-modal-wrap-console"
+      classNames={{
+        wrapper: 'position-unset!',
+        container: 'absolute! top-14! right-[26px]! z-1000!',
+        body: 'h-[calc(100vh-160px)]! border-1! border-solid! border-gray-200! p-2! rounded-md! bg-aliceblue!',
+      }}
       title="监控台（Esc关闭）"
       width={380}
-      style={{ top: 60, right: 26, position: 'absolute', zIndex: 1000 }}
-      styles={{
-        body: {
-          height: 'calc(100vh - 160px)',
-          border: '1px solid #ccc',
-          padding: '10px',
-          borderRadius: '6px',
-          backgroundColor: 'aliceblue',
-        },
-      }}
       footer={null}
       onCancel={() => setOpen(false)}
     >

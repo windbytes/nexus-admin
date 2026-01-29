@@ -1,9 +1,9 @@
-import type React from 'react';
-import { Card, Alert, Typography, List, Button, Spin, Row, Col, Tag, App } from 'antd';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import type { WorkflowVersion } from '@/services/integrated/version/model';
+import { Alert, App, Button, Card, Col, List, Row, Spin, Tag, Typography } from 'antd';
+import type React from 'react';
 import DragModal from '@/components/modal/DragModal';
-import { useVersionImpact, usePublishVersionWithParams } from './useVersionQueries';
+import type { WorkflowVersion } from '@/services/integrated/version/model';
+import { usePublishVersionWithParams, useVersionImpact } from './useVersionQueries';
 
 const { Title, Text } = Typography;
 
@@ -26,7 +26,7 @@ const ReleaseConfirmation: React.FC<ReleaseConfirmationProps> = ({ visible, onCl
   // 使用 React Query 获取版本影响评估
   const {
     data: impactAssessment,
-    isLoading: impactLoading,
+    isFetching: impactLoading,
     error: impactError,
   } = useVersionImpact(version?.workflowId || '', version?.id || '', visible && !!version);
 
@@ -34,7 +34,9 @@ const ReleaseConfirmation: React.FC<ReleaseConfirmationProps> = ({ visible, onCl
   const publishVersionMutation = usePublishVersionWithParams();
 
   const handleConfirm = async () => {
-    if (!version) return;
+    if (!version) {
+      return;
+    }
 
     // 检查影响评估是否加载失败
     if (impactError) {
@@ -88,18 +90,22 @@ const ReleaseConfirmation: React.FC<ReleaseConfirmationProps> = ({ visible, onCl
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) {
+      return '0 B';
+    }
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN');
   };
 
-  if (!version) return null;
+  if (!version) {
+    return null;
+  }
 
   // 处理影响评估数据，提供默认值
   const assessmentData = impactAssessment || {

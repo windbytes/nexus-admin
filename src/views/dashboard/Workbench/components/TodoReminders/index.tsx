@@ -1,7 +1,7 @@
-import type React from 'react';
+import { ExclamationCircleOutlined, InfoCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Tag } from 'antd';
-import { WarningOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import type React from 'react';
 import type { TodoReminder } from '../../mockData';
 
 // 模拟获取待办提醒数据的API
@@ -38,7 +38,7 @@ const fetchTodoRemindersData = async (): Promise<TodoReminder[]> => {
 };
 
 export const TodoReminders: React.FC = () => {
-  const { data: todoReminders, isLoading } = useQuery({
+  const { data: todoReminders, isFetching } = useQuery({
     queryKey: ['todoRemindersData'],
     queryFn: fetchTodoRemindersData,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -85,7 +85,7 @@ export const TodoReminders: React.FC = () => {
           return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300';
       }
     }
-    
+
     // 中优先级使用中等深度的背景色
     if (priority === 'medium') {
       switch (type) {
@@ -99,7 +99,7 @@ export const TodoReminders: React.FC = () => {
           return 'bg-gradient-to-r from-gray-25 to-gray-75 border-gray-150 hover:border-gray-250';
       }
     }
-    
+
     // 低优先级使用最浅的背景色
     switch (type) {
       case 'error':
@@ -113,12 +113,12 @@ export const TodoReminders: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((index) => (
           <div key={index} className="animate-pulse">
-            <div className="h-20 bg-gray-200 rounded-lg"></div>
+            <div className="h-20 bg-gray-200 rounded-lg" />
           </div>
         ))}
       </div>
@@ -138,21 +138,16 @@ export const TodoReminders: React.FC = () => {
         >
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center">
-              <div className="p-2 rounded-full bg-white/60 backdrop-blur-sm">
-                {getIcon(item.type)}
-              </div>
+              <div className="p-2 rounded-full bg-white/60 backdrop-blur-sm">{getIcon(item.type)}</div>
               <span className="ml-3 font-semibold text-gray-800 text-sm">{item.title}</span>
             </div>
-            <Tag 
-              color={getPriorityColor(item.priority)}
-              className="font-medium shadow-sm"
-            >
+            <Tag color={getPriorityColor(item.priority)} className="font-medium shadow-sm">
               {item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}
             </Tag>
           </div>
           <div className="text-sm text-gray-700 mb-3 leading-relaxed">{item.description}</div>
           <div className="text-xs text-gray-500 flex items-center">
-            <span className="inline-block w-2 h-2 rounded-full bg-current mr-2 opacity-60"></span>
+            <span className="inline-block w-2 h-2 rounded-full bg-current mr-2 opacity-60" />
             {item.time}
           </div>
         </div>

@@ -1,8 +1,8 @@
 import type {
+  FlowNodeEntity,
   WorkflowNodeJSON as FlowNodeJsonDefault,
   WorkflowNodeRegistry as FlowNodeRegistryDefault,
   FreeLayoutPluginContext,
-  FlowNodeEntity,
   WorkflowEdgeJSON,
   WorkflowNodeMeta,
 } from '@flowgram.ai/free-layout-editor';
@@ -33,6 +33,8 @@ export interface FlowNodeMeta extends WorkflowNodeMeta {
   disableSideBar?: boolean;
   // 是否禁用弹窗（某些节点双击的时候不需要弹窗）
   disableModal?: boolean;
+  // 节点名称
+  name?: string;
 }
 
 /**
@@ -45,7 +47,7 @@ export interface FlowNodeRegistry extends FlowNodeRegistryDefault {
   meta: FlowNodeMeta;
 
   info?: {
-    icon: string;
+    icon: React.ReactNode | string;
     description: string;
   };
   canAdd?: (ctx: FreeLayoutPluginContext) => boolean;

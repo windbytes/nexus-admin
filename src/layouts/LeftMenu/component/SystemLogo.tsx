@@ -1,7 +1,6 @@
-import { memo } from 'react';
+import { Link } from '@tanstack/react-router';
 import { Image } from 'antd';
-import { Link } from 'react-router';
-import logo from '@/assets/images/icon-192.png';
+import logo from '@/assets/icon/web/icon-192.png';
 import { usePreferencesStore } from '@/stores/store';
 
 /**
@@ -17,24 +16,17 @@ const SystemLogo = () => {
           <div className="logo-card-content">
             <div className="logo-container">
               <div className="logo-background">
-                <Image
-                  width={32}
-                  height={32}
-                  className="logo-image"
-                  src={logo}
-                  preview={false}
-                />
+                <Image width={32} height={32} className="logo-image" src={logo} preview={false} />
               </div>
             </div>
             <span className="system-name" style={{ color: colorPrimary }}>
-              Nexus Admin
+              Nexus
             </span>
           </div>
-          <div className="card-glow"></div>
         </section>
       </Link>
     </div>
   );
 };
 
-export default memo(SystemLogo);
+export default SystemLogo;

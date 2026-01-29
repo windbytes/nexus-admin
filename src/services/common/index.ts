@@ -1,5 +1,5 @@
+import type { RouteItem } from '@/types/route';
 import { HttpRequest } from '@/utils/request';
-import type { MenuModel } from '../system/menu/type';
 
 /**
  * 菜单相关接口枚举
@@ -7,15 +7,19 @@ import type { MenuModel } from '../system/menu/type';
 const CommonApi = {
   // 根据token获取菜单（多用于框架上根据角色获取菜单那种）
   getMenuListByRoleId: '/system/menu/getMenusByRole',
+
+  // 获取角色配置的权限点（按钮权限）
+  getButtonPermissionsByRoleId: '/system/permission/getButtonPermissionsByRoleId',
+
   /**
    * 退出登录
    */
-  logout: '/logout',
+  logout: '/auth/logout',
 
   /**
    * 刷新token
    */
-  refreshToken: '/refreshToken',
+  refreshToken: '/auth/refresh',
 };
 
 /**
@@ -27,19 +31,23 @@ interface ICommonService {
    * @param roleId 角色ID
    * @returns 菜单列表
    */
-  getMenuListByRoleId(roleId: string, token?: string): Promise<MenuModel[]>;
+  getMenuListByRoleId(roleId: string): Promise<RouteItem[]>;
+
+  /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]>;
 
   /**
    * 用户退出登录
-   * @param token 用户token
    */
-  logout(token: string): Promise<boolean>;
+  logout(): Promise<boolean>;
 
   /**
    * 刷新token
-   * @param refreshToken 刷新token
    */
-  refreshToken(refreshToken: string): Promise<string>;
+  refreshToken(): Promise<string>;
 }
 
 /**
@@ -51,36 +59,45 @@ export const commonService: ICommonService = {
    * @param roleId 角色ID
    * @returns 菜单列表
    */
-  getMenuListByRoleId(roleId: string, token?: string): Promise<MenuModel[]> {
+  getMenuListByRoleId(roleId: string): Promise<RouteItem[]> {
     return HttpRequest.get(
       {
         url: CommonApi.getMenuListByRoleId,
         params: { roleId },
         adapter: 'fetch',
       },
-      { successMessageMode: 'none', token },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   * @returns 权限点列表
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]> {
+    return HttpRequest.get(
+      { url: CommonApi.getButtonPermissionsByRoleId, params: { roleId }, adapter: 'fetch' },
+      { successMessageMode: 'none' }
     );
   },
 
   /**
    * 用户退出登录
-   * @param token 用户token
    */
-  logout(token: string): Promise<boolean> {
-    return HttpRequest.post({ url: CommonApi.logout, params: { token } });
+  logout(): Promise<boolean> {
+    return HttpRequest.post({ url: CommonApi.logout }, { successMessageMode: 'none' });
   },
 
   /**
    * 刷新token
-   * @param refreshToken 刷新token
    */
-  refreshToken(refreshToken: string): Promise<string> {
-    return HttpRequest.post(
+  refreshToken(): Promise<string> {
+    return HttpRequest.post<string>(
       {
         url: CommonApi.refreshToken,
-        data: { refreshToken },
       },
-      { successMessageMode: 'none', skipAuthInterceptor: true },
+      { successMessageMode: 'none', skipAuthInterceptor: true }
     );
   },
 };

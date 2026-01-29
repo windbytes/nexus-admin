@@ -1,23 +1,21 @@
-import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SolutionOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SearchOutlined, SolutionOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-
 import { useDebounceFn } from 'ahooks';
-import { Segmented, type SegmentedProps, Input, type InputRef, Checkbox, Spin } from 'antd';
+import { Button, Checkbox, Input, type InputRef, Segmented, type SegmentedProps, Space, Spin } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TagManagementModal from '@/components/base/tag-management';
 import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
+import { BubbleLoading } from '@/components/icons';
 import { usePermission } from '@/hooks/usePermission';
-import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
 import type { App, AppSearchParams } from '@/services/integrated/apps/app';
 import { appsService } from '@/services/integrated/apps/appsApi';
 import { useTagStore } from '@/stores/useTagStore.ts';
+import CreateAppCard from '@/views/integrated/Apps/NewAppCard.tsx';
 import AppCard from './AppCard';
 import './apps.scss';
-import { Icon } from '@iconify-icon/react';
-const { Search } = Input;
 /**
  * 应用设计
  */
@@ -68,7 +66,7 @@ const Apps: React.FC = () => {
   const {
     data: result,
     refetch,
-    isLoading,
+    isFetching,
   } = useQuery({
     queryKey: ['integrated_app', searchParams],
     queryFn: () => appsService.getApps(searchParams),
@@ -78,7 +76,7 @@ const Apps: React.FC = () => {
   const handleSearch = (value: string) => {
     const search = {
       name: value,
-      type: searchParams.type,
+      type: searchParams.type ?? 0,
       pageNum: searchParams.pageNum,
       pageSize: searchParams.pageSize,
     };
@@ -87,7 +85,7 @@ const Apps: React.FC = () => {
       refetch();
       return;
     }
-    setSearchParams((prev) => ({ ...prev, ...search }));
+    setSearchParams((prev) => ({ ...prev, ...search, type: search.type ?? prev.type }));
   };
 
   useEffect(() => {
@@ -127,7 +125,7 @@ const Apps: React.FC = () => {
       // 更新页面应用的检索
       setSearchParams((prev) => ({ ...prev, tags: tagFilterValue }));
     },
-    { wait: 500 },
+    { wait: 500 }
   );
 
   /**
@@ -141,23 +139,33 @@ const Apps: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col h-full pt-2 pr-4 pl-4 bg-[#f5f6f7]">
+      <div className="flex flex-col h-full pt-2 pr-4 pl-4">
         {/* 卡片列表和筛选框 */}
         <div className="mb-[8px]">
           <div className="w-[600px] my-4 mx-auto">
             {/* 检索 */}
-            <Search
-              enterButton
-              allowClear
-              placeholder={t('common.placeholder')}
-              ref={searchRef}
-              size="large"
-              loading={isLoading}
-              onSearch={handleSearch}
-            />
+            <Space.Compact style={{ width: '100%' }}>
+              <Input
+                size="large"
+                ref={searchRef}
+                placeholder={t('common.placeholder')}
+                onPressEnter={(e: React.KeyboardEvent<HTMLInputElement>) => handleSearch(e.currentTarget.value)}
+              />
+              <Button
+                size="large"
+                type="primary"
+                style={{ width: '60px' }}
+                icon={<SearchOutlined />}
+                onClick={() => handleSearch(searchRef.current?.input?.value || '')}
+              />
+            </Space.Compact>
           </div>
           <div className="w-full flex justify-between items-center">
-            <Segmented<number> options={segmentedOptions} onChange={onSegmentedChange} value={searchParams.type} />
+            <Segmented<number>
+              options={segmentedOptions}
+              onChange={onSegmentedChange}
+              value={searchParams.type ?? (0 as number)}
+            />
             <div>
               {/* 区分我创建的、标签页 */}
               <Checkbox onChange={(e) => onCreatedChange(e.target.checked)}>{t('app.createBy')}</Checkbox>
@@ -167,8 +175,8 @@ const Apps: React.FC = () => {
           </div>
         </div>
         {/* 应用列表 */}
-        {isLoading ? (
-          <Spin indicator={<Icon icon="eos-icons:bubble-loading" width={48} />} />
+        {isFetching ? (
+          <Spin indicator={<BubbleLoading width={48} />} />
         ) : (
           <div className="flex-1 overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
             {/* 新建应用卡片 */}

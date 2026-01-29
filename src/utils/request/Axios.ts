@@ -7,9 +7,9 @@ import axios, {
 } from 'axios';
 import { cloneDeep } from 'lodash-es';
 import type { RequestOptions } from '@/types/axios';
+import type { Response } from '@/types/global';
 import { isFunction } from '@/utils/is';
 import type { CreateAxiosOptions } from './transform';
-import type { Response } from '@/types/global';
 
 /**
  * Axios请求封装
@@ -151,5 +151,49 @@ export class RAxios {
    */
   patch<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'PATCH' }, options);
+  }
+
+  /**
+   * 封装post下载文件请求
+   * 用于后端返回ResponseEntity的文件下载场景
+   * 错误响应会在响应拦截器中统一处理
+   * @param config
+   * @param options
+   */
+  postDownload<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    return this.request(
+      {
+        ...config,
+        method: 'POST',
+        responseType: 'blob',
+      },
+      {
+        ...options,
+        isTransformResponse: false,
+        isReturnNativeResponse: false,
+      }
+    );
+  }
+
+  /**
+   * 封装get下载文件请求
+   * 用于后端返回ResponseEntity的文件下载场景
+   * 错误响应会在响应拦截器中统一处理
+   * @param config
+   * @param options
+   */
+  getDownload<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+    return this.request(
+      {
+        ...config,
+        method: 'GET',
+        responseType: 'blob',
+      },
+      {
+        ...options,
+        isTransformResponse: false,
+        isReturnNativeResponse: false,
+      }
+    );
   }
 }

@@ -1,21 +1,28 @@
+import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
 import type React from 'react';
-import { useRef, useState } from 'react';
-import { Button, Checkbox, Col, Form, Image, Input, Row } from 'antd';
-import logo from '@/assets/images/icon-512.png';
-import { LockOutlined, SecurityScanOutlined, UserOutlined } from '@ant-design/icons';
-import styles from './login.module.css';
-import filing from '@/assets/images/filing.png';
-import { useNavigate } from 'react-router';
-import { loginService } from '@/services/login/loginApi';
-// 一些公用的API需要提取出来到api目录下(后续进行更改)
-import { HttpCodeEnum } from '@/enums/httpEnum';
-import { antdUtils } from '@/utils/antdUtil';
-import { useMenuStore } from '@/stores/store';
-import { useQuery } from '@tanstack/react-query';
-import { commonService } from '@/services/common';
-import { useUserStore } from '@/stores/userStore';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import logo from '@/assets/icon/web/icon-512.png';
+import filing from '@/assets/images/filing.png';
+// 一些公用的API需要提取出来到api目录下(后续进行更改)
+import RoleSelector from '@/components/RoleSelector';
+import { HttpCodeEnum } from '@/enums/httpEnum';
+import { commonService } from '@/services/common';
+import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import type { RoleModel } from '@/services/system/role/type';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
+import { useUserStore } from '@/stores/userStore';
+import { antdUtils } from '@/utils/antdUtil';
+import styles from './login.module.css';
+
+const { Text } = Typography;
+
+/** 本地存储「记住我」用户名的 key */
+const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
 
 /**
  * 登录模块
@@ -25,29 +32,153 @@ const Login: React.FC = () => {
   const [form] = Form.useForm();
   const inputRef = useRef(null);
   const navigate = useNavigate();
-  const { setMenus } = useMenuStore();
+  const { setMenus, setButtonPermissions } = useMenuStore();
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
+  const { updatePreferences } = usePreferencesStore();
+  const queryClient = useQueryClient();
+
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
+  // 角色选择相关状态
+  const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const loginData = useRef<LoginResponse | null>(null);
+  // 动画状态
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
   // 验证码
   const { data, refetch } = useQuery<{ key: string; code: any }>({
     queryKey: ['getCode'],
     queryFn: loginService.getCaptcha,
   });
 
+  // 页面加载时启动动画
+  useEffect(() => {
+    setIsAnimating(true);
+  }, []);
+
+  // 页面加载时：若本地存在已记住的用户名，回填并勾选「记住我」
+  useEffect(() => {
+    try {
+      const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+      if (savedUsername?.trim()) {
+        form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+      }
+    } catch {
+      // 忽略本地存储不可用等情况
+    }
+  }, [form]);
+
+  /**
+   * 处理角色选择
+   */
+  const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
+    // 使用传入的loginResponseData或当前状态中的loginData
+    const currentLoginData = loginResponseData || loginData.current;
+    if (!currentLoginData) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 使用传入的角色数据或当前状态中的角色数据
+      const rolesToUse = roleData || userRoles;
+
+      // 查找选中的角色
+      const selectedRole = rolesToUse.find((role) => role.id === roleId);
+      if (!selectedRole) {
+        antdUtils.message?.error('选择的角色不存在');
+        return;
+      }
+      const { accessToken, permissions } = await loginService.confirmRole(
+        currentLoginData.accessToken,
+        selectedRole.roleCode
+      );
+      // 更新用户存储
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, accessToken);
+      userStore.setRoleId(roleId);
+      // 将UserRole转换为RoleModel格式
+      const roleModels: RoleModel[] = rolesToUse.map((role) => ({
+        id: role.id,
+        roleCode: role.roleCode,
+        roleName: role.roleName,
+        roleType: role.roleType,
+        status: role.status,
+        remark: role.remark || '',
+      }));
+      userStore.setUserRoles(roleModels);
+
+      // 清空缓存
+      resetTabs();
+
+      // 获取角色对应的菜单
+      const menu = await commonService.getMenuListByRoleId(roleId);
+      setMenus(menu);
+      queryClient.setQueryData(['menuData', roleId], menu);
+      // 获取角色配置的权限点（按钮权限）
+      const buttonPermissions = permissions;
+      setButtonPermissions(buttonPermissions);
+      queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
+      // 确定首页路径
+      let homePath = currentLoginData.homePath;
+      if (!homePath) {
+        const firstRoute = findMenuByRoute(menu);
+        if (firstRoute) {
+          homePath = (firstRoute as any).path;
+        } else {
+          antdUtils.notification?.error({
+            title: t('login.loginFail'),
+            description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
+          });
+          return;
+        }
+      }
+
+      if (!homePath) {
+        antdUtils.notification?.error({
+          title: t('login.loginFail'),
+          description: '无法确定首页路径！',
+        });
+        return;
+      }
+
+      userStore.setHomePath(homePath);
+
+      // 关闭角色选择弹窗
+      setShowRoleSelector(false);
+
+      // 直接解锁屏幕
+      updatePreferences('widget', 'lockScreenStatus', false);
+
+      antdUtils.notification?.success({
+        title: t('login.loginSuccess'),
+        description: t('login.welcome'),
+      });
+
+      // 跳转到首页
+      navigate({ to: homePath });
+    } catch (error) {
+      console.error('角色选择失败:', error);
+      antdUtils.message?.error('角色选择失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /**
    * 登录表单提交
    * @param values 提交表单的数据
    */
-  const submit = async (values: any) => {
+  const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key;
+    values.captchaKey = data?.key || '';
     setLoading(true);
-    // 这里考虑返回的内容不仅包括token，还包括用户登录的角色（需要存储在本地，用于刷新页面时重新根据角色获取菜单）、配置的首页地址（供登录后进行跳转）
+
     try {
-      const { code, data, message } = await loginService.login(values);
+      const { code, data: loginResponse, message } = await loginService.login(values);
 
       // 根据code判定登录状态（和枚举的状态码进行判定） 只会存在几种情况，用户名不存在，用户名或密码错误，用户名冻结，验证码错误或者过期
       // case中使用{}包裹的目的是为了保证变量做用于仅限于case块
@@ -70,8 +201,8 @@ const Login: React.FC = () => {
         // 验证码错误或过期
         case HttpCodeEnum.RC300:
         case HttpCodeEnum.RC301:
-          form.setFields([{ name: 'captcha', errors: [message] }]);
-          form.getFieldInstance('captcha').focus();
+          form.setFields([{ name: 'captchaCode', errors: [message] }]);
+          form.getFieldInstance('captchaCode').focus();
           // 刷新验证码
           refetch();
           break;
@@ -84,42 +215,37 @@ const Login: React.FC = () => {
         // 登录成功
         case HttpCodeEnum.SUCCESS:
           {
-            // 没有配置首页地址默认跳到第一个菜单
-            const { accessToken, refreshToken, roleId } = data;
+            // 根据「记住我」勾选状态，写入或清除本地用户名
+            if (values.remember) {
+              localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username);
+            } else {
+              localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+            }
 
-            userStore.login(values.username, accessToken, refreshToken, roleId);
-            // 登录成功后清空 TabBar 和 KeepAlive 缓存
-            resetTabs();
-            // 清空 KeepAlive 缓存
-            if ((window as any).__keepAliveClearAllCache) {
-              (window as any).__keepAliveClearAllCache();
+            // 保存登录数据
+            loginData.current = loginResponse;
+
+            // 检查角色信息
+            if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
+              // 没有角色信息，提示错误
+              antdUtils.modal?.error({
+                title: '登录失败',
+                content: '您的账户没有分配任何角色，请联系管理员配置角色权限！',
+                onOk: () => {
+                  // 刷新验证码
+                  refetch();
+                },
+              });
+              return;
+            } else if (loginResponse.userRoles.length === 1) {
+              // 单角色情况，直接登录
+              const role = loginResponse.userRoles[0];
+              await handleRoleSelect(role.id, loginResponse.userRoles, loginResponse);
+            } else {
+              // 多角色情况，显示角色选择界面
+              setUserRoles(loginResponse.userRoles);
+              setShowRoleSelector(true);
             }
-            let { homePath } = data;
-            // 登录成功根据角色获取菜单
-            const menu = await commonService.getMenuListByRoleId(roleId, accessToken);
-            setMenus(menu);
-            // 判断是否配置了默认跳转的首页地址
-            if (!homePath) {
-              // 获取第一个是路由的地址
-              const firstRoute = findMenuByRoute(menu);
-              if (firstRoute) {
-                homePath = (firstRoute as any).path;
-              } else {
-                // 没有配置默认首页地址，也没有菜单，则提示错误
-                antdUtils.notification?.error({
-                  message: t('login.loginFail'),
-                  description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
-                });
-                return;
-              }
-            }
-            userStore.setHomePath(homePath);
-            antdUtils.notification?.success({
-              message: t('login.loginSuccess'),
-              description: t('login.welcome'),
-            });
-            // 跳转到首页
-            navigate(homePath);
           }
           break;
         default:
@@ -129,10 +255,10 @@ const Login: React.FC = () => {
             content: (
               <>
                 <p>
-                  {t('common.statusCode')}:{code}
+                  {t('common.errorMsg.statusCode')}:{code}
                 </p>
                 <p>
-                  {t('common.reason')}:{message}
+                  {t('common.errorMsg.reason')}:{message}
                 </p>
               </>
             ),
@@ -153,33 +279,59 @@ const Login: React.FC = () => {
     refetch();
   };
 
+  /**
+   * 切换到另一个登录界面
+   */
+  const switchLoginStyle = () => {
+    navigate({ to: '/login2' });
+  };
+
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className={`w-full h-full flex flex-col ${isAnimating ? styles['login-page-animated'] : ''}`}>
       {/* 标题 */}
-      <div className="h-[80px] flex items-center ml-40">
+      <div className="h-20 flex items-center justify-between px-40">
         <div className="flex items-center">
-          <img className="login-icon my-0" width="40" src={logo} alt="logo" />
+          <img
+            className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`}
+            width="40"
+            src={logo}
+            alt="logo"
+          />
           <span
             className="ml-5 text-3xl text-[#000000]"
             style={{
-              fontFamily: '微软雅黑 Bold, 微软雅黑 Regular, 微软雅黑, sans-serif',
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '32px',
+              fontStyle: 'italic',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
               fontWeight: 700,
             }}
           >
             {t('common.app.name')}
           </span>
         </div>
+        {/* 切换登录样式按钮 */}
+        <Button
+          type="text"
+          icon={<SwapOutlined />}
+          onClick={switchLoginStyle}
+          className={styles['switch-btn-traditional'] || ''}
+          title="切换到现代登录界面"
+        />
       </div>
       <div className={styles['login-container']}>
-        <div className={styles['login-box']}>
+        <div className={`${styles['login-box']} ${isAnimating ? styles['login-box-animated'] : ''}`}>
           {/* 左边图案和标题 */}
           <div className={styles['login-left']}>
             <div className="title mt-18">
               <p className="text-[24px] m-0 mb-2">
                 <span
                   style={{
-                    fontFamily: '微软雅黑 Bold, 微软雅黑 Regular, 微软雅黑, sans-serif',
+                    fontFamily: 'Arial, sans-serif',
                     fontWeight: 700,
+                    fontSize: '28px',
+                    fontStyle: 'italic',
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {t('login.description')}
@@ -195,9 +347,13 @@ const Login: React.FC = () => {
                 <span className="font-bold">{t('login.login')}</span>
               </p>
             </div>
-            <div className="form" style={{ marginTop: '40px' }}>
+            <div className={`form ${isAnimating ? styles['form-animated'] : ''}`} style={{ marginTop: '40px' }}>
               <Form form={form} name="login" labelCol={{ span: 5 }} size="large" autoComplete="off" onFinish={submit}>
-                <Form.Item name="username" rules={[{ required: true, message: t('login.enterUsername') }]}>
+                <Form.Item
+                  name="username"
+                  rules={[{ required: true, message: t('login.enterUsername') }]}
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Input
                     size="large"
                     ref={inputRef}
@@ -208,7 +364,11 @@ const Login: React.FC = () => {
                     prefix={<UserOutlined />}
                   />
                 </Form.Item>
-                <Form.Item name="password" rules={[{ required: true, message: t('login.enterPassword') }]}>
+                <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: t('login.enterPassword') }]}
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Input.Password
                     size="large"
                     allowClear
@@ -217,10 +377,14 @@ const Login: React.FC = () => {
                     prefix={<LockOutlined />}
                   />
                 </Form.Item>
-                <Form.Item>
+                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Row gutter={8}>
                     <Col span={18}>
-                      <Form.Item name="captcha" noStyle rules={[{ required: true, message: t('login.enterCaptcha') }]}>
+                      <Form.Item
+                        name="captchaCode"
+                        noStyle
+                        rules={[{ required: true, message: t('login.enterCaptcha') }]}
+                      >
                         <Input
                           size="large"
                           allowClear
@@ -237,10 +401,14 @@ const Login: React.FC = () => {
                   </Row>
                 </Form.Item>
                 {/* 记住密码 */}
-                <Form.Item name="remember" valuePropName="checked">
+                <Form.Item
+                  name="remember"
+                  valuePropName="checked"
+                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                >
                   <Checkbox>{t('login.remember')}</Checkbox>
                 </Form.Item>
-                <Form.Item>
+                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
                     {t('login.login')}
                   </Button>
@@ -250,26 +418,37 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="w-[440px] my-0 mx-auto py-[20px] px-0">
-        <p className="text-center mb-2">Copyright@2025 499475142@qq.com All Rights Reserved</p>
-        <a
-          target="_blank"
-          rel="noreferrer"
-          href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51012202001944"
-          className="inline-block h-[20px] leading-5 text-decoration-none"
-        >
-          <img src={filing} className="float-left" alt="无图片" />
-          <p className="float-left h-5 leading-5 m-[0_0_0_5px] text-[#939393]!">川公网安备51012202001944</p>
-        </a>
-        <a
-          href="https://beian.miit.gov.cn/"
-          target="_blank"
-          rel="noreferrer"
-          className="absolute inline-block text-[#939393]! text-decoration-none ml-1.5"
-        >
-          蜀ICP备2023022276号-2
-        </a>
+      {/* 底部版权信息 */}
+      <div className={styles['login-footer']}>
+        <Text className={styles['copyright'] || ''}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
+        <div className={styles['filing-info']}>
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51012202001944"
+            className={styles['filing-link']}
+          >
+            <img src={filing} alt="备案图标" />
+            <Text className={styles['filing-text'] || ''}>川公网安备51012202001944</Text>
+          </a>
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" className={styles['icp-link']}>
+            <Text className={styles['icp-text'] || ''}>蜀ICP备2023022276号-2</Text>
+          </a>
+        </div>
       </div>
+
+      {/* 角色选择弹窗 */}
+      <Modal
+        title="选择角色"
+        open={showRoleSelector}
+        closable={false}
+        maskClosable={false}
+        footer={null}
+        width={600}
+        centered
+      >
+        {userRoles.length > 0 && <RoleSelector roles={userRoles} onSelect={handleRoleSelect} loading={loading} />}
+      </Modal>
     </div>
   );
 };
@@ -288,7 +467,9 @@ function findMenuByRoute(menus: any[]): any | null {
     }
     if (menu.children) {
       const found = findMenuByRoute(menu.children);
-      if (found) return found; // 递归查找子菜单
+      if (found) {
+        return found; // 递归查找子菜单
+      }
     }
   }
   return null;

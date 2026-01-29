@@ -1,24 +1,19 @@
-import DragModal from '@/components/modal/DragModal';
-import { Input, App } from 'antd';
-import type React from 'react';
-import { memo, useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { SearchOutlined } from '@ant-design/icons';
+import { App } from 'antd';
+import type React from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
 import CategorySidebar from './components/CategorySidebar';
 import TemplateGrid from './components/TemplateGrid';
-import TemplateTypeDropdown from './components/TemplateTypeDropdown';
+import TemplateHeaders from './Headers';
 import { templateService } from './services';
-import type { AppTemplate, TemplateType, TemplateSearchParams } from './types';
 import './styles.css';
+import type { AppTemplate, TemplateSearchParams, TemplateType } from './types';
 
 /**
  * 应用模板创建弹窗
  */
-const AppTemplates: React.FC<AppsTemplateModelProps> = ({ 
-  open, 
-  onClose, 
-  onCreateFromBlank 
-}) => {
+const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreateFromBlank }) => {
   const { message } = App.useApp();
   // 状态管理
   const [selectedCategory, setSelectedCategory] = useState('recommended');
@@ -42,14 +37,14 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   });
 
   // 搜索模板
-  const { data: searchResult, isLoading: searchLoading } = useQuery({
+  const { data: searchResult, isFetching: searchLoading } = useQuery({
     queryKey: ['template_search', searchParams],
     queryFn: () => templateService.searchTemplates(searchParams),
     enabled: !!searchParams,
   });
 
   // 根据分类获取模板
-  const { data: categoryTemplates = [], isLoading: categoryLoading } = useQuery({
+  const { data: categoryTemplates = [], isFetching: categoryLoading } = useQuery({
     queryKey: ['template_category', selectedCategory],
     queryFn: () => templateService.getTemplatesByCategory(selectedCategory),
     enabled: selectedCategory !== 'recommended',
@@ -72,7 +67,7 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
     setSearchParams({
       pageNum: 1,
       pageSize: 20,
-      category: categoryId === 'recommended' ? undefined : categoryId,
+      category: categoryId === 'recommended' ? '' : categoryId,
     });
     setSearchKeyword('');
     setSelectedTypes([]);
@@ -81,9 +76,9 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   // 处理类型筛选变化
   const handleTypeChange = useCallback((types: TemplateType[]) => {
     setSelectedTypes(types);
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
-      types: types.length > 0 ? types : undefined,
+      types: types.length > 0 ? types : [],
       pageNum: 1,
     }));
   }, []);
@@ -91,9 +86,9 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   // 处理搜索
   const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
-    setSearchParams(prev => ({
+    setSearchParams((prev) => ({
       ...prev,
-      keyword: keyword || undefined,
+      keyword: keyword || '',
       pageNum: 1,
     }));
   }, []);
@@ -115,17 +110,19 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
     <DragModal
       footer={null}
       centered
-      style={{ height: '95vh' }}
-      styles={{ body: { height: 'calc(95vh - 92px)', overflowY: 'auto' } }}
-      width="95%"
+      style={{ height: '90vh' }}
+      styles={{ body: { height: 'calc(90vh - 92px)', overflowY: 'auto' } }}
+      width="80%"
       open={open}
-      title={<TemplateHeaders 
-        searchKeyword={searchKeyword}
-        selectedTypes={selectedTypes}
-        filterOptions={filterOptions}
-        onSearch={handleSearch}
-        onTypeChange={handleTypeChange}
-      />}
+      title={
+        <TemplateHeaders
+          searchKeyword={searchKeyword}
+          selectedTypes={selectedTypes}
+          filterOptions={filterOptions}
+          onSearch={handleSearch}
+          onTypeChange={handleTypeChange}
+        />
+      }
       onCancel={onClose}
     >
       <div className="relative flex h-full overflow-y-auto">
@@ -136,14 +133,10 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
           onCategorySelect={handleCategorySelect}
           onCreateBlank={handleCreateBlank}
         />
-        
+
         {/* 右侧模板展示 */}
         <div className="h-full flex-1 shrink-0 grow overflow-auto px-6">
-          <TemplateGrid
-            templates={currentTemplates}
-            loading={isLoading}
-            onTemplateSelect={handleTemplateSelect}
-          />
+          <TemplateGrid templates={currentTemplates} loading={isLoading} onTemplateSelect={handleTemplateSelect} />
         </div>
       </div>
     </DragModal>
@@ -151,52 +144,6 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
 };
 
 export default memo(AppTemplates);
-
-/**
- * 弹窗头部组件
- */
-const TemplateHeaders: React.FC<TemplateHeadersProps> = ({ 
-  searchKeyword,
-  selectedTypes,
-  filterOptions,
-  onTypeChange, 
-  onSearch 
-}) => {
-  return (
-    <div className="flex justify-between items-center">
-      <div className="min-w-[180px] pl-5">
-        <span className="text-lg font-medium">从应用模板创建</span>
-      </div>
-      <div className="flex-1 max-w-[548px] p-1.5 flex items-center">
-        <Input
-          className="w-full h-10"
-          size="large"
-          placeholder="搜索所有模版..."
-          prefix={<SearchOutlined className="text-gray-400" />}
-          addonBefore={
-            <TemplateTypeDropdown 
-              selectedTypes={selectedTypes}
-              onTypeChange={onTypeChange}
-              filterOptions={filterOptions}
-            />
-          }
-          value={searchKeyword}
-          onChange={(e) => onSearch(e.target.value)}
-          onPressEnter={(e) => onSearch((e.target as any).value)}
-        />
-      </div>
-      <div className="w-[180px] h-8" />
-    </div>
-  );
-};
-
-interface TemplateHeadersProps {
-  searchKeyword: string;
-  selectedTypes: TemplateType[];
-  filterOptions: Array<{ label: string; value: TemplateType; count: number }>;
-  onTypeChange: (types: TemplateType[]) => void;
-  onSearch: (keyword: string) => void;
-}
 
 /**
  * 应用模板弹窗参数

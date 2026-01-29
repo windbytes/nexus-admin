@@ -1,16 +1,202 @@
 .login-container {
-  /* // font-size: $text-fontSize;
-  // color: $test-color; */
-  @apply bg-[#eee]! relative flex flex-1 justify-center items-center min-w-[550px] h-[calc(100%-200px)] min-h-[500px] bg-[url('@/assets/svg/login/background.svg')] bg-center bg-cover;
+  /* 
+    font-size: 16px;
+    color: #333;
+  */
+  background-color: #eee !important;
+  position: relative;
+  display: flex;
+  flex: 1 1 0%;
+  justify-content: center;
+  align-items: center;
+  min-width: 550px;
+  height: calc(100% - 200px);
+  min-height: 500px;
+  background-image: url('@/assets/svg/login/background.svg');
+  background-position: center;
+  background-size: cover;
+
   .login-box {
-    @apply w-[800px] h-[540px] flex bg-[#fff] rounded-[6px] shadow-[0_0_10px_rgba(0,_0,_0,_0.149019607843137)] border-[0px];
-
+    width: 800px;
+    height: 540px;
+    display: flex;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    border: 0;
+    
     .login-left {
-      @apply border-0 w-[330px] h-[540px] flex flex-col text-center leading-[24px] bg-[url('@/assets/svg/login/left.svg')] bg-center bg-cover;
+      border: 0;
+      width: 330px;
+      height: 540px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      line-height: 24px;
+      background-image: url('@/assets/svg/login/left.svg');
+      background-position: center;
+      background-size: cover;
     }
-
     .login-form {
-      @apply border-0 w-[420px] h-[460px] flex p-[40px] flex-col text-left text-[#000000] leading-[24px] flex-1;
+      border: 0;
+      width: 420px;
+      height: 460px;
+      display: flex;
+      padding: 40px;
+      flex-direction: column;
+      text-align: left;
+      color: #000000;
+      line-height: 24px;
+      flex: 1;
     }
+  }
+}
+
+/* 切换按钮样式 - 适配传统登录界面 */
+.switch-btn-traditional {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  .anticon {
+    font-size: 20px;
+  }
+}
+
+/* 动画相关样式 */
+.login-page-animated {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.login-box-animated {
+  animation: slideUp 0.8s ease-out;
+}
+
+.login-icon-animated {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.form-animated {
+  animation: slideUp 0.8s ease-out 0.2s both;
+}
+
+.form-item-animated {
+  animation: slideUp 0.6s ease-out both;
+}
+
+.form-item-animated:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.form-item-animated:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.form-item-animated:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.form-item-animated:nth-child(4) {
+  animation-delay: 0.5s;
+}
+
+.form-item-animated:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+/* 底部版权信息 */
+.login-footer {
+  position: relative;
+  z-index: 2;
+  padding: 20px 40px;
+  text-align: center;
+}
+
+.copyright {
+  display: block;
+  font-size: 14px;
+  color: rgb(65, 65, 65);
+  margin-bottom: 12px;
+}
+
+.filing-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filing-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  
+  img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.filing-text,
+.icp-text {
+  font-size: 12px;
+  color: rgb(65, 65, 65);
+}
+
+.icp-link {
+  text-decoration: none;
+}
+
+/* 动画定义 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
   }
 }

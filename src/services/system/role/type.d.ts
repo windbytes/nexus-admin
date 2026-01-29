@@ -34,12 +34,22 @@ export interface RoleModel {
    * 角色描述
    */
   remark?: string;
+
+  /**
+   * 角色等级
+   */
+  roleLevel?: number;
+
+  /**
+   * 是否内置角色
+   */
+  isBuiltIn?: boolean;
 }
 
 /**
  * 角色查询参数
  */
-export interface RoleSearchParams extends PageQueryParams{
+export interface RoleSearchParams extends PageQueryParams {
   /**
    * 角色编码
    */
@@ -63,11 +73,13 @@ export interface RoleState {
   // 角色菜单分配窗口的打开状态
   openRoleMenuModal: boolean;
   // 当前编辑的行数据
-  currentRow: any | null;
+  currentRow: RoleModel | null;
   // 当前选中的行数据
   selectedRows: any[];
   // 当前操作
   action: string;
+  // 表格数据总数
+  total: number;
 }
 
 /**

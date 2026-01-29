@@ -1,6 +1,6 @@
-import { Popover } from 'antd';
-import { cloneElement, useRef, useState } from 'react';
 import cn from '@/utils/classnames';
+import { Popover } from 'antd';
+import { cloneElement, useRef, useState, type ReactElement, type ReactNode } from 'react';
 
 /**
  * 通用气泡卡片（使用 antd 的 Popover 实现）
@@ -41,22 +41,24 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
     }, timeoutDuration);
   };
 
-  const contentNode = cloneElement(htmlContent as React.ReactElement, {
-    onClose: () => setVisible(false),
-    ...(manualClose
-      ? {
-          onClick: () => setVisible(false),
-        }
-      : {}),
-  });
+  const contentNode = htmlContent
+    ? cloneElement(htmlContent, {
+        onClose: () => setVisible(false),
+        ...(manualClose
+          ? {
+              onClick: () => setVisible(false),
+            }
+          : {}),
+      })
+    : null;
 
   const triggerNode = (
     <div
       ref={buttonRef}
       className={cn(
-        'group inline-flex items-center rounded-lg border border-[#10182824] bg-[#fff] px-3 py-2 text-base font-medium hover:border-[#10182833] hover:bg-[#f9fafb] focus:outline-none',
+        'group inline-flex items-center rounded-lg border border-[#10182824] bg-white px-3 py-2 text-base font-medium hover:border-[#10182833] hover:bg-[#f9fafb] focus:outline-none',
         btnClassName && typeof btnClassName === 'string' && btnClassName,
-        btnClassName && typeof btnClassName !== 'string' && btnClassName?.(visible),
+        btnClassName && typeof btnClassName !== 'string' && btnClassName?.(visible)
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -69,15 +71,17 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
     <Popover
       classNames={{
         root: cn(
-          'w-fit min-w-[130px] overflow-hidden rounded-lg bg-[#fff] shadow-lg ring-1 ring-black/5',
+          'w-fit min-w-[130px] overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5',
           popupClassName,
-          className,
+          className
         ),
       }}
       content={
-        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          {contentNode}
-        </div>
+        contentNode && (
+          <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            {contentNode}
+          </div>
+        )
       }
       trigger={trigger === 'hover' ? 'hover' : 'click'}
       placement={positionMap[position]}
@@ -109,11 +113,11 @@ const positionMap: Record<NonNullable<CustomPopoverProps['position']>, 'bottom' 
  */
 type CustomPopoverProps = {
   className?: string;
-  htmlContent?: React.ReactNode;
+  htmlContent?: ReactElement<HtmlContentProps>;
   popupClassName?: string;
   trigger?: 'click' | 'hover';
   position?: 'bottom' | 'br' | 'bl';
-  btnElement?: string | React.ReactNode;
+  btnElement?: ReactNode;
   btnClassName?: string | ((open: boolean) => string);
   manualClose?: boolean;
   disabled?: boolean;

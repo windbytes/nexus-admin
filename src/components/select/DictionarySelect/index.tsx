@@ -8,12 +8,9 @@ interface DictionarySelectProps {
 }
 
 // 字典选择器组件
-const DictionarySelect: React.FC<DictionarySelectProps> = ({
-  dictCode,
-  onChange,
-}) => {
+const DictionarySelect: React.FC<DictionarySelectProps> = ({ dictCode, onChange }) => {
   // 加载字典数据
-  const { data, isLoading } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ['component_dictionary', dictCode],
     queryFn: async () => {
       const response = await fetch(`/api/dict/${dictCode}`);
@@ -22,14 +19,7 @@ const DictionarySelect: React.FC<DictionarySelectProps> = ({
     },
   });
 
-  return (
-    <Select
-      options={data}
-      placeholder="请选择"
-      onChange={onChange}
-      loading={isLoading}
-    />
-  );
+  return <Select options={data} placeholder="请选择" onChange={onChange} loading={isFetching} />;
 };
 
 export default DictionarySelect;

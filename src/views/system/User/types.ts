@@ -1,20 +1,10 @@
-import type { UserModel } from './api/type';
+import type { PageQueryParams } from '@/types/global';
 
 /**
  * 查询参数
  */
-export interface UserSearchParams {
+export interface UserSearchParams extends PageQueryParams {
   username?: string;
   sex?: 1 | 2;
   status?: 0 | 1;
-  pageNum: number;
-  pageSize: number;
-}
-
-/**
- * 用户列表响应
- */
-export interface UserResponse {
-  data: UserModel[];
-  total: number;
 }

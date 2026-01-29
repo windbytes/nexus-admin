@@ -1,12 +1,15 @@
-import type React from "react";
-import { memo, useEffect, useState } from "react";
-import { Breadcrumb } from "antd";
-import { Link, useLocation } from "react-router";
-import type { RouteItem } from "@/types/route";
-import { getIcon } from "@/utils/optimized-icons";
-import { useMenuStore, usePreferencesStore } from "@/stores/store";
-import { t } from "i18next";
-import { useTranslation } from "react-i18next";
+import { Link, useRouterState } from '@tanstack/react-router';
+import { Breadcrumb } from 'antd';
+import { t } from 'i18next';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import type { RouteItem } from '@/types/route';
+import { getIcon } from '@/utils/optimized-icons';
+import { type MenuCaches, matchPathname } from '@/utils/utils';
+import '../header.scss';
 
 /**
  * 面包屑
@@ -14,90 +17,109 @@ import { useTranslation } from "react-i18next";
  */
 const BreadcrumbNav: React.FC = () => {
   // 获取路由的地址，地址变化的时候去获取对应的菜单项，以此来拼接面包屑
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   // 从后台获取的路由菜单
-  const menuState = useMenuStore();
-  const { menus } = menuState;
+  const { menus, caches } = useMenuStore(
+    useShallow((state) => ({
+      menus: state.menus,
+      caches: state.caches,
+    }))
+  );
   const [items, setItems] = useState<Record<string, any>[]>([]);
   // 从全局状态中获取配置是否开启面包屑、图标
-  const breadcrumb = usePreferencesStore(
-    (state) => state.preferences.breadcrumb
-  );
+  const breadcrumb = usePreferencesStore((state) => state.preferences.breadcrumb);
   const { t, i18n } = useTranslation();
+
   useEffect(() => {
-    // 将menu里面的内容和path进行对照获取
-    const breadItems = patchBreadcrumb(
-      menus,
-      location.pathname,
-      breadcrumb.showIcon
-    );
+    const breadItems = patchBreadcrumb(menus, caches, pathname, breadcrumb.showIcon);
     if (breadItems.length > 0) {
       setItems(breadItems);
+      return;
     }
-    // 设置面包屑内容
-  }, [location.pathname, menus, breadcrumb, t, i18n.language]);
+    setItems([]);
+  }, [pathname, menus, caches, breadcrumb, t, i18n.language]);
 
   // 组件的DOM内容
-  return (
-    <>
-      <Breadcrumb
-        items={items}
-        className="flex justify-between items-center"
-        style={{ marginLeft: "10px" }}
-      />
-    </>
-  );
+  return <Breadcrumb items={items} className="flex justify-between items-center ml-[16px]! nexus-breadcrumb" />;
 };
-export default memo(BreadcrumbNav);
+export default BreadcrumbNav;
 
 /**
  * 根据路径生成面包屑的路径内容
  * @param routerList 菜单集合
  * @param pathname 路径
+ * @param joinIcon 是否显示图标
  * @returns 面包屑内容集合
  */
 function patchBreadcrumb(
   routerList: RouteItem[],
+  caches: MenuCaches,
   pathname: string,
   joinIcon: boolean
 ): Record<string, any>[] {
-  const result: Record<string, any>[] = [];
-  if (routerList) {
-    for (let i = 0; i < routerList.length; i++) {
-      const item = routerList[i];
-      if (
-        pathname === item.path ||
-        (pathname.includes(item.path) &&
-          pathname.length > item.path.length &&
-          pathname.substring(item.path.length, item.path.length + 1) === "/")
-      ) {
-        const pth: Record<string, any> = {};
-        pth.title = (
-          <>
-            {joinIcon && item.meta?.icon && getIcon(item.meta.icon)}
-            <span style={{ padding: "0 4px" }}>
-              {t(item.meta?.title as string)}
-            </span>
-          </>
-        );
-        pth.key = item.path;
-        if (pathname === item.path) {
-          pth.title = (
-            <>
-              {joinIcon && item.meta?.icon && getIcon(item.meta.icon)}
-              <Link to={item.path}>{t(item.meta?.title as string)}</Link>
-            </>
-          );
-        }
-        result.push(pth);
-      }
-      if (item.children && item.children.length > 0) {
-        const rst = patchBreadcrumb(item.children, pathname, joinIcon);
-        if (rst.length > 0) {
-          return [...result, ...rst];
-        }
+  if (!routerList?.length || !caches?.pathMap?.size) {
+    return [];
+  }
+
+  const { pathMap, ancestorsMap, routeToMenuPathMap } = caches;
+  const breadcrumbItems: Record<string, any>[] = [];
+
+  let matchedPath: string | null = null;
+  let matchedEntity: RouteItem | undefined;
+
+  if (pathMap.has(pathname)) {
+    matchedPath = pathname;
+    matchedEntity = pathMap.get(pathname);
+  } else {
+    for (const [path, entity] of pathMap.entries()) {
+      if (matchPathname(path, pathname)) {
+        matchedPath = path;
+        matchedEntity = entity;
+        break;
       }
     }
   }
-  return result;
+
+  if (!matchedPath || !matchedEntity) {
+    return [];
+  }
+
+  const visiblePath = routeToMenuPathMap.get(matchedPath) ?? matchedPath;
+  const ancestorPaths = ancestorsMap.get(visiblePath) ?? [];
+  const breadcrumbPaths = [...ancestorPaths, visiblePath];
+
+  if (matchedPath !== visiblePath) {
+    breadcrumbPaths.push(matchedPath);
+  }
+
+  breadcrumbPaths.forEach((path, index) => {
+    const menu = pathMap.get(path);
+    if (!menu) {
+      return;
+    }
+
+    const isLast = index === breadcrumbPaths.length - 1;
+    const iconNode = joinIcon && menu.meta?.icon ? getIcon(menu.meta.icon) : null;
+    const titleContent = t(menu.meta?.title as string);
+    const isNotRoute = menu.meta?.menuType !== 2;
+    const title =
+      isLast || isNotRoute ? (
+        <>
+          {iconNode}
+          <span className="px-1">{titleContent}</span>
+        </>
+      ) : (
+        <>
+          {iconNode}
+          <Link to={menu.path}>{titleContent}</Link>
+        </>
+      );
+
+    breadcrumbItems.push({
+      key: menu.path,
+      title,
+    });
+  });
+
+  return breadcrumbItems;
 }

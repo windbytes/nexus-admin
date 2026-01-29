@@ -34,7 +34,7 @@ const Widget: React.FC = () => {
       {/* 启用刷新 */}
       <SwitchItem title="启用刷新" category="widget" pKey="refresh" />
       {/* 偏好设置位置 */}
-      <SelectItem title="偏好设置位置" disabled />
+      <SelectItem category="widget" pKey="preferencesButtonPosition" title="偏好设置位置" disabled />
     </>
   );
 };

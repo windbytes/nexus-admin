@@ -82,14 +82,16 @@ const Panel: React.FC<PanelProps> = (props) => {
       setCreating(true);
       setTagList([...tagList, data]);
       notification.success({
-        message: t('common.tag.created'),
+        title: t('common.tag.created'),
+        description: t('common.tag.created'),
       });
       setKeywords('');
       setCreating(false);
     },
     onError: (error) => {
       notification.error({
-        message: `${t('common.tag.failed')}:${error.message}`,
+        title: t('common.tag.failed'),
+        description: `${t('common.tag.failed')}:${error.message}`,
       });
       setCreating(false);
     },
@@ -100,12 +102,13 @@ const Panel: React.FC<PanelProps> = (props) => {
     mutationFn: (tagIDs: string[]) => tagsService.bindTag(tagIDs, targetID, type),
     onSuccess: () => {
       notification.success({
-        message: t('common.actionMsg.modifiedSuccessfully'),
+        title: t('common.actionMsg.modifiedSuccessfully'),
       });
     },
     onError: (error) => {
       notification.error({
-        message: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
+        title: t('common.actionMsg.modifiedFailed'),
+        description: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
       });
     },
   });
@@ -115,12 +118,13 @@ const Panel: React.FC<PanelProps> = (props) => {
     mutationFn: (tagID: string) => tagsService.unbindTag(tagID, targetID, type),
     onSuccess: () => {
       notification.success({
-        message: t('common.actionMsg.modifiedSuccessfully'),
+        title: t('common.actionMsg.modifiedSuccessfully'),
       });
     },
     onError: (error) => {
       notification.error({
-        message: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
+        title: t('common.actionMsg.modifiedFailed'),
+        description: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
       });
     },
   });
@@ -202,7 +206,7 @@ const Panel: React.FC<PanelProps> = (props) => {
           onClear={() => handleKeywordsChange('')}
         />
       </div>
-      <Divider className="!my-0 !h-[1px]" />
+      <Divider className="my-0! h-px!" />
       {/* 检索到不存在的提示创建标签 */}
       {keywords && notExisted && (
         <div className="p-1">
@@ -218,7 +222,7 @@ const Panel: React.FC<PanelProps> = (props) => {
           </div>
         </div>
       )}
-      {keywords && notExisted && filteredTagList.length > 0 && <Divider className="!my-0 !h-[1px]" />}
+      {keywords && notExisted && filteredTagList.length > 0 && <Divider className="my-0! h-px!" />}
       {/* 过滤后的标签和过滤后选中的标签 */}
       {(filteredTagList.length > 0 || filteredSelectedTagList.length > 0) && (
         <div className="max-h-[172px] overflow-auto p-1">
@@ -252,12 +256,12 @@ const Panel: React.FC<PanelProps> = (props) => {
       {!keywords && !filteredTagList.length && !filteredSelectedTagList.length && (
         <div className="p-1">
           <div className="flex flex-col items-center gap-1 p-3">
-            <TagOutlined className="h-6 w-6 !text-gray-400 text-xl" />
+            <TagOutlined className="h-6 w-6 text-gray-400! text-xl" />
             <div className="text-sm leading-[14px] text-gray-400">{t('common.tag.noTag')}</div>
           </div>
         </div>
       )}
-      <Divider className="!my-0 !h-[1px]" />
+      <Divider className="my-0! h-px!" />
       {/* 管理标签 */}
       <div className="p-1">
         <div
@@ -322,7 +326,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         )}
       >
         <TagOutlined className="h-3 w-3 shrink-0" />
-        <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-[400] leading-4">
+        <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-normal leading-5">
           {!triggerContent ? t('common.tag.addTag') : triggerContent}
         </div>
       </div>
@@ -354,7 +358,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
             )
           }
           popupClassName="!w-full !ring-0"
-          className="!z-20 h-fit !w-[324px]"
+          className="z-20! h-fit w-[324px]!"
         />
       )}
     </>

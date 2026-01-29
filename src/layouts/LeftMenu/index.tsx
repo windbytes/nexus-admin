@@ -1,31 +1,31 @@
+import { Layout, theme } from 'antd';
 import type React from 'react';
-import { memo, useMemo } from 'react';
-import { Layout } from 'antd';
-
-import './leftMenu.scss';
-import { usePreferencesStore } from '@/stores/store';
-import SystemLogo from './component/SystemLogo';
-import MenuComponent from './component/MenuComponent';
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
+
+import { usePreferencesStore } from '@/stores/store';
+import MenuComponent from './component/MenuComponent';
+import SystemLogo from './component/SystemLogo';
+import './leftMenu.scss';
 
 /**
  * 左边的菜单栏
  */
 const LeftMenu: React.FC = () => {
-  // 优化 1: 使用 shallow 避免不必要的重渲染
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
   const { sidebar, mode, semiDarkSidebar } = usePreferencesStore(
     useShallow((state) => ({
       sidebar: state.preferences.sidebar,
       mode: state.preferences.theme.mode,
       semiDarkSidebar: state.preferences.theme.semiDarkSidebar,
-    })),
+    }))
   );
 
-  // 优化 2: 使用 useMemo 缓存派生的 mode 值
   const finalMode = useMemo(() => {
     let currentMode = mode;
     if (currentMode === 'auto') {
-      // 检查 window 对象是否存在，以兼容 SSR (服务端渲染)
       const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
       currentMode = isDarkMode ? 'dark' : 'light';
     }
@@ -33,31 +33,25 @@ const LeftMenu: React.FC = () => {
       currentMode = 'dark';
     }
     return currentMode;
-  }, [mode, semiDarkSidebar]); // 依赖项是 theme 的相关属性
+  }, [mode, semiDarkSidebar]);
 
   return (
     <Layout.Sider
+      className="nexus-layout-sider shrink-0"
       trigger={null}
       collapsedWidth={64}
-      style={{
-        overflow: 'hidden',
-        position: 'relative',
-        transition: 'width .2s cubic-bezier(.34,.69,.1,1)',
-        zIndex: 999,
-        boxShadow: '0 2px 5px #00000014',
-        borderRight: '1px solid #ededed'
-      }}
+      style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}
       collapsible
       width={sidebar.width}
       theme={finalMode}
       collapsed={sidebar.collapsed}
     >
-      <div className="flex flex-col h-full" style={{ overflow: 'hidden' }}>
-        <SystemLogo />
-        <MenuComponent />
-      </div>
+      <SystemLogo />
+      <MenuComponent />
     </Layout.Sider>
   );
 };
 
-export default memo(LeftMenu);
+LeftMenu.displayName = 'LeftMenu';
+
+export default LeftMenu;

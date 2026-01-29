@@ -30,23 +30,13 @@ const Buitin: React.FC = () => {
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        width: "100%",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-      }}
+    <div className="flex w-full flex-wrap justify-between"
     >
       {BUILTIN_THEME_PRESETS.map((item) => {
         return (
           <div
             key={item.color}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              cursor: "pointer",
-            }}
+            className="flex flex-col cursor-pointer"
             onClick={() => {
               if (item.type === "custom") {
                 return;
@@ -55,34 +45,16 @@ const Buitin: React.FC = () => {
             }}
           >
             <div
-              className={clsx("outline-box", {
+              className={clsx("outline-box flex items-center justify-center cursor-pointer", {
                 "outline-box-active": colorPrimary === item.color,
               })}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
             >
               {item.type === "custom" ? (
                 <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    padding: "0.5rem 2.5rem",
-                  }}
+                  className="w-5 h-5 my-2 mx-10 rounded-md"
                 >
                   <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      width: "1.25rem",
-                      height: "1.25rem",
-                      borderRadius: "6px",
-                    }}
+                    className="flex items-center justify-center relative w-4 h-4 rounded-md"
                   >
                     <ColorPicker
                       onChangeComplete={onColorChange}
@@ -94,24 +66,13 @@ const Buitin: React.FC = () => {
                 </div>
               ) : (
                 <div
-                  style={{
-                    backgroundColor: item.color,
-                    width: "1.25rem",
-                    height: "1.25rem",
-                    margin: "0.5rem 2.5rem",
-                    borderRadius: "6px",
-                  }}
+                  className="bg-color w-5 h-5 my-2 mx-10 rounded-md"
+                  style={{ backgroundColor: item.color }}
                 />
               )}
             </div>
             <div
-              style={{
-                fontSize: ".75rem",
-                lineHeight: "1rem",
-                textAlign: "center",
-                margin: ".5rem 0",
-                color: "rgb(113, 113, 122)",
-              }}
+              className="text-center text-xs leading-4 text-gray-500 m-1"
             >
               {item.type}
             </div>

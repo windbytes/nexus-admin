@@ -1,7 +1,7 @@
-import type React from 'react';
+import { ExclamationCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Table, Tag, Button, Tooltip, type TableProps } from 'antd';
-import { ReloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Button, Table, type TableProps, Tag, Tooltip } from 'antd';
+import type React from 'react';
 import type { FailedFlow } from '../../mockData';
 
 // 模拟获取失败流程数据的API
@@ -35,7 +35,7 @@ const fetchFailedFlowsData = async (): Promise<FailedFlow[]> => {
 };
 
 export const FailedFlowsList: React.FC = () => {
-  const { data: failedFlows, isLoading } = useQuery({
+  const { data: failedFlows, isFetching } = useQuery({
     queryKey: ['failedFlowsData'],
     queryFn: fetchFailedFlowsData,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -89,12 +89,12 @@ export const FailedFlowsList: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
+  if (isFetching) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((index) => (
           <div key={index} className="animate-pulse">
-            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded" />
           </div>
         ))}
       </div>
@@ -113,7 +113,7 @@ export const FailedFlowsList: React.FC = () => {
       rowKey="id"
       size="small"
       className="custom-table"
-      loading={isLoading}
+      loading={isFetching}
     />
   );
 };

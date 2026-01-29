@@ -63,6 +63,8 @@ export interface RouteMeta {
   // 是否需要访问权限
   requiresAuth?: boolean;
   menuType?: number;
+  // 权限列表
+  permissionList?: string[];
 }
 
 /**

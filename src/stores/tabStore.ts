@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist, type PersistOptions } from 'zustand/middleware';
+import { type PersistOptions, persist } from 'zustand/middleware';
 import type { RouteItem } from '@/types/route';
 
 export interface TabItem {
@@ -10,6 +10,7 @@ export interface TabItem {
   closable: boolean;
   component?: React.ComponentType;
   route?: RouteItem;
+  reloadKey?: number; // 用于强制重新加载的时间戳
 }
 
 interface TabStore {
@@ -18,7 +19,7 @@ interface TabStore {
   // 当前激活的tab key
   activeKey: string;
   // 添加tab
-  addTab: (tab: TabItem, options?: { insertAt?: 'head' | 'tail', activate?: boolean }) => void;
+  addTab: (tab: TabItem, options?: { insertAt?: 'head' | 'tail'; activate?: boolean }) => void;
   // 移除tab
   removeTab: (targetKey: string) => string;
   // 设置激活的tab
@@ -53,14 +54,14 @@ export const useTabStore = create<TabStore>()(
       tabs: [],
       activeKey: '',
 
-      addTab: (tab: TabItem, options?: { insertAt?: 'head' | 'tail', activate?: boolean }) => {
+      addTab: (tab: TabItem, options?: { insertAt?: 'head' | 'tail'; activate?: boolean }) => {
         const { tabs, activeKey } = get();
         const existingTabIndex = tabs.findIndex((t) => t.key === tab.key);
 
         if (existingTabIndex === -1) {
           // 新tab，根据选项决定插入位置
           const { insertAt = 'tail', activate = true } = options || {};
-          
+
           let newTabs: TabItem[];
           if (insertAt === 'head') {
             // 头插入：添加到数组开头
@@ -90,7 +91,9 @@ export const useTabStore = create<TabStore>()(
         const { tabs, activeKey } = get();
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
 
-        if (targetIndex === -1) return activeKey;
+        if (targetIndex === -1) {
+          return activeKey;
+        }
 
         const newTabs = tabs.filter((tab) => tab.key !== targetKey);
 
@@ -101,10 +104,10 @@ export const useTabStore = create<TabStore>()(
             newActiveKey = '';
           } else if (targetIndex === 0) {
             // 关闭的是第一个，激活第一个
-            newActiveKey = newTabs[0].key;
+            newActiveKey = newTabs.length > 0 ? (newTabs[0]?.key ?? '') : '';
           } else {
             // 激活前一个
-            newActiveKey = newTabs[targetIndex - 1].key;
+            newActiveKey = newTabs[targetIndex - 1]?.key ?? '';
           }
         }
 
@@ -130,13 +133,18 @@ export const useTabStore = create<TabStore>()(
         if (targetTab) {
           // 保留目标tab和homePath的tab
           const homeTab = homePath ? tabs.find((tab) => tab.key === homePath) : null;
-          const newTabs = [targetTab];
+
+          let newTabs: TabItem[];
+
+          // 始终保持 homeTab 在第一个
           if (homeTab && homeTab.key !== targetKey) {
-            newTabs.push(homeTab);
+            newTabs = [homeTab, targetTab];
+          } else {
+            newTabs = [targetTab];
           }
-          
+
           // 如果当前激活的tab不在保留的tab中，需要激活目标tab
-          const newActiveKey = newTabs.some(tab => tab.key === activeKey) ? activeKey : targetKey;
+          const newActiveKey = newTabs.some((tab) => tab.key === activeKey) ? activeKey : targetKey;
           set({
             tabs: newTabs,
             activeKey: newActiveKey,
@@ -151,20 +159,20 @@ export const useTabStore = create<TabStore>()(
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
         if (targetIndex > 0) {
           let newTabs = tabs.slice(targetIndex);
-          
+
           // 如果homePath的tab在左侧被删除了，需要保留它
           if (homePath) {
             const homeTab = tabs.find((tab) => tab.key === homePath);
-            if (homeTab && !newTabs.some(tab => tab.key === homePath)) {
+            if (homeTab && !newTabs.some((tab) => tab.key === homePath)) {
               newTabs = [homeTab, ...newTabs];
             }
           }
-          
+
           // 如果当前激活的tab不在保留的tab中，需要激活目标tab
-          const newActiveKey = newTabs.some(tab => tab.key === activeKey) ? activeKey : targetKey;
-          set({ 
+          const newActiveKey = newTabs.some((tab) => tab.key === activeKey) ? activeKey : targetKey;
+          set({
             tabs: newTabs,
-            activeKey: newActiveKey
+            activeKey: newActiveKey,
           });
           return newActiveKey;
         }
@@ -176,20 +184,21 @@ export const useTabStore = create<TabStore>()(
         const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
         if (targetIndex >= 0 && targetIndex < tabs.length - 1) {
           let newTabs = tabs.slice(0, targetIndex + 1);
-          
+
           // 如果homePath的tab在右侧被删除了，需要保留它
           if (homePath) {
             const homeTab = tabs.find((tab) => tab.key === homePath);
-            if (homeTab && !newTabs.some(tab => tab.key === homePath)) {
-              newTabs.push(homeTab);
+            if (homeTab && !newTabs.some((tab) => tab.key === homePath)) {
+              // 始终保持 homeTab 在第一个
+              newTabs = [homeTab, ...newTabs];
             }
           }
-          
+
           // 如果当前激活的tab不在保留的tab中，需要激活目标tab
-          const newActiveKey = newTabs.some(tab => tab.key === activeKey) ? activeKey : targetKey;
-          set({ 
+          const newActiveKey = newTabs.some((tab) => tab.key === activeKey) ? activeKey : targetKey;
+          set({
             tabs: newTabs,
-            activeKey: newActiveKey
+            activeKey: newActiveKey,
           });
           return newActiveKey;
         }
@@ -198,32 +207,29 @@ export const useTabStore = create<TabStore>()(
 
       closeAllTabs: (homePath?: string) => {
         const { tabs } = get();
-        
+
         if (homePath) {
           // 保留homePath的tab
           const homeTab = tabs.find((tab) => tab.key === homePath);
           if (homeTab) {
-            set({ 
-              tabs: [homeTab], 
-              activeKey: homePath 
+            set({
+              tabs: [homeTab],
+              activeKey: homePath,
             });
             return homePath;
           }
         }
-        
+
         // 如果没有homePath或找不到homeTab，清空所有tabs
         set({ tabs: [], activeKey: '' });
         return '';
       },
 
       reloadTab: (targetKey: string) => {
-        // 这里可以通过重新渲染组件来实现重新加载
-        // 暂时只是重新设置activeKey来触发重新渲染
-        const { activeKey } = get();
-        if (targetKey === activeKey) {
-          set({ activeKey: '' });
-          setTimeout(() => set({ activeKey: targetKey }), 0);
-        }
+        const { tabs } = get();
+        // 1. 更新 tab 的 reloadKey，强制重新挂载组件
+        const newTabs = tabs.map((tab) => (tab.key === targetKey ? { ...tab, reloadKey: Date.now() } : tab));
+        set({ tabs: newTabs });
       },
 
       pinTab: (targetKey: string) => {
@@ -255,6 +261,6 @@ export const useTabStore = create<TabStore>()(
     {
       name: 'tab-store',
       getStorage: () => localStorage,
-    } as PersistOptions<TabStore>,
-  ),
+    } as PersistOptions<TabStore>
+  )
 );

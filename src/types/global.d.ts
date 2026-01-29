@@ -40,12 +40,12 @@ export interface PageResult<T> {
    * 当前页码
    */
   pageNumber: number;
-  
+
   /**
    * 每页显示数量
    */
   pageSize: number;
-  
+
   /**
    * 总记录数
    */
@@ -55,7 +55,7 @@ export interface PageResult<T> {
    * 总页数
    */
   totalPage: number;
-  
+
   /**
    * 数据列表
    */

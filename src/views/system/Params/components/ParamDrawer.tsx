@@ -1,8 +1,8 @@
+import { Button, Drawer, Form, Input, type InputRef, Select, Space, Switch } from 'antd';
 import type React from 'react';
-import { useEffect } from 'react';
-import { Drawer, Form, Input, Select, Switch, Button, Space } from 'antd';
+import { useEffect, useRef } from 'react';
 import type { SysParam, SysParamFormData } from '@/services/system/params';
-import { DATA_TYPE_OPTIONS, CATEGORY_OPTIONS } from '@/services/system/params';
+import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
 
 const { TextArea } = Input;
 
@@ -10,7 +10,7 @@ interface ParamDrawerProps {
   open: boolean;
   title: string;
   loading: boolean;
-  initialValues?: Partial<SysParam>;
+  initialValues?: Partial<SysParam> | undefined;
   onOk: (values: SysParamFormData) => void;
   onCancel: () => void;
 }
@@ -20,7 +20,7 @@ interface ParamDrawerProps {
  */
 const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initialValues, onOk, onCancel }) => {
   const [form] = Form.useForm();
-
+  const codeRef = useRef<InputRef>(null);
   useEffect(() => {
     if (open && initialValues) {
       form.setFieldsValue(initialValues);
@@ -29,10 +29,13 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
     }
   }, [open, initialValues, form]);
 
+  /**
+   * 确定按钮回调
+   */
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      values.categoryName = CATEGORY_OPTIONS.find(option => option.value === values.category)?.label || '';
+      values.categoryName = CATEGORY_OPTIONS.find((option) => option.value === values.category)?.label || '';
       values.status = Boolean(values.status);
       values.required = Boolean(values.required);
       onOk(values);
@@ -46,11 +49,18 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
     }
   };
 
+  /**
+   * 取消按钮回调
+   */
   const handleCancel = () => {
     form.resetFields();
     onCancel();
   };
 
+  /**
+   * 数据类型改变回调
+   * @param value 数据类型
+   */
   const handleDataTypeChange = (value: string) => {
     // 根据数据类型清空相关字段
     if (value === 'number') {
@@ -60,12 +70,22 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
     }
   };
 
+  /**
+   * 打开抽屉后回调
+   * @param open 是否打开
+   */
+  const afterOpenChange = (open: boolean) => {
+    if (open) {
+      codeRef.current?.focus({ cursor: 'end' });
+    }
+  };
+
   return (
     <Drawer
       title={title}
       open={open}
       onClose={handleCancel}
-      width={700}
+      size={700}
       className="param-drawer"
       styles={{
         footer: {
@@ -80,6 +100,7 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
           </Button>
         </Space>
       }
+      afterOpenChange={afterOpenChange}
     >
       <Form
         form={form}
@@ -103,12 +124,13 @@ const ParamDrawer: React.FC<ParamDrawerProps> = ({ open, title, loading, initial
         <Form.Item
           name="code"
           label="参数标识"
+          tooltip="参数标识只能包含字母、数字和下划线，且必须以字母开头"
           rules={[
             { required: true, message: '请输入参数标识' },
             { pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/, message: '参数标识只能包含字母、数字和下划线，且必须以字母开头' },
           ]}
         >
-          <Input autoComplete="off" placeholder="请输入参数标识" />
+          <Input ref={codeRef} autoComplete="off" placeholder="请输入参数标识" />
         </Form.Item>
 
         <Form.Item name="name" label="参数名称" rules={[{ required: true, message: '请输入参数名称' }]}>

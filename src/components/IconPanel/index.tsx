@@ -1,8 +1,7 @@
 import * as AntdIcon from '@ant-design/icons';
 import { Pagination } from 'antd';
 import { random } from 'lodash-es';
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isValidElementType } from 'react-is';
 
 // antd中所有的图标库
@@ -45,7 +44,7 @@ const IconPanel: React.FC<IconPanelProps> = (props) => {
               }`}
               onClick={() => handleIconClick(icon.displayName)}
             >
-              {React.createElement(icon, { style: { fontSize: '18px' } })}
+              {React.createElement(icon, { className: 'text-[18px]!' })}
             </div>
           );
         })}

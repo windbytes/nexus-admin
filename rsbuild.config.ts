@@ -1,13 +1,14 @@
 import path from 'node:path';
+import { defineConfig } from '@rsbuild/core';
+import { pluginBabel } from '@rsbuild/plugin-babel';
+import { pluginImageCompress } from '@rsbuild/plugin-image-compress';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginSass } from '@rsbuild/plugin-sass';
+import { pluginSvgr } from '@rsbuild/plugin-svgr';
 import CompressionPlugin from 'compression-webpack-plugin';
 import { pluginHtmlMinifierTerser } from 'rsbuild-plugin-html-minifier-terser';
 import { pluginMockServer } from 'rspack-plugin-mock/rsbuild';
-import { defineConfig } from '@rsbuild/core';
-import { pluginImageCompress } from '@rsbuild/plugin-image-compress';
-import { pluginBabel } from '@rsbuild/plugin-babel';
-import { pluginReact } from '@rsbuild/plugin-react';
-import { pluginSvgr } from '@rsbuild/plugin-svgr';
-import { pluginSass } from '@rsbuild/plugin-sass';
+import Icons from 'unplugin-icons/rspack';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -21,22 +22,14 @@ export default defineConfig({
           threshold: 10240,
           minRatio: 0.8,
           algorithm: 'gzip',
-          deleteOriginalAssets: false
+          deleteOriginalAssets: false,
         }),
-        // 生成.br压缩文件(暂时不要，如果配置了这个需要生效的话需要nginx安装ngx_brotli模块)
-        // new CompressionPlugin({
-        //   filename: "[path][base].br",
-        //   algorithm: "brotliCompress", // 使用 brotli 压缩
-        //   test: /\.(js|css|html|svg)$/,
-        //   compressionOptions: {
-        //     level: 11, // Brotli 压缩等级（0-11，11 压缩率最高但最慢）
-        //   },
-        //   threshold: 10240,
-        //   minRatio: 0.8,
-        //   deleteOriginalAssets: false
-        // }),
-      ]
-    }
+        Icons({
+          compiler: 'jsx',
+          jsx: 'react',
+        }),
+      ],
+    },
   },
   plugins: [
     // 表示将react和router相关的包拆分为单独的chunk
@@ -47,14 +40,12 @@ export default defineConfig({
       },
     }),
     // 只在生产环境启用编译器
-    ...(isDev ? [] : [
-      pluginBabel({
-        include: /\.(?:jsx|tsx)$/,
-        babelLoaderOptions(opts) {
-          opts.plugins?.unshift('babel-plugin-react-compiler');
-        },
-      })
-    ]),
+    pluginBabel({
+      include: /\.(?:jsx|tsx)$/,
+      babelLoaderOptions(opts) {
+        opts.plugins?.unshift('babel-plugin-react-compiler');
+      },
+    }),
     // 将SVG转换为React组件
     pluginSvgr(),
     pluginSass({
@@ -128,10 +119,6 @@ export default defineConfig({
       forceSplitting: {
         axios: /node_modules[\\/]axios/,
         antd: /node_modules[\\/]antd/,
-        //   echarts: /node_modules[\\/]echarts/,
-        //   zrender: /node_modules[\\/]zrender/,
-        // antdIcons: /node_modules[\\/]@ant-design\/icons/,
-        // 'rc-cp': /node_modules[\\/]rc-/,
       },
     },
     // 启用构建缓存

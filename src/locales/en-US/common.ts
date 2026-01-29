@@ -1,12 +1,13 @@
 const translation = {
   app: {
-    name: 'Nexus Admin',
+    name: 'Nexus',
   },
   api: {},
   operation: {
     confirm: 'confirm',
     cancel: 'cancel',
     delete: 'delete',
+    batchDelete: 'batch delete',
     edit: 'edit',
     add: 'add',
     save: 'save',
@@ -67,9 +68,9 @@ const translation = {
   maximize: 'Maximize',
   reload: 'Reload',
   openInNewWindow: 'Open in new window',
-  closeLeftTabs: 'Close left tabs',
-  closeRightTabs: 'Close right tabs',
-  closeOtherTabs: 'Close other tabs',
-  closeAllTabs: 'Close all tabs',
+  closeLeftTabs: 'Close left',
+  closeRightTabs: 'Close right',
+  closeOtherTabs: 'Close other',
+  closeAllTabs: 'Close all',
 };
 export default translation;

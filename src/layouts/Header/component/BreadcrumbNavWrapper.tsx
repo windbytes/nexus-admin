@@ -8,7 +8,7 @@ const BreadcrumbNavWrapper = () => {
   const breadcrumbEnable = usePreferencesStore(
     (state) => state.preferences.breadcrumb.enable
   );
-  return breadcrumbEnable ? <BreadcrumbNav /> : null;
+  return breadcrumbEnable && <BreadcrumbNav />;
 };
 
 export default BreadcrumbNavWrapper;

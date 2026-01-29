@@ -1,11 +1,16 @@
-import { forwardRef, useImperativeHandle, useRef, useCallback, useEffect, useState } from 'react';
-import type { OnMount, OnChange, OnValidate } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
+import type { OnChange, OnMount, OnValidate } from '@monaco-editor/react';
 import { Editor } from '@monaco-editor/react';
-import type { CodeEditorProps, CodeEditorRef } from './types';
+import type { editor } from 'monaco-editor';
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import './index.scss';
+import type { CodeEditorProps, CodeEditorRef } from './types';
 
-const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
+/**
+ * 代码编辑器组件
+ * 基于 Monaco Editor 封装
+ * React 19 新特性：直接接收 ref prop，无需 forwardRef 包装
+ */
+const CodeEditor: React.FC<CodeEditorProps> = ({
   value = '',
   language = 'javascript',
   theme = 'vs',
@@ -27,10 +32,10 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
   options = {},
   className = '',
   style = {},
-}, ref) => {
+  ref,
+}) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const [isEditorReady, setIsEditorReady] = useState(false);
-  const [currentValue, setCurrentValue] = useState(value);
+  const [currentValue, setCurrentValue] = useState('');
   const [currentLanguage, setCurrentLanguage] = useState(language);
   const [currentTheme, setCurrentTheme] = useState(theme);
   const [isReadOnly, setIsReadOnly] = useState(readOnly);
@@ -84,8 +89,8 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
     readOnly: isReadOnly,
   };
 
-  // 暴露编辑器方法给父组件
-  useImperativeHandle(ref, () => ({
+  // 暴露编辑器方法给父组件（使用 React 19 的 ref prop）
+  useImperativeHandle<CodeEditorRef, CodeEditorRef>(ref, () => ({
     getEditor: () => editorRef.current,
     
     getValue: () => {
@@ -265,7 +270,6 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
   // 编辑器挂载完成回调
   const handleEditorDidMount: OnMount = useCallback((editor: editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
-    setIsEditorReady(true);
     
     // 设置占位符 - 使用简单的文本装饰
     if (placeholder && !value) {
@@ -342,6 +346,10 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
     };
   }, []);
 
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value]);
+
   return (
     <div 
       className={`code-editor-container ${className} ${isReadOnly ? 'readonly' : ''}`}
@@ -360,8 +368,6 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({
       />
     </div>
   );
-});
-
-CodeEditor.displayName = 'CodeEditor';
+};
 
 export default CodeEditor;

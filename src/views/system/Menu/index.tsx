@@ -1,195 +1,187 @@
-import { Layout, theme } from 'antd';
+import { ExclamationCircleFilled, PlusOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { App, Button } from 'antd';
+import { isEqual } from 'lodash-es';
 import type React from 'react';
-import { useCallback, useReducer } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
-import MenuDetail from './menu-detail';
-import MenuInfoDrawer from './menu-info-drawer';
-import MenuInterfacePermission from './menu-interface-permission';
-import MenuTree from './menu-tree';
+import { type Key, useState } from 'react';
+import ProTable from '@/components/ProTable';
 import { menuService } from '@/services/system/menu/menuApi';
+import type { MenuModel } from '@/services/system/menu/type';
+import MenuInfoModal from './components/MenuInfoModal';
+import SearchForm from './components/SearchForm';
+import { useMenuActions } from './hooks/useMenuActions';
+import { useMenuModals } from './hooks/useMenuModals';
+import { useMenuPermissions } from './hooks/useMenuPermissions';
+import { useMenuTableColumns } from './hooks/useMenuTableColumns';
+import type { MenuSearchParams } from './types';
 
 /**
- *
- * @returns 菜单
+ * 菜单管理页面主组件
  */
 const Menu: React.FC = () => {
-  const { token } = theme.useToken();
-  const { message, modal } = App.useApp();
-  const queryClient = useQueryClient();
-  
-  // 合并的状态
-  const [state, dispatch] = useReducer((prev: any, action: any) => ({ ...prev, ...action }), {
-    // 抽屉是否打开
-    openDrawer: false,
-    // 当前选中的菜单
-    currentMenu: null,
-    // 当前的操作
-    operation: 'view',
-    // 复制的菜单数据（用于复制功能）
-    copiedMenuData: null,
+  const { modal } = App.useApp();
+  // 窗口管理hook
+  const {
+    modal: modalName,
+    current,
+    editingMenu,
+    parentMenu,
+    copiedMenuData,
+    openModal,
+    closeModal,
+    setCopiedData,
+  } = useMenuModals();
+  // 选中的行
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  // 查询参数
+  const [searchParams, setSearchParams] = useState<MenuSearchParams>({});
+  // 权限列表
+  const permissions = useMenuPermissions();
+
+  // 查询菜单数据
+  const {
+    isFetching,
+    data: menuList,
+    refetch,
+  } = useQuery({
+    queryKey: ['sys_menu', searchParams],
+    queryFn: () => menuService.getAllMenus({ name: searchParams.name }),
   });
 
-  /**
-   * 选择菜单
-   * @param menu 菜单
-   */
-  const onSelectMenu = useCallback((menu: any) => {
-    console.log('选中节点', menu);
-    dispatch({ currentMenu: menu });
-  }, []);
-
-  /**
-   * 打开抽屉
-   * @param open 是否打开
-   */
-  const onOpenDrawer = useCallback((open: boolean, operation: string) => {
-    if (!open) {
-      // 关闭抽屉时清空复制的菜单数据
-      dispatch({ openDrawer: open, operation, copiedMenuData: null });
-    } else {
-      dispatch({ openDrawer: open, operation });
-    }
-  }, []);
-
-  /**
-   * 复制菜单
-   * @param menuData 要复制的菜单数据
-   */
-  const handleCopyMenu = useCallback((menuData: any) => {
-    // 复制菜单数据，移除id等唯一标识字段
-    const copiedData = {
-      ...menuData,
-      id: undefined, // 移除id，确保是新增
-      name: `${menuData.name}_副本`, // 在名称后添加"_副本"标识
-      url: menuData.url ? `${menuData.url}_copy` : undefined, // 如果存在url，添加"_copy"后缀
-      componentName: menuData.componentName ? `${menuData.componentName}_copy` : undefined, // 如果存在组件名，添加"_copy"后缀
-    };
-    
-    // 设置复制的菜单数据并打开新增抽屉
-    dispatch({ 
-      copiedMenuData: copiedData, 
-      openDrawer: true, 
-      operation: 'add' 
-    });
-  }, []);
-
-  // 新增菜单的mutation
-  const addMenuMutation = useMutation({
-    mutationFn: async (menuData: Record<string, any>) => {
-      return await menuService.addMenu(menuData);
-    },
-    onSuccess: () => {
-      // 重新获取菜单数据
-      queryClient.invalidateQueries({ queryKey: ['sys_menu'] });
-      // 关闭抽屉
-      dispatch({ openDrawer: false });
-    },
-    onError: (error: any) => {
-      modal.error({
-        title: '菜单新增失败',
-        content: `新增菜单时发生错误：${error.message || '未知错误'}。请检查输入数据或联系技术支持。`,
-      });
-    },
-  });
-
-  // 修改菜单的mutation
-  const updateMenuMutation = useMutation({
-    mutationFn: async (menuData: Record<string, any>) => {
-      return await menuService.updateMenu(menuData);
-    },
-    onSuccess: () => {
-      // 重新获取菜单数据
-      queryClient.invalidateQueries({ queryKey: ['sys_menu'] });
-      // 关闭抽屉
-      dispatch({ openDrawer: false });
-    },
-    onError: (error: any) => {
-      modal.error({
-        title: '菜单修改失败',
-        content: `修改菜单时发生错误：${error.message || '未知错误'}。请检查输入数据或联系技术支持。`,
-      });
-    },
-  });
-
-  // 删除菜单的mutation
-  const deleteMenuMutation = useMutation({
-    mutationFn: async (menuId: string) => {
-      return await menuService.deleteMenu(menuId);
-    },
-    onSuccess: () => {
-      message.success('菜单删除成功！');
-      // 重新获取菜单数据
-      queryClient.invalidateQueries({ queryKey: ['sys_menu'] });
-      // 清空当前选中的菜单
-      dispatch({ currentMenu: null });
-    },
-    onError: (error: any) => {
-      modal.error({
-        title: '菜单删除失败',
-        content: `删除菜单时发生错误：${error.message || '未知错误'}。请检查菜单状态或联系技术支持。`,
-      });
-    },
-  });
-
-  /**
-   * 弹窗点击确定的回调函数
-   * @param menuData 编辑的菜单数据
-   */
-  const handleDrawerOk = async (menuData: Record<string, any>) => {
-    try {
-      if (state.operation === 'add') {
-        // 新增数据
-        await addMenuMutation.mutateAsync(menuData);
-      } else if (state.operation === 'edit') {
-        // 编辑数据
-        await updateMenuMutation.mutateAsync(menuData);
-      }
-    } catch (error) {
-      // 错误已在mutation中处理，这里不需要额外处理
-      console.error('操作失败:', error);
-    }
+  // 通用成功回调
+  const handleSuccess = () => {
+    // 关闭窗口
+    closeModal();
+    setSelectedRowKeys([]);
+    refetch();
   };
 
-  /**
-   * 删除菜单
-   * @param menuId 菜单ID
-   */
-  const handleDeleteMenu = async (menuId: string) => {
-    try {
-      await deleteMenuMutation.mutateAsync(menuId);
-    } catch (error) {
-      // 错误已在mutation中处理，这里不需要额外处理
-      console.error('删除失败:', error);
+  // 菜单操作hook
+  const { deleteMenuBatch, handleModalSave } = useMenuActions({
+    currentRow: editingMenu,
+    onSuccess: handleSuccess,
+  });
+
+  // 处理搜索
+  const handleSearch = (values: MenuSearchParams) => {
+    // 判断参数是否发生变化
+    if (isEqual(values, searchParams)) {
+      // 参数没有变化，手动刷新数据
+      refetch();
+      return;
     }
+    setSearchParams((prev: MenuSearchParams) => ({ ...prev, ...values }));
+  };
+
+  // 处理行选择变化
+  const handleSelectionChange = (keys: Key[], _rows: MenuModel[]) => {
+    setSelectedRowKeys(keys as string[]);
+  };
+
+  // 批量删除
+  const handleBatchDelete = (ids: string[]) => {
+    if (!permissions.canDeleteMenu) {
+      modal.error({
+        title: '权限不足',
+        content: '您没有删除菜单的权限，请联系管理员获取相应权限。',
+      });
+      return;
+    }
+    modal.confirm({
+      title: '删除菜单',
+      icon: <ExclamationCircleFilled />,
+      content: '确定删除选中的菜单吗？数据删除后将无法恢复！',
+      okButtonProps: {
+        danger: true,
+        type: 'default',
+      },
+      cancelButtonProps: {
+        type: 'primary',
+      },
+      onOk() {
+        deleteMenuBatch(ids);
+      },
+    });
+  };
+
+  // 获取表格列定义
+  const columns = useMenuTableColumns({
+    currentRow: current,
+    onSuccess: handleSuccess,
+    openModal,
+    setCopiedData,
+  });
+
+  // 打开详情
+  const handleOpenDetail = (record: MenuModel) => {
+    openModal('view', record);
   };
 
   return (
     <>
-      <Layout>
-        <Layout.Sider width={320} theme="light" style={{ borderRadius: token.borderRadius }}>
-          {/* 左边菜单列表 */}
-          <MenuTree onSelectMenu={onSelectMenu} onOpenDrawer={onOpenDrawer} />
-        </Layout.Sider>
-        <Layout.Content className="flex flex-col ml-4 gap-4">
-          {/* 菜单详情 */}
-          <MenuDetail 
-            menu={state.currentMenu} 
-            onOpenDrawer={onOpenDrawer}
-            onDeleteMenu={handleDeleteMenu}
-            onCopyMenu={handleCopyMenu}
-          />
-          {/* 菜单接口权限列表 */}
-          <MenuInterfacePermission menu={state.currentMenu} />
-        </Layout.Content>
-      </Layout>
-      <MenuInfoDrawer
-        menu={state.currentMenu}
-        operation={state.operation}
-        open={state.openDrawer}
-        copiedMenuData={state.copiedMenuData}
-        onOk={handleDrawerOk}
-        onClose={onOpenDrawer}
+      <div className="h-full flex flex-col gap-2">
+        {/* 菜单搜索栏 */}
+        <SearchForm onSearch={handleSearch} loading={isFetching} />
+        {/* 菜单数据表格 */}
+        <ProTable<MenuModel>
+          title="菜单列表"
+          columns={columns}
+          dataSource={menuList || []}
+          loading={isFetching}
+          rowKey="id"
+          actionButtons={
+            <div className="flex gap-2">
+              {permissions.canAddMenu && (
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
+                  新增菜单
+                </Button>
+              )}
+              {permissions.canDeleteMenu && (
+                <Button
+                  danger
+                  onClick={() => handleBatchDelete(selectedRowKeys)}
+                  disabled={selectedRowKeys.length === 0}
+                >
+                  批量删除
+                </Button>
+              )}
+            </div>
+          }
+          onRefresh={refetch}
+          rowSelection={{
+            type: 'checkbox' as const,
+            checkStrictly: false,
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          expandable={{
+            defaultExpandAllRows: false,
+            childrenColumnName: 'children',
+          }}
+          rowClassName={(record: MenuModel) => (record.status === false ? 'opacity-60 bg-gray-50' : '')}
+          onRow={(record: MenuModel) => ({
+            onDoubleClick: () => handleOpenDetail(record),
+          })}
+          bordered
+          pagination={false}
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
+      </div>
+      {/* 编辑/新增菜单弹窗 */}
+      <MenuInfoModal
+        open={modalName === 'add' || modalName === 'edit' || modalName === 'view'}
+        onOk={handleModalSave}
+        onClose={closeModal}
+        menu={modalName === 'add' ? parentMenu || undefined : editingMenu || undefined}
+        operation={modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit'}
+        copiedMenuData={copiedMenuData || undefined}
       />
     </>
   );

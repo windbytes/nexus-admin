@@ -1,26 +1,53 @@
-import { create } from "zustand";
-import { persist, type PersistOptions } from "zustand/middleware";
-import { defaultPreferences } from "@/config/defaultPreferences";
-import type { Preferences } from "./storeState";
+import { create } from 'zustand';
+import { type PersistOptions, persist } from 'zustand/middleware';
+import { defaultPreferences } from '@/config/defaultPreferences';
+import type { RouteItem } from '@/types/route';
+import { buildMenuCaches, type MenuCaches } from '@/utils/utils';
+import type { Preferences } from './storeState';
 
 // 定义category和key的类型
 export type Category = keyof Preferences;
 export type SettingKey<T extends Category> = keyof Preferences[T];
 
 /**
+ * 获取 preferences 中的值
+ * @param preferences - 全局状态库中的 preferences
+ * @param category - 类别
+ * @param key - 设置键
+ * @returns 设置值
+ */
+const getPreferenceValue = <T extends Category, K extends SettingKey<T>>(
+  preferences: Preferences,
+  category: T,
+  pKey: K
+): Preferences[T][K] => {
+  return preferences[category][pKey];
+};
+
+const emptyCaches: MenuCaches = {
+  pathMap: new Map(),
+  ancestorsMap: new Map(),
+  routeToMenuPathMap: new Map(),
+};
+
+/**
  * 定义状态对象
  */
 interface MenuStore {
   // 菜单状态
-  menus: any[];
-  setMenus: (menus: any[]) => void;
+  menus: RouteItem[];
+  // 按钮权限点
+  buttonPermissions: string[];
+  caches: MenuCaches;
+  setMenus: (menus: RouteItem[]) => void;
+  setButtonPermissions: (buttonPermissions: string[]) => void;
 }
 
 interface PreferencesStore {
   // 系统配置状态
   preferences: Preferences;
   // 更新全局状态
-  updatePreferences: (category: Category, key: any, value: any) => void;
+  updatePreferences: (category: Category, key: string, value: any) => void;
   // 重置全局状态
   resetPreferences: () => void;
 }
@@ -29,7 +56,15 @@ interface PreferencesStore {
 const useMenuStore = create<MenuStore>((set) => ({
   // 菜单状态
   menus: [],
-  setMenus: (menus: any[]) => set({ menus: menus }),
+  buttonPermissions: [],
+  setButtonPermissions: (buttonPermissions: string[]) => {
+    set({ buttonPermissions });
+  },
+  caches: emptyCaches,
+  setMenus: (menus: RouteItem[]) => {
+    const caches: MenuCaches = buildMenuCaches(menus);
+    set({ menus, caches });
+  },
 }));
 
 // 创建全局设置store
@@ -39,7 +74,7 @@ const usePreferencesStore = create<PreferencesStore>()(
       // 系统配置状态
       preferences: defaultPreferences,
       // 更新全局状态
-      updatePreferences: (category: Category, key: any, value: any) =>
+      updatePreferences: (category: Category, key: string, value: any) =>
         set((state) => ({
           preferences: {
             ...state.preferences,
@@ -53,10 +88,10 @@ const usePreferencesStore = create<PreferencesStore>()(
       resetPreferences: () => set({ preferences: defaultPreferences }),
     }),
     {
-      name: "preferences",
+      name: 'preferences',
       getStorage: () => localStorage,
     } as PersistOptions<PreferencesStore>
   )
 );
 
-export { useMenuStore, usePreferencesStore };
+export { useMenuStore, usePreferencesStore, getPreferenceValue };

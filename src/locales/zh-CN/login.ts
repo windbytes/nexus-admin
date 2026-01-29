@@ -1,5 +1,5 @@
 const translation = {
-  description: 'Nexus 平台',
+  description: 'Nexus',
   title: '用户登录',
   enterUsername: '请输入用户名',
   enterPassword: '请输入密码',
@@ -9,7 +9,7 @@ const translation = {
   login: '登录',
   loginSuccess: '登录成功',
   loginFail: '登录失败',
-  welcome: '欢迎使用 Nexus 平台',
+  welcome: '欢迎使用 Nexus',
   username: '用户名',
   password: '密码',
   loginValid: '凭证无效',

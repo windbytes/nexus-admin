@@ -69,37 +69,18 @@ const MyLayout: React.FC = () => {
     (state) => state.updatePreferences
   );
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        width: "100%",
-        gap: "1.25rem",
-      }}
-    >
+    <div className="flex flex-wrap w-full gap-5">
       {PRESET.map((item) => (
         <div
           key={item.name}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            cursor: "pointer",
-            width: "100px",
-          }}
+          className="flex flex-col cursor-pointer w-[100px]"
           onClick={() => {
             updatePreferences("app", "layout", item.name);
           }}
         >
-          <div
-            className="outline-box"
-            style={{
-              alignItems: "center",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+          <div className="outline-box items-center flex justify-center">
             {(() => {
-              const Comp = components[item.type];
+              const Comp = components[item.type]!;
               return <Comp />;
             })()}
           </div>
@@ -108,10 +89,7 @@ const MyLayout: React.FC = () => {
             {item.tip && (
               <Tooltip title={item.tip}>
                 <QuestionCircleOutlined
-                  style={{
-                    fontSize: ".75rem",
-                    marginLeft: ".25rem",
-                  }}
+                  className="text-xs! ml-1"
                 />
               </Tooltip>
             )}

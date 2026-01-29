@@ -1,8 +1,8 @@
+import type { CreateVersionParams } from '@/services/integrated/version/model';
+import { useCreateVersion, useVersionList } from '@/views/integrated/Versions/useVersionQueries';
+import { App, Button, Checkbox, Form, Input, Modal, Select, Typography } from 'antd';
 import type React from 'react';
 import { useEffect, useMemo } from 'react';
-import { Modal, Form, Input, Select, Checkbox, Button, message, Typography } from 'antd';
-import type { CreateVersionParams } from '@/services/integrated/version/model';
-import { useVersionList, useCreateVersion } from '@/views/integrated/Versions/useVersionQueries';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -22,7 +22,7 @@ const CreateVersionModal: React.FC<CreateVersionModalProps> = ({
   currentVersion = 'v2.1.0',
 }) => {
   const [form] = Form.useForm();
-
+  const {message} = App.useApp();
   // 使用 React Query 获取版本列表
   const { data: versionResult } = useVersionList(
     {

@@ -1,4 +1,4 @@
-import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 
 interface TitleProps {
@@ -18,11 +18,6 @@ const Title: React.FC<TitleProps> = ({
   onKeyDown,
   inputRef
 }) => {
-  const handleClear = () => {
-    onSearch('');
-    inputRef.current?.focus();
-  };
-
   return (
     <div className='flex justify-start items-center'>
       <Input 
@@ -33,16 +28,8 @@ const Title: React.FC<TitleProps> = ({
         value={searchValue}
         onChange={(e) => onSearch(e.target.value)}
         onKeyDown={onKeyDown}
-        prefix={<SearchOutlined style={{ cursor: 'pointer', fontSize: '18px' }} />}
-        suffix={
-          searchValue && (
-            <ClearOutlined
-              style={{ cursor: 'pointer', fontSize: '14px', color: '#999' }}
-              onClick={handleClear}
-            />
-          )
-        }
-        allowClear={false}
+        prefix={<SearchOutlined className='text-[18px] cursor-pointer' />}
+        allowClear
       />
     </div>
   );

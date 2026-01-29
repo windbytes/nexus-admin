@@ -10,7 +10,8 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
   return new RAxios(
     deepMerge(
       {
-        authenticationScheme: '',
+        authenticationScheme: 'Bearer',
+        withCredentials: true, // 允许携带token
         timeout: 0,
         headers: { 'Content-Type': ContentTypeEnum.JSON },
         // 数据处理方式
@@ -43,8 +44,8 @@ function createAxios(opts?: Partial<CreateAxiosOptions>) {
           encrypt: import.meta.env.MODE === 'development' ? 0 : 1,
         },
       },
-      opts || {},
-    ),
+      opts || {}
+    )
   );
 }
 

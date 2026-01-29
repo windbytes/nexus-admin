@@ -4,7 +4,7 @@ import type { Tag } from './tagsModel';
 /**
  * 标签相关接口
  */
-const TagsApi: Record<string, string> = {
+const TagsApi = {
   /**
    * 获取标签列表
    */
@@ -73,7 +73,7 @@ export const tagsService: ITagsService = {
   /**
    * 获取标签列表
    */
-  async getTagsList(type?: string): Promise<Tag[]> {
+  async getTagsList(type: string): Promise<Tag[]> {
     const response = await HttpRequest.get(
       {
         url: TagsApi.getTagsList,

@@ -1,33 +1,48 @@
-import { Layout, Skeleton } from "antd";
-import type React from "react";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { Outlet, useLocation } from "react-router";
-import AuthRouter from "@/router/AuthRouter";
-import { ErrorFallback } from "@/router/ErrorBoundary";
-import KeepAlive from "@/components/KeepAlive";
+import { Layout, Spin } from 'antd';
+import { memo, type ReactNode, Suspense, useMemo } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { BubbleLoading } from '@/components/icons';
+import KeepAlive from '@/components/KeepAlive';
+import { ErrorFallback } from './ErrorBoundary';
 
 /**
  * 中间主内容区域
- * @returns
+ * TanStack Router 版本
+ * 性能优化：
+ * 1. 使用 memo 避免不必要的重渲染
+ * 2. ErrorBoundary 使用 pathname 作为 key，确保路由切换时重置错误状态
+ * 3. 使用更明显的加载指示器（Spin 替代 Skeleton）
+ * 4. 添加全屏加载样式，提升用户体验
  */
-const Content: React.FC = () => {
-  // 错误边界加key的目的是为了每次路由切换的时候都重新渲染错误边界，避免切换到新的路由的时候不会重新渲染
-  const location = useLocation();
+interface ContentProps {
+  children?: ReactNode;
+}
+
+const Content = memo(({ children }: ContentProps) => {
+  // 【优化】使用更明显的加载指示器
+  const loadingFallback = useMemo(
+    () => (
+      <div className="h-full flex items-center justify-center min-h-[400px]">
+        <Spin indicator={<BubbleLoading width={48} />} size="large" />
+      </div>
+    ),
+    []
+  );
+
   return (
     <Layout.Content
-      className="overflow-x-hidden overflow-y-auto"
+      className="overflow-x-hidden overflow-y-auto h-full relative flex flex-col p-3"
+      style={{ overscrollBehavior: 'contain' }}
     >
-      <Suspense fallback={<Skeleton />}>
-        <ErrorBoundary key={location.pathname} fallback={<ErrorFallback />}>
-          <AuthRouter>
-            <KeepAlive>
-              <Outlet />
-            </KeepAlive>
-          </AuthRouter>
-        </ErrorBoundary>
-      </Suspense>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={loadingFallback}>
+          <KeepAlive>{children}</KeepAlive>
+        </Suspense>
+      </ErrorBoundary>
     </Layout.Content>
   );
-};
+});
+
+Content.displayName = 'Content';
+
 export default Content;

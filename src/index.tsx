@@ -1,30 +1,95 @@
-import { createRoot } from 'react-dom/client';
-import '@/styles/global.scss'; // 引入 Sass 文件
-import { BrowserRouter } from 'react-router';
-import GlobalConfigProvider from './GlobalConfigProvider';
-import './index.css';
+import '@/styles/global.scss';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { App as AntdApp, ConfigProvider } from 'antd';
+import 'antd/dist/antd.css';
+import enUS from 'antd/es/locale/en_US';
+import zhCN from 'antd/es/locale/zh_CN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en';
+import 'dayjs/locale/zh-cn';
+import { createRoot } from 'react-dom/client';
+import { useShallow } from 'zustand/shallow';
+import App from './App';
+import './index.css';
+import { usePreferencesStore } from './stores/store';
 import './locales/i18next-config';
-import '@ant-design/v5-patch-for-react-19';
+
+/**
+ * 全局配置提供者组件
+ * 提供 Antd 主题和国际化配置
+ */
+const GlobalProvider: React.FC = () => {
+  // 只订阅需要的状态，避免不必要的重渲染
+  const { colorPrimary, locale, radius } = usePreferencesStore(
+    useShallow((state) => ({
+      colorPrimary: state.preferences.theme.colorPrimary,
+      locale: state.preferences.app.locale,
+      radius: state.preferences.theme.radius,
+    }))
+  );
+
+  // 设置 dayjs 的语言
+  dayjs.locale(locale === 'zh-CN' ? 'zh-cn' : 'en');
+
+  return (
+    <ConfigProvider
+      theme={{
+        hashed: false,
+        // 配置使用零运行时，因此需要手动引入 antd/dist/antd.css，详情参考 {@link https://ant.design/docs/react/customize-theme-cn#zero-runtime}
+        zeroRuntime: true,
+        token: {
+          colorPrimary: colorPrimary,
+          borderRadius: radius,
+        },
+        components: {
+          Layout: {
+            headerPadding: '0',
+            headerHeight: 'auto',
+            bodyBg: '#f2f3f5',
+          },
+          Tree: {
+            directoryNodeSelectedBg: '#e6f4ff',
+            indentSize: 12,
+            directoryNodeSelectedColor: 'rgba(0, 0, 0, 0.88)',
+          },
+          Card: {
+            colorBorder: '#e4e7ed',
+          },
+        },
+      }}
+      locale={locale === 'zh-CN' ? zhCN : enUS}
+    >
+      <AntdApp className="h-full">
+        <App />
+      </AntdApp>
+    </ConfigProvider>
+  );
+};
 
 const container = document.getElementById('root');
+
 if (container) {
+  // 创建 QueryClient 实例
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: false, // 默认所有的useQuery请求都不重试，内部如果有需要重试的，需要手动设置retry: true
-        refetchOnWindowFocus: false, // 窗口聚焦时不重新获取数据，不然浏览器切换tab时会重新获取数据
-        gcTime: 1000 * 60 * 60 * 12, // 12小时后自动垃圾回收，防止内存泄漏
+        retry: false,
+        refetchOnWindowFocus: false, // 窗口聚焦时不重新获取数据
+        refetchOnReconnect: true, // 网络重连时重新获取数据
+        gcTime: 1000 * 60 * 60 * 12, // 12小时后自动垃圾回收
+        networkMode: 'online', // 只在在线时执行查询
+      },
+      mutations: {
+        networkMode: 'online',
       },
     },
   });
+
   const root = createRoot(container);
   root.render(
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <GlobalConfigProvider />
-      </QueryClientProvider>
-    </BrowserRouter>,
+    <QueryClientProvider client={queryClient}>
+      <GlobalProvider />
+    </QueryClientProvider>
   );
 } else {
   console.error('Root element not found');

@@ -1,34 +1,41 @@
-import { memo, useCallback, useEffect, useState, useMemo } from 'react';
-import { Empty, Menu, Spin, type MenuProps } from 'antd';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { Menu, type MenuProps, Spin } from 'antd';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon } from '@iconify-icon/react';
-import { useMenuStore, usePreferencesStore } from '@/stores/store';
-import { getIcon } from '@/utils/optimized-icons';
-import { getOpenKeys, searchRoute } from '@/utils/utils';
-import type { RouteItem } from '@/types/route';
 import { useShallow } from 'zustand/shallow';
-import { useTabStore } from '@/stores/tabStore';
-
-type MenuItem = Required<MenuProps>['items'][number];
+import { BubbleLoading } from '@/components/icons';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import type { MenuCaches } from '@/utils/utils';
+import { searchRoute } from '@/utils/utils';
+import {
+  buildMenuItems,
+  createInitialMenuState,
+  type MenuItem,
+  menuStateReducer,
+  resolveMenuSelection,
+} from './menu-utils';
 
 /**
  * 菜单组件
- * @returns
  */
 const MenuComponent = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const menus = useMenuStore((state) => state.menus);
-  const { activeKey } = useTabStore();
-  const { accordion, dynamicTitle, collapsed } = usePreferencesStore(
+  const { menus, caches } = useMenuStore(
+    useShallow((state) => ({
+      menus: state.menus,
+      caches: state.caches,
+    }))
+  );
+  const { accordion, dynamicTitle, collapsed, locale } = usePreferencesStore(
     useShallow((state) => ({
       accordion: state.preferences.navigation.accordion,
       dynamicTitle: state.preferences.app.dynamicTitle,
       collapsed: state.preferences.sidebar.collapsed,
-    })),
+      locale: state.preferences.app.locale,
+    }))
   );
   const mode = usePreferencesStore((state) => {
     let mode = state.preferences.theme.mode;
@@ -41,139 +48,120 @@ const MenuComponent = () => {
     return mode;
   });
 
+  // 菜单列表
   const [menuList, setMenuList] = useState<MenuItem[]>([]);
+  // 菜单加载状态
   const [loading, setLoading] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  // 菜单状态
+  const [menuState, dispatchMenuState] = useReducer(
+    menuStateReducer,
+    { pathname, caches },
+    (initial: { pathname: string; caches: MenuCaches }) => createInitialMenuState(initial.pathname, initial.caches)
+  );
+  const { selectedKeys, computedOpenKeys, openKeys, userInteracted } = menuState;
 
-  const getItem = (
-    label: any,
-    key?: React.Key | null,
-    icon?: React.ReactNode,
-    children?: MenuItem[],
-    type?: 'group',
-  ): MenuItem => {
-    return {
-      key,
-      icon,
-      children,
-      label: t(label),
-      type,
-    } as MenuItem;
-  };
-
-  const deepLoopFloat = useCallback((menuList: RouteItem[], newArr: MenuItem[] = []) => {
-    for (const item of menuList) {
-      if (item?.meta?.menuType === 2 || item?.meta?.menuType === 3 || item?.hidden) {
-        continue;
-      }
-      if (!item?.children?.length) {
-        newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon)));
-        continue;
-      }
-      newArr.push(getItem(item.meta?.title, item.path, getIcon(item.meta?.icon), deepLoopFloat(item.children)));
-    }
-    return newArr;
+  // 菜单点击
+  const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
+    navigate({ to: key, replace: true });
   }, []);
 
-  const clickMenu: MenuProps['onClick'] = ({ key }: { key: string }) => {
-    // 使用 replace 模式，替换当前历史记录，防止用户通过浏览器后退按钮回到之前的菜单
-    navigate(key, { replace: true });
-  };
+  // 菜单展开状态改变
+  const onOpenChange = (newOpenKeys: string[]) => {
+    // 侧边栏折叠状态下，不响应 openKeys 的变化
+    if (collapsed) {
+      return;
+    }
+    let nextOpenKeys = newOpenKeys;
 
-  useEffect(() => {
-    const openKey = getOpenKeys(pathname, menus);
-    const route = searchRoute(pathname, menus);
-    if (route && Object.keys(route).length) {
-      if (dynamicTitle) {
-        const title = route.meta?.title;
-        if (title) document.title = `Nexus - ${t(title)}`;
+    if (accordion) {
+      if (newOpenKeys.length < 1) {
+        nextOpenKeys = newOpenKeys;
+      } else {
+        const latestOpenKey = newOpenKeys[newOpenKeys.length - 1];
+        if (latestOpenKey && newOpenKeys[0] && latestOpenKey.includes(newOpenKeys[0])) {
+          nextOpenKeys = newOpenKeys;
+        } else if (latestOpenKey) {
+          nextOpenKeys = [latestOpenKey];
+        }
       }
-      // 非折叠状态下，设置打开的 key
-      !collapsed && setOpenKeys(openKey);
     }
-  }, [pathname, collapsed, menus, dynamicTitle, t]);
 
-  // 监听tab切换，同步更新左侧菜单选中状态
-  // 使用useMemo优化，避免不必要的重复渲染
-  const currentSelectedKeys = useMemo(() => {
-    // 如果activeKey与当前pathname不同，说明是通过tab切换触发的
-    // 此时使用activeKey作为选中项
-    if (activeKey && activeKey !== pathname) {
-      return [activeKey];
-    }
-    // 否则使用当前pathname，避免不必要的状态更新
-    return [pathname];
-  }, [activeKey, pathname]);
-
-  // 使用useMemo优化openKeys的计算
-  const currentOpenKeys = useMemo(() => {
-    const targetPath = activeKey && activeKey !== pathname ? activeKey : pathname;
-    return getOpenKeys(targetPath, menus);
-  }, [activeKey, pathname, menus]);
-
-  const onOpenChange = (openKeys: string[]) => {
-    if (!accordion) return setOpenKeys(openKeys);
-    if (openKeys.length < 1) return setOpenKeys(openKeys);
-    const latestOpenKey = openKeys[openKeys.length - 1];
-    if (latestOpenKey.includes(openKeys[0])) return setOpenKeys(openKeys);
-    setOpenKeys([latestOpenKey]);
+    dispatchMenuState({ type: 'user-open-change', openKeys: nextOpenKeys });
   };
 
-  // 智能合并用户手动操作和自动同步的openKeys
-  const mergedOpenKeys = useMemo(() => {
-    // 如果用户手动操作过菜单，优先使用用户的操作
-    if (openKeys.length > 0) {
-      return openKeys;
-    }
-    // 否则使用自动计算的openKeys
-    return currentOpenKeys;
-  }, [openKeys, currentOpenKeys]);
+  const mergedOpenKeys = userInteracted ? openKeys : computedOpenKeys;
 
-  // 只在初始化时设置openKeys，避免覆盖用户操作
+  // title 动态设置
   useEffect(() => {
-    if (!collapsed && openKeys.length === 0) {
-      setOpenKeys(currentOpenKeys);
+    const route = searchRoute(pathname, menus);
+    if (route && Object.keys(route).length && dynamicTitle) {
+      const title = route.meta?.title;
+      if (title) {
+        document.title = `Nexus - ${t(title)}`;
+      }
     }
-  }, [currentOpenKeys, collapsed, openKeys.length]);
+  }, [pathname, menus, dynamicTitle]);
 
+  // 菜单状态同步
   useEffect(() => {
-    if (!menus || menus.length === 0) return;
+    if (!menus || menus.length === 0 || !caches?.pathMap?.size) {
+      return;
+    }
+
+    const { selectedPath, openKeys } = resolveMenuSelection(pathname, caches);
+    if (!selectedPath) {
+      return;
+    }
+
+    dispatchMenuState({
+      type: 'sync',
+      selectedKeys: [selectedPath],
+      computedOpenKeys: openKeys,
+    });
+  }, [pathname, menus, caches]);
+
+  // 【优化】只在菜单数据或语言真正变化时重新生成菜单列表
+  useEffect(() => {
+    if (!menus || menus.length === 0) {
+      setMenuList([]);
+      return;
+    }
+
     setLoading(true);
-    const menu = deepLoopFloat(menus, []);
-    setMenuList(menu);
-    setLoading(false);
-  }, [menus, t, i18n.language, deepLoopFloat]);
+    // 使用 setTimeout 将菜单构建推迟到空闲时
+    const timeoutId = setTimeout(() => {
+      const menu = buildMenuItems(menus, t);
+      setMenuList(menu);
+      setLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [menus, locale, t]);
 
   return (
-    <Spin
-      wrapperClassName="side-menu"
-      indicator={<Icon icon="eos-icons:bubble-loading" width={24} />}
-      spinning={loading}
-      tip="加载中"
-    >
-      {menuList.length > 0 ? (
+    <>
+      {loading ? (
+        <Spin indicator={<BubbleLoading width={24} />} spinning />
+      ) : (
         <Menu
-          style={{
-            borderRight: 0,
-            height: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: '0 8px',
+          className="side-menu"
+          classNames={{
+            root: 'border-e-0!',
           }}
           mode="inline"
           theme={mode}
           inlineCollapsed={collapsed}
-          selectedKeys={currentSelectedKeys}
+          selectedKeys={selectedKeys}
           {...(collapsed ? {} : { openKeys: mergedOpenKeys })}
           items={menuList}
           onClick={clickMenu}
           onOpenChange={onOpenChange}
         />
-      ) : (
-        <Empty description={<>暂无菜单，请检查用户角色是否具有菜单！</>} />
       )}
-    </Spin>
+    </>
   );
 };
 
-export default memo(MenuComponent);
+MenuComponent.displayName = 'MenuComponent';
+
+export default MenuComponent;

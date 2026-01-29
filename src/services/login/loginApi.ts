@@ -2,17 +2,73 @@ import type { Response } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
 /**
+ * 登录请求参数
+ */
+export interface LoginParams {
+  /** 用户名 */
+  username: string;
+  /** 密码 */
+  password: string;
+  /** 验证码 */
+  captchaCode: string;
+  /** 验证码key */
+  captchaKey: string;
+  /** 记住密码 */
+  remember?: boolean;
+}
+
+/**
+ * 用户角色信息
+ */
+export interface UserRole {
+  /** 角色ID */
+  id: string;
+  /** 角色名称 */
+  roleName: string;
+  /** 角色Code */
+  roleCode: string;
+  /** 角色类型 */
+  roleType: string;
+  /** 角色描述 */
+  remark?: string;
+  /** 角色状态 */
+  status: boolean;
+}
+
+/**
+ * 登录响应数据
+ */
+export interface LoginResponse {
+  /** 用户ID */
+  userId: string;
+  /** 用户名 */
+  username: string;
+  /** 访问令牌 */
+  accessToken: string;
+  /** 首页路径 */
+  homePath?: string;
+  /** 用户角色列表 */
+  userRoles: UserRole[];
+}
+
+/**
  * 枚举登录需要的接口地址
  */
 const LoginApi = {
   /**
    * 登录
    */
-  login: '/login',
+  login: '/auth/login',
+
+  /**
+   * 确认选择角色
+   */
+  confirmRole: '/auth/confirm-role',
+
   /**
    * 获取验证码
    */
-  getCode: '/getCaptcha',
+  getCode: '/sys/framework/captcha',
 };
 
 /**
@@ -24,7 +80,15 @@ interface ILoginService {
    * @param params 登录参数
    * @returns 登录结果
    */
-  login(params: any): Promise<Response>;
+  login(params: LoginParams): Promise<Response>;
+
+  /**
+   * 确认选择角色
+   * @param loginToken 登录token
+   * @param roleCode 角色code
+   * @returns 确认选择角色结果
+   */
+  confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }>;
 
   /**
    * 获取验证码
@@ -42,13 +106,29 @@ export const loginService: ILoginService = {
    * @param params 登录参数
    * @returns 登录结果
    */
-  login(params: any): Promise<Response> {
+  login(params: LoginParams): Promise<Response> {
     return HttpRequest.post<Response>(
       {
         url: LoginApi.login,
         data: params,
       },
-      { isTransformResponse: false },
+      { isTransformResponse: false }
+    );
+  },
+
+  /**
+   * 确认选择角色
+   * @param loginToken 登录token
+   * @param roleCode 角色code
+   * @returns 确认选择角色结果
+   */
+  async confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }> {
+    return HttpRequest.post<{ accessToken: string; permissions: string[] }>(
+      {
+        url: LoginApi.confirmRole,
+        data: { loginToken, roleCode },
+      },
+      { successMessageMode: 'none' }
     );
   },
 
@@ -65,7 +145,7 @@ export const loginService: ILoginService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return { key, code };
   },

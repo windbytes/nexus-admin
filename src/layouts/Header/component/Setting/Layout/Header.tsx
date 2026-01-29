@@ -31,9 +31,9 @@ const Header = () => {
       {/* 显示顶栏 */}
       <SwitchItem disabled={false} title="显示顶栏" category="header" pKey="enable" />
       {/* 模式 */}
-      <SelectItem title="模式" items={modeItems} />
+      <SelectItem category="header" pKey="mode" title="模式" items={modeItems} />
       {/* 菜单位置 */}
-      <SelectItem title="菜单位置" />
+      <SelectItem category="header" pKey="menuAlign" title="菜单位置" />
     </>
   );
 };
