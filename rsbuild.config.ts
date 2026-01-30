@@ -89,7 +89,7 @@ export default defineConfig({
   },
   dev: {
     // 按需编译
-    lazyCompilation: true,
+    lazyCompilation: false,
     // 启用热更新
     hmr: true,
     // 显示编译进度条
