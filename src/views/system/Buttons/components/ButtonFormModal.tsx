@@ -24,7 +24,6 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({ open, menuId, record,
 
   useEffect(() => {
     if (!open) {
-      form.resetFields();
       return;
     }
     if (isEdit && record) {
@@ -60,8 +59,13 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({ open, menuId, record,
       };
       await onOk(payload);
       onClose();
-    } catch {
-      // 表单校验失败，不关闭
+    } catch (errorInfo) {
+      // 安全处理 errorInfo
+      const firstErrorField = (errorInfo as any).errorFields?.[0]?.name;
+      if (firstErrorField) {
+        form.scrollToField(firstErrorField);
+        form.focusField(firstErrorField);
+      }
     }
   };
 

@@ -1,8 +1,8 @@
 import { Form, Input, Select, Switch } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
-import { PermissionCodeSelector } from '@/components/PermissionCodeSelector';
 import DragModal from '@/components/modal/DragModal';
+import { PermissionCodeSelector } from '@/components/PermissionCodeSelector';
 import type { ApiModel, ApiSaveParams } from '@/services/system/api/type';
 
 const METHOD_OPTIONS = [
@@ -34,7 +34,6 @@ const ApiFormModal: React.FC<ApiFormModalProps> = ({ open, menuId, record, onOk,
 
   useEffect(() => {
     if (!open) {
-      form.resetFields();
       return;
     }
     if (isEdit && record) {
@@ -74,8 +73,13 @@ const ApiFormModal: React.FC<ApiFormModalProps> = ({ open, menuId, record, onOk,
       };
       await onOk(payload);
       onClose();
-    } catch {
-      // 表单校验失败，不关闭
+    } catch (errorInfo) {
+      // 安全处理 errorInfo
+      const firstErrorField = (errorInfo as any).errorFields?.[0]?.name;
+      if (firstErrorField) {
+        form.scrollToField(firstErrorField);
+        form.focusField(firstErrorField);
+      }
     }
   };
 
