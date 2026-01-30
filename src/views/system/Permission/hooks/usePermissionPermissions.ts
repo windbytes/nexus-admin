@@ -1,7 +1,7 @@
 import { usePermission } from '@/hooks/usePermission';
 
 /**
- * 权限点权限相关的 hooks
+ * 权限点模块权限相关的 hooks
  */
 export const usePermissionPermissions = () => {
   // 新增权限
@@ -13,16 +13,16 @@ export const usePermissionPermissions = () => {
   // 更新状态权限
   const canUpdateStatus = usePermission(['sys:permission:updateStatus']);
   // 批量导入权限
-  const canBatchImport = usePermission(['sys:permission:import']);
+  const canImport = usePermission(['sys:permission:import']);
   // 批量导出权限
-  const canBatchExport = usePermission(['sys:permission:export']);
+  const canExport = usePermission(['sys:permission:export']);
 
   return {
     canAdd,
     canEdit,
     canDelete,
     canUpdateStatus,
-    canBatchImport,
-    canBatchExport,
+    canImport,
+    canExport,
   };
 };

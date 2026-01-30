@@ -1,6 +1,7 @@
 import { Form, Input, Select, Switch } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
+import { PermissionCodeSelector } from '@/components/PermissionCodeSelector';
 import DragModal from '@/components/modal/DragModal';
 import type { ApiModel, ApiSaveParams } from '@/services/system/api/type';
 
@@ -126,7 +127,12 @@ const ApiFormModal: React.FC<ApiFormModalProps> = ({ open, menuId, record, onOk,
           <Select options={METHOD_OPTIONS} placeholder="GET / POST / PUT / DELETE 等" allowClear={false} />
         </Form.Item>
         <Form.Item name="permCode" label="权限标识" rules={[{ max: 32, message: '最多32个字符' }]}>
-          <Input placeholder="对应 t_sys_permission.permission_code，可选" maxLength={32} showCount />
+          <PermissionCodeSelector
+            resourceType={2}
+            placeholder="对应 t_sys_permission.permission_code，可选"
+            maxLength={32}
+            allowClear
+          />
         </Form.Item>
         <Form.Item name="remark" label="描述" rules={[{ max: 64, message: '最多64个字符' }]}>
           <Input.TextArea placeholder="接口说明" maxLength={64} showCount rows={2} />

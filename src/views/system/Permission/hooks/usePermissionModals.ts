@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import type { PermissionModel } from '@/services/system/permission/type';
 
-export type ModalType = 'add' | 'edit' | null;
+/**
+ * 弹窗类型
+ */
+export type ModalType = 'add' | 'edit' | 'view' | null;
 
 /**
  * 统一管理权限点相关的弹窗状态
@@ -12,13 +15,19 @@ export const usePermissionModals = () => {
   // 当前操作的权限点数据
   const [current, setCurrent] = useState<PermissionModel | null>(null);
 
-  // 打开弹窗
+  /**
+   * 打开弹窗
+   * @param name 弹窗类型
+   * @param record 当前操作的数据
+   */
   const openModal = (name: ModalType, record?: PermissionModel) => {
     setModal(name);
     setCurrent(record || null);
   };
 
-  // 关闭弹窗
+  /**
+   * 关闭弹窗
+   */
   const closeModal = () => {
     setModal(null);
     setCurrent(null);

@@ -1,6 +1,6 @@
 import { Select } from 'antd';
-import { memo } from 'react';
 import type React from 'react';
+import { memo } from 'react';
 import type { RoleOption } from './types';
 
 /**
@@ -33,36 +33,40 @@ interface BaseRoleSelectorProps {
  * 基础角色选择组件
  * 提供统一的角色选择功能
  */
-const BaseRoleSelector: React.FC<BaseRoleSelectorProps> = memo(({
-  options,
-  loading = false,
-  placeholder = '请选择角色',
-  width = 300,
-  showSearch = true,
-  disabled = false,
-  className,
-  multiple = false,
-  value,
-  onChange,
-}) => {
-  return (
-    <Select
-      mode={multiple ? 'multiple' : undefined}
-      placeholder={placeholder}
-      style={{ width }}
-      value={value}
-      onChange={onChange}
-      loading={loading}
-      disabled={disabled}
-      showSearch={showSearch && {
-        filterOption: (input, option) => 
-          (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
-      }}
-      className={className}
-      options={options}
-    />
-  );
-});
+const BaseRoleSelector: React.FC<BaseRoleSelectorProps> = memo(
+  ({
+    options,
+    loading = false,
+    placeholder = '请选择角色',
+    width = 300,
+    showSearch = true,
+    disabled = false,
+    className,
+    multiple = false,
+    value,
+    onChange,
+  }) => {
+    return (
+      <Select
+        mode={multiple ? 'multiple' : undefined}
+        placeholder={placeholder}
+        style={{ width }}
+        value={value}
+        onChange={onChange}
+        loading={loading}
+        disabled={disabled}
+        showSearch={
+          showSearch && {
+            filterOption: (input, option) =>
+              (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase()),
+          }
+        }
+        className={className}
+        options={options}
+      />
+    );
+  }
+);
 
 BaseRoleSelector.displayName = 'BaseRoleSelector';
 

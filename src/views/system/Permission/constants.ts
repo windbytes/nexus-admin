@@ -1,15 +1,25 @@
 /**
- * 权限点类型选项
+ * 资源类型选项
  */
-export const PERM_TYPE_OPTIONS = [
-  { label: '操作权限', value: 'ACTION' },
-  { label: '数据权限', value: 'DATA' },
+export const resourceTypeOptions = [
+  { value: 1, label: '按钮' },
+  { value: 2, label: '接口' },
+  { value: 4, label: '其他' },
 ];
 
 /**
- * 权限点状态选项
+ * 状态选项
  */
-export const PERM_STATUS_OPTIONS = [
-  { label: '启用', value: 1 },
-  { label: '停用', value: 0 },
+export const statusOptions = [
+  { value: true, label: '启用' },
+  { value: false, label: '停用' },
 ];
+
+/**
+ * 资源类型映射
+ */
+export const resourceTypeMap: Record<number, { label: string; color: string }> = {
+  1: { label: '按钮', color: 'blue' },
+  2: { label: '接口', color: 'green' },
+  4: { label: '其他', color: 'orange' },
+};

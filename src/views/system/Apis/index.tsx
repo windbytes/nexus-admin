@@ -82,8 +82,8 @@ const Apis: React.FC = () => {
   );
 
   return (
-    <div className="h-full flex flex-col gap-2">
-      <div className="flex gap-4 flex-1 min-h-0">
+    <>
+      <div className="h-full flex gap-2">
         <MenuTree treeData={menuTreeData} loading={menuLoading} onSelect={onMenuSelect} />
         <div className="flex-1 min-w-0 flex flex-col">{rightContent}</div>
       </div>
@@ -95,7 +95,7 @@ const Apis: React.FC = () => {
         onOk={handleModalSave}
         onClose={closeForm}
       />
-    </div>
+    </>
   );
 };
 

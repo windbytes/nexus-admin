@@ -2,21 +2,21 @@ import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-des
 import { Button, Card, ConfigProvider, Form, Input, Select } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PERM_STATUS_OPTIONS, PERM_TYPE_OPTIONS } from '../constants';
+import { resourceTypeOptions, statusOptions } from '../constants';
 import type { PermissionSearchParams } from '../types';
 
 /**
  * 搜索表单属性
  */
 interface SearchFormProps {
+  /** 搜索回调 */
   onSearch: (values: PermissionSearchParams) => void;
+  /** 加载状态 */
   loading: boolean;
 }
 
 /**
- * 搜索表单
- * @param onSearch 搜索回调
- * @returns 搜索表单
+ * 权限点搜索表单组件
  */
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
   const [form] = Form.useForm();
@@ -24,7 +24,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   /**
-   * 重置
+   * 重置表单
    */
   const handleReset = () => {
     form.resetFields();
@@ -38,7 +38,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
     setShowAdvanced(!showAdvanced);
   };
 
-  // 计算所有字段（包括基础字段和高级字段）
+  // 所有搜索字段配置
   const allFields = [
     {
       name: 'permCode',
@@ -51,9 +51,15 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
       component: <Input placeholder="请输入权限名称" allowClear autoComplete="off" />,
     },
     {
-      name: 'permType',
-      label: '权限类型',
-      component: <Select allowClear placeholder="请选择权限类型" className="rounded-md" options={PERM_TYPE_OPTIONS} />,
+      name: 'resourceType',
+      label: '资源类型',
+      component: (
+        <Select
+          allowClear
+          placeholder="请选择资源类型"
+          options={resourceTypeOptions}
+        />
+      ),
     },
     ...(showAdvanced
       ? [
@@ -61,13 +67,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
             name: 'status',
             label: '状态',
             component: (
-              <Select allowClear placeholder="请选择状态" className="rounded-md" options={PERM_STATUS_OPTIONS} />
+              <Select
+                allowClear
+                placeholder="请选择状态"
+                options={statusOptions}
+              />
             ),
-          },
-          {
-            name: 'moduleCode',
-            label: '模块编码',
-            component: <Input placeholder="请输入模块编码" allowClear autoComplete="off" />,
           },
         ]
       : []),
@@ -80,7 +85,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
   const shouldPlaceButtonInLastRow = fieldsInLastRow > 0 && fieldsInLastRow < fieldsPerRow;
   const shouldPlaceButtonInNewRow = fieldsInLastRow === 0;
 
-  // 操作按钮组件
+  /**
+   * 操作按钮组件
+   */
   const ActionButtons = ({ className = '' }: { className?: string }) => (
     <div className={`flex gap-3 justify-end ${className}`}>
       <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
@@ -115,7 +122,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
       }}
     >
       <Card className="mb-4">
-        <Form form={form} onFinish={onSearch} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form form={form} onFinish={onSearch} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
           <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 ${showAdvanced ? 'mb-4' : ''}`}>
             {/* 渲染所有字段 */}
             {allFields.map((field) => (

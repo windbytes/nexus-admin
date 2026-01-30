@@ -1,29 +1,69 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Switch, type TableProps } from 'antd';
+import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { App, Button, Dropdown, type MenuProps, Switch, Tag, type TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DeleteDismiss24Filled } from '@/components/icons';
 import type { PermissionModel } from '@/services/system/permission/type';
+import { resourceTypeMap } from '../constants';
 import { usePermissionActions } from './usePermissionActions';
 import type { ModalType } from './usePermissionModals';
 import { usePermissionPermissions } from './usePermissionPermissions';
 
 interface UsePermissionTableColumnProps {
-  // 当前操作行的数据
+  /** 当前操作行的数据 */
   currentRow: Partial<PermissionModel> | null;
+  /** 打开弹窗 */
   openModal: (name: ModalType, record?: PermissionModel) => void;
-  // 成功的回调
+  /** 成功的回调 */
   onSuccess?: () => void;
 }
 
 /**
- * @description: 权限点表格列配置hook
+ * 权限点表格列配置hook
  */
 export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
   const { canUpdateStatus, canDelete, canEdit } = usePermissionPermissions();
   const { t } = useTranslation();
-  // 操作hooks
-  const { updatePermissionStatus, deletePermission } = usePermissionActions({ currentRow, onSuccess });
+  const { updateStatus, deletePermissions } = usePermissionActions({ currentRow, onSuccess });
+
+  /**
+   * 更多操作菜单项
+   */
+  const moreActionItems = (record: PermissionModel): MenuProps['items'] => {
+    return [
+      {
+        key: 'delete',
+        label: t('common.operation.delete'),
+        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
+        disabled: !canDelete,
+        onClick: () => {
+          if (!canDelete) {
+            modal.error({
+              title: '权限不足',
+              content: '您没有删除权限点的权限，请联系管理员获取相应权限。',
+            });
+            return;
+          }
+          modal.confirm({
+            title: '删除权限点',
+            icon: <ExclamationCircleFilled />,
+            content: `确定删除权限点「${record.permName}」吗？此操作不可恢复！`,
+            okButtonProps: {
+              danger: true,
+              type: 'default',
+            },
+            cancelButtonProps: {
+              type: 'primary',
+            },
+            onOk() {
+              deletePermissions([record.id]);
+            },
+          });
+        },
+      },
+    ];
+  };
 
   const columns: TableProps<PermissionModel>['columns'] = [
     {
@@ -36,38 +76,27 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
       dataIndex: 'permCode',
       title: '权限编码',
       key: 'permCode',
-      width: 180,
+      width: 200,
       align: 'left',
+      ellipsis: true,
     },
     {
       dataIndex: 'permName',
       title: '权限名称',
       key: 'permName',
-      width: 200,
+      width: 160,
       align: 'left',
     },
     {
-      dataIndex: 'permType',
-      title: '权限类型',
-      key: 'permType',
-      width: 120,
+      dataIndex: 'resourceType',
+      title: '资源类型',
+      key: 'resourceType',
+      width: 100,
       align: 'center',
-      render: (text: string) => {
-        if (text === 'ACTION') {
-          return <span className="text-blue-500">操作权限</span>;
-        } else if (text === 'DATA') {
-          return <span className="text-green-500">数据权限</span>;
-        }
-        return <span className="text-gray-400">-</span>;
+      render: (value: number) => {
+        const config = resourceTypeMap[value];
+        return config ? <Tag color={config.color}>{config.label}</Tag> : '-';
       },
-    },
-    {
-      dataIndex: 'moduleCode',
-      title: '模块编码',
-      key: 'moduleCode',
-      width: 150,
-      align: 'center',
-      render: (text: string) => <span>{text || '-'}</span>,
     },
     {
       dataIndex: 'description',
@@ -79,25 +108,31 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
       render: (text: string) => <span>{text || '-'}</span>,
     },
     {
+      dataIndex: 'sort',
+      title: '排序',
+      key: 'sort',
+      width: 80,
+      align: 'center',
+      sorter: (a: PermissionModel, b: PermissionModel) => a.sort - b.sort,
+    },
+    {
       dataIndex: 'status',
       title: '状态',
       key: 'status',
       width: 100,
       align: 'center',
-      render: (text: number, record: PermissionModel) => {
-        const isActive = text === 1;
-
+      render: (value: boolean, record: PermissionModel) => {
         return (
           <div className="flex items-center justify-center">
             <Switch
-              checked={isActive}
+              checked={value}
               checkedChildren="启用"
               unCheckedChildren="停用"
               disabled={!canUpdateStatus}
               onChange={(checked) => {
-                updatePermissionStatus(record.id, checked ? 1 : 0);
+                updateStatus([record.id], checked);
               }}
-              className={isActive ? 'bg-green-500' : 'bg-gray-400'}
+              className={value ? 'bg-green-500' : 'bg-gray-400'}
             />
           </div>
         );
@@ -107,87 +142,39 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
-      width: 180,
+      width: 170,
       align: 'center',
       sorter: (a: PermissionModel, b: PermissionModel) => a.createTime.localeCompare(b.createTime),
     },
     {
       title: '操作',
-      width: 120,
+      width: 90,
       dataIndex: 'action',
-      fixed: 'end',
+      fixed: 'right',
       align: 'center',
       render: (_, record: PermissionModel) => (
-        <div className="flex gap-2 justify-center">
+        <>
           <Button
             size="small"
             type="link"
-            classNames={{ content: 'text-(--ant-color-primary)' }}
-            disabled={!canUpdateStatus}
-            onClick={() => {
-              if (!canUpdateStatus) {
-                modal.error({
-                  title: '权限不足',
-                  content: '您没有更新权限点状态的权限，请联系管理员获取相应权限。',
-                });
-                return;
-              }
-              updatePermissionStatus(record.id, record.status === 1 ? 0 : 1);
-            }}
-          >
-            {record.status === 1 ? '停用' : '启用'}
-          </Button>
-          <Button
-            size="small"
-            type="link"
-            classNames={{ content: 'text-(--ant-color-primary)' }}
             disabled={!canEdit}
-            onClick={() => {
-              if (!canEdit) {
-                modal.error({
-                  title: '权限不足',
-                  content: '您没有编辑权限点的权限，请联系管理员获取相应权限。',
-                });
-                return;
-              }
-              openModal('edit', record);
-            }}
+            classNames={{ content: 'text-(--ant-color-primary)' }}
+            onClick={() => openModal('edit', record)}
           >
             {t('common.operation.edit')}
           </Button>
-          <Button
-            size="small"
-            type="link"
-            danger
-            disabled={!canDelete}
-            onClick={() => {
-              if (!canDelete) {
-                modal.error({
-                  title: '权限不足',
-                  content: '您没有删除权限点的权限，请联系管理员获取相应权限。',
-                });
-                return;
-              }
-              modal.confirm({
-                title: '删除权限点',
-                icon: <ExclamationCircleFilled />,
-                content: '确定删除该权限点吗？',
-                okButtonProps: {
-                  danger: true,
-                  type: 'default',
-                },
-                cancelButtonProps: {
-                  type: 'primary',
-                },
-                onOk() {
-                  deletePermission(record.id);
-                },
-              });
-            }}
-          >
-            {t('common.operation.delete')}
-          </Button>
-        </div>
+          <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
+            <Button
+              size="small"
+              type="link"
+              classNames={{ content: 'text-(--ant-color-primary)' }}
+              icon={<DownOutlined className="text-(--ant-color-primary)!" />}
+              iconPlacement="end"
+            >
+              {t('common.operation.more')}
+            </Button>
+          </Dropdown>
+        </>
       ),
     },
   ];

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, Empty, Space, Spin } from 'antd';
 import { type Key, useCallback, useEffect, useMemo, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
-import { permissionService } from '@/services/system/permission';
+import { permissionService } from '@/services/system/permission/permissionApi';
 import type { PermissionSearchParams } from '@/services/system/permission/type';
 import { roleService } from '@/services/system/role/roleApi';
 import TableTransfer from './TableTransfer';

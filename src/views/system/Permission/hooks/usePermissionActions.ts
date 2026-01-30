@@ -1,16 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { App } from 'antd';
-import { permissionService } from '@/services/system/permission';
-import type {
-  PermissionModel,
-  PermissionResourceModel,
-  SavePermissionRequest,
-} from '@/services/system/permission/type';
+import { permissionService } from '@/services/system/permission/permissionApi';
+import type { PermissionModel } from '@/services/system/permission/type';
 
 interface UsePermissionActionsProps {
-  // 当前操作的行数据
+  /** 当前操作的行数据 */
   currentRow: Partial<PermissionModel> | null;
-  // 成功的回调
+  /** 成功的回调 */
   onSuccess?: () => void;
 }
 
@@ -18,106 +14,111 @@ interface UsePermissionActionsProps {
  * 权限点操作相关的 hooks
  */
 export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionActionsProps) => {
-  const { message } = App.useApp();
+  const { modal, message } = App.useApp();
 
   /**
-   * 更新权限点状态
+   * 创建权限点
+   */
+  const createMutation = useMutation({
+    mutationFn: (values: Partial<PermissionModel>) => permissionService.createPermission(values),
+    onSuccess: () => {
+      message.success('创建权限点成功');
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      modal.error({
+        title: '创建权限点失败',
+        content: error.message,
+      });
+    },
+  });
+
+  /**
+   * 更新权限点
+   */
+  const updateMutation = useMutation({
+    mutationFn: (values: Partial<PermissionModel>) => {
+      if (!currentRow?.id) {
+        throw new Error('当前行数据不存在');
+      }
+      return permissionService.updatePermission({ id: currentRow.id, ...values });
+    },
+    onSuccess: () => {
+      message.success('更新权限点成功');
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      modal.error({
+        title: '更新权限点失败',
+        content: error.message,
+      });
+    },
+  });
+
+  /**
+   * 批量更新状态
    */
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: number }) =>
-      permissionService.updatePermissionStatus(id, status),
+    mutationFn: ({ ids, status }: { ids: string[]; status: boolean }) =>
+      permissionService.updateBatchStatus(ids, status),
     onSuccess: () => {
       message.success('更新状态成功');
       onSuccess?.();
     },
+    onError: (error: Error) => {
+      modal.error({
+        title: '更新状态失败',
+        content: error.message,
+      });
+    },
   });
 
   /**
    * 删除权限点
    */
-  const deletePermissionMutation = useMutation({
-    mutationFn: (id: string) => permissionService.deletePermission(id),
+  const deleteMutation = useMutation({
+    mutationFn: (ids: string[]) => permissionService.deletePermissions(ids),
     onSuccess: () => {
       message.success('删除权限点成功');
       onSuccess?.();
     },
-  });
-
-  /**
-   * 批量删除权限点
-   */
-  const deletePermissionsMutation = useMutation({
-    mutationFn: (ids: string[]) => permissionService.deletePermissions(ids),
-    onSuccess: () => {
-      message.success('批量删除权限点成功');
-      onSuccess?.();
+    onError: (error: Error) => {
+      modal.error({
+        title: '删除权限点失败',
+        content: error.message,
+      });
     },
   });
 
   /**
-   * 绑定权限资源
+   * 更新权限点状态
    */
-  const bindResourcesMutation = useMutation({
-    mutationFn: ({ permissionId, resources }: { permissionId: string; resources: PermissionResourceModel[] }) =>
-      permissionService.bindPermissionResources(permissionId, resources),
-    onSuccess: () => {
-      message.success('绑定资源成功');
-      onSuccess?.();
-    },
-  });
-
-  /**
-   * 保存权限点（统一接口，包含基础信息和资源绑定）
-   */
-  const savePermissionMutation = useMutation({
-    mutationFn: (request: SavePermissionRequest) => permissionService.savePermission(request),
-    onSuccess: () => {
-      const actionText = currentRow?.id ? '更新' : '新增';
-      message.success(`${actionText}权限点成功`);
-      onSuccess?.();
-    },
-  });
-
-  /**
-   * 更改权限点状态
-   */
-  const updatePermissionStatus = (id: string, status: number) => {
-    updateStatusMutation.mutate({ id, status });
+  const updateStatus = (ids: string[], status: boolean) => {
+    updateStatusMutation.mutate({ ids, status });
   };
 
   /**
    * 删除权限点
    */
-  const deletePermission = (id: string) => {
-    deletePermissionMutation.mutate(id);
-  };
-
-  /**
-   * 批量删除权限点
-   */
   const deletePermissions = (ids: string[]) => {
-    deletePermissionsMutation.mutate(ids);
+    deleteMutation.mutate(ids);
   };
 
   /**
-   * 绑定权限资源
+   * 处理模态框保存
    */
-  const bindResources = (permissionId: string, resources: PermissionResourceModel[]) => {
-    bindResourcesMutation.mutate({ permissionId, resources });
-  };
-
-  /**
-   * 保存权限点（统一接口）
-   */
-  const savePermission = (request: SavePermissionRequest) => {
-    savePermissionMutation.mutate(request);
+  const handleModalSave = (values: Partial<PermissionModel>) => {
+    if (currentRow?.id) {
+      updateMutation.mutate(values);
+    } else {
+      createMutation.mutate(values);
+    }
   };
 
   return {
-    updatePermissionStatus,
-    deletePermission,
+    handleModalSave,
+    updateStatus,
     deletePermissions,
-    bindResources,
-    savePermission,
+    isLoading: createMutation.isPending || updateMutation.isPending,
   };
 };

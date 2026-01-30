@@ -2,6 +2,7 @@ import { Form, Input, InputNumber, Switch } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
 import DragModal from '@/components/modal/DragModal';
+import { PermissionCodeSelector } from '@/components/PermissionCodeSelector';
 import type { PageButtonModel, PageButtonSaveParams } from '@/services/system/pageButton/type';
 
 export interface ButtonFormModalProps {
@@ -112,11 +113,11 @@ const ButtonFormModal: React.FC<ButtonFormModalProps> = ({ open, menuId, record,
           name="permCode"
           label="权限标识"
           rules={[
-            { required: true, message: '请输入权限标识' },
+            { required: true, message: '请选择或输入权限标识' },
             { max: 32, message: '最多32个字符' },
           ]}
         >
-          <Input placeholder="与权限表一致，唯一" maxLength={32} showCount />
+          <PermissionCodeSelector resourceType={1} placeholder="与权限表一致，唯一" maxLength={32} allowClear={false} />
         </Form.Item>
         <Form.Item name="sort" label="排序" initialValue={0}>
           <InputNumber min={0} placeholder="数字越小越靠前" style={{ width: '100%' }} />
