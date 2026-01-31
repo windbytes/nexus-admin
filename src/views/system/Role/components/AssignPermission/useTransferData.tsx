@@ -10,9 +10,8 @@ export interface PermissionTransferItem {
   disabled?: boolean;
   permCode: string;
   permName: string;
-  permType: 'ACTION' | 'DATA';
-  moduleCode: string;
-  status: number;
+  resourceType: number;
+  status: boolean;
 }
 
 /**
@@ -29,8 +28,7 @@ export const useTransferData = (dataSource: PermissionModel[], rolePermissionIds
     disabled: false,
     permCode: permission.permCode,
     permName: permission.permName,
-    permType: permission.permType,
-    moduleCode: permission.moduleCode,
+    resourceType: permission.resourceType,
     status: permission.status,
   }));
 

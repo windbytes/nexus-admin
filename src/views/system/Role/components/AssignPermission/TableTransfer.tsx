@@ -84,8 +84,9 @@ const TableTransfer: React.FC<TableTransferProps> = ({
           : dataSource;
 
         return (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full p-3">
             <Table
+              bordered
               rowSelection={rowSelection}
               columns={columns}
               dataSource={paginatedItems}

@@ -65,7 +65,7 @@ const AssignPermission: React.FC<AssignPermissionProps> = ({ open, onOk, onCance
       // 实际项目中应该有一个按ID列表查询的接口
       const result = await permissionService.queryPermissionListPage({
         pageNum: 1,
-        pageSize: 1000, // 假设总数不超过1000
+        pageSize: 10,
       });
       const filtered = result.records.filter((p) => targetKeys.includes(p.id));
       // 分页处理
@@ -88,7 +88,7 @@ const AssignPermission: React.FC<AssignPermissionProps> = ({ open, onOk, onCance
   const rightData = rightPermissionResult?.records || [];
 
   // 获取表格列配置
-  const { leftColumns, rightColumns } = useTableColumns();
+  const columns = useTableColumns();
 
   // 处理穿梭框数据
   const leftTransferData = useTransferData(leftData, []).transferData;
@@ -121,7 +121,6 @@ const AssignPermission: React.FC<AssignPermissionProps> = ({ open, onOk, onCance
     return (
       item.permCode?.toLowerCase().includes(lowerInputValue) ||
       item.permName?.toLowerCase().includes(lowerInputValue) ||
-      item.moduleCode?.toLowerCase().includes(lowerInputValue) ||
       item.description?.toLowerCase().includes(lowerInputValue)
     );
   }, []);
@@ -192,8 +191,12 @@ const AssignPermission: React.FC<AssignPermissionProps> = ({ open, onOk, onCance
               onChange={(keys: Key[]) => {
                 setTargetKeys(keys.map((key) => key.toString()));
               }}
-              leftColumns={leftColumns}
-              rightColumns={rightColumns}
+              classNames={{
+                body: 'h-full',
+                list: 'h-full',
+              }}
+              leftColumns={columns}
+              rightColumns={columns}
               titles={['未分配权限点', '已分配权限点']}
               showSearch
               filterOption={(inputValue, item, _direction) => !!filterOption(inputValue, item)}
