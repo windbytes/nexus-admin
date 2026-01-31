@@ -123,10 +123,13 @@ export const permissionService: IPermissionService = {
    * @returns 创建结果
    */
   async createPermission(permission: Partial<PermissionModel>): Promise<boolean> {
-    const response = await HttpRequest.post({
-      url: PermissionAction.addPermission,
-      params: permission,
-    });
+    const response = await HttpRequest.post(
+      {
+        url: PermissionAction.addPermission,
+        params: permission,
+      },
+      { errorMessageMode: 'none' }
+    );
     return response;
   },
 

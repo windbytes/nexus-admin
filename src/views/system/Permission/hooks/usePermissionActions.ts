@@ -14,7 +14,7 @@ interface UsePermissionActionsProps {
  * 权限点操作相关的 hooks
  */
 export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionActionsProps) => {
-  const { modal, message } = App.useApp();
+  const { modal } = App.useApp();
 
   /**
    * 创建权限点
@@ -22,7 +22,6 @@ export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionAct
   const createMutation = useMutation({
     mutationFn: (values: Partial<PermissionModel>) => permissionService.createPermission(values),
     onSuccess: () => {
-      message.success('创建权限点成功');
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -44,14 +43,7 @@ export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionAct
       return permissionService.updatePermission({ id: currentRow.id, ...values });
     },
     onSuccess: () => {
-      message.success('更新权限点成功');
       onSuccess?.();
-    },
-    onError: (error: Error) => {
-      modal.error({
-        title: '更新权限点失败',
-        content: error.message,
-      });
     },
   });
 
@@ -62,7 +54,6 @@ export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionAct
     mutationFn: ({ ids, status }: { ids: string[]; status: boolean }) =>
       permissionService.updateBatchStatus(ids, status),
     onSuccess: () => {
-      message.success('更新状态成功');
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -79,7 +70,6 @@ export const usePermissionActions = ({ currentRow, onSuccess }: UsePermissionAct
   const deleteMutation = useMutation({
     mutationFn: (ids: string[]) => permissionService.deletePermissions(ids),
     onSuccess: () => {
-      message.success('删除权限点成功');
       onSuccess?.();
     },
     onError: (error: Error) => {
