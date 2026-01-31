@@ -1,7 +1,8 @@
-import { Input, Table } from 'antd';
+import { useQuery } from '@tanstack/react-query';
+import { Input, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { permissionService } from '@/services/system/permission/permissionApi';
 import type { PermissionModel } from '@/services/system/permission/type';
 import cn from '@/utils/classnames';
@@ -14,6 +15,7 @@ const DEFAULT_DROPDOWN_HEIGHT = 360;
 
 /**
  * 权限编码选择器：输入框 + 下拉分页表格，按资源类型查询权限点，选中行将权限编码填入输入框
+ * 数据仅在首次打开下拉时请求，之后由 React Query 缓存；翻页会按页缓存。
  */
 const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
   value,
@@ -28,54 +30,44 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [list, setList] = useState<PermissionModel[]>([]);
-  const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchList = useCallback(
-    async (pageNum: number = 1) => {
-      setLoading(true);
-      try {
-        const res = await permissionService.queryPermissionListPage({
-          resourceType,
-          pageNum,
-          pageSize,
-        });
-        setList(res.records ?? []);
-        setTotal(res.totalRow ?? 0);
-        setCurrentPage(pageNum);
-      } catch {
-        setList([]);
-        setTotal(0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [resourceType, pageSize]
-  );
+  const { data, isFetching } = useQuery({
+    queryKey: ['permission_selector', resourceType, currentPage, pageSize],
+    queryFn: () =>
+      permissionService.queryPermissionListPage({
+        resourceType,
+        pageNum: currentPage,
+        pageSize,
+      }),
+    enabled: open,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+
+  const list = data?.records ?? [];
+  const total = data?.totalRow ?? 0;
 
   useEffect(() => {
     if (open) {
-      fetchList(1);
+      setCurrentPage(1);
     }
-  }, [open, fetchList]);
+  }, [open]);
 
-  const handleInputFocus = useCallback(() => {
+  const handleInputFocus = () => {
     if (!disabled) {
       setOpen(true);
     }
-  }, [disabled]);
+  };
 
-  const handleInputClick = useCallback(() => {
+  const handleInputClick = () => {
     if (!disabled) {
       setOpen(true);
     }
-  }, [disabled]);
+  };
 
-  const handleInputBlur = useCallback((e: React.FocusEvent) => {
+  const handleInputBlur = (e: React.FocusEvent) => {
     setTimeout(() => {
       const relatedTarget = e.relatedTarget as Element | null;
       if (
@@ -86,30 +78,21 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
       }
       setOpen(false);
     }, 150);
-  }, []);
+  };
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = e.target.value?.trim() || undefined;
-      onChange?.(v);
-    },
-    [onChange]
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value?.trim() || undefined;
+    onChange?.(v);
+  };
 
-  const handleRowClick = useCallback(
-    (record: PermissionModel) => {
-      onChange?.(record.permCode);
-      setOpen(false);
-    },
-    [onChange]
-  );
+  const handleRowClick = (record: PermissionModel) => {
+    onChange?.(record.permCode);
+    setOpen(false);
+  };
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      fetchList(page);
-    },
-    [fetchList]
-  );
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -134,7 +117,7 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
       dataIndex: 'status',
       key: 'status',
       width: 72,
-      render: (status: boolean) => (status ? '启用' : '停用'),
+      render: (status: boolean) => <Tag color={status ? 'success' : 'error'}>{status ? '启用' : '停用'}</Tag>,
     },
   ];
 
@@ -162,11 +145,12 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
         >
           <div className="tableSection">
             <Table<PermissionModel>
+              bordered
               size="small"
               rowKey="id"
               columns={columns}
               dataSource={list}
-              loading={loading}
+              loading={isFetching}
               scroll={{ y: tableHeight }}
               pagination={{
                 current: currentPage,
