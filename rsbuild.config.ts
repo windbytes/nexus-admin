@@ -89,7 +89,7 @@ export default defineConfig({
   },
   dev: {
     // 按需编译
-    lazyCompilation: false,
+    lazyCompilation: true,
     // 启用热更新
     hmr: true,
     // 显示编译进度条
@@ -122,7 +122,7 @@ export default defineConfig({
       },
     },
     // 启用构建缓存
-    buildCache: !isDev,
+    buildCache: true,
     removeConsole: true,
     // 开启包文件分析
     // bundleAnalyze: {
