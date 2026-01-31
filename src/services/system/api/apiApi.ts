@@ -41,17 +41,11 @@ export const apiService: IApiService = {
   },
 
   add(params: ApiSaveParams): Promise<boolean> {
-    return HttpRequest.post(
-      { url: ApiPaths.add, data: params },
-      { errorMessageMode: 'none' }
-    );
+    return HttpRequest.post({ url: ApiPaths.add, data: params }, { errorMessageMode: 'none' });
   },
 
   update(params: ApiSaveParams): Promise<boolean> {
-    return HttpRequest.post(
-      { url: ApiPaths.update, data: params },
-      { errorMessageMode: 'none' }
-    );
+    return HttpRequest.post({ url: ApiPaths.update, data: params }, { errorMessageMode: 'none' });
   },
 
   delete(id: string): Promise<boolean> {

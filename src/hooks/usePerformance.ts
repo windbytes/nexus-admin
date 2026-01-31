@@ -36,7 +36,7 @@ export const usePerformance = () => {
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     if (navigation) {
       metricsRef.current.loadTime = navigation.loadEventEnd - navigation.loadEventStart;
-      metricsRef.current.domContentLoadedTime = 
+      metricsRef.current.domContentLoadedTime =
         navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart;
     }
   }, []);
@@ -137,32 +137,35 @@ export const usePerformance = () => {
   }, []);
 
   // 上报性能数据
-  const reportMetrics = useCallback((endpoint?: string) => {
-    const metrics = getMetrics();
-    
-    // 在开发环境下打印到控制台
-    if ( import.meta.env.MODE === 'development') {
-      console.log('性能指标:', metrics);
-    }
+  const reportMetrics = useCallback(
+    (endpoint?: string) => {
+      const metrics = getMetrics();
 
-    // 在生产环境下可以上报到监控服务
-    if (import.meta.env.MODE === 'production' && endpoint) {
-      fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...metrics,
-          timestamp: Date.now(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        }),
-      }).catch((error) => {
-        console.error('性能数据上报失败:', error);
-      });
-    }
-  }, [getMetrics]);
+      // 在开发环境下打印到控制台
+      if (import.meta.env.MODE === 'development') {
+        console.log('性能指标:', metrics);
+      }
+
+      // 在生产环境下可以上报到监控服务
+      if (import.meta.env.MODE === 'production' && endpoint) {
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...metrics,
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+          }),
+        }).catch((error) => {
+          console.error('性能数据上报失败:', error);
+        });
+      }
+    },
+    [getMetrics]
+  );
 
   // 清理观察器
   const cleanup = useCallback(() => {
@@ -215,7 +218,8 @@ export const useComponentPerformance = (componentName: string) => {
       const renderTime = performance.now() - renderStartRef.current;
       renderCountRef.current += 1;
 
-      if (renderTime > 16) { // 超过一帧的时间
+      if (renderTime > 16) {
+        // 超过一帧的时间
         console.warn(`${componentName} 渲染时间过长:`, renderTime, 'ms');
       }
 

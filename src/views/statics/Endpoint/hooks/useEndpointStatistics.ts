@@ -47,4 +47,3 @@ export const useEndpointStatistics = (endpoints: Endpoint[], total: number): Sta
     };
   }, [endpoints, total]);
 };
-

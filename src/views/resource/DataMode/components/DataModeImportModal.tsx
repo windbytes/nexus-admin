@@ -21,12 +21,7 @@ type ImportType = 'file' | 'url';
 /**
  * 数据模式导入弹窗组件
  */
-const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
-  open,
-  loading = false,
-  onOk,
-  onCancel,
-}) => {
+const DataModeImportModal: React.FC<DataModeImportModalProps> = ({ open, loading = false, onOk, onCancel }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [importType, setImportType] = useState<ImportType>('file');
@@ -48,7 +43,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
     onSuccess: () => {
       handleReset();
       onOk?.();
-    }
+    },
   });
 
   // URL导入 mutation
@@ -59,7 +54,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
     onSuccess: () => {
       handleReset();
       onOk?.();
-    }
+    },
   });
 
   /**
@@ -123,30 +118,36 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
   /**
    * 处理文件上传前验证
    */
-  const beforeUpload = useCallback((file: File) => {
-    // 验证文件类型
-    const isJson = file.type === 'application/json' || file.name.endsWith('.json');
-    if (!isJson) {
-      message.error('只能上传JSON格式的文件！');
-      return Upload.LIST_IGNORE;
-    }
+  const beforeUpload = useCallback(
+    (file: File) => {
+      // 验证文件类型
+      const isJson = file.type === 'application/json' || file.name.endsWith('.json');
+      if (!isJson) {
+        message.error('只能上传JSON格式的文件！');
+        return Upload.LIST_IGNORE;
+      }
 
-    // 验证文件大小（5M = 5 * 1024 * 1024 字节）
-    if (file.size >= (5 << 20)) {
-      message.error('文件大小不能超过5M！');
-      return Upload.LIST_IGNORE;
-    }
+      // 验证文件大小（5M = 5 * 1024 * 1024 字节）
+      if (file.size >= 5 << 20) {
+        message.error('文件大小不能超过5M！');
+        return Upload.LIST_IGNORE;
+      }
 
-    return false; // 阻止自动上传
-  }, [message]);
+      return false; // 阻止自动上传
+    },
+    [message]
+  );
 
   /**
    * 处理Tab切换
    */
-  const handleTabChange = useCallback((key: string) => {
-    setImportType(key as ImportType);
-    handleReset();
-  }, [handleReset]);
+  const handleTabChange = useCallback(
+    (key: string) => {
+      setImportType(key as ImportType);
+      handleReset();
+    },
+    [handleReset]
+  );
 
   const isLoading = loading || importFileMutation.isPending || importUrlMutation.isPending;
 
@@ -170,11 +171,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
             label: '文件导入',
             children: (
               <Form form={form} layout="vertical">
-                <Form.Item
-                  label=""
-                  required
-                  tooltip="支持拖拽上传，文件大小限制5M，格式限制为JSON"
-                >
+                <Form.Item label="" required tooltip="支持拖拽上传，文件大小限制5M，格式限制为JSON">
                   <Dragger
                     fileList={fileList}
                     onChange={handleFileChange}
@@ -187,9 +184,7 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
                       <InboxOutlined />
                     </p>
                     <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-                    <p className="ant-upload-hint">
-                      支持单个JSON文件上传，文件大小不超过5M
-                    </p>
+                    <p className="ant-upload-hint">支持单个JSON文件上传，文件大小不超过5M</p>
                   </Dragger>
                 </Form.Item>
               </Form>
@@ -223,4 +218,3 @@ const DataModeImportModal: React.FC<DataModeImportModalProps> = ({
 };
 
 export default DataModeImportModal;
-

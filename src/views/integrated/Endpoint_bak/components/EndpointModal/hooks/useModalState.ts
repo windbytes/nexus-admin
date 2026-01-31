@@ -31,4 +31,3 @@ export const useModalState = <T = any>(initialData?: T) => {
     setData,
   };
 };
-

@@ -29,10 +29,13 @@ const TagsCard: React.FC<TagsCardProps> = ({ endpoint }) => {
     );
   };
 
-  return <Card title="标签" size="small">{renderTags()}</Card>;
+  return (
+    <Card title="标签" size="small">
+      {renderTags()}
+    </Card>
+  );
 };
 
 TagsCard.displayName = 'TagsCard';
 
 export default TagsCard;
-

@@ -9,9 +9,7 @@ import type { ComponentConfigProps } from './index';
 const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
-  const [options, setOptions] = useState<Array<{ label: string; value: string }>>(
-    value.options || []
-  );
+  const [options, setOptions] = useState<Array<{ label: string; value: string }>>(value.options || []);
 
   // 处理配置变更
   const handleChange = (changedValues: any) => {
@@ -37,7 +35,7 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
       const lastOption = options[options.length - 1];
       const hasEmptyLabel = !lastOption?.label || lastOption.label.trim() === '';
       const hasEmptyValue = !lastOption?.value || lastOption.value.trim() === '';
-      
+
       if (hasEmptyLabel && hasEmptyValue) {
         message.warning({
           content: '请先填写上一个选项的显示文本和选项值后再添加新选项',
@@ -45,7 +43,7 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
         });
         return;
       }
-      
+
       if (hasEmptyLabel) {
         message.warning({
           content: '请先填写上一个选项的显示文本后再添加新选项',
@@ -53,7 +51,7 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
         });
         return;
       }
-      
+
       if (hasEmptyValue) {
         message.warning({
           content: '请先填写上一个选项的选项值后再添加新选项',
@@ -62,22 +60,20 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
         return;
       }
     }
-    
+
     // 验证通过，添加新选项
     const newOption = { label: '', value: '' };
-    setOptions(prev => [...prev, newOption]);
+    setOptions((prev) => [...prev, newOption]);
   };
 
   // 更新选项
   const handleUpdateOption = (index: number, field: 'label' | 'value', newValue: string) => {
-    setOptions(prev => prev.map((option, i) => 
-      i === index ? { ...option, [field]: newValue } : option
-    ));
+    setOptions((prev) => prev.map((option, i) => (i === index ? { ...option, [field]: newValue } : option)));
   };
 
   // 删除选项
   const handleDeleteOption = (index: number) => {
-    setOptions(prev => prev.filter((_, i) => i !== index));
+    setOptions((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -90,29 +86,24 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
           disabled: false,
         }}
       >
-        <Form.Item
-          name="disabled"
-          label="禁用状态"
-          valuePropName="checked"
-          tooltip="是否禁用复选框组"
-        >
+        <Form.Item name="disabled" label="禁用状态" valuePropName="checked" tooltip="是否禁用复选框组">
           <Switch />
         </Form.Item>
       </Form>
 
       <div style={{ marginTop: 16 }}>
         <div style={{ marginBottom: 12, fontWeight: 500, fontSize: '14px' }}>选项配置</div>
-        
+
         {/* 选项列表 */}
         {options.map((option, index) => (
-          <div 
+          <div
             key={index}
-            style={{ 
+            style={{
               padding: '12px',
               marginBottom: 8,
               border: '1px solid #d9d9d9',
               borderRadius: 6,
-              backgroundColor: '#fafafa'
+              backgroundColor: '#fafafa',
             }}
           >
             <Row gutter={12}>
@@ -147,23 +138,20 @@ const CheckboxConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }
         ))}
 
         {/* 添加选项按钮 */}
-        <Button 
-          type="dashed" 
-          icon={<PlusOutlined />} 
-          onClick={handleAddOption}
-          style={{ width: '100%', marginTop: 8 }}
-        >
+        <Button type="dashed" icon={<PlusOutlined />} onClick={handleAddOption} style={{ width: '100%', marginTop: 8 }}>
           添加选项
         </Button>
 
         {options.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            color: '#999', 
-            fontSize: '12px', 
-            marginTop: 8,
-            padding: '16px'
-          }}>
+          <div
+            style={{
+              textAlign: 'center',
+              color: '#999',
+              fontSize: '12px',
+              marginTop: 8,
+              padding: '16px',
+            }}
+          >
             暂无选项，点击上方按钮添加选项
           </div>
         )}

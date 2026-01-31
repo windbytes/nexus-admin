@@ -10,4 +10,3 @@ export interface EndpointSearchParams extends PageQueryParams {
   category?: string;
   status?: boolean;
 }
-

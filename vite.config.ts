@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
       }),
       tailwindcss(),
       viteCompression({
-        verbose: true,
-        disable: isProduction,
+        verbose: !isProduction,
+        disable: !isProduction,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
@@ -37,39 +37,20 @@ export default defineConfig(({ mode }) => {
       Icons({
         compiler: 'jsx',
       }),
-      mockDevServerPlugin({
-        prefix: '/api',
-      }),
+      // mock 插件仅开发环境启用
+      ...(mode === 'development' ? [mockDevServerPlugin({ prefix: '/api' })] : []),
     ],
     // 配置分包
     build: {
+      // 生产环境可设为 true 或 'hidden' 便于接入 Sentry 等错误追踪
       sourcemap: false,
       // css代码分割
       cssCodeSplit: isProduction,
       cssTarget: 'chrome80',
-      // 只在生产环境下启用terser代码压缩
-      ...(isProduction && {
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-            pure_funcs: ['console.log', 'console.info'],
-            passes: 2,
-          },
-          mangle: {
-            toplevel: true,
-            safari10: true,
-          },
-          format: {
-            comments: false,
-          },
-        },
-      }),
-      // 优化构建
-      target: 'es2015',
+      // 使用 Vite 8 默认 Oxc minifier（比 Terser 更快）
+      target: 'es2020',
       // 设置 chunk 大小警告限制
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 800,
       rolldownOptions: {
         output: {
           codeSplitting: {
@@ -121,13 +102,25 @@ export default defineConfig(({ mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
+      include: [
+        'react',
+        'react-dom',
+        'antd',
+        'lodash-es',
+        'dayjs',
+        'axios',
+        'echarts',
+        '@ant-design/icons',
+        '@tanstack/react-query',
+        '@tanstack/react-router',
+        '@monaco-editor/react',
+      ],
     },
     // css预处理器
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "@/styles/variables.scss";`,
+          additionalData: `@use "${path.resolve(__dirname, './src/styles/variables.scss').replace(/\\\\/g, '/')}";`,
         },
       },
     },
@@ -140,7 +133,7 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:9193',
           changeOrigin: true,
           ws: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          rewrite: (pathName) => pathName.replace(/^\/api/, ''),
         },
       },
     },

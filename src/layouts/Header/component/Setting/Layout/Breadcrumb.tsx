@@ -11,11 +11,7 @@ const Breadcrumb: React.FC = () => {
       {/* 开启面包屑导航 */}
       <SwitchItem title="开启面包屑导航" category="breadcrumb" pKey="enable" />
       {/* 仅有一个时隐藏 */}
-      <SwitchItem
-        title="仅有一个时隐藏"
-        category="breadcrumb"
-        pKey="hideOnlyOne"
-      />
+      <SwitchItem title="仅有一个时隐藏" category="breadcrumb" pKey="hideOnlyOne" />
       {/* 显示面包屑图标 */}
       <SwitchItem title="显示面包屑图标" category="breadcrumb" pKey="showIcon" />
       {/* 显示首页按钮 */}

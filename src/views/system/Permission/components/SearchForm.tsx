@@ -53,26 +53,14 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
     {
       name: 'resourceType',
       label: '资源类型',
-      component: (
-        <Select
-          allowClear
-          placeholder="请选择资源类型"
-          options={resourceTypeOptions}
-        />
-      ),
+      component: <Select allowClear placeholder="请选择资源类型" options={resourceTypeOptions} />,
     },
     ...(showAdvanced
       ? [
           {
             name: 'status',
             label: '状态',
-            component: (
-              <Select
-                allowClear
-                placeholder="请选择状态"
-                options={statusOptions}
-              />
-            ),
+            component: <Select allowClear placeholder="请选择状态" options={statusOptions} />,
           },
         ]
       : []),

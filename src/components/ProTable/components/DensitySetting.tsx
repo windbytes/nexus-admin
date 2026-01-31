@@ -36,4 +36,3 @@ export function DensitySetting({ value, onChange }: DensitySettingProps) {
     </Dropdown>
   );
 }
-

@@ -1,13 +1,7 @@
 import type { CSSProperties } from 'react';
 
 const IconMinimap: React.FC<{ style?: CSSProperties }> = ({ style }) => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    style={style}
-  >
+  <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={style}>
     <g id="g1">
       <path
         id="path1"

@@ -122,7 +122,8 @@ export const mockTemplates: AppTemplate[] = [
     id: '4',
     name: '跨平台文案创作',
     type: 'chatflow',
-    description: '此聊天流程允许用户输入URL,将网页的完整文本转换为指定语气的写作风格,同时生成适用于 Instagram、X(推特)、Threads 和RED(小红书)的内容',
+    description:
+      '此聊天流程允许用户输入URL,将网页的完整文本转换为指定语气的写作风格,同时生成适用于 Instagram、X(推特)、Threads 和RED(小红书)的内容',
     icon: '✏️',
     iconBg: '#722ed1',
     category: 'marketing',
@@ -248,7 +249,8 @@ export const mockTemplates: AppTemplate[] = [
     id: '13',
     name: '代码转换器',
     type: 'text_generation',
-    description: '这是一个可以提供多种代码语言转换能力的应用,你可以输入你希望转换的代码片段,选择目标的代码语言,你将得到你想要的',
+    description:
+      '这是一个可以提供多种代码语言转换能力的应用,你可以输入你希望转换的代码片段,选择目标的代码语言,你将得到你想要的',
     icon: '🔄',
     iconBg: '#13c2c2',
     category: 'ai_programming',

@@ -36,74 +36,71 @@ interface RoleSelectorBarProps {
  * 角色选择栏组件
  * 提供带标签和刷新按钮的角色选择功能
  */
-const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(({
-  roles,
-  selectedRole,
-  loading = false,
-  placeholder = '请选择角色',
-  width = 300,
-  showRefreshButton = false,
-  onSelect,
-  onRefresh,
-  showLabel = true,
-  labelText = '选择角色：',
-}) => {
-  /**
-   * 获取角色选项
-   */
-  const roleOptions: RoleOption[] = useMemo(() => {
-    return roles.map((role: RoleModel) => ({
-      label: role.roleName,
-      value: role.roleCode,
-    }));
-  }, [roles]);
+const RoleSelectorBar: React.FC<RoleSelectorBarProps> = memo(
+  ({
+    roles,
+    selectedRole,
+    loading = false,
+    placeholder = '请选择角色',
+    width = 300,
+    showRefreshButton = false,
+    onSelect,
+    onRefresh,
+    showLabel = true,
+    labelText = '选择角色：',
+  }) => {
+    /**
+     * 获取角色选项
+     */
+    const roleOptions: RoleOption[] = useMemo(() => {
+      return roles.map((role: RoleModel) => ({
+        label: role.roleName,
+        value: role.roleCode,
+      }));
+    }, [roles]);
 
-  /**
-   * 处理角色选择变化
-   */
-  const handleChange = (value: string | string[]) => {
-    if (typeof value === 'string') {
-      onSelect(value);
-    }
-  };
+    /**
+     * 处理角色选择变化
+     */
+    const handleChange = (value: string | string[]) => {
+      if (typeof value === 'string') {
+        onSelect(value);
+      }
+    };
 
-  return (
-    <Card size="small">
-      <Row gutter={16} align="middle">
-        <Col flex="auto">
-          <Space>
-            {showLabel && (
-              <>
-                <UserOutlined className="text-gray-500" />
-                <span className="font-medium">{labelText}</span>
-              </>
-            )}
-            <BaseRoleSelector
-              options={roleOptions}
-              loading={loading}
-              placeholder={placeholder}
-              width={width}
-              value={selectedRole}
-              onChange={handleChange}
-            />
-          </Space>
-        </Col>
-        {showRefreshButton && onRefresh && (
-          <Col>
-            <Button 
-              type="text" 
-              icon={<ReloadOutlined />} 
-              onClick={onRefresh} 
-              loading={loading}
-            >
-              刷新
-            </Button>
+    return (
+      <Card size="small">
+        <Row gutter={16} align="middle">
+          <Col flex="auto">
+            <Space>
+              {showLabel && (
+                <>
+                  <UserOutlined className="text-gray-500" />
+                  <span className="font-medium">{labelText}</span>
+                </>
+              )}
+              <BaseRoleSelector
+                options={roleOptions}
+                loading={loading}
+                placeholder={placeholder}
+                width={width}
+                value={selectedRole}
+                onChange={handleChange}
+              />
+            </Space>
           </Col>
-        )}
-      </Row>
-    </Card>
-  );
-});
+          {showRefreshButton && onRefresh && (
+            <Col>
+              <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
+                刷新
+              </Button>
+            </Col>
+          )}
+        </Row>
+      </Card>
+    );
+  }
+);
 
 RoleSelectorBar.displayName = 'RoleSelectorBar';
 

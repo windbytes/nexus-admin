@@ -1,7 +1,4 @@
-import type {
-  FlowNodeEntity,
-  FreeLayoutPluginContext,
-} from '@flowgram.ai/free-layout-editor';
+import type { FlowNodeEntity, FreeLayoutPluginContext } from '@flowgram.ai/free-layout-editor';
 
 /**
  * 滚动到节点可视化区域
@@ -9,11 +6,7 @@ import type {
  * @param node 节点
  * @param sidebarWidth 侧边栏宽度
  */
-export function scrollToView(
-  ctx: FreeLayoutPluginContext,
-  node: FlowNodeEntity,
-  sidebarWidth = 448,
-) {
+export function scrollToView(ctx: FreeLayoutPluginContext, node: FlowNodeEntity, sidebarWidth = 448) {
   const bounds = node.transform.bounds;
   ctx.playground.scrollToView({
     bounds,

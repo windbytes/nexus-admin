@@ -22,7 +22,7 @@ const CreateVersionModal: React.FC<CreateVersionModalProps> = ({
   currentVersion = 'v2.1.0',
 }) => {
   const [form] = Form.useForm();
-  const {message} = App.useApp();
+  const { message } = App.useApp();
   // 使用 React Query 获取版本列表
   const { data: versionResult } = useVersionList(
     {
@@ -30,7 +30,7 @@ const CreateVersionModal: React.FC<CreateVersionModalProps> = ({
       pageNum: 1,
       pageSize: 100,
     },
-    visible,
+    visible
   );
 
   // 版本数据

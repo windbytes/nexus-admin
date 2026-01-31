@@ -32,28 +32,16 @@ const SwitchConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         size: 'default',
       }}
     >
-      <Form.Item
-        name="checkedChildren"
-        label="选中时显示文本"
-        tooltip="开关打开时显示的文字"
-      >
+      <Form.Item name="checkedChildren" label="选中时显示文本" tooltip="开关打开时显示的文字">
         <Input placeholder="请输入选中时显示文本" />
       </Form.Item>
 
-      <Form.Item
-        name="unCheckedChildren"
-        label="未选中时显示文本"
-        tooltip="开关关闭时显示的文字"
-      >
+      <Form.Item name="unCheckedChildren" label="未选中时显示文本" tooltip="开关关闭时显示的文字">
         <Input placeholder="请输入未选中时显示文本" />
       </Form.Item>
 
-      <Form.Item
-        name="size"
-        label="开关大小"
-        tooltip="开关的大小"
-      >
-        <Select 
+      <Form.Item name="size" label="开关大小" tooltip="开关的大小">
+        <Select
           placeholder="请选择开关大小"
           options={[
             { value: 'default', label: '默认' },
@@ -62,21 +50,11 @@ const SwitchConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         />
       </Form.Item>
 
-      <Form.Item
-        name="disabled"
-        label="禁用状态"
-        valuePropName="checked"
-        tooltip="是否禁用开关"
-      >
+      <Form.Item name="disabled" label="禁用状态" valuePropName="checked" tooltip="是否禁用开关">
         <Switch />
       </Form.Item>
 
-      <Form.Item
-        name="loading"
-        label="加载状态"
-        valuePropName="checked"
-        tooltip="是否显示加载状态"
-      >
+      <Form.Item name="loading" label="加载状态" valuePropName="checked" tooltip="是否显示加载状态">
         <Switch />
       </Form.Item>
     </Form>

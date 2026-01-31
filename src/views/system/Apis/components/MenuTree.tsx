@@ -19,13 +19,7 @@ const MenuTree: React.FC<MenuTreeProps> = ({ treeData, loading, onSelect }) => {
     >
       <Spin spinning={loading}>
         {treeData.length > 0 ? (
-          <Tree
-            showLine
-            blockNode
-            treeData={treeData}
-            onSelect={onSelect}
-            defaultExpandAll
-          />
+          <Tree showLine blockNode treeData={treeData} onSelect={onSelect} defaultExpandAll />
         ) : (
           <Empty description="暂无菜单数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
         )}

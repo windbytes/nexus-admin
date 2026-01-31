@@ -154,23 +154,14 @@ const EndpointVersionDrawer: React.FC<EndpointVersionDrawerProps> = ({ open, end
   }, [open, endpoint, loadVersions]);
 
   return (
-    <Drawer
-      title={`版本管理 - ${endpoint?.name || ''}`}
-      placement="right"
-      size={600}
-      open={open}
-      onClose={onClose}
-    >
+    <Drawer title={`版本管理 - ${endpoint?.name || ''}`} placement="right" size={600} open={open} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* 版本列表 */}
         <Spin spinning={loading}>
           {versions.length > 0 ? (
             <div className={styles['version-list']}>
               {versions.map((version) => (
-                <div
-                  key={version.id}
-                  className={`${styles['version-item']} ${version.isCurrent ? 'bg-blue-50' : ''}`}
-                >
+                <div key={version.id} className={`${styles['version-item']} ${version.isCurrent ? 'bg-blue-50' : ''}`}>
                   <div className={styles['version-item-content']}>
                     <div className={styles['version-item-meta']}>
                       <div className={styles['version-item-title']}>
@@ -193,11 +184,7 @@ const EndpointVersionDrawer: React.FC<EndpointVersionDrawerProps> = ({ open, end
                       </div>
                     </div>
                     <div className={styles['version-item-actions']}>
-                      <Button
-                        type="link"
-                        size="small"
-                        onClick={() => handleViewDetail(version)}
-                      >
+                      <Button type="link" size="small" onClick={() => handleViewDetail(version)}>
                         查看
                       </Button>
                       {!version.isCurrent && onRestore && (
@@ -226,4 +213,3 @@ const EndpointVersionDrawer: React.FC<EndpointVersionDrawerProps> = ({ open, end
 };
 
 export default EndpointVersionDrawer;
-

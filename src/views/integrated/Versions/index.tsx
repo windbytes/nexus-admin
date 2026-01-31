@@ -11,7 +11,7 @@ import VersionList from './VersionList';
  * 版本管理主组件
  */
 const Versions: React.FC = () => {
-  const {message} = App.useApp();
+  const { message } = App.useApp();
   const [showComparison, setShowComparison] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [comparisonVersions, setComparisonVersions] = useState<{

@@ -20,14 +20,7 @@ interface UseApiActionsOptions {
  */
 export const useApiActions = (options: UseApiActionsOptions) => {
   const { modal } = App.useApp();
-  const {
-    selectedMenuId,
-    selectedRowKeys,
-    setSelectedRowKeys,
-    openForm,
-    closeForm,
-    refetchApis,
-  } = options;
+  const { selectedMenuId, selectedRowKeys, setSelectedRowKeys, openForm, closeForm, refetchApis } = options;
 
   const onSuccess = () => {
     closeForm();
@@ -119,10 +112,7 @@ export const useApiData = (selectedMenuId: string | null) => {
     refetch: refetchApis,
   } = useQuery({
     queryKey: ['sys_api', selectedMenuId],
-    queryFn: () =>
-      selectedMenuId
-        ? apiService.queryByMenuId({ menuId: selectedMenuId })
-        : Promise.resolve([]),
+    queryFn: () => (selectedMenuId ? apiService.queryByMenuId({ menuId: selectedMenuId }) : Promise.resolve([])),
     enabled: !!selectedMenuId,
   });
 

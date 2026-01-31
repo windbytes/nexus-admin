@@ -26,4 +26,3 @@ const EndpointInfoCard: React.FC<EndpointInfoCardProps> = ({ endpoint }) => {
 EndpointInfoCard.displayName = 'EndpointInfoCard';
 
 export default EndpointInfoCard;
-

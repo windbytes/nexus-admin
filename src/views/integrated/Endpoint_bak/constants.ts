@@ -7,4 +7,3 @@ export const PAGINATION_CONFIG = {
   hideOnSinglePage: false,
   pageSizeOptions: ['10', '20', '50', '100'],
 };
-

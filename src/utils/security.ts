@@ -28,19 +28,19 @@ export const setSafeInnerHTML = (element: HTMLElement, html: string): void => {
 export const validationRules = {
   // 邮箱验证
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  
+
   // 手机号验证（中国大陆）
   phone: /^1[3-9]\d{9}$/,
-  
+
   // 密码强度验证（至少8位，包含大小写字母、数字和特殊字符）
   password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-  
+
   // 用户名验证（3-20位字母数字下划线）
   username: /^[a-zA-Z0-9_]{3,20}$/,
-  
+
   // URL 验证
   url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
-  
+
   // 身份证号验证（中国大陆）
   idCard: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
 };
@@ -55,7 +55,7 @@ export const validateInput = {
   username: (username: string): boolean => validationRules.username.test(username),
   url: (url: string): boolean => validationRules.url.test(url),
   idCard: (idCard: string): boolean => validationRules.idCard.test(idCard),
-  
+
   // 通用验证
   required: (value: any): boolean => {
     if (typeof value === 'string') {
@@ -63,14 +63,13 @@ export const validateInput = {
     }
     return value !== null && value !== undefined;
   },
-  
+
   minLength: (value: string, min: number): boolean => value.length >= min,
   maxLength: (value: string, max: number): boolean => value.length <= max,
-  
+
   // 数字范围验证
-  numberRange: (value: number, min: number, max: number): boolean => 
-    value >= min && value <= max,
-  
+  numberRange: (value: number, min: number, max: number): boolean => value >= min && value <= max,
+
   // 正则表达式验证
   pattern: (value: string, pattern: RegExp): boolean => pattern.test(value),
 };
@@ -84,7 +83,7 @@ export const maskSensitiveData = {
     if (phone.length !== 11) return phone;
     return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
   },
-  
+
   // 邮箱脱敏
   email: (email: string): string => {
     const [username, domain] = email.split('@');
@@ -92,13 +91,13 @@ export const maskSensitiveData = {
     const maskedUsername = username![0] + '*'.repeat(username!.length - 2) + username![username!.length - 1];
     return `${maskedUsername}@${domain}`;
   },
-  
+
   // 身份证号脱敏
   idCard: (idCard: string): string => {
     if (idCard.length !== 18) return idCard;
     return idCard.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2');
   },
-  
+
   // 银行卡号脱敏
   bankCard: (cardNumber: string): string => {
     if (cardNumber.length < 8) return cardNumber;
@@ -107,7 +106,7 @@ export const maskSensitiveData = {
     const middle = '*'.repeat(cardNumber.length - 8);
     return `${start}${middle}${end}`;
   },
-  
+
   // 姓名脱敏
   name: (name: string): string => {
     if (name.length <= 1) return name;
@@ -124,19 +123,19 @@ export const csrfToken = {
   generate: (): string => {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
   },
-  
+
   // 验证 CSRF 令牌
   validate: (token: string, storedToken: string): boolean => {
     return token === storedToken && token.length === 64;
   },
-  
+
   // 存储 CSRF 令牌到 sessionStorage
   store: (token: string): void => {
     sessionStorage.setItem('csrf-token', token);
   },
-  
+
   // 从 sessionStorage 获取 CSRF 令牌
   get: (): string | null => {
     return sessionStorage.getItem('csrf-token');
@@ -172,7 +171,7 @@ export const secureStorage = {
   encode: (data: string): string => {
     return btoa(unescape(encodeURIComponent(data)));
   },
-  
+
   // Base64 解码
   decode: (encodedData: string): string => {
     try {
@@ -181,7 +180,7 @@ export const secureStorage = {
       return '';
     }
   },
-  
+
   // 安全存储（编码后存储）
   setItem: (key: string, value: any): void => {
     try {
@@ -191,13 +190,13 @@ export const secureStorage = {
       console.error('安全存储失败:', error);
     }
   },
-  
+
   // 安全获取（解码后获取）
   getItem: <T = any>(key: string): T | null => {
     try {
       const encodedValue = localStorage.getItem(key);
       if (!encodedValue) return null;
-      
+
       const decodedValue = secureStorage.decode(encodedValue);
       return JSON.parse(decodedValue);
     } catch (error) {
@@ -205,12 +204,12 @@ export const secureStorage = {
       return null;
     }
   },
-  
+
   // 删除安全存储项
   removeItem: (key: string): void => {
     localStorage.removeItem(key);
   },
-  
+
   // 清空安全存储
   clear: (): void => {
     localStorage.clear();
@@ -226,17 +225,17 @@ export const sanitizeInput = {
   stripHtml: (input: string): string => {
     return input.replace(/<[^>]*>/g, '');
   },
-  
+
   // 清理 SQL 注入字符
   stripSql: (input: string): string => {
     return input.replace(/['"\\;]/g, '');
   },
-  
+
   // 清理 JavaScript 代码
   stripScript: (input: string): string => {
     return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
   },
-  
+
   // 清理所有危险字符
   stripDangerous: (input: string): string => {
     return input

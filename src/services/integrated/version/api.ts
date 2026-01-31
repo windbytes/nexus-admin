@@ -122,7 +122,7 @@ export interface IVersionsService {
    */
   assessVersionImpact(
     workflowId: string,
-    versionId: string,
+    versionId: string
   ): Promise<{
     backwardCompatible: boolean;
     nonDestructive: boolean;
@@ -160,7 +160,7 @@ export const versionsService: IVersionsService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return response;
   },
@@ -277,7 +277,7 @@ export const versionsService: IVersionsService = {
    */
   async assessVersionImpact(
     workflowId: string,
-    versionId: string,
+    versionId: string
   ): Promise<{
     backwardCompatible: boolean;
     nonDestructive: boolean;

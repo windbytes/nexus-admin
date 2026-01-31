@@ -82,7 +82,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       if (showConditionValue.trim()) {
         const trimmed = showConditionValue.trim();
         // 检测是否为函数格式
-        if (trimmed.startsWith('function') || trimmed.startsWith('(') && trimmed.includes('=>')) {
+        if (trimmed.startsWith('function') || (trimmed.startsWith('(') && trimmed.includes('=>'))) {
           setConditionType('function');
         } else {
           setConditionType('expression');
@@ -177,22 +177,22 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
    */
   const validateRules = (rules: RuleItem[]): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
-    
+
     rules.forEach((rule, index) => {
       const ruleNum = index + 1;
-      
+
       // 1. 必须有错误提示信息
       if (!rule.message || !rule.message.trim()) {
         errors.push(`规则${ruleNum}：缺少错误提示信息（message字段为必填项）`);
       }
-      
+
       // 2. 如果配置了min/max，验证其有效性
       if (rule.min !== undefined && rule.max !== undefined) {
         if (rule.min > rule.max) {
           errors.push(`规则${ruleNum}：最小值(${rule.min})不能大于最大值(${rule.max})`);
         }
       }
-      
+
       // 3. 如果配置了正则表达式，验证其有效性
       if (rule.pattern && rule.pattern.trim()) {
         try {
@@ -201,16 +201,16 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
           errors.push(`规则${ruleNum}：正则表达式格式错误 - ${rule.pattern}`);
         }
       }
-      
+
       // 4. 如果type是enum，应该配置enum数组（虽然在当前界面没有配置项，但可以通过JSON配置）
       if (rule.type === 'enum' && !rule['enum']) {
         errors.push(`规则${ruleNum}：验证类型为enum时，需要配置enum数组`);
       }
     });
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   };
 
@@ -221,35 +221,34 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
     if (!condition || !condition.trim()) {
       return { valid: true };
     }
-    
+
     const trimmed = condition.trim();
-    
+
     // 1. 检查危险代码
     if (trimmed.includes('eval(') || trimmed.includes('Function(')) {
       return { valid: false, error: '显示条件中不允许使用 eval 或 Function' };
     }
-    
+
     // 2. 如果是函数模式，验证基本格式
     if (conditionType === 'function') {
-      const isFunctionFormat = trimmed.startsWith('function') || 
-                              (trimmed.startsWith('(') && trimmed.includes('=>'));
-      
+      const isFunctionFormat = trimmed.startsWith('function') || (trimmed.startsWith('(') && trimmed.includes('=>'));
+
       if (!isFunctionFormat) {
-        return { 
-          valid: false, 
-          error: '函数模式下，应使用 function(formValues) {...} 或 (formValues) => {...} 格式' 
+        return {
+          valid: false,
+          error: '函数模式下，应使用 function(formValues) {...} 或 (formValues) => {...} 格式',
         };
       }
-      
+
       // 验证是否有返回语句
       if (!trimmed.includes('return')) {
-        return { 
-          valid: false, 
-          error: '函数必须包含 return 语句以返回布尔值' 
+        return {
+          valid: false,
+          error: '函数必须包含 return 语句以返回布尔值',
         };
       }
     }
-    
+
     return { valid: true };
   };
 
@@ -263,19 +262,19 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       // 处理验证规则
       let rulesStr = '';
       let rulesToValidate: RuleItem[] = [];
-      
+
       if (rulesMode === 'json') {
         // JSON模式：验证JSON格式和内容
         if (rulesJson.trim()) {
           try {
             const parsed = JSON.parse(rulesJson);
-            
+
             // 验证是否为数组
             if (!Array.isArray(parsed)) {
               message.error('验证规则必须是数组格式');
               return;
             }
-            
+
             rulesToValidate = parsed;
             rulesStr = rulesJson.trim();
           } catch (error: any) {
@@ -287,11 +286,16 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
         // 可视化模式：验证并转换
         if (visualRules.length > 0) {
           // 过滤掉完全空的规则（没有任何有效配置的）
-          const nonEmptyRules = visualRules.filter(rule => 
-            rule.message || rule.type || rule.required || 
-            rule.min !== undefined || rule.max !== undefined || rule.pattern
+          const nonEmptyRules = visualRules.filter(
+            (rule) =>
+              rule.message ||
+              rule.type ||
+              rule.required ||
+              rule.min !== undefined ||
+              rule.max !== undefined ||
+              rule.pattern
           );
-          
+
           if (nonEmptyRules.length > 0) {
             rulesToValidate = nonEmptyRules;
             rulesStr = JSON.stringify(nonEmptyRules);
@@ -308,7 +312,9 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
               <div>
                 <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>验证规则配置错误：</div>
                 {errors.map((err, idx) => (
-                  <div key={idx} style={{ marginLeft: '8px', fontSize: '12px' }}>• {err}</div>
+                  <div key={idx} style={{ marginLeft: '8px', fontSize: '12px' }}>
+                    • {err}
+                  </div>
                 ))}
               </div>
             ),
@@ -463,11 +469,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
             <div className="space-y-2">
               <div className="text-sm text-gray-500 mb-2">
                 配置Ant Design Form的验证规则。支持配置：是否必填、验证类型、错误提示、长度限制、正则表达式等。（
-                <a
-                  href="https://ant.design/components/form-cn#rule"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://ant.design/components/form-cn#rule" target="_blank" rel="noopener noreferrer">
                   查看文档
                 </a>
                 ）
@@ -483,9 +485,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                           checked={rule.required || false}
                           onChange={(checked) => handleUpdateRule(index, 'required', checked)}
                         />
-                        <span className="text-xs text-gray-400">
-                          {rule.required ? '必填项' : '非必填'}
-                        </span>
+                        <span className="text-xs text-gray-400">{rule.required ? '必填项' : '非必填'}</span>
                       </div>
 
                       {/* 验证类型 */}
@@ -528,17 +528,21 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                               placeholder="最小值 (min)"
                               type="number"
                               value={rule.min}
-                              onChange={(e) => handleUpdateRule(index, 'min', e.target.value ? Number(e.target.value) : undefined)}
+                              onChange={(e) =>
+                                handleUpdateRule(index, 'min', e.target.value ? Number(e.target.value) : undefined)
+                              }
                             />
                           </Space.Compact>
                           <Space.Compact>
                             <Space.Addon>≤</Space.Addon>
-                              <Input
-                                placeholder="最大值 (max)"
-                                type="number"
-                                value={rule.max}
-                                onChange={(e) => handleUpdateRule(index, 'max', e.target.value ? Number(e.target.value) : undefined)}
-                              />
+                            <Input
+                              placeholder="最大值 (max)"
+                              type="number"
+                              value={rule.max}
+                              onChange={(e) =>
+                                handleUpdateRule(index, 'max', e.target.value ? Number(e.target.value) : undefined)
+                              }
+                            />
                           </Space.Compact>
                         </div>
                       </div>
@@ -567,13 +571,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                   </div>
                 </Card>
               ))}
-              <Button
-                type="dashed"
-                icon={<PlusOutlined />}
-                onClick={handleAddRule}
-                block
-                size="small"
-              >
+              <Button type="dashed" icon={<PlusOutlined />} onClick={handleAddRule} block size="small">
                 添加验证规则
               </Button>
             </div>
@@ -581,11 +579,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
             <div>
               <div className="text-sm text-gray-500 mb-2">
                 请输入JSON格式的验证规则数组（
-                <a
-                  href="https://ant.design/components/form-cn#rule"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://ant.design/components/form-cn#rule" target="_blank" rel="noopener noreferrer">
                   Ant Design Form Rule[]
                 </a>
                 ）
@@ -608,11 +602,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
           title="显示条件"
           size="small"
           extra={
-            <Radio.Group
-              size="small"
-              value={conditionType}
-              onChange={(e) => setConditionType(e.target.value)}
-            >
+            <Radio.Group size="small" value={conditionType} onChange={(e) => setConditionType(e.target.value)}>
               <Radio.Button value="expression">表达式</Radio.Button>
               <Radio.Button value="function">函数</Radio.Button>
             </Radio.Group>
@@ -646,7 +636,9 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                     if (conditionType === 'function') {
                       const trimmed = value.trim();
                       if (!trimmed.startsWith('function') && !(trimmed.startsWith('(') && trimmed.includes('=>'))) {
-                        return Promise.reject(new Error('函数格式不正确，应为 function(formValues) {...} 或 (formValues) => {...}'));
+                        return Promise.reject(
+                          new Error('函数格式不正确，应为 function(formValues) {...} 或 (formValues) => {...}')
+                        );
                       }
                     }
                     return Promise.resolve();
@@ -669,14 +661,22 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
             {conditionType === 'expression' ? (
               <>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>常用示例：</div>
-                <div>• <code>formValues.fieldName === 'someValue'</code> - 当某字段等于特定值时显示</div>
-                <div>• <code>formValues.enabled === true</code> - 当某开关打开时显示</div>
-                <div>• <code>formValues.type === 'A' || formValues.type === 'B'</code> - 多条件判断</div>
+                <div>
+                  • <code>formValues.fieldName === 'someValue'</code> - 当某字段等于特定值时显示
+                </div>
+                <div>
+                  • <code>formValues.enabled === true</code> - 当某开关打开时显示
+                </div>
+                <div>
+                  • <code>formValues.type === 'A' || formValues.type === 'B'</code> - 多条件判断
+                </div>
               </>
             ) : (
               <>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>函数示例：</div>
-                <pre style={{ margin: 0, padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontSize: '11px' }}>
+                <pre
+                  style={{ margin: 0, padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontSize: '11px' }}
+                >
                   {`// 标准函数
 function(formValues) {
   return formValues.type === 'database' && formValues.enabled;
@@ -698,4 +698,3 @@ function(formValues) {
 };
 
 export default AdvancedConfigModal;
-

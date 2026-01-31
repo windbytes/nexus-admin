@@ -54,12 +54,7 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
       fixed: 'right',
       render: (_: unknown, record: PageButtonModel) => (
         <div className="flex gap-1">
-          <Button
-            type="link"
-            size="small"
-            disabled={actionsDisabled}
-            onClick={() => openModal('edit', record)}
-          >
+          <Button type="link" size="small" disabled={actionsDisabled} onClick={() => openModal('edit', record)}>
             编辑
           </Button>
           <Button

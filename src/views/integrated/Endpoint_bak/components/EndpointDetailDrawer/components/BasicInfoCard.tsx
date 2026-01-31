@@ -43,9 +43,7 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({ endpoint }) => {
           <Text strong>{endpoint.name}</Text>
         </Descriptions.Item>
         <Descriptions.Item label="端点类型">
-          <Tag color={getEndpointTypeColor(endpoint.endpointType)}>
-            {getEndpointTypeName(endpoint.endpointType)}
-          </Tag>
+          <Tag color={getEndpointTypeColor(endpoint.endpointType)}>{getEndpointTypeName(endpoint.endpointType)}</Tag>
         </Descriptions.Item>
         <Descriptions.Item label="端点分类">
           {endpoint.category || <Text type="secondary">未分类</Text>}
@@ -65,4 +63,3 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({ endpoint }) => {
 BasicInfoCard.displayName = 'BasicInfoCard';
 
 export default BasicInfoCard;
-

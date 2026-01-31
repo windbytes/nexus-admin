@@ -239,4 +239,3 @@ export interface AddUserModalProps {
   onOk: (params: number) => void;
   onCancel: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
-

@@ -106,7 +106,13 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
               <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
                 {t('common.operation.reset')}
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />} onClick={handleSearch}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+              >
                 {t('common.operation.search')}
               </Button>
               <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={toggleAdvanced}>
@@ -151,14 +157,25 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
 
           {/* 小屏幕上的操作按钮 */}
           <div className="flex lg:hidden justify-between items-center mt-4">
-            <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={toggleAdvanced} className="pl-0">
+            <Button
+              type="link"
+              icon={expanded ? <UpOutlined /> : <DownOutlined />}
+              onClick={toggleAdvanced}
+              className="pl-0"
+            >
               {expanded ? '收起' : '展开'}
             </Button>
             <Space>
               <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
                 {t('common.operation.reset')}
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />} onClick={handleSearch}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+              >
                 {t('common.operation.search')}
               </Button>
             </Space>
@@ -172,4 +189,3 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
 SearchForm.displayName = 'SearchForm';
 
 export default SearchForm;
-

@@ -1,4 +1,3 @@
-
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -28,7 +27,6 @@ const Console: React.FC = () => {
       document.removeEventListener('keyup', keyupEvent, false);
     };
   }, []);
-
 
   /**
    * 监听键盘事件

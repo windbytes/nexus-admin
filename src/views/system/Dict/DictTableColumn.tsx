@@ -16,35 +16,38 @@ const getDictTableColumns = ({ dispatch, logicDeleteUserMutation }: DictTableCol
   const { t } = useTranslation();
 
   // 更多操作
-  const more = useCallback((row: any) => [
-    {
-      key: 'edit',
-      label: t('common.operation.edit'),
-      icon: <EditOutlined className="text-orange-400" />,
-      onClick: () => {
-        dispatch({
-          openEditModal: true,
-          currentRow: row,
-          action: 'edit',
-        });
+  const more = useCallback(
+    (row: any) => [
+      {
+        key: 'edit',
+        label: t('common.operation.edit'),
+        icon: <EditOutlined className="text-orange-400" />,
+        onClick: () => {
+          dispatch({
+            openEditModal: true,
+            currentRow: row,
+            action: 'edit',
+          });
+        },
       },
-    },
-    {
-      key: 'delete',
-      label: t('common.operation.delete'),
-      icon: <DeleteOutlined className="text-red-400" />,
-      onClick: () => {
-        modal.confirm({
-          title: '删除字典',
-          icon: <ExclamationCircleFilled />,
-          content: '确定删除该字典吗？数据删除后将无法恢复！',
-          onOk() {
-            logicDeleteUserMutation.mutate([row.id]);
-          },
-        });
+      {
+        key: 'delete',
+        label: t('common.operation.delete'),
+        icon: <DeleteOutlined className="text-red-400" />,
+        onClick: () => {
+          modal.confirm({
+            title: '删除字典',
+            icon: <ExclamationCircleFilled />,
+            content: '确定删除该字典吗？数据删除后将无法恢复！',
+            onOk() {
+              logicDeleteUserMutation.mutate([row.id]);
+            },
+          });
+        },
       },
-    },
-  ], []);
+    ],
+    []
+  );
 
   /**
    * 表格列配置

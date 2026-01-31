@@ -24,12 +24,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
   return (
     <div className="flex gap-2">
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={onAdd}
-        disabled={actionsDisabled}
-      >
+      <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} disabled={actionsDisabled}>
         新增
       </Button>
       <Button

@@ -4,7 +4,7 @@ import type { AppTemplate, TemplateCategory, TemplateFilterOption, TemplateSearc
 /**
  * 模拟API延迟
  */
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * 模拟的模板服务
@@ -36,37 +36,34 @@ export const templateService = {
     pageSize: number;
   }> {
     await delay(500);
-    
+
     let filteredTemplates = [...mockTemplates];
 
     // 按关键词筛选
     if (params.keyword) {
       const keyword = params.keyword.toLowerCase();
-      filteredTemplates = filteredTemplates.filter(template =>
-        template.name.toLowerCase().includes(keyword) ||
-        template.description.toLowerCase().includes(keyword) ||
-        template.tags.some(tag => tag.toLowerCase().includes(keyword))
+      filteredTemplates = filteredTemplates.filter(
+        (template) =>
+          template.name.toLowerCase().includes(keyword) ||
+          template.description.toLowerCase().includes(keyword) ||
+          template.tags.some((tag) => tag.toLowerCase().includes(keyword))
       );
     }
 
     // 按类型筛选
     if (params.types && params.types.length > 0) {
-      filteredTemplates = filteredTemplates.filter(template =>
-        params.types!.includes(template.type)
-      );
+      filteredTemplates = filteredTemplates.filter((template) => params.types!.includes(template.type));
     }
 
     // 按分类筛选
     if (params.category && params.category !== 'recommended') {
-      filteredTemplates = filteredTemplates.filter(template =>
-        template.category === params.category
-      );
+      filteredTemplates = filteredTemplates.filter((template) => template.category === params.category);
     }
 
     const total = filteredTemplates.length;
     const pageNum = params.pageNum || 1;
     const pageSize = params.pageSize || 20;
-    
+
     // 分页
     const start = (pageNum - 1) * pageSize;
     const end = start + pageSize;
@@ -85,14 +82,12 @@ export const templateService = {
    */
   async getTemplatesByCategory(categoryId: string): Promise<AppTemplate[]> {
     await delay(400);
-    
+
     if (categoryId === 'recommended') {
       // 推荐分类返回评分最高的前20个模板
-      return mockTemplates
-        .sort((a, b) => b.rating - a.rating)
-        .slice(0, 20);
+      return mockTemplates.sort((a, b) => b.rating - a.rating).slice(0, 20);
     }
-    
-    return mockTemplates.filter(template => template.category === categoryId);
+
+    return mockTemplates.filter((template) => template.category === categoryId);
   },
 };

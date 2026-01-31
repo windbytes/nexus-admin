@@ -295,29 +295,29 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { startTime, endTime } = req.query;
-      
+
       // 根据时间范围调整统计数据（这里简化处理）
       const statistics = { ...mockPermissionStatistics };
-      
+
       if (startTime && endTime) {
         // 模拟根据时间范围调整数据
         const start = new Date(startTime as string);
         const end = new Date(endTime as string);
         const now = new Date();
-        
+
         // 如果查询的是过去的数据，适当调整使用次数
         if (end < now) {
-          statistics.topUsedButtons = statistics.topUsedButtons.map(item => ({
+          statistics.topUsedButtons = statistics.topUsedButtons.map((item) => ({
             ...item,
             usageCount: Math.floor(item.usageCount * 0.8),
           }));
-          statistics.topUsedInterfaces = statistics.topUsedInterfaces.map(item => ({
+          statistics.topUsedInterfaces = statistics.topUsedInterfaces.map((item) => ({
             ...item,
             usageCount: Math.floor(item.usageCount * 0.8),
           }));
         }
       }
-      
+
       return {
         code: 200,
         message: '操作成功',
@@ -325,51 +325,38 @@ export default defineMock([
       };
     },
   },
-  
+
   // 获取权限变更日志
   {
     url: '/api/system/permission/audit/changeLog',
     method: 'GET',
     enabled: false,
     body: (req) => {
-      const { 
-        pageNumber = 1, 
-        pageSize = 10, 
-        operationType, 
-        targetType, 
-        startTime, 
-        endTime 
-      } = req.query;
-      
+      const { pageNumber = 1, pageSize = 10, operationType, targetType, startTime, endTime } = req.query;
+
       let filteredData = [...mockPermissionChangeLogs];
-      
+
       // 根据查询条件过滤数据
       if (operationType) {
-        filteredData = filteredData.filter(item => item.operationType === operationType);
+        filteredData = filteredData.filter((item) => item.operationType === operationType);
       }
       if (targetType) {
-        filteredData = filteredData.filter(item => item.targetType === targetType);
+        filteredData = filteredData.filter((item) => item.targetType === targetType);
       }
       if (startTime) {
-        filteredData = filteredData.filter(item => 
-          new Date(item.operationTime) >= new Date(startTime as string)
-        );
+        filteredData = filteredData.filter((item) => new Date(item.operationTime) >= new Date(startTime as string));
       }
       if (endTime) {
-        filteredData = filteredData.filter(item => 
-          new Date(item.operationTime) <= new Date(endTime as string)
-        );
+        filteredData = filteredData.filter((item) => new Date(item.operationTime) <= new Date(endTime as string));
       }
-      
+
       // 按时间倒序排列
-      filteredData.sort((a, b) => 
-        new Date(b.operationTime).getTime() - new Date(a.operationTime).getTime()
-      );
-      
+      filteredData.sort((a, b) => new Date(b.operationTime).getTime() - new Date(a.operationTime).getTime());
+
       const startIndex = (pageNumber - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const records = filteredData.slice(startIndex, endIndex);
-      
+
       return {
         code: 200,
         message: '操作成功',
@@ -383,7 +370,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 获取异常权限检测结果
   {
     url: '/api/system/permission/audit/anomaly',
@@ -391,23 +378,21 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { pageNumber = 1, pageSize = 10, anomalyType } = req.query;
-      
+
       let filteredData = [...mockAnomalyDetectionResults];
-      
+
       // 根据查询条件过滤数据
       if (anomalyType) {
-        filteredData = filteredData.filter(item => item.anomalyType === anomalyType);
+        filteredData = filteredData.filter((item) => item.anomalyType === anomalyType);
       }
-      
+
       // 按检测时间倒序排列
-      filteredData.sort((a, b) => 
-        new Date(b.detectedTime).getTime() - new Date(a.detectedTime).getTime()
-      );
-      
+      filteredData.sort((a, b) => new Date(b.detectedTime).getTime() - new Date(a.detectedTime).getTime());
+
       const startIndex = (pageNumber - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const records = filteredData.slice(startIndex, endIndex);
-      
+
       return {
         code: 200,
         message: '操作成功',

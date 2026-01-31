@@ -181,7 +181,7 @@ done`,
     plaintext: `这是一个纯文本示例
 支持多行文本
 没有语法高亮
-适合显示日志、配置文件等内容`
+适合显示日志、配置文件等内容`,
   };
 
   // 处理代码变化
@@ -264,23 +264,18 @@ done`,
               </Select>
             </div>
           </Col>
-          
+
           <Col span={6}>
             <div>
               <label htmlFor={themeId}>主题:</label>
-              <Select
-                id={themeId}
-                value={theme}
-                onChange={setTheme}
-                style={{ width: '100%', marginTop: '8px' }}
-              >
+              <Select id={themeId} value={theme} onChange={setTheme} style={{ width: '100%', marginTop: '8px' }}>
                 <Option value="vs">浅色主题</Option>
                 <Option value="vs-dark">深色主题</Option>
                 <Option value="hc-black">高对比度</Option>
               </Select>
             </div>
           </Col>
-          
+
           <Col span={6}>
             <div>
               <label htmlFor={fontSizeId}>字体大小:</label>
@@ -294,7 +289,7 @@ done`,
               />
             </div>
           </Col>
-          
+
           <Col span={6}>
             <div>
               <label htmlFor={heightId}>编辑器高度:</label>
@@ -309,34 +304,25 @@ done`,
             </div>
           </Col>
         </Row>
-        
+
         <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
           <Col span={6}>
             <Space>
-              <Switch
-                checked={readOnly}
-                onChange={setReadOnly}
-              />
+              <Switch checked={readOnly} onChange={setReadOnly} />
               <span>只读模式</span>
             </Space>
           </Col>
-          
+
           <Col span={6}>
             <Space>
-              <Switch
-                checked={showLineNumbers}
-                onChange={setShowLineNumbers}
-              />
+              <Switch checked={showLineNumbers} onChange={setShowLineNumbers} />
               <span>显示行号</span>
             </Space>
           </Col>
-          
+
           <Col span={6}>
             <Space>
-              <Switch
-                checked={showMinimap}
-                onChange={setShowMinimap}
-              />
+              <Switch checked={showMinimap} onChange={setShowMinimap} />
               <span>显示小地图</span>
             </Space>
           </Col>

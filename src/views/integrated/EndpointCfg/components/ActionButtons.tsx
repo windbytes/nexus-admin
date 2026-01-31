@@ -1,12 +1,6 @@
 import React from 'react';
 import { Button, Space } from 'antd';
-import {
-  SaveOutlined,
-  DeleteOutlined,
-  ExportOutlined,
-  ImportOutlined,
-  EyeOutlined,
-} from '@ant-design/icons';
+import { SaveOutlined, DeleteOutlined, ExportOutlined, ImportOutlined, EyeOutlined } from '@ant-design/icons';
 
 interface ActionButtonsProps {
   /** 是否处于编辑模式 */
@@ -36,75 +30,62 @@ interface ActionButtonsProps {
  * 将按钮区域独立拆分，使代码结构更清晰
  * 使用 React.memo 优化，避免父组件重渲染时的不必要渲染
  */
-const ActionButtons: React.FC<ActionButtonsProps> = React.memo(({
-  isEditing,
-  hasSelected,
-  saveLoading = false,
-  onPreview,
-  onEdit,
-  onSave,
-  onCancel,
-  onDelete,
-  onExport,
-  onImport,
-}) => {
-  return (
-    <div className="border-t border-gray-200 pt-4">
-      <div className="flex justify-end">
-        <Space>
-          <Button color='cyan' variant='outlined' icon={<EyeOutlined />} onClick={onPreview}>
-            预览
-          </Button>
-          {!isEditing ? (
-            <>
-              <Button
-                color="orange"
-                variant="outlined"
-                icon={<SaveOutlined />}
-                disabled={!hasSelected}
-                onClick={onEdit}
-              >
-                编辑
-              </Button>
-              <Button
-                icon={<ExportOutlined />}
-                disabled={!hasSelected}
-                onClick={onExport}
-              >
-                导出
-              </Button>
-              <Button icon={<ImportOutlined />} onClick={onImport}>
-                导入
-              </Button>
-              <Button
-                icon={<DeleteOutlined />}
-                danger
-                disabled={!hasSelected}
-                onClick={onDelete}
-              >
-                删除
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button onClick={onCancel}>取消</Button>
-              <Button
-                type="primary"
-                icon={<SaveOutlined />}
-                loading={saveLoading}
-                onClick={onSave}
-              >
-                保存
-              </Button>
-            </>
-          )}
-        </Space>
+const ActionButtons: React.FC<ActionButtonsProps> = React.memo(
+  ({
+    isEditing,
+    hasSelected,
+    saveLoading = false,
+    onPreview,
+    onEdit,
+    onSave,
+    onCancel,
+    onDelete,
+    onExport,
+    onImport,
+  }) => {
+    return (
+      <div className="border-t border-gray-200 pt-4">
+        <div className="flex justify-end">
+          <Space>
+            <Button color="cyan" variant="outlined" icon={<EyeOutlined />} onClick={onPreview}>
+              预览
+            </Button>
+            {!isEditing ? (
+              <>
+                <Button
+                  color="orange"
+                  variant="outlined"
+                  icon={<SaveOutlined />}
+                  disabled={!hasSelected}
+                  onClick={onEdit}
+                >
+                  编辑
+                </Button>
+                <Button icon={<ExportOutlined />} disabled={!hasSelected} onClick={onExport}>
+                  导出
+                </Button>
+                <Button icon={<ImportOutlined />} onClick={onImport}>
+                  导入
+                </Button>
+                <Button icon={<DeleteOutlined />} danger disabled={!hasSelected} onClick={onDelete}>
+                  删除
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button onClick={onCancel}>取消</Button>
+                <Button type="primary" icon={<SaveOutlined />} loading={saveLoading} onClick={onSave}>
+                  保存
+                </Button>
+              </>
+            )}
+          </Space>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 ActionButtons.displayName = 'ActionButtons';
 
 export default ActionButtons;
-

@@ -200,13 +200,7 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
   ];
 
   return (
-    <Drawer
-      title={`操作日志 - ${endpoint?.name || ''}`}
-      placement="right"
-      size={900}
-      open={open}
-      onClose={onClose}
-    >
+    <Drawer title={`操作日志 - ${endpoint?.name || ''}`} placement="right" size={900} open={open} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* 过滤器 */}
         <Space className="w-full" size="middle">
@@ -255,4 +249,3 @@ const EndpointLogDrawer: React.FC<EndpointLogDrawerProps> = ({ open, endpoint, o
 };
 
 export default EndpointLogDrawer;
-

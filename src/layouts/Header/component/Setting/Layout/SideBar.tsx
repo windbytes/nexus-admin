@@ -12,17 +12,9 @@ const SideBar: React.FC = () => {
       {/* 折叠菜单 */}
       <SwitchItem title="折叠菜单" category="sidebar" pKey="collapse" />
       {/* 鼠标悬停展开 */}
-      <SwitchItem
-        title="鼠标悬停展开"
-        category="sidebar"
-        pKey="expandOnHover"
-      />
+      <SwitchItem title="鼠标悬停展开" category="sidebar" pKey="expandOnHover" />
       {/* 自动激活子菜单 */}
-      <SwitchItem
-        title="自动激活子菜单"
-        category="sidebar"
-        pKey="autoActivateChild"
-      />
+      <SwitchItem title="自动激活子菜单" category="sidebar" pKey="autoActivateChild" />
       {/* 宽度 */}
       <NumberItem title="宽度" category="sidebar" pKey="width" />
     </>

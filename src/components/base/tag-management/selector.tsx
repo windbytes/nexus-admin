@@ -50,7 +50,7 @@ const Panel: React.FC<PanelProps> = (props) => {
   };
 
   // 不存在的节点
- const notExisted = useMemo(() => {
+  const notExisted = useMemo(() => {
     return tagList.every((tag) => tag.type === type && tag.name !== keywords);
   }, [type, tagList, keywords]);
 
@@ -61,12 +61,7 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 过滤后的标签列表
   const filteredTagList = useMemo(() => {
-    return tagList.filter(
-      (tag) =>
-        tag.type === type &&
-        !value.includes(tag.id) &&
-        tag.name.includes(keywords),
-    );
+    return tagList.filter((tag) => tag.type === type && !value.includes(tag.id) && tag.name.includes(keywords));
   }, [type, tagList, value, keywords]);
 
   const [creating, setCreating] = useState<boolean>(false);
@@ -156,7 +151,7 @@ const Panel: React.FC<PanelProps> = (props) => {
   /**
    * 值未改变
    */
- const valueNotChanged = useMemo(() => {
+  const valueNotChanged = useMemo(() => {
     return (
       value.length === selectedTagIDs.length &&
       value.every((v) => selectedTagIDs.includes(v)) &&
@@ -304,7 +299,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   /**
    * 用于显示选中标签的内容
    */
- const triggerContent = useMemo(() => {
+  const triggerContent = useMemo(() => {
     if (selectedTags?.length) {
       return selectedTags
         .filter((tag) => tagList.find((t) => t.id === tag.id))
@@ -322,7 +317,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     return (
       <div
         className={cn(
-          'relative flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-[7px] hover:bg-[#c8ceda33]',
+          'relative flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-[7px] hover:bg-[#c8ceda33]'
         )}
       >
         <TagOutlined className="h-3 w-3 shrink-0" />
@@ -354,7 +349,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
           btnClassName={(open) =>
             cn(
               open ? '!bg-[#c8ceda33] !text-[#101828]' : '!bg-transparent',
-              '!w-full !border-0 !p-0 !text-[#101828] hover:!bg-[#c8ceda33] hover:!text-[#101828]',
+              '!w-full !border-0 !p-0 !text-[#101828] hover:!bg-[#c8ceda33] hover:!text-[#101828]'
             )
           }
           popupClassName="!w-full !ring-0"

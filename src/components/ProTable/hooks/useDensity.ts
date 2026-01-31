@@ -16,4 +16,3 @@ export function useDensity(defaultDensity: TableDensity = 'middle') {
     changeDensity,
   };
 }
-

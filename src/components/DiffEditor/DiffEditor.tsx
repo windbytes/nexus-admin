@@ -40,7 +40,7 @@ const DiffEditorComponent = forwardRef<DiffEditorRef, DiffEditorProps>(
       className = '',
       style = {},
     },
-    ref,
+    ref
   ) => {
     const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
     const [, setIsEditorReady] = useState(false);
@@ -160,7 +160,7 @@ const DiffEditorComponent = forwardRef<DiffEditorRef, DiffEditorProps>(
               // 修改
               modifications += Math.max(
                 diff.originalEndLineNumber - diff.originalStartLineNumber + 1,
-                diff.modifiedEndLineNumber - diff.modifiedStartLineNumber + 1,
+                diff.modifiedEndLineNumber - diff.modifiedStartLineNumber + 1
               );
             }
           });
@@ -265,7 +265,7 @@ const DiffEditorComponent = forwardRef<DiffEditorRef, DiffEditorProps>(
           }
         },
       }),
-      [isReadOnly, currentLanguage, currentTheme],
+      [isReadOnly, currentLanguage, currentTheme]
     );
 
     // 编辑器挂载完成回调
@@ -290,7 +290,7 @@ const DiffEditorComponent = forwardRef<DiffEditorRef, DiffEditorProps>(
         // 调用外部挂载回调
         onMount?.(editor);
       },
-      [originalTitle, modifiedTitle, onMount],
+      [originalTitle, modifiedTitle, onMount]
     );
 
     // 监听外部值变化
@@ -358,7 +358,7 @@ const DiffEditorComponent = forwardRef<DiffEditorRef, DiffEditorProps>(
         />
       </div>
     );
-  },
+  }
 );
 
 DiffEditorComponent.displayName = 'DiffEditor';

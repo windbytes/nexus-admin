@@ -4,6 +4,4 @@ import React from 'react';
 interface INodeRenderContext extends NodeRenderReturnType {}
 
 /** 业务自定义节点上下文 */
-export const NodeRenderContext = React.createContext<INodeRenderContext>(
-  {} as INodeRenderContext,
-);
+export const NodeRenderContext = React.createContext<INodeRenderContext>({} as INodeRenderContext);

@@ -137,4 +137,3 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({ open, onOk, onCancel, rol
 };
 
 export default RoleInfoModal;
-

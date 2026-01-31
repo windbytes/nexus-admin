@@ -17,22 +17,12 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
   return (
     <div className="space-y-4">
       {/* 基本信息 */}
-      <Form.Item
-        name="namespace"
-        label="命名空间"
-        rules={[{ required: true, message: '请输入命名空间' }]}
-      >
+      <Form.Item name="namespace" label="命名空间" rules={[{ required: true, message: '请输入命名空间' }]}>
         <Input placeholder="例如：http://example.com/services" disabled={disabled} />
       </Form.Item>
 
       <Form.Item name="serviceAnnotation" label="服务注解">
-        <TextArea
-          placeholder="请输入服务注解/描述"
-          rows={2}
-          maxLength={500}
-          showCount
-          disabled={disabled}
-        />
+        <TextArea placeholder="请输入服务注解/描述" rows={2} maxLength={500} showCount disabled={disabled} />
       </Form.Item>
 
       {/* 操作列表 */}
@@ -58,12 +48,7 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                   title={`操作 ${index + 1}`}
                   extra={
                     !disabled && (
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(field.name)}
-                      >
+                      <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(field.name)}>
                         删除
                       </Button>
                     )
@@ -85,15 +70,8 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                     </Form.Item>
 
                     {/* 操作注解 */}
-                    <Form.Item
-                      name={[field.name, 'annotation']}
-                      label="操作注解"
-                      className="mb-0"
-                    >
-                      <Input
-                        placeholder="请输入操作注解"
-                        disabled={disabled}
-                      />
+                    <Form.Item name={[field.name, 'annotation']} label="操作注解" className="mb-0">
+                      <Input placeholder="请输入操作注解" disabled={disabled} />
                     </Form.Item>
 
                     {/* 输入参数 */}
@@ -117,16 +95,9 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                                   style={{ width: '140px' }}
                                   rules={[{ required: true, message: '类型必填' }]}
                                 >
-                                  <Select
-                                    placeholder="类型"
-                                    options={PARAMETER_TYPES}
-                                    disabled={disabled}
-                                  />
+                                  <Select placeholder="类型" options={PARAMETER_TYPES} disabled={disabled} />
                                 </Form.Item>
-                                <Form.Item
-                                  name={[paramField.name, 'description']}
-                                  className="mb-0 flex-1"
-                                >
+                                <Form.Item name={[paramField.name, 'description']} className="mb-0 flex-1">
                                   <Input placeholder="描述" disabled={disabled} />
                                 </Form.Item>
                                 {!disabled && (
@@ -140,12 +111,7 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                               </div>
                             ))}
                             {!disabled && (
-                              <Button
-                                type="dashed"
-                                icon={<PlusOutlined />}
-                                onClick={() => addParam()}
-                                block
-                              >
+                              <Button type="dashed" icon={<PlusOutlined />} onClick={() => addParam()} block>
                                 添加输入参数
                               </Button>
                             )}
@@ -175,16 +141,9 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                                   style={{ width: '140px' }}
                                   rules={[{ required: true, message: '类型必填' }]}
                                 >
-                                  <Select
-                                    placeholder="类型"
-                                    options={PARAMETER_TYPES}
-                                    disabled={disabled}
-                                  />
+                                  <Select placeholder="类型" options={PARAMETER_TYPES} disabled={disabled} />
                                 </Form.Item>
-                                <Form.Item
-                                  name={[paramField.name, 'description']}
-                                  className="mb-0 flex-1"
-                                >
+                                <Form.Item name={[paramField.name, 'description']} className="mb-0 flex-1">
                                   <Input placeholder="描述" disabled={disabled} />
                                 </Form.Item>
                                 {!disabled && (
@@ -198,12 +157,7 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                               </div>
                             ))}
                             {!disabled && (
-                              <Button
-                                type="dashed"
-                                icon={<PlusOutlined />}
-                                onClick={() => addParam()}
-                                block
-                              >
+                              <Button type="dashed" icon={<PlusOutlined />} onClick={() => addParam()} block>
                                 添加输出参数
                               </Button>
                             )}
@@ -215,7 +169,7 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
                 </Card>
               ))}
               {!disabled && (
-                <Button type="dashed" className='mt-4' icon={<PlusOutlined />} onClick={() => add()} block>
+                <Button type="dashed" className="mt-4" icon={<PlusOutlined />} onClick={() => add()} block>
                   添加操作
                 </Button>
               )}
@@ -230,4 +184,3 @@ const ManualWsdlEditor: React.FC<ManualWsdlEditorProps> = memo(({ disabled }) =>
 ManualWsdlEditor.displayName = 'ManualWsdlEditor';
 
 export default ManualWsdlEditor;
-

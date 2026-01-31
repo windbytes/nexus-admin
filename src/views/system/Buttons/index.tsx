@@ -86,11 +86,7 @@ const Buttons: React.FC = () => {
       dataSource={sortedButtonList}
       loading={buttonLoading}
       rowKey="id"
-      locale={
-        selectedMenuId
-          ? undefined
-          : { emptyText: '请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）' }
-      }
+      locale={selectedMenuId ? undefined : { emptyText: '请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）' }}
       actionButtons={
         <TableActionButtons
           selectedMenuId={selectedMenuId}

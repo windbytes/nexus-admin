@@ -37,7 +37,7 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
       const lastOption = options[options.length - 1];
       const hasEmptyLabel = !lastOption?.label || lastOption.label.trim() === '';
       const hasEmptyValue = !lastOption?.value || lastOption.value.trim() === '';
-      
+
       if (hasEmptyLabel && hasEmptyValue) {
         message.warning({
           content: '请先填写上一个选项的显示文本和选项值后再添加新选项',
@@ -45,7 +45,7 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         });
         return;
       }
-      
+
       if (hasEmptyLabel) {
         message.warning({
           content: '请先填写上一个选项的显示文本后再添加新选项',
@@ -53,7 +53,7 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         });
         return;
       }
-      
+
       if (hasEmptyValue) {
         message.warning({
           content: '请先填写上一个选项的选项值后再添加新选项',
@@ -62,22 +62,20 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         return;
       }
     }
-    
+
     // 验证通过，添加新选项
     const newOption = { label: '', value: '', disabled: false };
-    setOptions(prev => [...prev, newOption]);
+    setOptions((prev) => [...prev, newOption]);
   };
 
   // 更新选项
   const handleUpdateOption = (index: number, field: 'label' | 'value' | 'disabled', newValue: string | boolean) => {
-    setOptions(prev => prev.map((option, i) =>
-      i === index ? { ...option, [field]: newValue } : option
-    ));
+    setOptions((prev) => prev.map((option, i) => (i === index ? { ...option, [field]: newValue } : option)));
   };
 
   // 删除选项
   const handleDeleteOption = (index: number) => {
-    setOptions(prev => prev.filter((_, i) => i !== index));
+    setOptions((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -101,77 +99,56 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
       >
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item
-              name="placeholder"
-              label="占位符"
-              tooltip="选择框占位符文本"
-            >
+            <Form.Item name="placeholder" label="占位符" tooltip="选择框占位符文本">
               <Input placeholder="请输入占位符" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="mode"
-              label="选择模式"
-              tooltip="单选或多选模式"
-            >
-              <Select placeholder="single 或 multiple" options={[{ value: 'single', label: '单选' }, { value: 'multiple', label: '多选' }]} />
+            <Form.Item name="mode" label="选择模式" tooltip="单选或多选模式">
+              <Select
+                placeholder="single 或 multiple"
+                options={[
+                  { value: 'single', label: '单选' },
+                  { value: 'multiple', label: '多选' },
+                ]}
+              />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="listHeight"
-              label="列表高度"
-              tooltip="选择框列表高度"
-            >
+            <Form.Item name="listHeight" label="列表高度" tooltip="选择框列表高度">
               <InputNumber placeholder="请输入列表高度" min={100} max={1000} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="placement"
-              label="列表位置"
-              tooltip="选择框列表位置"
-            >
-              <Select placeholder="bottomLeft 或 bottomRight" options={[{ value: 'bottomLeft', label: '底部左侧' }, { value: 'bottomRight', label: '底部右侧' }, { value: 'topLeft', label: '顶部左侧' }, { value: 'topRight', label: '顶部右侧' }]} />
+            <Form.Item name="placement" label="列表位置" tooltip="选择框列表位置">
+              <Select
+                placeholder="bottomLeft 或 bottomRight"
+                options={[
+                  { value: 'bottomLeft', label: '底部左侧' },
+                  { value: 'bottomRight', label: '底部右侧' },
+                  { value: 'topLeft', label: '顶部左侧' },
+                  { value: 'topRight', label: '顶部右侧' },
+                ]}
+              />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="prefix"
-              label="前缀"
-              tooltip="选择框前缀"
-            >
+            <Form.Item name="prefix" label="前缀" tooltip="选择框前缀">
               <Input placeholder="请输入前缀" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="allowClear"
-              label="允许清除"
-              valuePropName="checked"
-              tooltip="是否显示清除按钮"
-            >
+            <Form.Item name="allowClear" label="允许清除" valuePropName="checked" tooltip="是否显示清除按钮">
               <Switch />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="showSearch"
-              label="显示搜索"
-              valuePropName="checked"
-              tooltip="是否显示搜索框"
-            >
+            <Form.Item name="showSearch" label="显示搜索" valuePropName="checked" tooltip="是否显示搜索框">
               <Switch />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item
-              name="disabled"
-              label="禁用状态"
-              valuePropName="checked"
-              tooltip="是否禁用选择框"
-            >
+            <Form.Item name="disabled" label="禁用状态" valuePropName="checked" tooltip="是否禁用选择框">
               <Switch />
             </Form.Item>
           </Col>
@@ -183,7 +160,7 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
 
         {/* 选项列表 */}
         {options.map((option, index) => (
-          <Row gutter={8} key={index} className='p-4 mb-2 border rounded-md border-[#d9d9d9] bg-[#fafafa]'>
+          <Row gutter={8} key={index} className="p-4 mb-2 border rounded-md border-[#d9d9d9] bg-[#fafafa]">
             <Col span={9}>
               <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>显示文本</div>
               <Input
@@ -200,21 +177,16 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
                 placeholder="请输入选项值"
               />
             </Col>
-            <Col span={3} className='text-center'>
+            <Col span={3} className="text-center">
               <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>是否禁用</div>
               <Switch
                 checked={option.disabled}
                 onChange={(checked) => handleUpdateOption(index, 'disabled', checked)}
               />
             </Col>
-            <Col span={3} className='text-center'>
+            <Col span={3} className="text-center">
               <div style={{ marginBottom: 4, fontSize: '12px', color: '#666' }}>操作</div>
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => handleDeleteOption(index)}
-              />
+              <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDeleteOption(index)} />
             </Col>
           </Row>
         ))}
@@ -231,13 +203,15 @@ const SelectConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) 
         </Button>
 
         {options.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            color: '#999',
-            fontSize: '12px',
-            marginTop: 8,
-            padding: '16px'
-          }}>
+          <div
+            style={{
+              textAlign: 'center',
+              color: '#999',
+              fontSize: '12px',
+              marginTop: 8,
+              padding: '16px',
+            }}
+          >
             暂无选项，点击上方按钮添加选项
           </div>
         )}

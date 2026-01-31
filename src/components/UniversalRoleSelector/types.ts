@@ -68,9 +68,9 @@ export interface SelectWithRefreshRoleSelectorProps extends BaseRoleSelectorProp
 /**
  * 角色选择组件Props联合类型
  */
-export type UniversalRoleSelectorProps = 
-  | SingleRoleSelectorProps 
-  | MultipleRoleSelectorProps 
+export type UniversalRoleSelectorProps =
+  | SingleRoleSelectorProps
+  | MultipleRoleSelectorProps
   | SelectWithRefreshRoleSelectorProps;
 
 /**

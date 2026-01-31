@@ -94,14 +94,14 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
     () => {
       removeTag(tag.id);
     },
-    { wait: 200 },
+    { wait: 200 }
   );
 
   return (
     <>
       <div
         className={classNames(
-          'flex shrink-0 items-center gap-0.5 rounded-lg border border-solid border-gray-200 py-1 pl-2 pr-1 text-sm leading-5 text-gray-500',
+          'flex shrink-0 items-center gap-0.5 rounded-lg border border-solid border-gray-200 py-1 pl-2 pr-1 text-sm leading-5 text-gray-500'
         )}
       >
         {!isEditing && (

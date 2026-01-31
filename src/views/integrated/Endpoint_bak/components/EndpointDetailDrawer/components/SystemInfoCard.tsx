@@ -29,4 +29,3 @@ const SystemInfoCard: React.FC<SystemInfoCardProps> = ({ endpoint }) => {
 SystemInfoCard.displayName = 'SystemInfoCard';
 
 export default SystemInfoCard;
-

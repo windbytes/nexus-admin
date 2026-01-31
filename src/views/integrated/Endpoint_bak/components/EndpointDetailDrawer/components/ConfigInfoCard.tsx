@@ -29,10 +29,13 @@ const ConfigInfoCard: React.FC<ConfigInfoCardProps> = ({ endpoint }) => {
     );
   };
 
-  return <Card title="配置信息" size="small">{renderConfigInfo()}</Card>;
+  return (
+    <Card title="配置信息" size="small">
+      {renderConfigInfo()}
+    </Card>
+  );
 };
 
 ConfigInfoCard.displayName = 'ConfigInfoCard';
 
 export default ConfigInfoCard;
-

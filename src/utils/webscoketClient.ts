@@ -56,9 +56,7 @@ class WebSocketClient {
 
     // 监听socket关闭
     this.socket.addEventListener('close', (event) => {
-      console.log(
-        `WebSocket连接已关闭，代码: ${event.code}，原因: ${event.reason}`,
-      );
+      console.log(`WebSocket连接已关闭，代码: ${event.code}，原因: ${event.reason}`);
       this.emit('close', event);
       this.reconnect();
     });
@@ -131,9 +129,7 @@ class WebSocketClient {
    */
   public off(event: string, callback: (event: any) => void) {
     if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter(
-        (listener) => listener !== callback,
-      );
+      this.listeners[event] = this.listeners[event].filter((listener) => listener !== callback);
     }
   }
 

@@ -19,12 +19,7 @@ export interface AppTemplate {
 /**
  * 模板类型枚举
  */
-export type TemplateType = 
-  | 'workflow' 
-  | 'chatflow' 
-  | 'chat_assistant' 
-  | 'agent' 
-  | 'text_generation';
+export type TemplateType = 'workflow' | 'chatflow' | 'chat_assistant' | 'agent' | 'text_generation';
 
 /**
  * 模板分类

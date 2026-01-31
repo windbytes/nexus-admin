@@ -21,13 +21,7 @@ interface PermissionInfoModalProps {
  * 权限点信息弹窗组件
  * 用于新增、编辑和查看权限点信息
  */
-const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
-  open,
-  onOk,
-  onCancel,
-  permissionInfo,
-  action,
-}) => {
+const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({ open, onOk, onCancel, permissionInfo, action }) => {
   const [form] = Form.useForm();
   const permCodeRef = useRef<InputRef>(null);
 
@@ -128,7 +122,10 @@ const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
           rules={[
             { required: true },
             { max: 100, message: '权限编码最多100个字符' },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9:_-]*$/, message: '权限编码必须以字母开头，只能包含字母、数字、冒号、下划线和短横线' },
+            {
+              pattern: /^[a-zA-Z][a-zA-Z0-9:_-]*$/,
+              message: '权限编码必须以字母开头，只能包含字母、数字、冒号、下划线和短横线',
+            },
           ]}
           tooltip="权限编码是权限点的唯一标识，建议使用 模块:功能:操作 的格式，如 sys:user:add"
         >
@@ -143,49 +140,25 @@ const PermissionInfoModal: React.FC<PermissionInfoModalProps> = ({
         <Form.Item
           label="权限名称"
           name="permName"
-          rules={[
-            { required: true },
-            { max: 128, message: '权限名称最多128个字符' },
-          ]}
+          rules={[{ required: true }, { max: 128, message: '权限名称最多128个字符' }]}
         >
           <Input placeholder="请输入权限名称" />
         </Form.Item>
 
-        <Form.Item
-          label="资源类型"
-          name="resourceType"
-          rules={[{ required: true }]}
-        >
+        <Form.Item label="资源类型" name="resourceType" rules={[{ required: true }]}>
           <Select options={resourceTypeOptions} placeholder="请选择资源类型" />
         </Form.Item>
 
-        <Form.Item
-          label="排序"
-          name="sort"
-          tooltip="数值越小排序越靠前"
-        >
+        <Form.Item label="排序" name="sort" tooltip="数值越小排序越靠前">
           <InputNumber min={0} max={9999} className="w-full" placeholder="请输入排序值" />
         </Form.Item>
 
-        <Form.Item
-          label="状态"
-          name="status"
-          valuePropName="checked"
-        >
+        <Form.Item label="状态" name="status" valuePropName="checked">
           <Switch checkedChildren="启用" unCheckedChildren="停用" />
         </Form.Item>
 
-        <Form.Item
-          label="描述"
-          name="description"
-          rules={[{ max: 256, message: '描述最多256个字符' }]}
-        >
-          <Input.TextArea
-            rows={3}
-            placeholder="请输入权限点描述"
-            showCount
-            maxLength={256}
-          />
+        <Form.Item label="描述" name="description" rules={[{ max: 256, message: '描述最多256个字符' }]}>
+          <Input.TextArea rows={3} placeholder="请输入权限点描述" showCount maxLength={256} />
         </Form.Item>
       </Form>
     </DragModal>

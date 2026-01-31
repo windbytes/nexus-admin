@@ -71,9 +71,7 @@ const TestResultCard: React.FC<TestResultCardProps> = ({ testResult }) => {
         </div>
 
         {/* 测试时间 */}
-        <div className="text-gray-500 text-sm">
-          测试时间: {new Date(testResult.timestamp).toLocaleString('zh-CN')}
-        </div>
+        <div className="text-gray-500 text-sm">测试时间: {new Date(testResult.timestamp).toLocaleString('zh-CN')}</div>
 
         {/* 测试详情 */}
         {testResult.details && (
@@ -95,9 +93,7 @@ const TestResultCard: React.FC<TestResultCardProps> = ({ testResult }) => {
         )}
 
         {/* 成功提示 */}
-        {testResult.status === 'success' && (
-          <Alert message="连接测试成功，端点配置正确！" type="success" showIcon />
-        )}
+        {testResult.status === 'success' && <Alert message="连接测试成功，端点配置正确！" type="success" showIcon />}
 
         {/* 失败建议 */}
         {testResult.status === 'failed' && (
@@ -123,4 +119,3 @@ const TestResultCard: React.FC<TestResultCardProps> = ({ testResult }) => {
 TestResultCard.displayName = 'TestResultCard';
 
 export default TestResultCard;
-

@@ -30,24 +30,13 @@ const DataModeTableActions: React.FC<DataModeTableActionsProps> = memo(
           </Tooltip>
 
           <Tooltip title={hasSelection ? `删除选中的 ${selectedRowKeys.length} 项` : '请先选择要删除的数据模式'}>
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={onBatchDelete}
-              disabled={!hasSelection || loading}
-            >
+            <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelection || loading}>
               批量删除
             </Button>
           </Tooltip>
 
-          <Tooltip
-            title={hasSelection ? `导出选中的 ${selectedRowKeys.length} 个Schema` : '请先选择要导出的数据模式'}
-          >
-            <Button
-              icon={<DownloadOutlined />}
-              onClick={onBatchExport}
-              disabled={!hasSelection || loading}
-            >
+          <Tooltip title={hasSelection ? `导出选中的 ${selectedRowKeys.length} 个Schema` : '请先选择要导出的数据模式'}>
+            <Button icon={<DownloadOutlined />} onClick={onBatchExport} disabled={!hasSelection || loading}>
               批量导出
             </Button>
           </Tooltip>
@@ -63,10 +52,9 @@ const DataModeTableActions: React.FC<DataModeTableActionsProps> = memo(
         </Tooltip>
       </div>
     );
-  },
+  }
 );
 
 DataModeTableActions.displayName = 'DataModeTableActions';
 
 export default DataModeTableActions;
-

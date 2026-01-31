@@ -24,7 +24,7 @@ function calculateSearchScore(text: string, keyword: string): number {
 function collectResults(menuList: RouteItem[], keyword: string): SearchResultItem[] {
   const results: SearchResultItem[] = [];
   const traverse = (menus: RouteItem[], parentPath = '') => {
-    menus.forEach(menu => {
+    menus.forEach((menu) => {
       if (menu.name && menu.route) {
         const nameScore = calculateSearchScore(menu.name, keyword);
         const pathScore = menu.path ? calculateSearchScore(menu.path, keyword) : 0;

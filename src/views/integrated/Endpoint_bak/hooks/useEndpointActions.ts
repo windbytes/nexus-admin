@@ -150,4 +150,3 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     isLoading,
   };
 };
-

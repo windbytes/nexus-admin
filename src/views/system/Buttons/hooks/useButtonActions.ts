@@ -32,8 +32,7 @@ export const useButtonActions = ({ currentRow, onSuccess }: UseButtonActionsProp
   });
 
   const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: boolean }) =>
-      pageButtonService.toggleStatus(id, status),
+    mutationFn: ({ id, status }: { id: string; status: boolean }) => pageButtonService.toggleStatus(id, status),
     onSuccess,
   });
 

@@ -18,4 +18,3 @@ export const MENU_TYPE_OPTIONS = [
   { value: MENU_TYPE.SUB_ROUTE, label: '子路由' },
   { value: MENU_TYPE.TOP_LEVEL, label: '目录' },
 ];
-

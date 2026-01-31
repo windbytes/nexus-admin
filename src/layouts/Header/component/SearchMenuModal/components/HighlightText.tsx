@@ -24,7 +24,7 @@ const HighlightText: React.FC<Props> = ({ text, keyword }) => {
       nodes.push(
         <mark key={`h-${text}-${part}-${i}`} className="highlightText">
           {part}
-        </mark>,
+        </mark>
       );
     } else {
       nodes.push(<span key={`t-${text}-${part}-${i}`}>{part}</span>);

@@ -34,13 +34,10 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-
   /**
    * 确认
    */
-  const onConfirmClick = async () => {
-    
-  }
+  const onConfirmClick = async () => {};
 
   return (
     <DragModal open={show} onCancel={onCancel} title="复制应用">

@@ -124,7 +124,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
       buttons.push(
         <Button key="view" type="text" icon={<EyeOutlined />} onClick={() => onViewVersion?.(version)}>
           查看
-        </Button>,
+        </Button>
       );
 
       // 根据状态显示不同按钮
@@ -152,7 +152,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
             onClick={() => onDeleteVersion?.(version)}
           >
             删除
-          </Button>,
+          </Button>
         );
       } else if (status === VersionStatus.PUBLISHED) {
         // 已发布状态：回滚、对比、下载
@@ -171,7 +171,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
           </Button>,
           <Button key="download" type="text" icon={<DownloadOutlined />} onClick={() => onDownloadVersion?.(version)}>
             下载
-          </Button>,
+          </Button>
         );
       } else {
         // 其他状态：对比、下载
@@ -181,7 +181,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
           </Button>,
           <Button key="download" type="text" icon={<DownloadOutlined />} onClick={() => onDownloadVersion?.(version)}>
             下载
-          </Button>,
+          </Button>
         );
       }
 
@@ -240,7 +240,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
         </Row>
       </Card>
     );
-  },
+  }
 );
 
 VersionListItem.displayName = 'VersionListItem';

@@ -74,7 +74,7 @@ export const appsService: IAppsService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return response;
   },
