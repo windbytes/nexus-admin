@@ -1,4 +1,4 @@
-import { DownOutlined, ExclamationCircleFilled, PlusOutlined } from '@ant-design/icons';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
 import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';

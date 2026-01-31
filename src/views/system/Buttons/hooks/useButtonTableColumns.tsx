@@ -29,12 +29,14 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
       dataIndex: 'sort',
       key: 'sort',
       width: 80,
+      align: 'center',
       sorter: (a, b) => (a.sort ?? 0) - (b.sort ?? 0),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
+      align: 'center',
       width: 90,
       render: (_: boolean, record: PageButtonModel) => (
         <Switch
@@ -51,9 +53,10 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
       title: '操作',
       key: 'action',
       width: 120,
+      align: 'center',
       fixed: 'right',
       render: (_: unknown, record: PageButtonModel) => (
-        <div className="flex gap-1">
+        <>
           <Button type="link" size="small" disabled={actionsDisabled} onClick={() => openModal('edit', record)}>
             编辑
           </Button>
@@ -74,7 +77,7 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
           >
             删除
           </Button>
-        </div>
+        </>
       ),
     },
   ];

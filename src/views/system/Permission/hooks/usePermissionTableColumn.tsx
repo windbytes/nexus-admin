@@ -1,5 +1,5 @@
 import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Dropdown, type MenuProps, Switch, Tag, type TableProps } from 'antd';
+import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DeleteDismiss24Filled } from '@/components/icons';
 import type { PermissionModel } from '@/services/system/permission/type';
