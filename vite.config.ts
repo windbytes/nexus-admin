@@ -72,13 +72,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
       rolldownOptions: {
         output: {
-          minify: true,
-          chunkFileNames: 'static/js/[hash].js',
-          entryFileNames: 'static/js/[hash].js',
-          // 按文件类型进行拆分文件夹
-          assetFileNames: 'static/[ext]/[hash].[ext]',
-          // 使用 rolldown 的 advancedChunks 进行高级代码分割
-          advancedChunks: {
+          codeSplitting: {
             groups: [
               {
                 name: 'lib-react',
@@ -110,6 +104,11 @@ export default defineConfig(({ mode }) => {
               },
             ],
           },
+          minify: true,
+          chunkFileNames: 'static/js/[hash].js',
+          entryFileNames: 'static/js/[hash].js',
+          // 按文件类型进行拆分文件夹
+          assetFileNames: 'static/[ext]/[hash].[ext]',
         },
       },
     },
