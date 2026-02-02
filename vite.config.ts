@@ -6,6 +6,8 @@ import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
+const buildId = Math.random().toString(36).slice(2, 8);
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
@@ -86,10 +88,10 @@ export default defineConfig(({ mode }) => {
             ],
           },
           minify: true,
-          chunkFileNames: 'static/js/[hash].js',
-          entryFileNames: 'static/js/[hash].js',
+          chunkFileNames: `static/js/${buildId}-[hash].js`,
+          entryFileNames: `static/js/${buildId}-[hash].js`,
           // 按文件类型进行拆分文件夹
-          assetFileNames: 'static/[ext]/[hash].[ext]',
+          assetFileNames: `static/[ext]/${buildId}-[hash].[ext]`,
         },
       },
     },
