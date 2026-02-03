@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { App } from 'antd';
-import type { Endpoint, EndpointFormData } from '@/services/integrated/endpoint/endpointApi';
+import type { EndpointFormData, EndpointModel } from '@/services/integrated/endpoint/endpointApi';
 import { endpointService } from '@/services/integrated/endpoint/endpointApi';
 
 interface UseEndpointActionsProps {
   // 当前操作的行数据
-  currentRow: Partial<Endpoint> | null;
+  currentRow: Partial<EndpointModel> | null;
   // 成功的回调
   onSuccess?: () => void;
 }
