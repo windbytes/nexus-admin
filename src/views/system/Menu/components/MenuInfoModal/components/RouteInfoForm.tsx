@@ -39,33 +39,34 @@ const RouteInfoForm: React.FC<RouteInfoFormProps> = ({ menuType, onIconSelect, s
       >
         <Input allowClear autoComplete="off" />
       </Form.Item>
-      {menuType === MENU_TYPE.SUB_MENU && (
-        <>
-          <Form.Item
-            label="前端组件"
-            rules={[
-              {
-                required: menuType === MENU_TYPE.SUB_MENU,
-                message: '前端组件配置不能为空!',
-              },
-            ]}
-          >
-            <Space.Compact className="w-full">
-              <Space.Addon>views/</Space.Addon>
-              <Form.Item name="component" noStyle>
-                <Input allowClear placeholder="请输入前端组件" autoComplete="off" />
-              </Form.Item>
-              <Space.Addon>/index.tsx</Space.Addon>
-            </Space.Compact>
-          </Form.Item>
-          <Form.Item name="componentName" label="组件名称">
-            <Input allowClear autoComplete="off" />
-          </Form.Item>
-          <Form.Item name="redirect" label="默认跳转地址">
-            <Input allowClear autoComplete="off" />
-          </Form.Item>
-        </>
-      )}
+      {menuType === MENU_TYPE.SUB_MENU ||
+        (menuType === MENU_TYPE.SUB_ROUTE && (
+          <>
+            <Form.Item
+              label="前端组件"
+              rules={[
+                {
+                  required: true,
+                  message: '前端组件配置不能为空!',
+                },
+              ]}
+            >
+              <Space.Compact className="w-full">
+                <Space.Addon>views/</Space.Addon>
+                <Form.Item name="component" noStyle>
+                  <Input allowClear placeholder="请输入前端组件" autoComplete="off" />
+                </Form.Item>
+                <Space.Addon>/index.tsx</Space.Addon>
+              </Space.Compact>
+            </Form.Item>
+            <Form.Item name="componentName" label="组件名称">
+              <Input allowClear autoComplete="off" />
+            </Form.Item>
+            <Form.Item name="redirect" label="默认跳转地址">
+              <Input allowClear autoComplete="off" />
+            </Form.Item>
+          </>
+        ))}
       <Form.Item label="菜单图标">
         <Space.Compact className="w-full">
           <Form.Item name="icon" noStyle>
