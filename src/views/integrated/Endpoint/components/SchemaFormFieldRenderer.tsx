@@ -38,15 +38,15 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = ({ field
         // 方式1：作为函数字符串执行
         // 例如：function(formValues) { return formValues.needAuth; }
         // 或者：(formValues) => formValues.needAuth
-        try {
-          // 使用 eval 执行函数字符串并调用（仅在创建时执行一次）
-          const func = eval(`(${condition})`);
-          if (typeof func === 'function') {
-            return func;
-          }
-        } catch (evalError: any) {
-          message.error(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行: ${evalError}`);
-        }
+        // try {
+        //   // 使用 eval 执行函数字符串并调用（仅在创建时执行一次）
+        //   const func = eval(`(${condition})`);
+        //   if (typeof func === 'function') {
+        //     return func;
+        //   }
+        // } catch (evalError: any) {
+        //   message.error(`字段 ${field.field} 的函数字符串执行失败，尝试作为表达式执行: ${evalError}`);
+        // }
       }
 
       // 方式2：作为 JS 表达式执行（默认方式）
