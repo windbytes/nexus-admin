@@ -4,6 +4,8 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  Background,
+  Controls,
   type DefaultEdgeOptions,
   type Edge,
   type FitViewOptions,
@@ -70,7 +72,10 @@ const Workflow: React.FC = () => {
           fitView
           fitViewOptions={fitViewOptions}
           defaultEdgeOptions={defaultEdgeOptions}
-        />
+        >
+          <Background />
+          <Controls />
+        </ReactFlow>
       </div>
     </ReactFlowProvider>
   );
