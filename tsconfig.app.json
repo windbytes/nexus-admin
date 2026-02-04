@@ -17,7 +17,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     // 在新版的vscode中需要，因为新版vscode中内置的ts版本为7 "ignoreDeprecations": "6.0",
-    "ignoreDeprecations": "6.0",
+    // "ignoreDeprecations": "6.0",
     "baseUrl": ".", // 项目根目录
     "paths": {
       "@/*": ["src/*"]

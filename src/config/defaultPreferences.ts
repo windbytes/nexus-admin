@@ -21,7 +21,7 @@ export const defaultPreferences: Preferences = {
     loginExpiredMode: 'page',
     name: 'fusion',
     preferencesButtonPosition: 'auto',
-    watermark: false,
+    watermark: import.meta.env.PROD,
   },
   breadcrumb: {
     enable: true,
@@ -32,7 +32,7 @@ export const defaultPreferences: Preferences = {
   },
   copyright: {
     companyName: 'fusion',
-    companySiteLink: 'http://fusionadmin.cn',
+    companySiteLink: 'https://fusionadmin.cn',
     date: new Date().getFullYear(),
     enable: true,
     icp: '蜀ICP备2023022276号-2',
