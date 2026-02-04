@@ -40,26 +40,6 @@ const PRESET = [
     tip: t('preferences.horizontalTip'),
     type: 'header-nav',
   },
-  {
-    name: t('preferences.headerSidebarNav'),
-    tip: t('preferences.headerSidebarNavTip'),
-    type: 'header-sidebar-nav',
-  },
-  {
-    name: t('preferences.mixedMenu'),
-    tip: t('preferences.mixedMenuTip'),
-    type: 'mixed-nav',
-  },
-  {
-    name: t('preferences.headerTwoColumn'),
-    tip: t('preferences.headerTwoColumnTip'),
-    type: 'header-mixed-nav',
-  },
-  {
-    name: t('preferences.fullContent'),
-    tip: t('preferences.fullContentTip'),
-    type: 'full-content',
-  },
 ];
 /**
  * 布局
