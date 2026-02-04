@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { Layout, Skeleton, Watermark } from 'antd';
 import { lazy, Suspense } from 'react';
+import { useShallow } from 'zustand/shallow';
 import HotKeyProvider from '@/components/HotKeyProvider';
 import RouteLoadingBar from '@/components/RouteLoadingBar';
 import { usePreferencesStore } from '@/stores/store';
@@ -35,9 +36,12 @@ export const authenticatedRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'nexus',
   component: () => {
-    const lockScreenStatus = usePreferencesStore((state) => state.preferences.widget.lockScreenStatus);
-    const watermarkEnabled = usePreferencesStore((state) => state.preferences.app.watermark);
-
+    const { watermarkEnabled, lockScreenStatus } = usePreferencesStore(
+      useShallow((state) => ({
+        watermarkEnabled: state.preferences.app.watermark,
+        lockScreenStatus: state.preferences.widget.lockScreenStatus,
+      }))
+    );
     const layoutContent = (
       <Layout className="h-full">
         <Suspense fallback={<Skeleton active />}>
