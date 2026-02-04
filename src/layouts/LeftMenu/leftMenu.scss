@@ -12,6 +12,36 @@
   }
 }
 
+/* 双列菜单时侧栏内容区占满并允许内部 flex 分布 */
+.nexus-layout-sider-double .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.nexus-double-column-menu {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nexus-double-column-menu-left,
+.nexus-double-column-menu-right {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nexus-double-column-menu-left {
+  flex: 0 0 auto;
+  width: 56px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.nexus-double-column-menu-right {
+  flex: 1;
+  min-width: 0;
+}
+
 .side-menu {
   flex: 1;
   overflow-y: auto;

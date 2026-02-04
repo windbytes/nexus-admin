@@ -73,7 +73,7 @@ const MyLayout: React.FC = () => {
           key={item.name}
           className="flex flex-col cursor-pointer w-[100px]"
           onClick={() => {
-            updatePreferences('app', 'layout', item.name);
+            updatePreferences('app', 'layout', item.type);
           }}
         >
           <div className="outline-box items-center flex justify-center">
