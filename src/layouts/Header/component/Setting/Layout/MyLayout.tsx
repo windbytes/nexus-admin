@@ -10,9 +10,11 @@ import SidebarNav from '../icons/SidebarNav';
 import '../Theme/theme.scss';
 import './layout.scss';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import clsx from 'clsx';
+import { useShallow } from 'zustand/shallow';
 import { usePreferencesStore } from '@/stores/store';
 
-// 定义组件映射
+// 定义组件组
 const components: Record<string, React.FC> = {
   'full-content': FullContent,
   'header-nav': HeaderNav,
@@ -42,10 +44,15 @@ const PRESET = [
   },
 ];
 /**
- * 布局
+ * 布局模块
  */
 const MyLayout: React.FC = () => {
-  const updatePreferences = usePreferencesStore((state) => state.updatePreferences);
+  const { layout, updatePreferences } = usePreferencesStore(
+    useShallow((state) => ({
+      layout: state.preferences.app.layout,
+      updatePreferences: state.updatePreferences,
+    }))
+  );
   return (
     <div className="flex flex-wrap w-full gap-5">
       {PRESET.map((item) => (
@@ -56,7 +63,11 @@ const MyLayout: React.FC = () => {
             updatePreferences('app', 'layout', item.type);
           }}
         >
-          <div className="outline-box items-center flex justify-center">
+          <div
+            className={clsx('outline-box items-center flex justify-center', {
+              'outline-box-active': layout === item.type,
+            })}
+          >
             {(() => {
               const Comp = components[item.type]!;
               return <Comp />;

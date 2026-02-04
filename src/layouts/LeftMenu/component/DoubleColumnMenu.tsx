@@ -1,12 +1,14 @@
 import { useLocation, useNavigate } from '@tanstack/react-router';
-import { Menu, type MenuProps, Spin } from 'antd';
+import { Layout, Menu, type MenuProps, Spin, theme } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import { BubbleLoading } from '@/components/icons';
+import CollapseSwitch from '@/layouts/Header/component/CollapseSwitch';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { searchRoute } from '@/utils/utils';
 import { buildMenuItems, type MenuItem, resolveMenuSelection } from './menu-utils';
+import SystemLogo from './SystemLogo';
 
 /**
  * 双列菜单：左列一级菜单，右列当前一级的子菜单
@@ -22,13 +24,17 @@ const DoubleColumnMenu = () => {
       caches: state.caches,
     }))
   );
-  const { dynamicTitle, collapsed, locale } = usePreferencesStore(
+  const { dynamicTitle, collapsed, locale, sidebarWidth } = usePreferencesStore(
     useShallow((state) => ({
       dynamicTitle: state.preferences.app.dynamicTitle,
       collapsed: state.preferences.sidebar.collapsed,
       locale: state.preferences.app.locale,
+      sidebarWidth: state.preferences.sidebar.width,
     }))
   );
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
   const mode = usePreferencesStore((state) => {
     let m = state.preferences.theme.mode;
     if (m === 'auto') {
@@ -144,8 +150,9 @@ const DoubleColumnMenu = () => {
   return (
     <div className="nexus-double-column-menu flex flex-1 min-h-0">
       <div className="nexus-double-column-menu-left flex flex-col min-w-0 flex-1">
+        <SystemLogo variant="iconOnly" />
         <Menu
-          className="side-menu border-r border-[#00000012]"
+          className="side-menu border-r border-[#00000012] flex-1 min-h-0"
           classNames={{ root: 'border-e-0!' }}
           mode="inline"
           theme={mode}
@@ -155,19 +162,38 @@ const DoubleColumnMenu = () => {
           onClick={onLeftClick}
         />
       </div>
-      {!collapsed && secondLevelItems.length > 0 && (
-        <div className="nexus-double-column-menu-right flex flex-col min-w-0 flex-1">
+
+      <Layout.Sider
+        className="nexus-double-column-menu-right shrink-0"
+        collapsedWidth={collapsed ? 56 : sidebarWidth}
+        width={sidebarWidth}
+        theme={mode}
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        style={{
+          backgroundColor: mode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer,
+          maxHeight: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <div className="flex flex-col h-full min-h-0">
+          {!collapsed && <SystemLogo variant="nameOnly" />}
           <Menu
-            className="side-menu"
+            className="side-menu flex-1 min-h-0"
             classNames={{ root: 'border-e-0!' }}
             mode="inline"
             theme={mode}
+            inlineCollapsed={collapsed}
             selectedKeys={rightSelectedKeys}
             items={secondLevelItems}
             onClick={onRightClick}
           />
+          <div className="nexus-double-column-menu-footer shrink-0 flex items-center justify-center border-t border-[#00000012] py-2">
+            <CollapseSwitch />
+          </div>
         </div>
-      )}
+      </Layout.Sider>
     </div>
   );
 };

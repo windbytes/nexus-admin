@@ -38,20 +38,30 @@ const LeftMenu: React.FC = () => {
   }, [mode, semiDarkSidebar]);
 
   const isDoubleColumn = DOUBLE_COLUMN_LAYOUTS.includes(layout);
+  /** 双列时：仅第一列固定 56px，不受 sidebar.width 影响；展开时宽度为 56 + sidebar.width */
+  const siderWidth = isDoubleColumn ? (sidebar.collapsed ? 112 : 56 + sidebar.width) : sidebar.width;
+  /** 双列时由 width 控制显隐，不用 antd collapsed，故始终 false */
+  const siderCollapsed = isDoubleColumn ? false : sidebar.collapsed;
 
   return (
     <Layout.Sider
       className={`nexus-layout-sider shrink-0 ${isDoubleColumn ? 'nexus-layout-sider-double' : ''}`}
       trigger={null}
-      collapsedWidth={64}
+      collapsedWidth={isDoubleColumn ? 56 : 64}
       style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}
       collapsible
-      width={sidebar.width}
+      width={siderWidth}
       theme={finalMode}
-      collapsed={sidebar.collapsed}
+      collapsed={siderCollapsed}
     >
-      <SystemLogo />
-      {isDoubleColumn ? <DoubleColumnMenu /> : <MenuComponent />}
+      {isDoubleColumn ? (
+        <DoubleColumnMenu />
+      ) : (
+        <>
+          <SystemLogo />
+          <MenuComponent />
+        </>
+      )}
     </Layout.Sider>
   );
 };

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import TabBar from '@/components/TabBar';
 import { usePreferencesStore } from '@/stores/store';
+import type { LayoutType } from '@/types/app';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import CollapseSwitch from './component/CollapseSwitch';
 import FullScreen from './component/FullScreen';
@@ -31,15 +32,21 @@ const Header = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  /** 双列菜单布局时顶部不显示侧边栏切换（收缩按钮在左侧第二列底部） */
+  const DOUBLE_COLUMN_LAYOUTS: LayoutType[] = ['sidebar-mixed-nav', 'header-mixed-nav'];
+
   // 使用 useShallow 优化选择器，避免不必要的重渲染
-  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
+  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig, layout } = usePreferencesStore(
     useShallow((state) => ({
       updatePreferences: state.updatePreferences,
       headerEnable: state.preferences.header.enable,
       tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
+      layout: state.preferences.app.layout,
     }))
   );
+
+  const isDoubleColumnMenu = DOUBLE_COLUMN_LAYOUTS.includes(layout);
   // 设置窗口
   const { settingMenuModalOpen, setSettingMenuModalOpen } = useGlobalUIStore(
     useShallow((state) => ({
@@ -74,8 +81,8 @@ const Header = () => {
         >
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
-            {/* 侧边栏切换按钮 */}
-            {sidebarToggle && <CollapseSwitch />}
+            {/* 侧边栏切换按钮（双列菜单时移至左侧第二列底部，此处不展示） */}
+            {sidebarToggle && !isDoubleColumnMenu && <CollapseSwitch />}
             {/* 面包屑 */}
             <BreadcrumbNavWrapper />
             {/* 显示头部横向的菜单 */}
