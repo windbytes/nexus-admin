@@ -32,21 +32,29 @@ export const rootRoute = createRootRoute({
  * 认证布局路由
  * 需要登录才能访问的页面都在此布局下
  */
+/** 水平布局：菜单在 Header 中横向展示，左侧不显示菜单栏 */
+const HORIZONTAL_LAYOUT = 'header-nav';
+
 export const authenticatedRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'nexus',
   component: () => {
-    const { watermarkEnabled, lockScreenStatus } = usePreferencesStore(
+    const { watermarkEnabled, lockScreenStatus, layout } = usePreferencesStore(
       useShallow((state) => ({
         watermarkEnabled: state.preferences.app.watermark,
         lockScreenStatus: state.preferences.widget.lockScreenStatus,
+        layout: state.preferences.app.layout,
       }))
     );
+    const showLeftMenu = layout !== HORIZONTAL_LAYOUT;
+
     const layoutContent = (
       <Layout className="h-full">
-        <Suspense fallback={<Skeleton active />}>
-          <LeftMenu />
-        </Suspense>
+        {showLeftMenu && (
+          <Suspense fallback={<Skeleton active />}>
+            <LeftMenu />
+          </Suspense>
+        )}
 
         <Layout>
           <Suspense fallback={<Skeleton active />}>
