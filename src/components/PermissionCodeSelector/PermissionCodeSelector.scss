@@ -1,42 +1,36 @@
 .permissionCodeSelector {
-  position: relative;
   width: 100%;
+}
 
-  .dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1050;
-    margin-top: 4px;
-    padding: 8px;
-    border: 1px solid var(--ant-color-border);
-    border-radius: var(--ant-border-radius-lg);
+.permissionCodeSelectorDropdown {
+  .paginationSection {
+    padding: 8px 12px;
+    border-top: 1px solid var(--ant-color-border-secondary);
     background: var(--ant-color-bg-container);
-    box-shadow: var(--ant-box-shadow);
-    min-width: 100%;
-
-    .tableSection {
-      overflow: hidden;
-    }
-
-    :global(.ant-table-wrapper) {
-      .ant-pagination {
-        margin-bottom: 0;
+    
+    :global(.ant-pagination) {
+      margin: 0;
+      
+      :global(.ant-pagination-total-text) {
+        flex: 1;
       }
     }
   }
-
-  .suffixIcon {
-    color: var(--ant-color-text-tertiary);
-    transition: transform 0.2s ease;
-    pointer-events: none;
-
-    &.open {
-      transform: rotate(180deg);
+  
+  :global(.ant-select-item) {
+    padding: 8px 12px;
+    
+    &:hover {
+      background-color: var(--ant-color-bg-text-hover);
     }
   }
-}
-
-.rowSelected {
-  background-color: var(--ant-color-primary-bg) !important;
+  
+  :global(.ant-select-item-option-selected) {
+    background-color: var(--ant-color-primary-bg);
+    font-weight: normal;
+    
+    &:hover {
+      background-color: var(--ant-color-primary-bg-hover);
+    }
+  }
 }

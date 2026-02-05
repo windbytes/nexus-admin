@@ -1,6 +1,5 @@
-import { Button } from 'antd';
+import { Button, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Tag } from 'antd';
 import type { ApiModel } from '@/services/system/api/type';
 import { getMethodColor } from '../constants';
 
@@ -40,6 +39,7 @@ export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsTyp
       title: '公开',
       dataIndex: 'isPublic',
       key: 'isPublic',
+      align: 'center',
       width: 70,
       render: (v: boolean) => (v ? '是' : '否'),
     },
@@ -47,6 +47,7 @@ export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsTyp
       title: '操作',
       key: 'action',
       width: 120,
+      align: 'center',
       fixed: 'right',
       render: (_: unknown, record: ApiModel) => (
         <div className="flex gap-1">
