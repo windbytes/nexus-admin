@@ -79,6 +79,16 @@ const RoleApi = {
   getRolePermissions: '/system/role/getRolePermissions',
 
   /**
+   * 查询角色已配置的按钮类型权限点 ID（授权资源用，resourceType=1）
+   */
+  getRoleButtonPermissionIds: '/system/role/getRoleButtonPermissionIds',
+
+  /**
+   * 查询角色已配置的接口类型权限点 ID（授权权限用，resourceType=2）
+   */
+  getRoleApiPermissionIds: '/system/role/getRoleApiPermissionIds',
+
+  /**
    * 校验角色编码是否重复
    */
   checkRoleCodeExist: '/system/role/checkRoleCodeExist',
@@ -180,6 +190,20 @@ export interface IRoleService {
    * @returns 权限点ID列表
    */
   getRolePermissions(roleId: string): Promise<string[]>;
+
+  /**
+   * 查询角色已配置的按钮类型权限点 ID 列表（授权资源）
+   * @param roleId 角色ID
+   * @returns 权限点ID列表
+   */
+  getRoleButtonPermissionIds(roleId: string): Promise<string[]>;
+
+  /**
+   * 查询角色已配置的接口类型权限点 ID 列表（授权权限）
+   * @param roleId 角色ID
+   * @returns 权限点ID列表
+   */
+  getRoleApiPermissionIds(roleId: string): Promise<string[]>;
 
   /**
    * 获取角色用户
@@ -389,6 +413,34 @@ export const roleService: IRoleService = {
       {
         successMessageMode: 'none',
       }
+    );
+  },
+
+  /**
+   * 查询角色已配置的按钮类型权限点 ID 列表（授权资源用）
+   */
+  async getRoleButtonPermissionIds(roleId: string): Promise<string[]> {
+    return await HttpRequest.get(
+      {
+        url: RoleApi.getRoleButtonPermissionIds,
+        params: { roleId },
+        adapter: 'fetch',
+      },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  /**
+   * 查询角色已配置的接口类型权限点 ID 列表（授权权限用）
+   */
+  async getRoleApiPermissionIds(roleId: string): Promise<string[]> {
+    return await HttpRequest.get(
+      {
+        url: RoleApi.getRoleApiPermissionIds,
+        params: { roleId },
+        adapter: 'fetch',
+      },
+      { successMessageMode: 'none' }
     );
   },
   /**

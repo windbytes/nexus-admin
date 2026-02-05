@@ -7,7 +7,8 @@ import { type Key, useEffect, useState } from 'react';
 import ProTable from '@/components/ProTable';
 import { roleService } from '@/services/system/role/roleApi';
 import type { RoleModel, RoleSearchParams } from '@/services/system/role/type';
-import AssignPermission from './components/AssignPermission';
+import AssignApiPermission from './components/AssignApiPermission';
+import AssignResource from './components/AssignResource';
 import AssignRoleMenuDrawer from './components/AssignRoleMenuDrawer';
 import AssignRoleUserDrawer from './components/AssignRoleUserDrawer';
 import RoleInfoModal from './components/RoleInfoModal';
@@ -128,14 +129,22 @@ const Role: React.FC = () => {
     handleSuccess();
   };
 
-  // 处理用户分配确认
-  const handleAssignUser = () => {
-    closeModal();
+  /** 授权资源确定：合并当前角色的接口权限 ID，再全量保存（仅此时落库） */
+  const handleAssignResourceOk = (buttonPermissionIds: string[]) => {
+    const roleId = current?.id ?? '';
+    roleService.getRoleApiPermissionIds(roleId).then((apiIds) => {
+      const permissionIds = [...buttonPermissionIds, ...apiIds];
+      assignRolePermissionsMutation.mutate({ roleId, permissionIds }, { onSuccess: () => closeModal() });
+    });
   };
 
-  // 处理权限点分配确认
-  const handleAssignPermission = (permissionIds: string[]) => {
-    assignRolePermissionsMutation.mutate({ roleId: current?.id || '', permissionIds });
+  /** 授权权限确定：合并当前角色的按钮权限 ID，再全量保存（仅此时落库） */
+  const handleAssignPermissionOk = (apiPermissionIds: string[]) => {
+    const roleId = current?.id ?? '';
+    roleService.getRoleButtonPermissionIds(roleId).then((buttonIds) => {
+      const permissionIds = [...buttonIds, ...apiPermissionIds];
+      assignRolePermissionsMutation.mutate({ roleId, permissionIds }, { onSuccess: () => closeModal() });
+    });
   };
 
   // 获取表格列定义
@@ -220,11 +229,18 @@ const Role: React.FC = () => {
       />
       {/* 用户分配抽屉 */}
       <AssignRoleUserDrawer open={modalName === 'assignUser'} roleId={current?.id || ''} onCancel={closeModal} />
-      {/* 权限点分配弹窗 */}
-      <AssignPermission
+      {/* 授权资源弹窗（仅按钮类型，穿梭框；确定时合并接口权限后保存） */}
+      <AssignResource
+        open={modalName === 'assignResource'}
+        roleId={current?.id || ''}
+        onOk={handleAssignResourceOk}
+        onCancel={closeModal}
+      />
+      {/* 授权权限弹窗（仅 API 类型，多选分页表格；确定时合并按钮权限后保存） */}
+      <AssignApiPermission
         open={modalName === 'assignPermission'}
         roleId={current?.id || ''}
-        onOk={handleAssignPermission}
+        onOk={handleAssignPermissionOk}
         onCancel={closeModal}
       />
     </>

@@ -89,11 +89,20 @@ export const useRoleActions = ({ currentRow, onSuccess }: UseRoleActionsProps) =
     },
   });
 
-  // 分配角色权限点
+  // 分配角色权限点（授权资源/授权权限确定时调用，全量覆盖）
   const assignRolePermissionsMutation = useMutation({
     mutationFn: ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) =>
       roleService.assignRolePermission(roleId, permissionIds),
-    onSuccess,
+    onSuccess: () => {
+      message.success('保存成功');
+      onSuccess?.();
+    },
+    onError: (error) => {
+      modal.error({
+        title: '保存失败',
+        content: error.message,
+      });
+    },
   });
 
   // 处理模态框确认

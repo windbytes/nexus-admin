@@ -1,7 +1,6 @@
-import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
+import { ExclamationCircleFilled } from '@ant-design/icons';
+import { App, Button, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DeleteDismiss24Filled } from '@/components/icons';
 import type { PermissionModel } from '@/services/system/permission/type';
 import { resourceTypeMap } from '../constants';
 import { usePermissionActions } from './usePermissionActions';
@@ -27,42 +26,29 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
   const { t } = useTranslation();
   const { updateStatus, deletePermissions } = usePermissionActions({ currentRow, onSuccess });
 
-  /**
-   * 更多操作菜单项
-   */
-  const moreActionItems = (record: PermissionModel): MenuProps['items'] => {
-    return [
-      {
-        key: 'delete',
-        label: t('common.operation.delete'),
-        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
-        disabled: !canDelete,
-        onClick: () => {
-          if (!canDelete) {
-            modal.error({
-              title: '权限不足',
-              content: '您没有删除权限点的权限，请联系管理员获取相应权限。',
-            });
-            return;
-          }
-          modal.confirm({
-            title: '删除权限点',
-            icon: <ExclamationCircleFilled />,
-            content: `确定删除权限点「${record.permName}」吗？此操作不可恢复！`,
-            okButtonProps: {
-              danger: true,
-              type: 'default',
-            },
-            cancelButtonProps: {
-              type: 'primary',
-            },
-            onOk() {
-              deletePermissions([record.id]);
-            },
-          });
-        },
+  const handleDelete = (record: PermissionModel) => {
+    if (!canDelete) {
+      modal.error({
+        title: '权限不足',
+        content: '您没有删除权限点的权限，请联系管理员获取相应权限。',
+      });
+      return;
+    }
+    modal.confirm({
+      title: '删除权限点',
+      icon: <ExclamationCircleFilled />,
+      content: `确定删除权限点「${record.permName}」吗？此操作不可恢复！`,
+      okButtonProps: {
+        danger: true,
+        type: 'default',
       },
-    ];
+      cancelButtonProps: {
+        type: 'primary',
+      },
+      onOk() {
+        deletePermissions([record.id]);
+      },
+    });
   };
 
   const columns: TableProps<PermissionModel>['columns'] = [
@@ -148,7 +134,7 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
     },
     {
       title: '操作',
-      width: 90,
+      width: 120,
       dataIndex: 'action',
       fixed: 'right',
       align: 'center',
@@ -163,17 +149,9 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
           >
             {t('common.operation.edit')}
           </Button>
-          <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
-            <Button
-              size="small"
-              type="link"
-              classNames={{ content: 'text-(--ant-color-primary)' }}
-              icon={<DownOutlined className="text-(--ant-color-primary)!" />}
-              iconPlacement="end"
-            >
-              {t('common.operation.more')}
-            </Button>
-          </Dropdown>
+          <Button size="small" type="link" disabled={!canDelete} danger onClick={() => handleDelete(record)}>
+            {t('common.operation.delete')}
+          </Button>
         </>
       ),
     },

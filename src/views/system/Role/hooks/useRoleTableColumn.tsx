@@ -24,18 +24,20 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
   const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission } = useRolePermissions();
+  // 授权资源、授权权限共用同一权限点
+  const canAssignResource = canAssignPermission;
   const { t } = useTranslation();
   // 操作hooks
   const { updateRoleStatus, deleteRoles } = useRoleActions({ currentRow, onSuccess });
   // 获取当前登录的角色
   const { roleCode } = useUserStore();
 
-  // 更多操作菜单项
+  // 更多操作菜单项：授权用户、授权菜单、授权资源、授权权限、复制、删除
   const moreActionItems = (record: RoleModel): MenuProps['items'] => {
     return [
       {
         key: 'assignUser',
-        label: '分配用户',
+        label: '授权用户',
         icon: <UserPlus className="text-sm! block" />,
         disabled: !canAssignUser,
         onClick: () => {
@@ -51,7 +53,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       },
       {
         key: 'assignMenu',
-        label: '分配菜单',
+        label: '授权菜单',
         icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
         disabled: !canAssignMenu,
         onClick: () => {
@@ -66,15 +68,31 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
         },
       },
       {
+        key: 'assignResource',
+        label: '授权资源',
+        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        disabled: !canAssignResource,
+        onClick: () => {
+          if (!canAssignResource) {
+            modal.error({
+              title: '权限不足',
+              content: '您没有授权资源的权限，请联系管理员获取相应权限。',
+            });
+            return;
+          }
+          openModal('assignResource', record);
+        },
+      },
+      {
         key: 'assignPermission',
-        label: '分配权限点',
+        label: '授权权限',
         icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
         disabled: !canAssignPermission,
         onClick: () => {
           if (!canAssignPermission) {
             modal.error({
               title: '权限不足',
-              content: '您没有分配权限点权限的权限，请联系管理员获取相应权限。',
+              content: '您没有授权权限的权限，请联系管理员获取相应权限。',
             });
             return;
           }

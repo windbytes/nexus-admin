@@ -1,6 +1,6 @@
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { App } from 'antd';
+import { Alert, App } from 'antd';
 import type { Key } from 'react';
 import { useState } from 'react';
 import ProTable from '@/components/ProTable';
@@ -86,7 +86,11 @@ const Buttons: React.FC = () => {
       dataSource={sortedButtonList}
       loading={buttonLoading}
       rowKey="id"
-      locale={selectedMenuId ? undefined : { emptyText: '请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）' }}
+      locale={
+        selectedMenuId
+          ? undefined
+          : { emptyText: <Alert title="请先在左侧选择要配置按钮的菜单（仅叶子/可点击页面）" type="warning" showIcon /> }
+      }
       actionButtons={
         <TableActionButtons
           selectedMenuId={selectedMenuId}

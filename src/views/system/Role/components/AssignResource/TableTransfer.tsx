@@ -95,7 +95,7 @@ const TableTransfer: React.FC<TableTransferProps> = ({
               onRow={handleRowClick}
               rowKey="key"
               pagination={false}
-              scroll={{ y: 'calc(70vh - 300px)' }}
+              scroll={{ y: 'calc(70vh - 300px)', x: 'max-content' }}
             />
             {pagination && (
               <div className="mt-2 flex justify-end">

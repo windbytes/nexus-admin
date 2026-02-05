@@ -1,3 +1,4 @@
+import { Alert } from 'antd';
 import type { Key } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,7 +52,11 @@ const Apis: React.FC = () => {
       dataSource={sortedApiList}
       loading={apiLoading}
       rowKey="id"
-      locale={selectedMenuId ? undefined : { emptyText: '请先在左侧选择要配置接口的菜单（仅叶子/可点击页面）' }}
+      locale={
+        selectedMenuId
+          ? undefined
+          : { emptyText: <Alert title="请先在左侧选择要配置接口的菜单（仅叶子/可点击页面）" type="warning" showIcon /> }
+      }
       actionButtons={
         <TableActionButtons
           selectedMenuId={selectedMenuId}
