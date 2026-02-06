@@ -2,7 +2,7 @@ import { ManOutlined, RedoOutlined, SearchOutlined, WomanOutlined } from '@ant-d
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button, Card, Col, Form, Input, type InputRef, Row, Select, Space, Table, type TableProps } from 'antd';
 import { isEqual } from 'lodash-es';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import { roleService } from '@/services/system/role/roleApi';
 import type { UserSearchParams } from '@/services/system/role/type';
@@ -22,13 +22,26 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onOk, onCancel, roleI
     pageNum: 1,
     pageSize: 20,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询没分配给当前角色的用户数据
   const { isFetching, data, refetch } = useQuery({
     queryKey: ['sys_role_user_not_in_role', [roleId, searchParams]],
-    queryFn: () => roleService.getUserNotInRoleByPage(roleId, searchParams),
+    queryFn: () =>
+      roleService.getUserNotInRoleByPage(roleId, {
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
     enabled: open,
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && data?.totalRow !== undefined) {
+      setTotal(data.totalRow);
+    }
+  }, [searchParams.pageNum, data?.totalRow]);
 
   /**
    * 分配用户

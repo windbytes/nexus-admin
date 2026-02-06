@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Pagination, Select, Space, Tag, Typography } from 'antd';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { permissionService } from '@/services/system/permission/permissionApi';
 import type { PermissionModel } from '@/services/system/permission/type';
 import './PermissionCodeSelector.scss';
@@ -25,6 +25,8 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchKeyword, setSearchKeyword] = useState('');
+  // 数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   const { data, isFetching } = useQuery({
     queryKey: ['permission_selector', resourceType, currentPage, pageSize, searchKeyword],
@@ -35,13 +37,20 @@ const PermissionCodeSelector: React.FC<PermissionCodeSelectorProps> = ({
         pageSize,
         permCode: searchKeyword || undefined,
         permName: searchKeyword || undefined,
+        total: currentPage === 1 ? 0 : total,
       }),
     enabled: open,
     staleTime: Number.POSITIVE_INFINITY,
   });
 
   const list = data?.records ?? [];
-  const total = data?.totalRow ?? 0;
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (currentPage === 1 && data?.totalRow !== undefined) {
+      setTotal(data.totalRow);
+    }
+  }, [currentPage, data?.totalRow]);
 
   const handleDropdownVisibleChange = (visible: boolean) => {
     setOpen(visible);

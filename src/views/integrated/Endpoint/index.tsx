@@ -58,7 +58,11 @@ const Endpoint: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['endpoint_list', searchParams],
-    queryFn: () => endpointService.getEndpointList(searchParams),
+    queryFn: () =>
+      endpointService.getEndpointList({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
   // 同步分页总数

@@ -89,7 +89,7 @@ const Header = () => {
           <div className="header-main-row">
             {/* 水平布局：左侧展示系统图标和名称 */}
             {isHorizontalLayout && (
-              <div className="shrink-0 mr-4">
+              <div className="shrink-0">
                 <SystemLogo variant="full" />
               </div>
             )}

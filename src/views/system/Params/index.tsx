@@ -39,7 +39,11 @@ const Params: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_params', searchParams],
-    queryFn: () => sysParamService.queryParams({ ...searchParams }),
+    queryFn: () =>
+      sysParamService.queryParams({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
   // 同步分页总数

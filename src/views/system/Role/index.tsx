@@ -45,7 +45,11 @@ const Role: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_roles', searchParams],
-    queryFn: () => roleService.getRoleListPage({ ...searchParams }),
+    queryFn: () =>
+      roleService.getRoleListPage({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
   // 同步分页总数

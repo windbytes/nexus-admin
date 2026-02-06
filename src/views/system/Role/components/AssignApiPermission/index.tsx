@@ -41,6 +41,8 @@ const columns: ColumnsType<PermissionModel> = [
 const AssignApiPermission: React.FC<AssignApiPermissionProps> = ({ open, onOk, onCancel, roleId }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [pagination, setPagination] = useState({ pageNum: 1, pageSize: 20 });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 角色已配置的接口类型权限点 ID，用于初始勾选
   const { data: roleApiIds = [], isFetching: roleLoading } = useQuery<string[]>({
@@ -56,13 +58,23 @@ const AssignApiPermission: React.FC<AssignApiPermissionProps> = ({ open, onOk, o
   );
   const { data: pageResult, isFetching: listLoading } = useQuery({
     queryKey: ['sys_permissions_api_page', searchParams],
-    queryFn: () => permissionService.queryPermissionListPage(searchParams),
+    queryFn: () =>
+      permissionService.queryPermissionListPage({
+        ...searchParams,
+        total: pagination.pageNum === 1 ? 0 : total,
+      }),
     enabled: open && !!roleId,
   });
 
   const loading = roleLoading || listLoading;
   const dataSource = pageResult?.records ?? [];
-  const total = pageResult?.totalRow ?? 0;
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (pagination.pageNum === 1 && pageResult?.totalRow !== undefined) {
+      setTotal(pageResult.totalRow);
+    }
+  }, [pagination.pageNum, pageResult?.totalRow]);
 
   // 弹窗打开且角色接口 ID 加载完成后，同步勾选
   useEffect(() => {

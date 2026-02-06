@@ -98,7 +98,14 @@ const LayoutMenu: React.FC<LayoutMenuProps> = ({ className, mode = 'horizontal',
 
   return (
     <div className={`flex-1 h-full min-w-0 overflow-hidden flex items-center ${className ?? ''}`}>
-      <Menu {...menuProps} classNames={{ root: 'line-height-[var(--ant-menu-horizontal-line-height)]' }} />
+      <Menu
+        {...menuProps}
+        styles={{
+          root: {
+            lineHeight: 'var(--ant-menu-horizontal-line-height)',
+          },
+        }}
+      />
     </div>
   );
 };

@@ -50,14 +50,14 @@ export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsTyp
       align: 'center',
       fixed: 'right',
       render: (_: unknown, record: ApiModel) => (
-        <div className="flex gap-1">
+        <>
           <Button type="link" size="small" disabled={actionsDisabled} onClick={() => onEdit(record)}>
             编辑
           </Button>
           <Button type="link" size="small" danger disabled={actionsDisabled} onClick={() => onDelete(record)}>
             删除
           </Button>
-        </div>
+        </>
       ),
     },
   ];

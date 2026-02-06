@@ -46,7 +46,11 @@ const User: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_users', searchParams],
-    queryFn: () => userService.queryUserListPage({ ...searchParams }),
+    queryFn: () =>
+      userService.queryUserListPage({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
   // 同步分页总数

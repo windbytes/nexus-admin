@@ -2,7 +2,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
-import { lazy, useCallback, useReducer, useState } from 'react';
+import { lazy, useCallback, useEffect, useReducer, useState } from 'react';
 import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import DataModeSearchForm from './components/DataModeSearchForm';
@@ -64,6 +64,8 @@ const DataMode: React.FC = () => {
     pageNum: 1,
     pageSize: 20,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询数据模式列表
   const {
@@ -72,8 +74,19 @@ const DataMode: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['datamode_list', searchParams],
-    queryFn: () => dataModeService.getDataModeList(searchParams),
+    queryFn: () =>
+      dataModeService.getDataModeList({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && result?.totalRow !== undefined) {
+      setTotal(result.totalRow);
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 新增/编辑数据模式 mutation
   const saveDataModeMutation = useMutation({
@@ -363,7 +376,7 @@ const DataMode: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.totalRow ?? 0,
+            total,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

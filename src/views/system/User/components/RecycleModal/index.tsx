@@ -46,7 +46,11 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
     refetch,
   } = useQuery({
     queryKey: ['sys_user_recycle', searchParams],
-    queryFn: () => userService.queryRecycleUserListPage(searchParams),
+    queryFn: () =>
+      userService.queryRecycleUserListPage({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
     enabled: open,
   });
 
@@ -56,12 +60,12 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
     refetch();
   });
 
-  // 同步分页总数
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
   useEffect(() => {
-    if (result?.totalRow !== undefined) {
+    if (searchParams.pageNum === 1 && result?.totalRow !== undefined) {
       setTotal(result.totalRow);
     }
-  }, [result?.totalRow]);
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 获取表格列配置
   const columns = useTableColumns({ onRestore: handleRestore });

@@ -29,7 +29,7 @@ import {
   Tooltip,
 } from 'antd';
 import { isEqual } from 'lodash-es';
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { DeleteDismiss24Filled } from '@/components/icons';
 import { roleService } from '@/services/system/role/roleApi';
 import type { UserSearchParams } from '@/services/system/role/type';
@@ -58,13 +58,26 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
     pageNum: 1,
     pageSize: 20,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询用户数据
   const { isFetching, data, refetch } = useQuery({
     queryKey: ['sys_role_users_drawer', [roleId, searchParams]],
-    queryFn: () => roleService.getRoleUser(roleId, searchParams),
+    queryFn: () =>
+      roleService.getRoleUser(roleId, {
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
     enabled: open,
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && data?.totalRow !== undefined) {
+      setTotal(data.totalRow);
+    }
+  }, [searchParams.pageNum, data?.totalRow]);
 
   // 删除用户的mutation
   const deleteRoleUserMutation = useMutation({

@@ -34,7 +34,7 @@ const Workbench: React.FC = () => {
       {/* 统计卡片 */}
       <StatisticCards />
 
-      <Row gutter={[12, 12]} className="mt-3">
+      <Row gutter={[8, 8]} className="mt-2">
         {/* 左侧主要内容区域 - 调整为更大的比例 */}
         <Col xs={24} xl={18} lg={16} className="flex! flex-col gap-2">
           {/* 流程运行时间趋势图 */}

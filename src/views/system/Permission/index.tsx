@@ -48,7 +48,11 @@ const Permission: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['sys_permissions', searchParams],
-    queryFn: () => permissionService.queryPermissionListPage({ ...searchParams }),
+    queryFn: () =>
+      permissionService.queryPermissionListPage({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
   // 同步分页总数
