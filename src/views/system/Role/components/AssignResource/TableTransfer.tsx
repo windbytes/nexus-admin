@@ -8,6 +8,9 @@ type TableRowSelection<T extends object> = TableProps<T>['rowSelection'];
 /**
  * 表格穿梭框属性
  */
+/** 分页模式：frontend=数据为全量，组件内 slice 分页；backend=数据已是当前页，不再 slice */
+type PaginationMode = 'frontend' | 'backend';
+
 interface TableTransferProps extends Omit<TransferProps<PermissionTransferItem>, 'dataSource' | 'render'> {
   dataSource: PermissionTransferItem[];
   leftColumns: TableColumnsType<PermissionTransferItem>;
@@ -16,6 +19,10 @@ interface TableTransferProps extends Omit<TransferProps<PermissionTransferItem>,
   rightPagination?: PaginationProps;
   leftData?: PermissionTransferItem[];
   rightData?: PermissionTransferItem[];
+  /** 左侧/右侧分页模式，默认 frontend。后端分页时传 backend，避免对当前页数据再次 slice 导致空白 */
+  leftPaginationMode?: PaginationMode;
+  rightPaginationMode?: PaginationMode;
+  loading?: boolean;
 }
 
 /**
@@ -29,6 +36,9 @@ const TableTransfer: React.FC<TableTransferProps> = ({
   rightPagination,
   leftData,
   rightData,
+  leftPaginationMode = 'frontend',
+  rightPaginationMode = 'frontend',
+  loading,
   ...restProps
 }) => {
   const renderItem = (item: PermissionTransferItem) => ({
@@ -48,6 +58,7 @@ const TableTransfer: React.FC<TableTransferProps> = ({
       }) => {
         const columns = direction === 'left' ? leftColumns : rightColumns;
         const pagination = direction === 'left' ? leftPagination : rightPagination;
+        const paginationMode = direction === 'left' ? leftPaginationMode : rightPaginationMode;
         // 根据方向使用对应的数据源
         const dataSource = direction === 'left' ? leftData || filteredItems : rightData || filteredItems;
 
@@ -75,13 +86,14 @@ const TableTransfer: React.FC<TableTransferProps> = ({
           },
         });
 
-        // 分页处理
-        const paginatedItems = pagination
-          ? dataSource.slice(
-              ((pagination.current || 1) - 1) * (pagination.pageSize || 20),
-              (pagination.current || 1) * (pagination.pageSize || 20)
-            )
-          : dataSource;
+        // 分页处理：后端分页时 dataSource 已是当前页，不再 slice；前端分页时对全量数据 slice
+        const paginatedItems =
+          pagination && paginationMode === 'frontend'
+            ? dataSource.slice(
+                ((pagination.current || 1) - 1) * (pagination.pageSize || 20),
+                (pagination.current || 1) * (pagination.pageSize || 20)
+              )
+            : dataSource;
 
         return (
           <div className="flex flex-col h-full p-3">
@@ -91,6 +103,7 @@ const TableTransfer: React.FC<TableTransferProps> = ({
               columns={columns}
               dataSource={paginatedItems}
               size="small"
+              loading={loading}
               style={{ pointerEvents: listDisabled ? 'none' : undefined }}
               onRow={handleRowClick}
               rowKey="key"

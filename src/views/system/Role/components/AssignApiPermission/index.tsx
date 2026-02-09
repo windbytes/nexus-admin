@@ -114,7 +114,6 @@ const AssignApiPermission: React.FC<AssignApiPermissionProps> = ({ open, onOk, o
       title="授权权限"
       width={900}
       maskClosable={false}
-      loading={loading}
       styles={{ body: { minHeight: '400px', overflowY: 'auto' } }}
       footer={
         <Space>
@@ -135,6 +134,7 @@ const AssignApiPermission: React.FC<AssignApiPermissionProps> = ({ open, onOk, o
         columns={columns}
         dataSource={dataSource}
         rowSelection={rowSelection}
+        loading={loading}
         pagination={{
           current: pagination.pageNum,
           pageSize: pagination.pageSize,

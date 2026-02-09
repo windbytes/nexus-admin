@@ -94,7 +94,6 @@ export const useRoleActions = ({ currentRow, onSuccess }: UseRoleActionsProps) =
     mutationFn: ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) =>
       roleService.assignRolePermission(roleId, permissionIds),
     onSuccess: () => {
-      message.success('保存成功');
       onSuccess?.();
     },
     onError: (error) => {

@@ -24,12 +24,12 @@ const RESOURCE_TYPE_BUTTON = 1;
 /**
  * 授权资源弹窗
  * 仅展示并选择「按钮」类型权限点，使用穿梭框。
- * 首次打开时请求：全部按钮数据 + 角色已配置的按钮 ID；左右列表由前端根据 targetKeys 拆分，仅点击确定时由父组件保存。
  */
 const AssignResource: React.FC<AssignResourceProps> = ({ open, onOk, onCancel, roleId }) => {
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
   const [leftPagination, setLeftPagination] = useState({ pageNum: 1, pageSize: 20 });
   const [rightPagination, setRightPagination] = useState({ pageNum: 1, pageSize: 20 });
+  const [total, setTotal] = useState<number>(0);
 
   // 仅首次打开时请求：角色已配置的按钮权限点 ID（用于右侧初始值）
   const { data: roleButtonIds = [], isFetching: roleLoading } = useQuery<string[]>({
@@ -38,17 +38,23 @@ const AssignResource: React.FC<AssignResourceProps> = ({ open, onOk, onCancel, r
     enabled: open && !!roleId,
   });
 
-  // 仅首次打开时请求：全部按钮类型权限点（一页拉取，前后端不再因 targetKeys 变化而请求）
   const { data: allButtonResult, isFetching: allButtonLoading } = useQuery({
-    queryKey: ['sys_permissions_button_all', roleId],
+    queryKey: ['sys_permissions_button_all', [roleId, leftPagination]],
     queryFn: () =>
       permissionService.queryPermissionListPage({
         pageNum: leftPagination.pageNum,
         pageSize: leftPagination.pageSize,
         resourceType: RESOURCE_TYPE_BUTTON,
+        total: leftPagination.pageNum === 1 ? 0 : total,
       }),
     enabled: open && !!roleId,
   });
+
+  useEffect(() => {
+    if (leftPagination.pageNum === 1) {
+      setTotal(allButtonResult?.totalRow || 0);
+    }
+  }, [leftPagination.pageNum, allButtonResult?.totalRow]);
 
   const loading = roleLoading || allButtonLoading;
   const allButtonList = allButtonResult?.records ?? [];
@@ -102,7 +108,6 @@ const AssignResource: React.FC<AssignResourceProps> = ({ open, onOk, onCancel, r
       title="授权资源"
       width={1400}
       maskClosable={false}
-      loading={loading}
       footer={
         <Space>
           <Button onClick={onCancel}>取消</Button>
@@ -128,13 +133,15 @@ const AssignResource: React.FC<AssignResourceProps> = ({ open, onOk, onCancel, r
             rightColumns={columns}
             titles={['未分配资源', '已分配资源']}
             showSearch
+            loading={loading}
             filterOption={(_input, item, _dir) => !!filterOption(_input, item)}
             leftData={leftTransferData}
             rightData={rightTransferData}
+            leftPaginationMode="backend"
             leftPagination={{
               current: leftPagination.pageNum,
               pageSize: leftPagination.pageSize,
-              total: leftTransferData.length,
+              total: allButtonResult?.totalRow || 0,
               showSizeChanger: true,
               showQuickJumper: true,
               showTotal: (t: number, r: [number, number]) => `${r[0]}-${r[1]} / ${t} 条`,
