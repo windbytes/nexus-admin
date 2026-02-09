@@ -32,6 +32,12 @@ const DictAction = {
   saveDictFull: '/system/dict/saveDictFull',
   /** 逻辑删除字典定义 */
   deleteDict: '/system/dict/deleteDict',
+  /** 批量逻辑删除字典定义 */
+  batchDeleteDict: '/system/dict/batchDeleteDict',
+  /** 导出字典 CSV */
+  exportDict: '/system/dict/exportDict',
+  /** 导入字典 CSV */
+  importDict: '/system/dict/importDict',
   /** 按字典 id 查询数据源配置列表 */
   listSource: '/system/dict/listSource',
   /** 保存数据源配置 */
@@ -74,6 +80,12 @@ export interface IDictService {
   saveDictFull(request: DictSaveFullRequest): Promise<number>;
   /** 逻辑删除字典定义 */
   deleteDict(id: string): Promise<boolean>;
+  /** 批量逻辑删除字典定义 */
+  batchDeleteDict(ids: string[]): Promise<boolean>;
+  /** 导出字典（CSV），返回 Blob */
+  exportDict(options: { type: 'all' | 'selected'; selectedIds?: string[]; searchParams?: DictSearchParams }): Promise<Blob>;
+  /** 导入字典（CSV 文件），返回成功条数 */
+  importDict(file: File): Promise<number>;
   /** 按字典 id 查询数据源配置列表 */
   listSourceByDictId(dictId: string): Promise<DictSourceModel[]>;
   /** 保存数据源配置（新增或更新） */
@@ -143,6 +155,43 @@ export const dictService: IDictService = {
   /** @inheritdoc */
   async deleteDict(id: string): Promise<boolean> {
     return HttpRequest.post({ url: `${DictAction.deleteDict}/${id}` });
+  },
+
+  /** @inheritdoc */
+  async batchDeleteDict(ids: string[]): Promise<boolean> {
+    const numericIds = ids.map((id) => (typeof id === 'string' ? Number(id) : id));
+    return HttpRequest.post({ url: DictAction.batchDeleteDict, data: numericIds });
+  },
+
+  /** @inheritdoc */
+  async exportDict(options: {
+    type: 'all' | 'selected';
+    selectedIds?: string[];
+    searchParams?: DictSearchParams;
+  }): Promise<Blob> {
+    const body = {
+      type: options.type,
+      selectedIds:
+        options.type === 'selected' && options.selectedIds?.length
+          ? options.selectedIds.map((id) => (typeof id === 'string' ? Number(id) : id))
+          : undefined,
+      searchParams: options.type === 'all' ? options.searchParams : undefined,
+    };
+    return HttpRequest.postDownload<Blob>(
+      { url: DictAction.exportDict, data: body },
+      { successMessageMode: 'none', errorMessageMode: 'none' }
+    );
+  },
+
+  /** @inheritdoc */
+  async importDict(file: File): Promise<number> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return HttpRequest.post({
+      url: DictAction.importDict,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   },
 
   /** @inheritdoc */

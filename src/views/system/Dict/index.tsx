@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { isEqual } from 'lodash-es';
+import type { Key } from 'react';
 import { useEffect, useState } from 'react';
 import ProTable from '@/components/ProTable';
 import { dictService } from '@/services/system/dict/dictApi';
@@ -17,6 +18,7 @@ import type { DictSearchParams } from './types';
  */
 const Dict: React.FC = () => {
   const { modal: modalName, current, closeModal, openModal } = useDictModals();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [searchParams, setSearchParams] = useState<DictSearchParams>({
     pageNum: 1,
     pageSize: 20,
@@ -44,11 +46,15 @@ const Dict: React.FC = () => {
   }, [searchParams.pageNum, result?.totalRow]);
 
   const handleSuccess = () => {
+    setSelectedRowKeys([]);
     closeModal();
     refetch();
   };
 
-  const { handleModalSave } = useDictActions({ currentRow: current, onSuccess: handleSuccess });
+  const { handleModalSave, batchDeleteDict, importDict, exportDict } = useDictActions({
+    currentRow: current,
+    onSuccess: handleSuccess,
+  });
 
   const handleSearch = (values: DictSearchParams) => {
     const next = { ...searchParams, ...values };
@@ -65,6 +71,26 @@ const Dict: React.FC = () => {
       pageNum: page,
       pageSize: pageSize ?? prev.pageSize,
     }));
+  };
+
+  const handleSelectionChange = (keys: Key[], _rows: DictModel[]) => {
+    setSelectedRowKeys(keys);
+  };
+
+  const handleBatchDelete = () => {
+    batchDeleteDict(selectedRowKeys);
+  };
+
+  const handleImport = (file: File) => {
+    importDict(file);
+  };
+
+  const handleExport = (type: 'all' | 'selected') => {
+    exportDict(
+      type,
+      type === 'selected' ? selectedRowKeys : undefined,
+      type === 'all' ? (searchParams as import('@/services/system/dict/type.d').DictSearchParams) : undefined
+    );
   };
 
   const columns = useDictTableColumns({
@@ -85,8 +111,20 @@ const Dict: React.FC = () => {
           dataSource={result?.records ?? []}
           loading={isFetching}
           rowKey="id"
-          actionButtons={<TableActionButtons openModal={openModal} refetch={refetch} />}
+          actionButtons={
+            <TableActionButtons
+              openModal={openModal}
+              selectedRowKeys={selectedRowKeys}
+              onBatchDelete={handleBatchDelete}
+              onImport={handleImport}
+              onExport={handleExport}
+            />
+          }
           onRefresh={refetch}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
           pagination={{
             current: searchParams.pageNum,
             pageSize: searchParams.pageSize,
