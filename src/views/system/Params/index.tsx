@@ -178,7 +178,6 @@ const Params: React.FC = () => {
           actionButtons={
             <TableActionButtons
               handleBatchDelete={handleBatchDelete}
-              refetch={refetch}
               selectedRows={selectedRowKeys}
               openModal={openModal}
               onImport={handleImport}
