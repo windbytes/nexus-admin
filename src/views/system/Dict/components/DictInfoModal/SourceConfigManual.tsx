@@ -1,6 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { FormListFieldData } from 'antd';
-import { Alert, Button, Form, Input, InputNumber, Switch, Table } from 'antd';
+import { Button, Form, Input, InputNumber, Switch, Table } from 'antd';
 import { memo } from 'react';
 
 interface SourceConfigManualProps {
@@ -29,25 +29,20 @@ function defaultManualRow(): ManualDataRow {
  */
 const SourceConfigManual: React.FC<SourceConfigManualProps> = ({ disabled }) => (
   <div className="flex flex-col gap-4">
-    <Alert
-      type="info"
-      showIcon
-      message="手工维护"
-      description="保存字典后，可在下方维护字典项（如 code、label 等）。"
-    />
     <Form.List name="manualData">
       {(fields, { add, remove }) => (
         <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-start items-center gap-2">
             <span className="text-sm text-gray-500">共 {fields.length} 条</span>
             {!disabled && (
-              <Button type="dashed" size="small" icon={<PlusOutlined />} onClick={() => add(defaultManualRow())}>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => add(defaultManualRow())}>
                 新增行
               </Button>
             )}
           </div>
           <Table
-            size="small"
+            size="middle"
+            bordered
             rowKey="key"
             pagination={false}
             scroll={{ x: 500 }}

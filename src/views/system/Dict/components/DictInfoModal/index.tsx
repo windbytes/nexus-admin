@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Divider, Form, Tabs } from 'antd';
+import { Divider, Form, Tabs } from 'antd';
 import { memo, useEffect, useMemo } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import { dictService } from '@/services/system/dict/dictApi';
@@ -72,7 +72,8 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
   const dictType = Form.useWatch('dictType', form);
   const isView = action === 'view';
   const hasDictId = !!dictInfo?.id;
-  const showColumnMapping = hasDictId && (dictType === 'SQL' || dictType === 'API');
+  /** SQL/API 时列映射与字典一起保存，不要求先保存字典 */
+  const isColumnMappingType = dictType === 'SQL' || dictType === 'API';
   const showManualData = hasDictId && dictType === 'MANUAL';
 
   const { data: sourceList } = useQuery({
@@ -84,7 +85,7 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
   const { data: columnList } = useQuery({
     queryKey: ['dict_columns', dictInfo?.id],
     queryFn: () => (dictInfo?.id ? dictService.listColumnByDictId(dictInfo.id) : Promise.resolve([])),
-    enabled: open && showColumnMapping,
+    enabled: open && hasDictId && isColumnMappingType,
   });
 
   const { data: manualDataList } = useQuery({
@@ -124,7 +125,7 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
     if (!open || !hasDictId) {
       return;
     }
-    if (showColumnMapping && columnList) {
+    if (isColumnMappingType && columnList) {
       form.setFieldValue(
         'columns',
         columnList.map((c) => ({
@@ -152,7 +153,7 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
         }))
       );
     }
-  }, [open, hasDictId, showColumnMapping, showManualData, columnList, manualDataList, form]);
+  }, [open, hasDictId, isColumnMappingType, showManualData, columnList, manualDataList, form]);
 
   const handleOk = () => {
     form.validateFields().then((values: Record<string, unknown>) => {
@@ -191,10 +192,12 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
 
       const payload: DictSubmitPayload = { basic, source: sourceRecord };
       const dictId = basic.id;
-      if (showColumnMapping && Array.isArray(values.columns)) {
+      if (isColumnMappingType && Array.isArray(values.columns)) {
         payload.columns = toFormColumns(values.columns as { id?: string; [k: string]: unknown }[]);
         if (dictId && payload.columns) {
-          payload.columns.forEach((c) => ((c as DictColumnRecord).dictId = dictId));
+          payload.columns.forEach((c) => {
+            (c as DictColumnRecord).dictId = dictId;
+          });
         }
       }
       if (dictType === 'MANUAL' && Array.isArray(values.manualData)) {
@@ -202,7 +205,9 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
           values.manualData as { id?: string; data?: Record<string, unknown>; orderIndex?: number; enabled?: boolean }[]
         );
         if (dictId && payload.manualData) {
-          payload.manualData.forEach((m) => ((m as DictDataManualRecord).dictId = dictId));
+          payload.manualData.forEach((m) => {
+            (m as DictDataManualRecord).dictId = dictId;
+          });
         }
       }
       onOk(payload);
@@ -223,10 +228,18 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
       onOk={handleOk}
       okButtonProps={{ disabled: isView }}
       onCancel={handleCancel}
-      width={720}
-      destroyOnClose
+      width={1200}
+      classNames={{
+        body: 'h-[70vh] overflow-y-auto p-2',
+      }}
     >
-      <Form form={form} layout="vertical" disabled={isView} initialValues={{ enabled: true, cacheEnabled: true }}>
+      <Form
+        form={form}
+        disabled={isView}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 18 }}
+        initialValues={{ enabled: true, cacheEnabled: true }}
+      >
         <BasicInfoForm disabled={isView} />
         {dictType === 'MANUAL' && (
           <>
@@ -242,11 +255,7 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
                 {
                   key: 'columns',
                   label: '列映射',
-                  children: hasDictId ? (
-                    <ColumnMappingEditableTable disabled={isView} />
-                  ) : (
-                    <Alert type="info" showIcon message="请先保存字典后再配置列映射，使用字典处才能正确取数。" />
-                  ),
+                  children: <ColumnMappingEditableTable disabled={isView} />,
                 },
                 {
                   key: 'source',

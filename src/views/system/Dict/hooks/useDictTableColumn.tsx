@@ -71,7 +71,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       render: (v: boolean) => (v ? '是' : '否'),
     },
     {
-      title: t('common.operation.operation'),
+      title: '操作',
       key: 'action',
       width: 120,
       fixed: 'right',

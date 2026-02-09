@@ -18,17 +18,18 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
     <Form.List name="columns">
       {(fields, { add, remove }) => (
         <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-start items-center gap-2">
             <span className="text-sm text-gray-500">共 {fields.length} 列</span>
             {!disabled && (
-              <Button type="dashed" size="small" icon={<PlusOutlined />} onClick={() => add(defaultColumnRow())}>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => add(defaultColumnRow())}>
                 新增列
               </Button>
             )}
           </div>
           <Table
-            size="small"
+            size="middle"
             rowKey="key"
+            bordered
             pagination={false}
             scroll={{ x: 900 }}
             dataSource={fields}
@@ -59,7 +60,6 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                   <Form.Item name={[field.name, 'dataType']} rules={[{ required: true }]} style={{ marginBottom: 0 }}>
                     <Select
                       placeholder="选择"
-                      size="small"
                       options={COLUMN_DATA_TYPE_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
                       disabled={disabled}
                     />
@@ -81,7 +81,7 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                 align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
                   <Form.Item name={[field.name, 'isPrimary']} valuePropName="checked" style={{ marginBottom: 0 }}>
-                    <Switch size="small" disabled={disabled} />
+                    <Switch disabled={disabled} />
                   </Form.Item>
                 ),
               },
@@ -91,17 +91,7 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                 align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
                   <Form.Item name={[field.name, 'isLabel']} valuePropName="checked" style={{ marginBottom: 0 }}>
-                    <Switch size="small" disabled={disabled} />
-                  </Form.Item>
-                ),
-              },
-              {
-                title: '可排序',
-                width: 64,
-                align: 'center',
-                render: (_: unknown, field: FormListFieldData) => (
-                  <Form.Item name={[field.name, 'sortable']} valuePropName="checked" style={{ marginBottom: 0 }}>
-                    <Switch size="small" disabled={disabled} />
+                    <Switch disabled={disabled} />
                   </Form.Item>
                 ),
               },
@@ -111,16 +101,17 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                 align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
                   <Form.Item name={[field.name, 'searchable']} valuePropName="checked" style={{ marginBottom: 0 }}>
-                    <Switch size="small" disabled={disabled} />
+                    <Switch disabled={disabled} />
                   </Form.Item>
                 ),
               },
               {
                 title: '顺序',
                 width: 72,
+                align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
-                  <Form.Item name={[field.name, 'orderIndex']} style={{ marginBottom: 0 }}>
-                    <InputNumber min={0} size="small" className="w-full" disabled={disabled} />
+                  <Form.Item noStyle name={[field.name, 'orderIndex']} style={{ marginBottom: 0 }}>
+                    <InputNumber min={0} step={1} disabled={disabled} />
                   </Form.Item>
                 ),
               },
@@ -132,13 +123,7 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                       width: 56,
                       fixed: 'right' as const,
                       render: (_: unknown, field: FormListFieldData) => (
-                        <Button
-                          type="link"
-                          size="small"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => remove(field.name)}
-                        />
+                        <Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(field.name)} />
                       ),
                     },
                   ]),
