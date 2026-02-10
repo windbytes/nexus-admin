@@ -11,11 +11,30 @@ export interface TabToolItem {
   icon?: React.ReactNode;
 }
 
-/** 单个 Tab 配置（如：文件、开始、页面、插入等） */
+/** 单个 Tab 配置（如：开始、页面、插入等，不含文件） */
 export interface TabItemConfig {
   key: string;
   label: string;
   tools: TabToolItem[];
+}
+
+/** 文件下拉菜单项（支持二级子菜单） */
+export interface FileMenuItem {
+  key: string;
+  label: string;
+  /** 二级菜单 */
+  children?: FileMenuItem[];
+  icon?: React.ReactNode;
+}
+
+/** 文件菜单配置项：普通菜单项或分组分隔线 */
+export type FileMenuConfigItem = FileMenuItem | { type: 'divider' };
+
+/** 左侧快捷操作按钮配置 */
+export interface LeftQuickActionConfig {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
 }
 
 /** 左侧模板树节点（扩展 Ant Design Tree DataNode） */

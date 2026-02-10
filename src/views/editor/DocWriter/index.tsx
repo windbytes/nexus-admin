@@ -14,7 +14,9 @@ import type { TemplateTreeNode } from './types';
  * 技术栈：React 19 + Ant Design + Tailwind CSS
  */
 const DocWriter: React.FC = () => {
-  const [activeTabKey, setActiveTabKey] = useState<string>(tabToolbarConfig[0]?.key ?? 'file');
+  const [activeTabKey, setActiveTabKey] = useState<string>(
+    tabToolbarConfig.find((t) => t.key !== 'file')?.key ?? 'start'
+  );
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<Key[]>([]);
   const [scale] = useState(1);
   const [editorMode, setEditorMode] = useState('edit');
@@ -43,6 +45,19 @@ const DocWriter: React.FC = () => {
             onToolClick={(_tabKey, _toolKey) => {
               // 占位：后续对接具体功能
             }}
+            onFileMenuClick={(_key) => {
+              // 占位：文件菜单项
+            }}
+            onLeftQuickActionClick={(_key) => {
+              // 占位：左侧快捷按钮
+            }}
+            onUploadClick={() => {
+              // 占位：上传
+            }}
+            onShareClick={() => {
+              // 占位：分享
+            }}
+            uploadLabel="未上云"
           />
           <EditorCanvas className="min-h-0" scale={scale} />
           <StatusBar
