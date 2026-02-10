@@ -11,6 +11,9 @@ const A4_MM = { width: 210, height: 297 };
 /** 画布边距（纸张与灰色区域间距） */
 const CANVAS_MARGIN = 48;
 
+/** 页面上下边距（mm），用于绘制内容区域线 */
+const PAGE_MARGIN_MM = 25;
+
 /** 将 mm 转为 px，96dpi 下与真实 A4 打印尺寸一致 */
 function mmToPx(mm: number): number {
   return (mm * 96) / 25.4;
@@ -62,6 +65,38 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: prop
       ctx.strokeStyle = '#d9d9d9';
       ctx.lineWidth = 1;
       ctx.strokeRect(x, y, scaledW, scaledH);
+
+      // 四角区域线：上下边距 25mm，左右同值，每个角只画 L 形两条边（不画整框）
+      const marginPx = mmToPx(PAGE_MARGIN_MM) * scale;
+      const rx = x + marginPx;
+      const ry = y + marginPx;
+      const rw = scaledW - marginPx * 2;
+      const rh = scaledH - marginPx * 2;
+      const cornerLen = 32; // L 形每边长度（px）
+      ctx.strokeStyle = '#bfbfbf';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      // 左上角 L 开口朝外：竖线向上 + 横线向左
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx, ry - cornerLen);
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - cornerLen, ry);
+      // 右上角 L 开口朝外：竖线向上 + 横线向右
+      ctx.moveTo(rx + rw, ry);
+      ctx.lineTo(rx + rw, ry - cornerLen);
+      ctx.moveTo(rx + rw, ry);
+      ctx.lineTo(rx + rw + cornerLen, ry);
+      // 左下角 L 开口朝外：竖线向下 + 横线向左
+      ctx.moveTo(rx, ry + rh);
+      ctx.lineTo(rx, ry + rh + cornerLen);
+      ctx.moveTo(rx, ry + rh);
+      ctx.lineTo(rx - cornerLen, ry + rh);
+      // 右下角 L 开口朝外：竖线向下 + 横线向右
+      ctx.moveTo(rx + rw, ry + rh);
+      ctx.lineTo(rx + rw, ry + rh + cornerLen);
+      ctx.moveTo(rx + rw, ry + rh);
+      ctx.lineTo(rx + rw + cornerLen, ry + rh);
+      ctx.stroke();
 
       // 占位提示文本（居中在 A4 内）
       ctx.save();

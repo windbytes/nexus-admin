@@ -84,6 +84,9 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
             menu={{ items: fileMenuItems, onClick: ({ key }) => onFileMenuClick?.(key) }}
             trigger={['click']}
             placement="bottomLeft"
+            classNames={{
+              root: 'w-44',
+            }}
           >
             <Button type="text" size="small" className="flex items-center gap-1 text-gray-700">
               <MenuOutlined />
