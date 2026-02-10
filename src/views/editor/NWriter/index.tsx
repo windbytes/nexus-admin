@@ -8,7 +8,15 @@ import TabToolbar from './components/TabToolbar';
 import TemplateTree from './components/TemplateTree';
 import { tabToolbarConfig } from './config/tabToolbarConfig';
 import { templateTreeData } from './config/templateTreeData';
+import { ModalProvider } from './modal/ModalProvider';
+import { openModal } from './modal/modalManager';
+import { registerEditorModal } from './modal/registry';
 import type { TemplateTreeNode } from './types';
+
+/**
+ * 注册编辑器域内弹窗
+ */
+registerEditorModal();
 
 /**
  * 病历编辑器模块
@@ -32,8 +40,8 @@ const DocWriter: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full flex-col bg-gray-100">
-      <div className="flex flex-1 min-h-0">
+    <ModalProvider>
+      <div className="flex h-full bg-gray-100">
         {/* 左侧：展开时显示病历树 + 最右侧中间收缩按钮；收缩时仅显示中间展开按钮 */}
         {sidebarCollapsed ? (
           <div className="flex h-full w-8 shrink-0 items-center justify-center border-r border-gray-200 bg-white">
@@ -75,6 +83,7 @@ const DocWriter: React.FC = () => {
             }}
             onFileMenuClick={(_key) => {
               // 占位：文件菜单项
+              openModal('FileMenuModal', { key: _key });
             }}
             onLeftQuickActionClick={(_key) => {
               // 占位：左侧快捷按钮
@@ -99,7 +108,7 @@ const DocWriter: React.FC = () => {
           />
         </main>
       </div>
-    </div>
+    </ModalProvider>
   );
 };
 
