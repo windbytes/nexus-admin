@@ -80,7 +80,7 @@ const menu = {
   },
   editor: {
     main: 'Editor',
-    docWriter: 'Doc Writer',
+    nwriter: 'NWriter',
   },
   apps: {
     add: 'add app',

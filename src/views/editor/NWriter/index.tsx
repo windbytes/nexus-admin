@@ -18,7 +18,7 @@ const DocWriter: React.FC = () => {
     tabToolbarConfig.find((t) => t.key !== 'file')?.key ?? 'start'
   );
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<Key[]>([]);
-  const [scale] = useState(1);
+  const [scale, setScale] = useState(1);
   const [editorMode, setEditorMode] = useState('edit');
 
   const handleTreeSelect = (selectedKeys: Key[], info: { node: TemplateTreeNode }) => {
@@ -62,11 +62,9 @@ const DocWriter: React.FC = () => {
           <EditorCanvas className="min-h-0" scale={scale} />
           <StatusBar
             scale={scale}
+            onScaleChange={setScale}
             mode={editorMode}
             onModeChange={setEditorMode}
-            onSave={() => {
-              // 占位：后续对接保存
-            }}
             onFullscreen={() => {
               // 占位：后续对接全屏
             }}
