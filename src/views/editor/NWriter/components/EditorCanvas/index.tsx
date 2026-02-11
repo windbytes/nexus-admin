@@ -1,153 +1,45 @@
-/**
- * 编辑区画布：整块 Canvas 绘制，中央为 A4 纸张尺寸的编辑页面
- * A4: 210mm x 297mm，按 96dpi 换算约 794 x 1123 px
- * 默认以 100% 比例绘制，使屏幕上的 A4 接近真实尺寸；画布可滚动查看整页
- */
-import { useCallback, useEffect, useRef, useState } from 'react';
-
-/** A4 纸宽高（mm） */
-const A4_MM = { width: 210, height: 297 };
-
-/** 画布边距（纸张与灰色区域间距） */
-const CANVAS_MARGIN = 48;
-
-/** 页面上下边距（mm），用于绘制内容区域线 */
-const PAGE_MARGIN_MM = 25;
-
-/** 将 mm 转为 px，96dpi 下与真实 A4 打印尺寸一致 */
-function mmToPx(mm: number): number {
-  return (mm * 96) / 25.4;
-}
+import { useEffect, useRef } from 'react';
+import { getContentSize, NWriterEditor } from '../../Editor';
 
 interface EditorCanvasProps {
   className?: string;
   /** 画布与 A4 的缩放比例，默认 1.0（100%，接近真实 A4 大小） */
   scale?: number;
 }
-
+/**
+ * 编辑区画布：提供指定宽高的 div 容器，在 useEffect 中创建 NWriterEditor 实例负责绘制
+ */
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: propScale }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  /** 默认 1.0：按 96dpi 的 A4 像素尺寸绘制，视觉上接近真实 A4 大小 */
-  const [scale, setScale] = useState(propScale ?? 1);
+  const editorRef = useRef<NWriterEditor | null>(null);
 
-  const a4Px = useCallback(() => {
-    return {
-      width: mmToPx(A4_MM.width),
-      height: mmToPx(A4_MM.height),
-    };
-  }, []);
-
-  /** 画布内容区尺寸：A4 缩放后 + 左右上下边距 */
-  const contentSize = useCallback(() => {
-    const { width: a4w, height: a4h } = a4Px();
-    return {
-      width: Math.ceil(a4w * scale) + CANVAS_MARGIN * 2,
-      height: Math.ceil(a4h * scale) + CANVAS_MARGIN * 2,
-    };
-  }, [a4Px, scale]);
-
-  const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, w: number, h: number) => {
-      const { width: a4w, height: a4h } = a4Px();
-      const scaledW = a4w * scale;
-      const scaledH = a4h * scale;
-      const x = (w - scaledW) / 2;
-      const y = (h - scaledH) / 2;
-
-      // 画布背景（整块灰色）
-      ctx.fillStyle = '#e8e8e8';
-      ctx.fillRect(0, 0, w, h);
-
-      // A4 白纸
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x, y, scaledW, scaledH);
-      ctx.strokeStyle = '#d9d9d9';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, scaledW, scaledH);
-
-      // 四角区域线：上下边距 25mm，左右同值，每个角只画 L 形两条边（不画整框）
-      const marginPx = mmToPx(PAGE_MARGIN_MM) * scale;
-      const rx = x + marginPx;
-      const ry = y + marginPx;
-      const rw = scaledW - marginPx * 2;
-      const rh = scaledH - marginPx * 2;
-      const cornerLen = 32; // L 形每边长度（px）
-      ctx.strokeStyle = '#bfbfbf';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      // 左上角 L 开口朝外：竖线向上 + 横线向左
-      ctx.moveTo(rx, ry);
-      ctx.lineTo(rx, ry - cornerLen);
-      ctx.moveTo(rx, ry);
-      ctx.lineTo(rx - cornerLen, ry);
-      // 右上角 L 开口朝外：竖线向上 + 横线向右
-      ctx.moveTo(rx + rw, ry);
-      ctx.lineTo(rx + rw, ry - cornerLen);
-      ctx.moveTo(rx + rw, ry);
-      ctx.lineTo(rx + rw + cornerLen, ry);
-      // 左下角 L 开口朝外：竖线向下 + 横线向左
-      ctx.moveTo(rx, ry + rh);
-      ctx.lineTo(rx, ry + rh + cornerLen);
-      ctx.moveTo(rx, ry + rh);
-      ctx.lineTo(rx - cornerLen, ry + rh);
-      // 右下角 L 开口朝外：竖线向下 + 横线向右
-      ctx.moveTo(rx + rw, ry + rh);
-      ctx.lineTo(rx + rw, ry + rh + cornerLen);
-      ctx.moveTo(rx + rw, ry + rh);
-      ctx.lineTo(rx + rw + cornerLen, ry + rh);
-      ctx.stroke();
-
-      // 占位提示文本（居中在 A4 内）
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scale, scale);
-      ctx.fillStyle = '#000';
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('编辑区域（A4 纸张）', a4w / 2, a4h / 2 - 10);
-      ctx.fillText('此处为病历正文占位，后续接入富文本或块编辑', a4w / 2, a4h / 2 + 15);
-      ctx.restore();
-    },
-    [scale, a4Px]
-  );
+  const scale = propScale ?? 1;
+  const { width: contentW, height: contentH } = getContentSize(scale);
 
   useEffect(() => {
-    if (propScale != null) {
-      setScale(propScale);
-    }
-  }, [propScale]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const { width: cw, height: ch } = contentSize();
-    if (!canvas || cw <= 0 || ch <= 0) {
+    const container = wrapperRef.current;
+    if (!container) {
       return;
     }
 
-    const dpr = window.devicePixelRatio ?? 1;
-    const bufferW = Math.floor(cw * dpr);
-    const bufferH = Math.floor(ch * dpr);
-    canvas.width = bufferW;
-    canvas.height = bufferH;
-    canvas.style.width = `${cw}px`;
-    canvas.style.height = `${ch}px`;
+    const editor = new NWriterEditor(container, { scale });
+    editorRef.current = editor;
 
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw(ctx, cw, ch);
+    return () => {
+      editor.destroy();
+      editorRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (propScale != null && editorRef.current) {
+      editorRef.current.update({ scale: propScale });
     }
-  }, [contentSize, draw]);
-
-  const { width: contentW, height: contentH } = contentSize();
+  }, [propScale]);
 
   return (
     <div className={`relative flex flex-1 flex-col items-center justify-start overflow-auto bg-[#e8e8e8] ${className}`}>
-      {/* 内层按“A4 缩放 + 边距”固定尺寸，画布即真实 A4 比例；区域大时居中，小时可滚动 */}
-      <div ref={wrapperRef} style={{ width: contentW, height: contentH }}>
-        <canvas ref={canvasRef} className="block" />
-      </div>
+      <div ref={wrapperRef} style={{ width: contentW, height: contentH }} />
     </div>
   );
 };
