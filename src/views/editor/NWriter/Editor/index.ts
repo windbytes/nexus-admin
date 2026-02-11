@@ -1,7 +1,3 @@
-/**
- * 病历编辑器 - class 实现，负责 canvas 创建与绘制
- */
-
 /** A4 纸宽高（mm） */
 const A4_MM = { width: 210, height: 297 };
 

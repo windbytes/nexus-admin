@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { getContentSize, NWriterEditor } from '../../Editor';
+import { getContentSize, NWriterEditor } from '../../editor';
 
 interface EditorCanvasProps {
   className?: string;
