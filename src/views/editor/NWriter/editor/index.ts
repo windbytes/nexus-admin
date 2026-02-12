@@ -22,20 +22,20 @@ export function getContentSize(scale: number) {
   };
 }
 
-export interface NWriterEditorOptions {
+export interface OrionEditorOptions {
   /** 画布与 A4 的缩放比例，默认 1.0 */
   scale?: number;
 }
 
 /**
- * 病历编辑器：接收外层包裹 div，负责 canvas 创建与绘制
+ * Orion 病历编辑器：接收外层包裹 div，负责 canvas 创建与绘制
  */
-export class NWriterEditor {
+export class OrionEditor {
   private container: HTMLDivElement;
-  private options: Required<NWriterEditorOptions>;
+  private options: Required<OrionEditorOptions>;
   private canvas: HTMLCanvasElement | null = null;
 
-  constructor(container: HTMLDivElement, options: NWriterEditorOptions = {}) {
+  constructor(container: HTMLDivElement, options: OrionEditorOptions = {}) {
     this.container = container;
     this.options = {
       scale: options.scale ?? 1,
@@ -126,7 +126,7 @@ export class NWriterEditor {
   }
 
   /** 更新参数并重绘（不销毁 DOM，仅调整尺寸后清空重绘） */
-  update(options: Partial<NWriterEditorOptions>) {
+  update(options: Partial<OrionEditorOptions>) {
     this.options = { ...this.options, ...options };
     if (!this.canvas) {
       return;

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { getContentSize, NWriterEditor } from '../../editor';
+import { getContentSize, OrionEditor } from '../../editor';
 
 interface EditorCanvasProps {
   className?: string;
@@ -7,11 +7,11 @@ interface EditorCanvasProps {
   scale?: number;
 }
 /**
- * 编辑区画布：提供指定宽高的 div 容器，在 useEffect 中创建 NWriterEditor 实例负责绘制
+ * 编辑区画布：提供指定宽高的 div 容器，在 useEffect 中创建 OrionEditor 实例负责绘制
  */
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: propScale }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<NWriterEditor | null>(null);
+  const editorRef = useRef<OrionEditor | null>(null);
 
   const scale = propScale ?? 1;
   const { width: contentW, height: contentH } = getContentSize(scale);
@@ -22,7 +22,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: prop
       return;
     }
 
-    const editor = new NWriterEditor(container, { scale });
+    const editor = new OrionEditor(container, { scale });
     editorRef.current = editor;
 
     return () => {

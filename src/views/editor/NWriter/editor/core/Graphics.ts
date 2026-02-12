@@ -1,4 +1,4 @@
-import type { NW } from './NW';
+import type { Orion } from './Orion';
 import { TObject } from './TObject';
 
 /**
@@ -14,7 +14,7 @@ import { TObject } from './TObject';
  * 9. 绘制背景
  * 等等
  */
-export class NWCanvas extends TObject {
+export class OrionCanvas extends TObject {
   /**
    * 绘制上下文
    */
@@ -28,8 +28,8 @@ export class NWCanvas extends TObject {
    */
   private dpi: number;
 
-  constructor(nw: NW, h5Context: CanvasRenderingContext2D) {
-    super(nw);
+  constructor(orion: Orion, h5Context: CanvasRenderingContext2D) {
+    super(orion);
     this.h5Context = h5Context;
   }
 }

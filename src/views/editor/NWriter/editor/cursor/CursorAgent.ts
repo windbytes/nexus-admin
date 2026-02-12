@@ -1,4 +1,4 @@
-import type { NW } from '../core/NW';
+import type { Orion } from '../core/Orion';
 import { TObject } from '../core/TObject';
 /**
  * 光标代理
@@ -10,13 +10,13 @@ export class CursorAgent extends TObject {
   // 光标所在容器
   private container: HTMLElement;
 
-  constructor(nw: NW) {
-    super(nw);
-    this.container = nw.parentElement;
+  constructor(orion: Orion) {
+    super(orion);
+    this.container = orion.parentElement;
     // 代理光标绘制
     const agentCursorDom = document.createElement('textarea');
     agentCursorDom.autocomplete = 'off';
-    agentCursorDom.classList.add('nw-inputarea');
+    agentCursorDom.classList.add('orion-inputarea');
     agentCursorDom.innerText = '';
     this.container.appendChild(agentCursorDom);
     this.agentCursorDom = agentCursorDom;
