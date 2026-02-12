@@ -1,6 +1,8 @@
 import type { Orion } from '../core/Orion';
+import type { Point } from '../core/Point';
 import { Rect } from '../core/Rect';
 import { TObject } from '../core/TObject';
+import { ImeMode } from '../system/constants';
 
 /**
  * 控制器类，例如控制鼠标事件、键盘事件
@@ -26,6 +28,9 @@ export class Control extends TObject {
   // 记录父级
   private _parent: Control | null;
 
+  // 记录输入法模式
+  private _imeMode: number;
+
   constructor(orion: Orion) {
     super(orion);
     this._updateCount = 0;
@@ -37,6 +42,7 @@ export class Control extends TObject {
     this._visible = true;
     this._focused = false;
     this._parent = null;
+    this._imeMode = ImeMode.DISABLED;
   }
 
   /**
@@ -58,8 +64,22 @@ export class Control extends TObject {
     }
   }
 
+  /**
+   * 获取客户端矩形
+   */
   clientRect() {
     return Rect.create(0, 0, this.width, this.height);
+  }
+
+  /**
+   * 客户端坐标转换为屏幕坐标
+   * @param point 客户端坐标
+   * @returns 屏幕坐标
+   */
+  clientToScreen(point: Point): Point {
+    point.x += this.left;
+    point.y += this.top;
+    return this.parent?.clientToScreen(point) ?? point;
   }
 
   /**
@@ -129,6 +149,17 @@ export class Control extends TObject {
   deactive() {}
 
   /**
+   * 输入法输入事件
+   * @param str 输入字符
+   */
+  imeInput(str: string) {}
+
+  /**
+   * 输入法激活
+   */
+  imeActive() {}
+
+  /**
    * 更新
    */
   update() {
@@ -173,6 +204,10 @@ export class Control extends TObject {
     return this._parent;
   }
 
+  get imeMode() {
+    return this._imeMode;
+  }
+
   set left(value: number) {
     if (this._left !== value) {
       this._left = value;
@@ -202,5 +237,9 @@ export class Control extends TObject {
 
   set parent(value: Control | null) {
     this._setParent(value);
+  }
+
+  set imeMode(value: number) {
+    this._imeMode = value;
   }
 }
