@@ -7,8 +7,8 @@ import { ImeMode } from '../system/constants';
  * 光标代理
  * 负责处理输入、键盘事件等操作
  */
-export class CursorAgent {
-  // 代理光标dom元素
+export class Ime {
+  // 代理光标输入的dom元素
   private agentCursorDom: HTMLTextAreaElement;
 
   private _control: Control | null;
@@ -156,7 +156,7 @@ export class CursorAgent {
       this._control = null;
     }
     if (this._control != null) {
-      if (control.imeMode === ImeMode.DISABLED || this._active) {
+      if (control.imeMode === ImeMode.disabled || this._active) {
         this.updateSize(16);
         this.agentCursorDom.focus();
         this._control.imeActive();

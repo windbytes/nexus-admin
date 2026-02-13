@@ -1,5 +1,5 @@
-import type { Orion } from './Orion';
-import { TObject } from './TObject';
+import type { Orion } from '../core/Orion';
+import { TObject } from '../core/TObject';
 
 /**
  * 封装canvas中的绘制工具，包括：
@@ -24,7 +24,7 @@ export class OrionCanvas extends TObject {
    */
   private scale: number;
   /**
-   * 绘制分辨率
+   * 分辨率
    */
   private dpi: number;
 
