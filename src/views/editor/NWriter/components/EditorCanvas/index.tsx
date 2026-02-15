@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { getContentSize, OrionEditor } from '../../editor';
+import { OrionEditor } from '../../editor';
 
 interface EditorCanvasProps {
   className?: string;
@@ -7,14 +7,13 @@ interface EditorCanvasProps {
   scale?: number;
 }
 /**
- * 编辑区画布：提供指定宽高的 div 容器，在 useEffect 中创建 OrionEditor 实例负责绘制
+ * 编辑区画布：提供指定宽高的 div 容器，在容器宽高有效时（ResizeObserver 检测到非零尺寸）创建 OrionEditor 实例负责绘制
  */
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: propScale }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<OrionEditor | null>(null);
 
   const scale = propScale ?? 1;
-  const { width: contentW, height: contentH } = getContentSize(scale);
 
   useEffect(() => {
     const container = wrapperRef.current;
@@ -22,24 +21,30 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: prop
       return;
     }
 
-    const editor = new OrionEditor(container, { scale });
-    editorRef.current = editor;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) {
+        observer.disconnect();
+        const editor = new OrionEditor(container, { scale });
+        editorRef.current = editor;
+      }
+    });
+
+    observer.observe(container);
 
     return () => {
-      editor.destroy();
+      observer.disconnect();
       editorRef.current = null;
     };
-  }, []);
-
-  useEffect(() => {
-    if (propScale != null && editorRef.current) {
-      editorRef.current.update({ scale: propScale });
-    }
-  }, [propScale]);
+  }, [scale]);
 
   return (
     <div className={`relative flex flex-1 flex-col items-center justify-start overflow-auto bg-[#e8e8e8] ${className}`}>
-      <div ref={wrapperRef} style={{ width: contentW, height: contentH }} />
+      <div ref={wrapperRef} className="w-full h-full" />
     </div>
   );
 };

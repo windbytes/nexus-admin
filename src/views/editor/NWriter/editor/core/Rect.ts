@@ -50,6 +50,23 @@ export class Rect {
   }
 
   /**
+   * 创建矩形区域
+   * @param left 左边界
+   * @param top 上边界
+   * @param width 宽度
+   * @param height 高度
+   * @returns 矩形区域
+   */
+  static createByBounds(left: number, top: number, width: number, height: number): Rect {
+    const newRect = new Rect();
+    newRect.left = left;
+    newRect.top = top;
+    newRect.right = left + width;
+    newRect.bottom = top + height;
+    return newRect;
+  }
+
+  /**
    * 获取矩形区域宽度
    * @returns 宽度
    */

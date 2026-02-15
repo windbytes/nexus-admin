@@ -24,12 +24,30 @@ export class OrionCanvas extends TObject {
    */
   private scale: number;
   /**
-   * 分辨率
+   * 设备像素比
    */
-  private dpi: number;
+  private dpr: number;
 
   constructor(orion: Orion, h5Context: CanvasRenderingContext2D) {
     super(orion);
     this.h5Context = h5Context;
+  }
+
+  /**
+   * 准备绘制上下文
+   * @param scale 缩放比例
+   * @param dpr 设备像素比
+   */
+  prepareConext(scale: number, dpr: number) {
+    this.scale = scale;
+    this.dpr = dpr;
+    this.h5Context.scale(dpr, dpr);
+    this.h5Context.shadowColor = 'black';
+    this.h5Context.textBaseline = 'top';
+    this.h5Context.textAlign = 'left';
+    this.h5Context.lineCap = 'square';
+    this.h5Context.setLineDash([]);
+    this.h5Context.lineDashOffset = 0;
+    // 设置默认的字体、字号
   }
 }

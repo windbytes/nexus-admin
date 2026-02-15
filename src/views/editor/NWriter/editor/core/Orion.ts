@@ -1,6 +1,8 @@
 import { Caret } from '../cursor/Caret';
 import { Ime } from '../cursor/Ime';
 import { OrionCanvas } from '../draw/Graphics';
+import { Application } from './Application';
+import { Rect } from './Rect';
 
 /**
  * 编辑器核心，统一管理贯穿编辑器全文的工具或者状态
@@ -24,36 +26,66 @@ export class Orion {
   // 编辑器高度
   private _height: number;
 
+  // 自动适应父元素宽高
+  private _autoWidth: boolean;
+  private _autoHeight: boolean;
+
+  // 是否水平居中
+  private _horizontalCenter: boolean;
+  private _left: number;
+
   // 更新计数
   private _updateCount: number;
 
   // 背景层 页面背景、页边距区域、页码底色、水印、分页分隔线
-  private _bgH5Canvas: HTMLCanvasElement | null;
-  private _bgCanvas: OrionCanvas | null;
+  private _bgH5Canvas!: HTMLCanvasElement;
+  private _bgCanvas!: OrionCanvas;
 
   // 内容层 文本、表格、图片、公式、图表、修订痕迹等
-  private _orionH5Canvas: HTMLCanvasElement | null; // 编辑器绘制canvas
-  private _orionCanvas: OrionCanvas | null; // 编辑器绘制canvas包装
+  private _orionH5Canvas!: HTMLCanvasElement; // 编辑器绘制canvas
+  private _orionCanvas!: OrionCanvas; // 编辑器绘制canvas包装
 
   // 选区层 选区、控件选中等
-  private _selectionH5Canvas: HTMLCanvasElement | null;
-  private _selectionCanvas: OrionCanvas | null;
+  private _selectionH5Canvas!: HTMLCanvasElement;
+  private _selectionCanvas!: OrionCanvas;
 
   // 交互层 hover效果、高亮、命中提示、对其辅助线、拖拽框等
-  private _interactionH5Canvas: HTMLCanvasElement | null;
-  private _interactionCanvas: OrionCanvas | null;
+  private _interactionH5Canvas!: HTMLCanvasElement;
+  private _interactionCanvas!: OrionCanvas;
 
   // 光标层
-  private _caretH5Canvas: HTMLCanvasElement | null;
-  private _caretCanvas: OrionCanvas | null;
+  private _caretH5Canvas!: HTMLCanvasElement;
+  private _caretCanvas!: OrionCanvas;
 
   // 离屏渲染使用的canvas 用于提高绘制性能使用
-  private _offscreenH5Canvas: HTMLCanvasElement | null;
-  private _offscreenCanvas: OrionCanvas | null;
+  private _offscreenH5Canvas!: HTMLCanvasElement;
+  private _offscreenCanvas!: OrionCanvas;
+
+  // 一个临时canvas，用于字体测量等相关操作
+  private _tempH5Canvas: HTMLCanvasElement;
+  private _tempCanvas: OrionCanvas;
+
   private _caret: Caret;
+
+  // canvas最小宽度
+  private _minWidth: number;
 
   // 父元素的监听器对象
   private _parentResizeObserver: ResizeObserver | null;
+
+  // 应用
+  private _application: Application | null;
+
+  // 是否加载完成
+  private _loaded: boolean;
+
+  /** 光标位置（临时实现用于闪烁绘制） */
+  private _cursorX: number = 0;
+  private _cursorY: number = 0;
+  private _cursorHeight: number = 20;
+  /** 光标闪烁是否显示 */
+  private _caretBlinkOn: boolean = true;
+  private _caretBlinkTimerId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.instanceID = 0;
@@ -64,21 +96,44 @@ export class Orion {
 
     this._ime = new Ime();
 
-    this._orionH5Canvas = null;
-    this._orionCanvas = null;
-    this._offscreenH5Canvas = null;
-    this._offscreenCanvas = null;
+    this._minWidth = 256;
     this._parentResizeObserver = null;
     this._updateCount = 0;
     this._caret = new Caret();
     this._width = 1450;
     this._height = 658;
+    this._application = null;
+    this._tempH5Canvas = document.createElement('canvas');
+    this._tempCanvas = new OrionCanvas(this, this._tempH5Canvas.getContext('2d') as CanvasRenderingContext2D);
+    this._loaded = false;
+  }
+
+  /**
+   * 运行应用
+   */
+  applicationRun() {
+    if (!this._parentElement) {
+      this._parentElement = document.body;
+    }
+    this.resize();
+  }
+
+  /**
+   * 父元素resize事件
+   */
+  private parentResize() {
+    this.resize();
   }
 
   /**
    * 移除编辑器的容器元素绑定的事件
    */
-  removeEvent() {}
+  removeEvent() {
+    if (this.parentElement) {
+      this.parentElement.removeEventListener('resize', this.parentResize.bind(this));
+    }
+    console.log('removeEvent');
+  }
 
   /**
    * 给编辑器的容器元素绑定事件
@@ -87,6 +142,8 @@ export class Orion {
     this.removeEvent();
     if (this._parentElement) {
       // 绑定键盘事件、焦点、鼠标、拖拽、复制粘贴、鼠标滚动等，统一处理绑定到容器上，内部进行转发到不同的层
+      console.log('bindEvent');
+      this.parentElement.addEventListener('resize', this.parentResize.bind(this));
     }
   }
 
@@ -96,18 +153,251 @@ export class Orion {
   resize() {
     if (this._parentElement) {
       // 开始计数更新
+      this.beginUpdate();
+      try {
+        if (this._autoWidth) {
+          this._left = 0;
+          this._width = this.getViewPortWidth();
+        } else {
+          if (this._horizontalCenter) {
+            this._left = this.getAdjustLeft();
+          }
+        }
+        if (this._autoHeight) {
+          this._height = this.getViewPortHeight();
+        }
+        // 调整所有canvas的left，调整之前需要判定left是否发生的变化
+        if (this._bgH5Canvas && this._bgH5Canvas.style.left !== `${this._left}px`) {
+          this._bgH5Canvas.style.left = `${this._left}px`;
+        }
+        if (this._orionH5Canvas && this._orionH5Canvas.style.left !== `${this._left}px`) {
+          this._orionH5Canvas.style.left = `${this._left}px`;
+        }
+        if (this._selectionH5Canvas && this._selectionH5Canvas.style.left !== `${this._left}px`) {
+          this._selectionH5Canvas.style.left = `${this._left}px`;
+        }
+        if (this._interactionH5Canvas && this._interactionH5Canvas.style.left !== `${this._left}px`) {
+          this._interactionH5Canvas.style.left = `${this._left}px`;
+        }
+        if (this._caretH5Canvas && this._caretH5Canvas.style.left !== `${this._left}px`) {
+          this._caretH5Canvas.style.left = `${this._left}px`;
+        }
+
+        // 设置临时canvas的宽高
+        this._tempH5Canvas.width = Math.max(this._width, this._minWidth);
+        this._tempH5Canvas.height = Math.max(this._height, this._minWidth);
+        this._tempCanvas.prepareConext(this._scale, this._dpr);
+        // 获取浏览器的DPR
+        this._dpr = this.getDpr();
+
+        // 设置所有canvas的宽高
+        this._bgH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._bgH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._bgCanvas.prepareConext(this._scale, this._dpr);
+        // 设置内容层canvas的宽高
+        this._orionH5Canvas.style.width = `${this._width}px`;
+        this._orionH5Canvas.style.height = `${this._height}px`;
+        this._orionH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._orionH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._orionCanvas.prepareConext(this._scale, this._dpr);
+
+        // 设置选区层canvas的宽高
+        this._selectionH5Canvas.style.width = `${this._width}px`;
+        this._selectionH5Canvas.style.height = `${this._height}px`;
+        this._selectionH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._selectionH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._selectionCanvas.prepareConext(this._scale, this._dpr);
+
+        // 设置交互层canvas的宽高
+        this._interactionH5Canvas.style.width = `${this._width}px`;
+        this._interactionH5Canvas.style.height = `${this._height}px`;
+        this._interactionH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._interactionH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._interactionCanvas.prepareConext(this._scale, this._dpr);
+
+        // 设置光标层canvas的宽高
+        this._caretH5Canvas.style.width = `${this._width}px`;
+        this._caretH5Canvas.style.height = `${this._height}px`;
+        this._caretH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._caretH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._caretCanvas.prepareConext(this._scale, this._dpr);
+
+        // 设置离屏渲染canvas的宽高
+        this._offscreenH5Canvas.style.width = `${this._width}px`;
+        this._offscreenH5Canvas.style.height = `${this._height}px`;
+        this._offscreenH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._offscreenH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._offscreenCanvas.prepareConext(this._scale, this._dpr);
+      } finally {
+        this.endUpdate();
+      }
     }
   }
 
   /**
    * 更新计数累加
    */
-  beginUpdate() {}
+  private beginUpdate() {
+    this._updateCount++;
+  }
 
   /**
    * 更新计数累减
    */
-  endUpdate() {}
+  private endUpdate() {
+    if (this._updateCount > 0) {
+      this._updateCount--;
+      if (this._updateCount === 0) {
+        this.update();
+      }
+    }
+  }
+
+  /**
+   * 更新整个编辑器
+   */
+  private update() {
+    this._updateCount > 0 || this.paint(Rect.createByBounds(0, 0, this.width, this.height));
+  }
+
+  /**
+   * 更新指定区域
+   * @param t 更新区域
+   */
+  private updateRect(t: Rect) {
+    this._updateCount > 0 ||
+      // (this.brower === Miss_Ed ? this._paint(t) : this._paint(t.inFlate(this.theme.shadow, this.theme.shadow, true)));
+      this.paint(t);
+  }
+
+  /** A4 纸张尺寸（96dpi 下的像素值） */
+  private static readonly A4_WIDTH = 794;
+  private static readonly A4_HEIGHT = 1123;
+  /** 白色纸张与灰色背景之间的上边距（像素） */
+  private static readonly PAPER_TOP_MARGIN = 24;
+
+  /**
+   * 绘制指定区域（临时实现：背景层页面背景；内容层两行文字；选区层第一行选中；光标层第二行末闪烁光标）
+   * @param _t 绘制区域（临时实现未做区域裁剪）
+   */
+  private paint(_t: Rect) {
+    const bgCtx = this._bgH5Canvas?.getContext('2d');
+    if (!bgCtx) {
+      return;
+    }
+
+    const gray = '#e0e0e0';
+    const white = '#ffffff';
+    const topMargin = Orion.PAPER_TOP_MARGIN;
+    const a4W = Orion.A4_WIDTH * this._scale;
+    const a4H = Orion.A4_HEIGHT * this._scale;
+    const a4Left = (this._width - a4W) / 2;
+    const a4Top = topMargin;
+    const lineHeight = 24;
+
+    // 背景层：灰色页面背景 + 居中 A4 白纸（上边距）
+    bgCtx.fillStyle = gray;
+    bgCtx.fillRect(0, 0, this._width, this._height);
+    bgCtx.fillStyle = white;
+    bgCtx.fillRect(a4Left, a4Top, a4W, a4H);
+
+    const textX = a4Left + 40;
+    const textY = a4Top + 40;
+    const line1 = 'Orion 病历编辑器';
+    const line2 = '(临时绘制：灰底 + A4 白纸区域)';
+
+    // 内容层：两行文字
+    const contentCtx = this._orionH5Canvas?.getContext('2d');
+    let line1Width = 0;
+    let line2Width = 0;
+    if (contentCtx) {
+      contentCtx.fillStyle = '#333333';
+      contentCtx.font = '16px sans-serif';
+      contentCtx.textAlign = 'left';
+      contentCtx.fillText(line1, textX, textY);
+      contentCtx.fillText(line2, textX, textY + lineHeight);
+      line1Width = contentCtx.measureText(line1).width;
+      line2Width = contentCtx.measureText(line2).width;
+    }
+
+    // 选区层：第一行文本选中状态（浅蓝色）
+    const selectionCtx = this._selectionH5Canvas?.getContext('2d');
+    if (selectionCtx) {
+      selectionCtx.fillStyle = 'rgba(173, 216, 230, 0.45)';
+      selectionCtx.fillRect(textX, textY - 4, line1Width, lineHeight);
+    }
+
+    // 光标层：第二行末尾闪烁光标（位置在 paint 中写入，闪烁由定时器驱动）
+    this._cursorX = textX + line2Width;
+    this._cursorY = textY + lineHeight;
+    this._cursorHeight = lineHeight;
+    this.paintCaretLayer();
+    this.startCaretBlinkTimer();
+  }
+
+  /** 仅重绘光标层（用于闪烁） */
+  private paintCaretLayer() {
+    const ctx = this._caretH5Canvas?.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.clearRect(0, 0, this._width, this._height);
+    if (this._caretBlinkOn) {
+      ctx.fillStyle = '#333333';
+      ctx.fillRect(this._cursorX, this._cursorY - 4, 1, this._cursorHeight);
+    }
+  }
+
+  /** 启动光标闪烁定时器（仅启动一次） */
+  private startCaretBlinkTimer() {
+    if (this._caretBlinkTimerId !== null) {
+      return;
+    }
+    this._caretBlinkTimerId = setInterval(() => {
+      this._caretBlinkOn = !this._caretBlinkOn;
+      this.paintCaretLayer();
+    }, 530);
+  }
+
+  /**
+   * 获取浏览器设备像素比
+   * @returns 设备像素比
+   */
+  private getDpr() {
+    return window.devicePixelRatio;
+  }
+
+  /**
+   * 获取浏览器视口宽度
+   * @returns 视口宽度
+   */
+  private getViewPortWidth() {
+    return this._parentElement && this._parentElement !== document.body
+      ? this._parentElement.clientWidth
+      : document.documentElement.clientWidth || document.body.clientWidth;
+  }
+
+  /**
+   * 获取浏览器视口高度
+   * @returns 视口高度
+   */
+  private getViewPortHeight() {
+    return this._parentElement && this._parentElement !== document.body
+      ? this._parentElement.clientHeight
+      : document.documentElement.clientHeight || document.body.clientHeight;
+  }
+
+  /**
+   * 获取浏览器视口左偏移量
+   * @returns 左偏移量
+   */
+  private getAdjustLeft() {
+    let vLeft = (this.getViewPortWidth() - this._width) / 2;
+    if (this._loaded && vLeft < this._parentElement.clientLeft) {
+      vLeft = this._parentElement.clientLeft;
+    }
+    return vLeft;
+  }
 
   /**
    * 设置编辑器父元素
@@ -200,6 +490,20 @@ export class Orion {
     }
   }
 
+  set autoWidth(t: boolean) {
+    if (this._autoWidth !== t) {
+      this._autoWidth = t;
+      this.resize();
+    }
+  }
+
+  set autoHeight(t: boolean) {
+    if (this._autoHeight !== t) {
+      this._autoHeight = t;
+      this.resize();
+    }
+  }
+
   get parentElement(): HTMLElement {
     return this._parentElement;
   }
@@ -222,5 +526,16 @@ export class Orion {
 
   get ime(): Ime {
     return this._ime;
+  }
+
+  /**
+   * 获取应用
+   * @returns 应用
+   */
+  get application(): Application {
+    if (!this._application) {
+      this._application = new Application(this);
+    }
+    return this._application;
   }
 }
