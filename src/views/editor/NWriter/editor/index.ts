@@ -67,4 +67,16 @@ export class OrionEditor {
   private registerContextMenu() {
     // @TODO
   }
+
+  /**
+   * 获取编辑器核心实例（用于访问更新管线等高级 API）
+   */
+  get orion(): Orion {
+    return this._orion;
+  }
 }
+
+// 导出核心类型供外部使用
+export { Rect } from './core/Rect';
+export { DirtyManager } from './core/DirtyManager';
+export type { Orion } from './core/Orion';

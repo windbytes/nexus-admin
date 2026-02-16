@@ -2,10 +2,10 @@
  * 矩形区域
  */
 export class Rect {
-  private left: number = 0;
-  private top: number = 0;
-  private right: number = 0;
-  private bottom: number = 0;
+  private _left: number = 0;
+  private _top: number = 0;
+  private _right: number = 0;
+  private _bottom: number = 0;
 
   /**
    * 重置矩形区域
@@ -16,10 +16,10 @@ export class Rect {
    * @returns 矩形区域
    */
   reset(left: number, top: number, right: number, bottom: number): Rect {
-    this.left = left;
-    this.top = top;
-    this.right = right;
-    this.bottom = bottom;
+    this._left = left;
+    this._top = top;
+    this._right = right;
+    this._bottom = bottom;
     return this;
   }
 
@@ -29,7 +29,34 @@ export class Rect {
    * @returns 矩形区域
    */
   resetRect(rect: Rect): Rect {
-    return this.reset(rect.left, rect.top, rect.right, rect.bottom);
+    return this.reset(rect._left, rect._top, rect._right, rect._bottom);
+  }
+
+  /**
+   * 缩放矩形区域
+   * @param _dpr 缩放比例
+   * @param newRect 是否返回新的矩形区域
+   * @returns 缩放后的矩形区域
+   */
+  scale(_dpr: number, newRect: boolean): Rect {
+    if (_dpr === 1) {
+      if (newRect) {
+        return Rect.create(this._left, this._top, this._right, this._bottom);
+      }
+      return this;
+    }
+    const left = Math.ceil(this._left * _dpr);
+    const top = Math.ceil(this._top * _dpr);
+    const right = Math.floor(this._right * _dpr);
+    const bottom = Math.floor(this._bottom * _dpr);
+    if (newRect) {
+      return Rect.create(left, top, right, bottom);
+    }
+    this._left = left;
+    this._top = top;
+    this._right = right;
+    this._bottom = bottom;
+    return this;
   }
 
   /**
@@ -42,10 +69,10 @@ export class Rect {
    */
   static create(left: number, top: number, right: number, bottom: number): Rect {
     const newRect = new Rect();
-    newRect.left = left;
-    newRect.top = top;
-    newRect.right = right;
-    newRect.bottom = bottom;
+    newRect._left = left;
+    newRect._top = top;
+    newRect._right = right;
+    newRect._bottom = bottom;
     return newRect;
   }
 
@@ -59,10 +86,10 @@ export class Rect {
    */
   static createByBounds(left: number, top: number, width: number, height: number): Rect {
     const newRect = new Rect();
-    newRect.left = left;
-    newRect.top = top;
-    newRect.right = left + width;
-    newRect.bottom = top + height;
+    newRect._left = left;
+    newRect._top = top;
+    newRect._right = left + width;
+    newRect._bottom = top + height;
     return newRect;
   }
 
@@ -71,7 +98,7 @@ export class Rect {
    * @returns 宽度
    */
   get width(): number {
-    return this.right - this.left;
+    return this._right - this._left;
   }
 
   /**
@@ -79,6 +106,19 @@ export class Rect {
    * @returns 高度
    */
   get height(): number {
-    return this.bottom - this.top;
+    return this._bottom - this._top;
+  }
+
+  get left(): number {
+    return this._left;
+  }
+  get top(): number {
+    return this._top;
+  }
+  get right(): number {
+    return this._right;
+  }
+  get bottom(): number {
+    return this._bottom;
   }
 }

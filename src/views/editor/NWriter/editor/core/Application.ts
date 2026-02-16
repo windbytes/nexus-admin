@@ -21,4 +21,8 @@ export class Application extends TObject {
     this.orion.applicationRun();
     this._running = true;
   }
+
+  get runing(): boolean {
+    return this._running;
+  }
 }

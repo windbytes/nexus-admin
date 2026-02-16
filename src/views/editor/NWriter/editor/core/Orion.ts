@@ -2,7 +2,8 @@ import { Caret } from '../cursor/Caret';
 import { Ime } from '../cursor/Ime';
 import { OrionCanvas } from '../draw/Graphics';
 import { Application } from './Application';
-import { Rect } from './Rect';
+import { DirtyManager } from './DirtyManager';
+import type { Rect } from './Rect';
 
 /**
  * 编辑器核心，统一管理贯穿编辑器全文的工具或者状态
@@ -41,11 +42,11 @@ export class Orion {
   private _bgH5Canvas!: HTMLCanvasElement;
   private _bgCanvas!: OrionCanvas;
 
-  // 内容层 文本、表格、图片、公式、图表、修订痕迹等
+  // 内容层 文本、表格、图片、公式、图表、修订痕迹等，使用 dirtyRect进行区域更新
   private _orionH5Canvas!: HTMLCanvasElement; // 编辑器绘制canvas
   private _orionCanvas!: OrionCanvas; // 编辑器绘制canvas包装
 
-  // 选区层 选区、控件选中等
+  // 选区层 选区、控件选中、表格选中块等
   private _selectionH5Canvas!: HTMLCanvasElement;
   private _selectionCanvas!: OrionCanvas;
 
@@ -53,7 +54,7 @@ export class Orion {
   private _interactionH5Canvas!: HTMLCanvasElement;
   private _interactionCanvas!: OrionCanvas;
 
-  // 光标层
+  // 光标层 光标闪烁、输入法候选定位参考线
   private _caretH5Canvas!: HTMLCanvasElement;
   private _caretCanvas!: OrionCanvas;
 
@@ -65,6 +66,7 @@ export class Orion {
   private _tempH5Canvas: HTMLCanvasElement;
   private _tempCanvas: OrionCanvas;
 
+  // 光标对象
   private _caret: Caret;
 
   // canvas最小宽度
@@ -79,13 +81,27 @@ export class Orion {
   // 是否加载完成
   private _loaded: boolean;
 
+  /** 脏区域管理器（内容更新管线用） */
+  private _dirtyManager: DirtyManager;
+  /** 内容更新管线的 rAF id */
+  private _contentUpdateFrameId: number | null = null;
+  /** 视口更新管线的 rAF id */
+  private _viewportUpdateFrameId: number | null = null;
+
+  /** 当前滚动偏移（视口更新管线用） */
+  private _scrollTop: number = 0;
+  private _scrollLeft: number = 0;
+
   /** 光标位置（临时实现用于闪烁绘制） */
   private _cursorX: number = 0;
   private _cursorY: number = 0;
   private _cursorHeight: number = 20;
   /** 光标闪烁是否显示 */
   private _caretBlinkOn: boolean = true;
-  private _caretBlinkTimerId: ReturnType<typeof setInterval> | null = null;
+  /** 上次切换光标显示状态的时间戳（用于 requestAnimationFrame 闪烁） */
+  private _caretLastToggle: number = 0;
+  /** 光标闪烁动画帧 id（用于 cancelAnimationFrame） */
+  private _caretAnimationFrameId: number | null = null;
 
   constructor() {
     this.instanceID = 0;
@@ -106,6 +122,7 @@ export class Orion {
     this._tempH5Canvas = document.createElement('canvas');
     this._tempCanvas = new OrionCanvas(this, this._tempH5Canvas.getContext('2d') as CanvasRenderingContext2D);
     this._loaded = false;
+    this._dirtyManager = new DirtyManager();
   }
 
   /**
@@ -115,7 +132,9 @@ export class Orion {
     if (!this._parentElement) {
       this._parentElement = document.body;
     }
+    this._focus = true; // 临时：使光标层能绘制；后续可改为随容器 focus 更新
     this.resize();
+    this.startCaretBlinkTimer();
   }
 
   /**
@@ -129,6 +148,9 @@ export class Orion {
    * 移除编辑器的容器元素绑定的事件
    */
   removeEvent() {
+    if (this._parentResizeObserver) {
+      this._parentResizeObserver.unobserve(this._parentElement);
+    }
     if (this.parentElement) {
       this.parentElement.removeEventListener('resize', this.parentResize.bind(this));
     }
@@ -145,6 +167,12 @@ export class Orion {
       console.log('bindEvent');
       this.parentElement.addEventListener('resize', this.parentResize.bind(this));
     }
+
+    // 添加父元素的监听器
+    if (!this._parentResizeObserver) {
+      this._parentResizeObserver = new ResizeObserver(this.parentResize.bind(this));
+    }
+    this._parentResizeObserver.observe(this._parentElement);
   }
 
   /**
@@ -254,20 +282,256 @@ export class Orion {
   }
 
   /**
-   * 更新整个编辑器
+   * 更新整个编辑器（resize 等场景触发，走视口更新管线）
    */
   private update() {
-    this._updateCount > 0 || this.paint(Rect.createByBounds(0, 0, this.width, this.height));
+    if (this._updateCount > 0) {
+      return;
+    }
+    this.requestViewportUpdate();
   }
 
   /**
-   * 更新指定区域
+   * 更新指定区域（已弃用，请使用 invalidate）
    * @param t 更新区域
+   * @deprecated 使用 invalidate(rect) 替代
    */
   private updateRect(t: Rect) {
-    this._updateCount > 0 ||
-      // (this.brower === Miss_Ed ? this._paint(t) : this._paint(t.inFlate(this.theme.shadow, this.theme.shadow, true)));
-      this.paint(t);
+    this.invalidate(t);
+  }
+
+  // ========== ① 内容更新管线（数据变化）==========
+
+  /**
+   * 标记区域为脏（输入、删除、公式变化、批注变化、编辑操作等触发）
+   * @param rect 脏区域
+   */
+  invalidate(rect: Rect): void {
+    this._dirtyManager.invalidate(rect);
+    this.requestContentUpdate();
+  }
+
+  /**
+   * 请求内容更新（通过 rAF 合并多次 invalidate）
+   */
+  private requestContentUpdate(): void {
+    if (this._contentUpdateFrameId !== null) {
+      return;
+    }
+    this._contentUpdateFrameId = requestAnimationFrame(() => {
+      this._contentUpdateFrameId = null;
+      this.updateContentPipeline();
+    });
+  }
+
+  /**
+   * 内容更新管线主流程
+   */
+  private updateContentPipeline(): void {
+    const dirtyRegion = this._dirtyManager.getDirtyRegion();
+    if (!dirtyRegion) {
+      return;
+    }
+    this._dirtyManager.clear();
+    this.updateOffscreen(dirtyRegion);
+    this.blitToContentLayer(dirtyRegion);
+    this.repaintSelection();
+    this.repaintOverlay();
+  }
+
+  /**
+   * 在离屏 canvas 上更新脏区域（绘制文本、图表、公式等内容）
+   * @param rect 脏区域
+   */
+  private updateOffscreen(rect: Rect): void {
+    const ctx = this._offscreenH5Canvas?.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    const scale = rect.scale(this._dpr, true);
+    ctx.clearRect(scale.left, scale.top, scale.width, scale.height);
+    // TODO: 实际内容绘制逻辑（文本、表格、图片、公式等）
+    // 这里暂时画一个示例矩形表示内容区域
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(scale.left, scale.top, scale.width, scale.height);
+  }
+
+  /**
+   * 将离屏 canvas 的指定区域 blit（拷贝）到内容层
+   * @param rect 区域
+   */
+  private blitToContentLayer(rect: Rect): void {
+    const contentCtx = this._orionH5Canvas?.getContext('2d');
+    const offscreenCtx = this._offscreenH5Canvas?.getContext('2d');
+    if (!contentCtx || !offscreenCtx) {
+      return;
+    }
+    const scale = rect.scale(this._dpr, true);
+    const imageData = offscreenCtx.getImageData(scale.left, scale.top, scale.width, scale.height);
+    contentCtx.putImageData(imageData, scale.left, scale.top);
+  }
+
+  // ========== ② 视口更新管线（视口变化）==========
+
+  /**
+   * 设置滚动位置（触发视口更新管线）
+   * @param scrollTop 垂直滚动偏移
+   * @param scrollLeft 水平滚动偏移（可选）
+   */
+  setScrollTop(scrollTop: number, scrollLeft: number = this._scrollLeft): void {
+    if (this._scrollTop === scrollTop && this._scrollLeft === scrollLeft) {
+      return;
+    }
+    this._scrollTop = scrollTop;
+    this._scrollLeft = scrollLeft;
+    this.requestViewportUpdate();
+  }
+
+  /**
+   * 设置缩放（触发视口更新管线）
+   * @param scale 缩放比例
+   */
+  setScale(scale: number): void {
+    if (this._scale === scale) {
+      return;
+    }
+    this._scale = scale;
+    this.requestViewportUpdate();
+  }
+
+  /**
+   * 请求视口更新（通过 rAF）
+   */
+  private requestViewportUpdate(): void {
+    if (this._viewportUpdateFrameId !== null) {
+      return;
+    }
+    this._viewportUpdateFrameId = requestAnimationFrame(() => {
+      this._viewportUpdateFrameId = null;
+      this.updateViewportPipeline();
+    });
+  }
+
+  /**
+   * 视口更新管线主流程（不更新离屏，不走 dirty，重绘整个 viewport）
+   */
+  private updateViewportPipeline(): void {
+    this.repaintBackground();
+    this.repaintContentFromOffscreen();
+    this.repaintSelection();
+    this.repaintOverlay();
+    this.repaintCaret();
+  }
+
+  /**
+   * 重绘背景层（灰底 + A4 白纸）
+   */
+  private repaintBackground(): void {
+    const bgCtx = this._bgH5Canvas?.getContext('2d');
+    if (!bgCtx) {
+      return;
+    }
+    const gray = '#e0e0e0';
+    const white = '#ffffff';
+    const topMargin = Orion.PAPER_TOP_MARGIN;
+    const a4W = Orion.A4_WIDTH * this._scale;
+    const a4H = Orion.A4_HEIGHT * this._scale;
+    const a4Left = (this._width - a4W) / 2;
+    const a4Top = topMargin;
+    bgCtx.fillStyle = gray;
+    bgCtx.fillRect(0, 0, this._width, this._height);
+    bgCtx.fillStyle = white;
+    bgCtx.fillRect(a4Left, a4Top, a4W, a4H);
+  }
+
+  /**
+   * 从离屏 canvas 重绘内容层（整个视口）
+   */
+  private repaintContentFromOffscreen(): void {
+    const contentCtx = this._orionH5Canvas?.getContext('2d');
+    if (!contentCtx) {
+      return;
+    }
+    contentCtx.clearRect(0, 0, this._width, this._height);
+    // TODO: 根据 scrollTop / scrollLeft 从离屏 canvas blit 可见区域
+    // 这里暂时绘制临时示例内容
+    const topMargin = Orion.PAPER_TOP_MARGIN;
+    const a4W = Orion.A4_WIDTH * this._scale;
+    const a4Left = (this._width - a4W) / 2;
+    const a4Top = topMargin;
+    const textX = a4Left + 40;
+    const textY = a4Top + 40;
+    const lineHeight = 24;
+    const line1 = 'Orion 病历编辑器';
+    const line2 = '（视口更新管线）';
+    contentCtx.fillStyle = '#333333';
+    contentCtx.font = '16px sans-serif';
+    contentCtx.textBaseline = 'top';
+    contentCtx.textAlign = 'left';
+    contentCtx.fillText(line1, textX, textY);
+    contentCtx.fillText(line2, textX, textY + lineHeight);
+  }
+
+  /**
+   * 重绘选区层
+   */
+  private repaintSelection(): void {
+    const selectionCtx = this._selectionH5Canvas?.getContext('2d');
+    if (!selectionCtx) {
+      return;
+    }
+    selectionCtx.clearRect(0, 0, this._width, this._height);
+    // TODO: 根据当前选区数据绘制选区
+    // 这里暂时绘制第一行选中示例
+    const topMargin = Orion.PAPER_TOP_MARGIN;
+    const a4W = Orion.A4_WIDTH * this._scale;
+    const a4Left = (this._width - a4W) / 2;
+    const a4Top = topMargin;
+    const textX = a4Left + 40;
+    const textY = a4Top + 40;
+    const lineHeight = 24;
+    const line1 = 'Orion 病历编辑器';
+    selectionCtx.font = '16px sans-serif';
+    const line1Width = selectionCtx.measureText(line1).width;
+    const selectionY = textY;
+    selectionCtx.fillStyle = 'rgba(173, 216, 230, 0.35)';
+    selectionCtx.fillRect(textX, selectionY - 4, line1Width, lineHeight);
+  }
+
+  /**
+   * 重绘交互层（hover、高亮、对齐辅助线、拖拽框等）
+   */
+  private repaintOverlay(): void {
+    const interactionCtx = this._interactionH5Canvas?.getContext('2d');
+    if (!interactionCtx) {
+      return;
+    }
+    interactionCtx.clearRect(0, 0, this._width, this._height);
+    // TODO: 根据当前交互状态绘制交互层内容
+  }
+
+  /**
+   * 重绘光标层
+   */
+  private repaintCaret(): void {
+    // 更新光标位置（临时：第二行末尾）
+    const topMargin = Orion.PAPER_TOP_MARGIN;
+    const a4W = Orion.A4_WIDTH * this._scale;
+    const a4Left = (this._width - a4W) / 2;
+    const a4Top = topMargin;
+    const textX = a4Left + 40;
+    const textY = a4Top + 40;
+    const lineHeight = 24;
+    const line2 = '（视口更新管线）';
+    const ctx = this._orionH5Canvas?.getContext('2d');
+    if (ctx) {
+      ctx.font = '16px sans-serif';
+      const line2Width = ctx.measureText(line2).width;
+      this._cursorX = textX + line2Width;
+      this._cursorY = textY + lineHeight;
+      this._cursorHeight = lineHeight;
+    }
+    this.paintCaretLayer();
   }
 
   /** A4 纸张尺寸（96dpi 下的像素值） */
@@ -276,87 +540,43 @@ export class Orion {
   /** 白色纸张与灰色背景之间的上边距（像素） */
   private static readonly PAPER_TOP_MARGIN = 24;
 
-  /**
-   * 绘制指定区域（临时实现：背景层页面背景；内容层两行文字；选区层第一行选中；光标层第二行末闪烁光标）
-   * @param _t 绘制区域（临时实现未做区域裁剪）
-   */
-  private paint(_t: Rect) {
-    const bgCtx = this._bgH5Canvas?.getContext('2d');
-    if (!bgCtx) {
-      return;
-    }
-
-    const gray = '#e0e0e0';
-    const white = '#ffffff';
-    const topMargin = Orion.PAPER_TOP_MARGIN;
-    const a4W = Orion.A4_WIDTH * this._scale;
-    const a4H = Orion.A4_HEIGHT * this._scale;
-    const a4Left = (this._width - a4W) / 2;
-    const a4Top = topMargin;
-    const lineHeight = 24;
-
-    // 背景层：灰色页面背景 + 居中 A4 白纸（上边距）
-    bgCtx.fillStyle = gray;
-    bgCtx.fillRect(0, 0, this._width, this._height);
-    bgCtx.fillStyle = white;
-    bgCtx.fillRect(a4Left, a4Top, a4W, a4H);
-
-    const textX = a4Left + 40;
-    const textY = a4Top + 40;
-    const line1 = 'Orion 病历编辑器';
-    const line2 = '(临时绘制：灰底 + A4 白纸区域)';
-
-    // 内容层：两行文字
-    const contentCtx = this._orionH5Canvas?.getContext('2d');
-    let line1Width = 0;
-    let line2Width = 0;
-    if (contentCtx) {
-      contentCtx.fillStyle = '#333333';
-      contentCtx.font = '16px sans-serif';
-      contentCtx.textAlign = 'left';
-      contentCtx.fillText(line1, textX, textY);
-      contentCtx.fillText(line2, textX, textY + lineHeight);
-      line1Width = contentCtx.measureText(line1).width;
-      line2Width = contentCtx.measureText(line2).width;
-    }
-
-    // 选区层：第一行文本选中状态（浅蓝色）
-    const selectionCtx = this._selectionH5Canvas?.getContext('2d');
-    if (selectionCtx) {
-      selectionCtx.fillStyle = 'rgba(173, 216, 230, 0.45)';
-      selectionCtx.fillRect(textX, textY - 4, line1Width, lineHeight);
-    }
-
-    // 光标层：第二行末尾闪烁光标（位置在 paint 中写入，闪烁由定时器驱动）
-    this._cursorX = textX + line2Width;
-    this._cursorY = textY + lineHeight;
-    this._cursorHeight = lineHeight;
-    this.paintCaretLayer();
-    this.startCaretBlinkTimer();
-  }
-
-  /** 仅重绘光标层（用于闪烁） */
+  /** 仅清空并重绘光标层（用于闪烁） */
   private paintCaretLayer() {
     const ctx = this._caretH5Canvas?.getContext('2d');
     if (!ctx) {
       return;
     }
     ctx.clearRect(0, 0, this._width, this._height);
-    if (this._caretBlinkOn) {
-      ctx.fillStyle = '#333333';
+    if (this._caretBlinkOn && this._focus) {
+      ctx.fillStyle = 'black';
       ctx.fillRect(this._cursorX, this._cursorY - 4, 1, this._cursorHeight);
     }
   }
 
-  /** 启动光标闪烁定时器（仅启动一次） */
+  /** 光标闪烁动画循环（500ms 切换一次，仅重绘光标层） */
+  private animateCaret(timestamp: number) {
+    if (timestamp - this._caretLastToggle > 500) {
+      this._caretBlinkOn = !this._caretBlinkOn;
+      this._caretLastToggle = timestamp;
+      this.paintCaretLayer();
+    }
+    this._caretAnimationFrameId = requestAnimationFrame(this.animateCaret.bind(this));
+  }
+
+  /** 启动光标闪烁（requestAnimationFrame，仅启动一次） */
   private startCaretBlinkTimer() {
-    if (this._caretBlinkTimerId !== null) {
+    if (this._caretAnimationFrameId !== null) {
       return;
     }
-    this._caretBlinkTimerId = setInterval(() => {
-      this._caretBlinkOn = !this._caretBlinkOn;
-      this.paintCaretLayer();
-    }, 530);
+    this._caretAnimationFrameId = requestAnimationFrame(this.animateCaret.bind(this));
+  }
+
+  /** 停止光标闪烁 */
+  private stopCaretBlinkTimer() {
+    if (this._caretAnimationFrameId !== null) {
+      cancelAnimationFrame(this._caretAnimationFrameId);
+      this._caretAnimationFrameId = null;
+    }
   }
 
   /**
@@ -502,6 +722,16 @@ export class Orion {
       this._autoHeight = t;
       this.resize();
     }
+  }
+
+  set mode(mode: string) {
+    if (this._mode !== mode) {
+      this._mode = mode;
+    }
+  }
+
+  get mode(): string {
+    return this._mode;
   }
 
   get parentElement(): HTMLElement {
