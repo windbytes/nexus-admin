@@ -38,15 +38,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className = '', scale: prop
 
     return () => {
       observer.disconnect();
+      editorRef.current?.dispose();
       editorRef.current = null;
     };
   }, [scale]);
 
-  return (
-    <div className={`relative flex flex-1 flex-col items-center justify-start overflow-auto bg-[#e8e8e8] ${className}`}>
-      <div ref={wrapperRef} className="w-full h-full" />
-    </div>
-  );
+  return <div ref={wrapperRef} className={`relative flex-1 w-full h-full bg-[#e8e8e8] ${className}`} />;
 };
 
 export default EditorCanvas;

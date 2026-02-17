@@ -1,5 +1,5 @@
 import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { App, Button } from 'antd';
 import type { Key } from 'react';
 import { useState } from 'react';
 import EditorCanvas from './components/EditorCanvas';
@@ -20,6 +20,7 @@ registerBuiltinPlugins();
  * 病历编辑器主体内容（在 EditorProvider 内使用，可消费 useEditorContext）
  */
 const DocWriterContent: React.FC = () => {
+  const { modal } = App.useApp();
   const editor = useEditorContext();
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<Key[]>([]);
   const {
@@ -80,6 +81,10 @@ const DocWriterContent: React.FC = () => {
           onTabChange={setActiveTabKey}
           onToolClick={(_tabKey, _toolKey) => {
             // 占位：后续对接具体功能
+            modal.warning({
+              title: '功能开发中',
+              content: '敬请期待。',
+            });
           }}
           onFileMenuClick={(key) => {
             executeCommand('file.openMenu', key).catch(() => {});

@@ -1,3 +1,4 @@
+import { Scrollbar } from '../controls/Scrollbar';
 import { Caret } from '../cursor/Caret';
 import { Ime } from '../cursor/Ime';
 import { OrionCanvas } from '../draw/Graphics';
@@ -58,6 +59,10 @@ export class Orion {
   private _caretH5Canvas!: HTMLCanvasElement;
   private _caretCanvas!: OrionCanvas;
 
+  // 滚动条层 水平滚动条、垂直滚动条
+  private _scrollbarH5Canvas!: HTMLCanvasElement;
+  private _scrollbarCanvas!: OrionCanvas;
+
   // 离屏渲染使用的canvas 用于提高绘制性能使用
   private _offscreenH5Canvas!: HTMLCanvasElement;
   private _offscreenCanvas!: OrionCanvas;
@@ -68,6 +73,9 @@ export class Orion {
 
   // 光标对象
   private _caret: Caret;
+
+  // 滚动条对象
+  private _scrollbar: Scrollbar;
 
   // canvas最小宽度
   private _minWidth: number;
@@ -87,10 +95,6 @@ export class Orion {
   private _contentUpdateFrameId: number | null = null;
   /** 视口更新管线的 rAF id */
   private _viewportUpdateFrameId: number | null = null;
-
-  /** 当前滚动偏移（视口更新管线用） */
-  private _scrollTop: number = 0;
-  private _scrollLeft: number = 0;
 
   /** 光标位置（临时实现用于闪烁绘制） */
   private _cursorX: number = 0;
@@ -116,6 +120,7 @@ export class Orion {
     this._parentResizeObserver = null;
     this._updateCount = 0;
     this._caret = new Caret();
+    this._scrollbar = new Scrollbar();
     this._width = 1450;
     this._height = 658;
     this._application = null;
@@ -164,7 +169,11 @@ export class Orion {
     this.removeEvent();
     if (this._parentElement) {
       // 绑定键盘事件、焦点、鼠标、拖拽、复制粘贴、鼠标滚动等，统一处理绑定到容器上，内部进行转发到不同的层
-      console.log('bindEvent');
+      // mouse event
+      this.parentElement.addEventListener('wheel', this.mouseWheel.bind(this));
+      // keyboard event
+      // resize event
+
       this.parentElement.addEventListener('resize', this.parentResize.bind(this));
     }
 
@@ -256,9 +265,39 @@ export class Orion {
         this._offscreenH5Canvas.width = Math.floor(this._width * this._dpr);
         this._offscreenH5Canvas.height = Math.floor(this._height * this._dpr);
         this._offscreenCanvas.prepareConext(this._scale, this._dpr);
+
+        // 设置滚动条层canvas的宽高
+        this._scrollbarH5Canvas.style.width = `${this._width}px`;
+        this._scrollbarH5Canvas.style.height = `${this._height}px`;
+        this._scrollbarH5Canvas.width = Math.floor(this._width * this._dpr);
+        this._scrollbarH5Canvas.height = Math.floor(this._height * this._dpr);
+        this._scrollbarCanvas.prepareConext(this._scale, this._dpr);
       } finally {
         this.endUpdate();
       }
+    }
+  }
+
+  /**
+   * 鼠标滚动事件
+   * @param event 鼠标滚动事件
+   */
+  private mouseWheel(event: WheelEvent) {
+    event.preventDefault();
+
+    // 垂直滚动
+    if (!event.shiftKey && Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      const currentScrollTop = this._scrollbar.scrollTop;
+      const newScrollTop = Math.max(0, currentScrollTop + event.deltaY);
+      this.setScrollTop(newScrollTop);
+    }
+
+    // 水平滚动（按住 Shift 或横向滚动）
+    if (event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+      const currentScrollLeft = this._scrollbar.scrollLeft;
+      const currentScrollTop = 0;
+      const newScrollLeft = Math.max(0, currentScrollLeft + (event.shiftKey ? event.deltaY : event.deltaX));
+      this.setScrollTop(currentScrollTop, newScrollLeft);
     }
   }
 
@@ -378,12 +417,12 @@ export class Orion {
    * @param scrollTop 垂直滚动偏移
    * @param scrollLeft 水平滚动偏移（可选）
    */
-  setScrollTop(scrollTop: number, scrollLeft: number = this._scrollLeft): void {
-    if (this._scrollTop === scrollTop && this._scrollLeft === scrollLeft) {
+  setScrollTop(scrollTop: number, scrollLeft: number = this._scrollbar.scrollLeft): void {
+    if (this._scrollbar.scrollTop === scrollTop && this._scrollbar.scrollLeft === scrollLeft) {
       return;
     }
-    this._scrollTop = scrollTop;
-    this._scrollLeft = scrollLeft;
+    this._scrollbar.scrollTop = scrollTop;
+    this._scrollbar.scrollLeft = scrollLeft;
     this.requestViewportUpdate();
   }
 
@@ -421,31 +460,114 @@ export class Orion {
     this.repaintSelection();
     this.repaintOverlay();
     this.repaintCaret();
+    this.repaintScrollbar();
   }
 
   /**
-   * 重绘背景层（灰底 + A4 白纸）
+   * 重绘背景层（灰底 + A4 白纸，考虑滚动条占用）
    */
   private repaintBackground(): void {
     const bgCtx = this._bgH5Canvas?.getContext('2d');
     if (!bgCtx) {
       return;
     }
+    // 更新滚动条尺寸（假设内容区域比视口大，需要滚动条）
+    const contentWidth = Orion.A4_WIDTH * this._scale + 100;
+    const contentHeight = Orion.A4_HEIGHT * this._scale + Orion.PAPER_TOP_MARGIN * 2;
+    this._scrollbar.setDimensions(this._width, this._height, contentWidth, contentHeight);
+    this._scrollbar.setScroll(this._scrollbar.scrollLeft, this._scrollbar.scrollTop);
+
     const gray = '#e0e0e0';
     const white = '#ffffff';
     const topMargin = Orion.PAPER_TOP_MARGIN;
     const a4W = Orion.A4_WIDTH * this._scale;
     const a4H = Orion.A4_HEIGHT * this._scale;
-    const a4Left = (this._width - a4W) / 2;
-    const a4Top = topMargin;
+
+    // 可用宽度（扣除垂直滚动条）
+    const availableWidth = this._scrollbar.getAvailableWidth();
+    const a4Left = (availableWidth - a4W) / 2;
+    const a4Top = topMargin - this._scrollbar.scrollTop;
+
+    // 灰色背景填充整个 canvas
     bgCtx.fillStyle = gray;
     bgCtx.fillRect(0, 0, this._width, this._height);
+
+    // A4 白纸（考虑滚动偏移）
     bgCtx.fillStyle = white;
     bgCtx.fillRect(a4Left, a4Top, a4W, a4H);
+
+    // 绘制纸张四个方向的边角线（标识页边距）
+    this.drawPaperMarginCorners(bgCtx, a4Left, a4Top, a4W, a4H);
   }
 
   /**
-   * 从离屏 canvas 重绘内容层（整个视口）
+   * 绘制纸张四个方向的边角线（L 形标识页边距）
+   * @param ctx 背景层上下文
+   * @param paperLeft 纸张左边界
+   * @param paperTop 纸张上边界
+   * @param paperWidth 纸张宽度
+   * @param paperHeight 纸张高度
+   */
+  private drawPaperMarginCorners(
+    ctx: CanvasRenderingContext2D,
+    paperLeft: number,
+    paperTop: number,
+    paperWidth: number,
+    paperHeight: number
+  ): void {
+    const marginH = Orion.PAPER_MARGIN_HORIZONTAL * this._scale;
+    const marginV = Orion.PAPER_MARGIN_VERTICAL * this._scale;
+    const lineLen = Orion.CORNER_LINE_LENGTH;
+    const lineColor = '#cccccc';
+
+    // 边距线的位置（物理像素）
+    const leftMarginX = paperLeft + marginH;
+    const rightMarginX = paperLeft + paperWidth - marginH;
+    const topMarginY = paperTop + marginV;
+    const bottomMarginY = paperTop + paperHeight - marginV;
+
+    // 像素对齐：将坐标调整到半像素位置 (x.5)，确保 1px 线条清晰
+    // 对于物理像素坐标，需要考虑 DPR
+    const snap = (value: number) => Math.floor(value * this._dpr) / this._dpr + 0.5 / this._dpr;
+
+    const leftX = snap(leftMarginX);
+    const rightX = snap(rightMarginX);
+    const topY = snap(topMarginY);
+    const bottomY = snap(bottomMarginY);
+
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    // 左上角 ┘（向左、向上）
+    ctx.moveTo(leftX, topY);
+    ctx.lineTo(leftX - lineLen, topY); // 横线向左
+    ctx.moveTo(leftX, topY);
+    ctx.lineTo(leftX, topY - lineLen); // 竖线向上
+
+    // 右上角 └（向右、向上）
+    ctx.moveTo(rightX, topY);
+    ctx.lineTo(rightX + lineLen, topY); // 横线向右
+    ctx.moveTo(rightX, topY);
+    ctx.lineTo(rightX, topY - lineLen); // 竖线向上
+
+    // 左下角 ┐（向左、向下）
+    ctx.moveTo(leftX, bottomY);
+    ctx.lineTo(leftX - lineLen, bottomY); // 横线向左
+    ctx.moveTo(leftX, bottomY);
+    ctx.lineTo(leftX, bottomY + lineLen); // 竖线向下
+
+    // 右下角 ┌（向右、向下）
+    ctx.moveTo(rightX, bottomY);
+    ctx.lineTo(rightX + lineLen, bottomY); // 横线向右
+    ctx.moveTo(rightX, bottomY);
+    ctx.lineTo(rightX, bottomY + lineLen); // 竖线向下
+
+    ctx.stroke();
+  }
+
+  /**
+   * 从离屏 canvas 重绘内容层（整个视口，考虑滚动偏移）
    */
   private repaintContentFromOffscreen(): void {
     const contentCtx = this._orionH5Canvas?.getContext('2d');
@@ -457,13 +579,14 @@ export class Orion {
     // 这里暂时绘制临时示例内容
     const topMargin = Orion.PAPER_TOP_MARGIN;
     const a4W = Orion.A4_WIDTH * this._scale;
-    const a4Left = (this._width - a4W) / 2;
-    const a4Top = topMargin;
-    const textX = a4Left + 40;
-    const textY = a4Top + 40;
+    const availableWidth = this._scrollbar.getAvailableWidth();
+    const a4Left = (availableWidth - a4W) / 2;
+    const a4Top = topMargin - this._scrollbar.scrollTop;
+    const textX = a4Left + Orion.PAPER_MARGIN_HORIZONTAL;
+    const textY = a4Top + Orion.PAPER_MARGIN_VERTICAL + 4;
     const lineHeight = 24;
     const line1 = 'Orion 病历编辑器';
-    const line2 = '（视口更新管线）';
+    const line2 = '（视口更新管线 + 滚动条）';
     contentCtx.fillStyle = '#333333';
     contentCtx.font = '16px sans-serif';
     contentCtx.textBaseline = 'top';
@@ -473,7 +596,8 @@ export class Orion {
   }
 
   /**
-   * 重绘选区层
+   * 重绘选区层（考虑滚动偏移）
+   * 使用混合模式确保选区颜色深时文字依然清晰可见
    */
   private repaintSelection(): void {
     const selectionCtx = this._selectionH5Canvas?.getContext('2d');
@@ -485,17 +609,23 @@ export class Orion {
     // 这里暂时绘制第一行选中示例
     const topMargin = Orion.PAPER_TOP_MARGIN;
     const a4W = Orion.A4_WIDTH * this._scale;
-    const a4Left = (this._width - a4W) / 2;
-    const a4Top = topMargin;
-    const textX = a4Left + 40;
-    const textY = a4Top + 40;
+    const availableWidth = this._scrollbar.getAvailableWidth();
+    const a4Left = (availableWidth - a4W) / 2;
+    const a4Top = topMargin - this._scrollbar.scrollTop;
+    const textX = a4Left + Orion.PAPER_MARGIN_HORIZONTAL;
+    const textY = a4Top + Orion.PAPER_MARGIN_VERTICAL + 4;
     const lineHeight = 24;
     const line1 = 'Orion 病历编辑器';
     selectionCtx.font = '16px sans-serif';
     const line1Width = selectionCtx.measureText(line1).width;
-    const selectionY = textY;
-    selectionCtx.fillStyle = 'rgba(173, 216, 230, 0.35)';
-    selectionCtx.fillRect(textX, selectionY - 4, line1Width, lineHeight);
+    const selectionY = textY - 4;
+
+    // 方案1：使用混合模式（推荐）- 让选区颜色与下方文字混合而非遮挡
+    selectionCtx.save();
+    selectionCtx.globalCompositeOperation = 'multiply'; // 正片叠底，颜色变暗但文字清晰
+    selectionCtx.fillStyle = 'rgba(0, 120, 215, 0.4)'; // 可以使用更深的颜色
+    selectionCtx.fillRect(textX, selectionY, line1Width, lineHeight);
+    selectionCtx.restore();
   }
 
   /**
@@ -511,18 +641,19 @@ export class Orion {
   }
 
   /**
-   * 重绘光标层
+   * 重绘光标层（考虑滚动偏移）
    */
   private repaintCaret(): void {
     // 更新光标位置（临时：第二行末尾）
     const topMargin = Orion.PAPER_TOP_MARGIN;
     const a4W = Orion.A4_WIDTH * this._scale;
-    const a4Left = (this._width - a4W) / 2;
-    const a4Top = topMargin;
-    const textX = a4Left + 40;
-    const textY = a4Top + 40;
+    const availableWidth = this._scrollbar.getAvailableWidth();
+    const a4Left = (availableWidth - a4W) / 2;
+    const a4Top = topMargin - this._scrollbar.scrollTop;
+    const textX = a4Left + Orion.PAPER_MARGIN_HORIZONTAL;
+    const textY = a4Top + Orion.PAPER_MARGIN_VERTICAL + 4;
     const lineHeight = 24;
-    const line2 = '（视口更新管线）';
+    const line2 = '（视口更新管线 + 滚动条）';
     const ctx = this._orionH5Canvas?.getContext('2d');
     if (ctx) {
       ctx.font = '16px sans-serif';
@@ -534,11 +665,28 @@ export class Orion {
     this.paintCaretLayer();
   }
 
+  /**
+   * 重绘滚动条层（垂直 + 水平滚动条）
+   */
+  private repaintScrollbar(): void {
+    const scrollbarCtx = this._scrollbarH5Canvas?.getContext('2d');
+    if (!scrollbarCtx) {
+      return;
+    }
+    scrollbarCtx.clearRect(0, 0, this._width, this._height);
+    this._scrollbar.draw(scrollbarCtx, this._width, this._height);
+  }
+
   /** A4 纸张尺寸（96dpi 下的像素值） */
   private static readonly A4_WIDTH = 794;
   private static readonly A4_HEIGHT = 1123;
   /** 白色纸张与灰色背景之间的上边距（像素） */
   private static readonly PAPER_TOP_MARGIN = 24;
+  /** 纸张页边距（打印边距）- 上下边距 2.54cm ≈ 96px，左右边距 3.18cm ≈ 120px */
+  private static readonly PAPER_MARGIN_VERTICAL = 96; // 2.54cm
+  private static readonly PAPER_MARGIN_HORIZONTAL = 120; // 3.18cm
+  /** 边角线长度（px） */
+  private static readonly CORNER_LINE_LENGTH = 25;
 
   /** 仅清空并重绘光标层（用于闪烁） */
   private paintCaretLayer() {
@@ -620,6 +768,29 @@ export class Orion {
   }
 
   /**
+   * 释放编辑器资源
+   */
+  dispose(): void {
+    this.stopCaretBlinkTimer();
+    this.removeEvent();
+    this._dirtyManager.dispose();
+    this._parentResizeObserver?.disconnect();
+    this._parentResizeObserver = null;
+    this._application?.dispose();
+    this._application = null;
+    this._loaded = false;
+    // 移除所有canvas
+    this._bgH5Canvas.remove();
+    this._orionH5Canvas.remove();
+    this._selectionH5Canvas.remove();
+    this._interactionH5Canvas.remove();
+    this._caretH5Canvas.remove();
+    this._scrollbarH5Canvas.remove();
+    this._offscreenH5Canvas.remove();
+    this._tempH5Canvas.remove();
+  }
+
+  /**
    * 设置编辑器父元素
    * @param element 编辑器父元素
    */
@@ -691,6 +862,21 @@ export class Orion {
       this._caretH5Canvas.style.pointerEvents = 'none';
       this._caretCanvas = new OrionCanvas(this, this._caretH5Canvas.getContext('2d') as CanvasRenderingContext2D);
 
+      // 创建滚动条层
+      this._scrollbarH5Canvas = document.createElement('canvas');
+      this._scrollbarH5Canvas.setAttribute('id', `scrollbar-h5-canvas-${this.instanceID}`);
+      this._scrollbarH5Canvas.width = this._width;
+      this._scrollbarH5Canvas.height = this._height;
+      this._scrollbarH5Canvas.style.position = 'absolute';
+      this._scrollbarH5Canvas.tabIndex = -1;
+      this._scrollbarH5Canvas.style.zIndex = '999';
+      this._scrollbarH5Canvas.style.outline = 'none';
+      this._scrollbarH5Canvas.style.pointerEvents = 'auto';
+      this._scrollbarCanvas = new OrionCanvas(
+        this,
+        this._scrollbarH5Canvas.getContext('2d') as CanvasRenderingContext2D
+      );
+
       // 创建离屏渲染canvas
       this._offscreenH5Canvas = document.createElement('canvas');
       this._offscreenCanvas = new OrionCanvas(
@@ -703,6 +889,7 @@ export class Orion {
       element.appendChild(this._selectionH5Canvas);
       element.appendChild(this._interactionH5Canvas);
       element.appendChild(this._caretH5Canvas);
+      element.appendChild(this._scrollbarH5Canvas);
       // 重置编辑器尺寸
       this.resize();
       // 绑定事件

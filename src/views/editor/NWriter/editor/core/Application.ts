@@ -25,4 +25,8 @@ export class Application extends TObject {
   get runing(): boolean {
     return this._running;
   }
+
+  dispose(): void {
+    this._running = false;
+  }
 }

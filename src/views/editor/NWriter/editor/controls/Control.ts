@@ -42,7 +42,7 @@ export class Control extends TObject {
     this._visible = true;
     this._focused = false;
     this._parent = null;
-    this._imeMode = ImeMode.DISABLED;
+    this._imeMode = ImeMode.disabled;
   }
 
   /**

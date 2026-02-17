@@ -70,4 +70,8 @@ export class DirtyManager {
   isDirty(): boolean {
     return this.hasDirty;
   }
+
+  dispose(): void {
+    this.clear();
+  }
 }
