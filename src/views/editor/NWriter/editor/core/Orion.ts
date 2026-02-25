@@ -228,6 +228,8 @@ export class Orion {
         this._dpr = this.getDpr();
 
         // 设置所有canvas的宽高
+        this._bgH5Canvas.style.width = `${this._width}px`;
+        this._bgH5Canvas.style.height = `${this._height}px`;
         this._bgH5Canvas.width = Math.floor(this._width * this._dpr);
         this._bgH5Canvas.height = Math.floor(this._height * this._dpr);
         this._bgCanvas.prepareConext(this._scale, this._dpr);

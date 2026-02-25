@@ -191,7 +191,7 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
               }}
             >
               <div className="flex min-w-0 items-start gap-2">
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                <div className="flex h-[50px] min-w-0 flex-1 flex-wrap items-center justify-center gap-2">
                   {groups.map((group, idx) => (
                     <ToolGroup key={group.key ?? `g-${idx}`} group={group} tabKey={currentKey} groupIndex={idx} />
                   ))}
