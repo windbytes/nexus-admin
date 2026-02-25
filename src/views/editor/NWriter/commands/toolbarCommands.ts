@@ -10,7 +10,7 @@ import { registerCommand } from '../core/extension';
  */
 const noop = (...args: unknown[]): void => {
   if (import.meta.env?.DEV && args.length > 0) {
-    console.debug('[NWriter.Toolbar] 占位命令被触发，参数:', args);
+    console.info('[NWriter.Toolbar] 占位命令被触发，参数:', args);
   }
 };
 

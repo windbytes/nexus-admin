@@ -1,7 +1,3 @@
-/**
- * 病历编辑器模块类型定义
- */
-
 import type { DataNode } from 'antd/es/tree';
 
 /** 工具栏控件类型：按钮、下拉、选择、复选框、数字输入 */
@@ -39,7 +35,7 @@ export interface ToolItemConfig {
   suffix?: string;
 }
 
-/** 兼容旧配置：仅 key/label/icon 的扁平工具项 */
+/** 仅 key/label/icon 的扁平工具项 */
 export interface TabToolItem {
   key: string;
   label: string;

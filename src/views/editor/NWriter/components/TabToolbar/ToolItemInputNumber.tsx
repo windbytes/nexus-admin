@@ -3,8 +3,8 @@
  */
 import { InputNumber } from 'antd';
 import { memo } from 'react';
-import { executeCommand } from '../../core/extension';
 import { emit, type ToolEventPayload } from '../../core/eventBus';
+import { executeCommand } from '../../core/extension';
 import type { ToolItemConfig } from '../../types';
 
 interface ToolItemInputNumberProps {
