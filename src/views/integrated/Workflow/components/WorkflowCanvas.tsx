@@ -64,8 +64,8 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ nodeTypes, onOpe
       onEdgesChange={storeOnEdgesChange}
       onConnect={onConnect}
       nodeTypes={nodeTypes}
-      fitView
       fitViewOptions={fitViewOptions}
+      defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       defaultEdgeOptions={defaultEdgeOptions}
       onNodeClick={(_, node) => {
         setSelectedNodeId(node.id);
@@ -74,7 +74,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ nodeTypes, onOpe
       onPaneClick={() => setSelectedNodeId(null)}
     >
       <Background />
-      <Controls />
+      <Controls className="p-[3px]" />
       <MiniMap />
     </ReactFlow>
   );

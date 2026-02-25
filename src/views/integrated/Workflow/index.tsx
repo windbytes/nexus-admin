@@ -1,7 +1,7 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Alert, Spin } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { Spin } from 'antd';
+import { useMemo } from 'react';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
@@ -11,6 +11,9 @@ import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuer
 import { registerBuiltinNodePlugins } from './plugin/nodes';
 import { buildNodeTypes } from './utils/nodeTypes';
 import './workflow.scss';
+
+// 模块加载时即注册内置节点插件，保证 useMemo(buildNodeTypes) 首次执行时能拿到所有插件
+registerBuiltinNodePlugins();
 
 /**
  * 流程编排页：基于 appId 拉取节点/边配置与运行状态，组装顶部栏、左侧栏、画布、属性面板
@@ -31,12 +34,8 @@ const Workflow: React.FC = () => {
   } = useWorkflowHandlers();
 
   useWorkflowConfigSync(appId);
-  const { isLoading: configLoading, isError: configError, error: configErr } = useWorkflowConfigQuery(appId);
+  const { isLoading: configLoading } = useWorkflowConfigQuery(appId);
   const { data: runStatus } = useWorkflowRunStatusQuery(appId);
-
-  useEffect(() => {
-    registerBuiltinNodePlugins();
-  }, []);
 
   const nodeTypes = useMemo(() => buildNodeTypes(), []);
 
@@ -75,15 +74,6 @@ const Workflow: React.FC = () => {
               >
                 <Spin size="large" description="加载流程配置..." />
               </div>
-            )}
-            {configError && (
-              <Alert
-                type="error"
-                showIcon
-                title="加载失败"
-                description={configErr instanceof Error ? configErr.message : '无法获取流程配置'}
-                style={{ margin: 16 }}
-              />
             )}
             <WorkflowCanvas nodeTypes={nodeTypes} onOpenPropertyPanel={() => setPropertyPanelOpen(true)} />
           </div>

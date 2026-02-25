@@ -32,25 +32,22 @@ const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
   failed: { color: 'error', text: '失败' },
 };
 
-export const TopBar: React.FC<TopBarProps> = ({
-  appId,
-  onPreview,
-  onPublish,
-  checklistCount = 0,
-  runStatus,
-}) => {
+export const TopBar: React.FC<TopBarProps> = ({ appId, onPreview, onPublish, checklistCount = 0, runStatus }) => {
   const { lastSavedAt, dirty, undo, redo, canUndo, canRedo } = useWorkflowStore();
 
   const timeStr = lastSavedAt
-    ? new Date(lastSavedAt).toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    ? new Date(lastSavedAt).toLocaleTimeString('zh-CN', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
     : '--:--:--';
 
   return (
-    <div className="workflow-top-bar workflow-top-bar--floating">
+    <div className="workflow-top-bar">
       <Space size="middle">
-        <Text type="secondary">
-          自动保存 {timeStr}
-        </Text>
+        <Text type="secondary">自动保存 {timeStr}</Text>
         {dirty && <Tag color="orange">未发布</Tag>}
       </Space>
 
@@ -74,13 +71,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <Button type="primary" icon={<CloudUploadOutlined />} onClick={onPublish}>
           发布
         </Button>
-        <Button
-          type="text"
-          icon={<RedoOutlined />}
-          disabled={!canRedo()}
-          onClick={redo}
-          title="重做"
-        />
+        <Button type="text" icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
         <Button type="text" icon={<ReloadOutlined />} title="刷新" />
       </Space>
     </div>

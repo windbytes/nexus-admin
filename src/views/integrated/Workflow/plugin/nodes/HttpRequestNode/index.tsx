@@ -6,6 +6,10 @@ import { Handle, Position } from '@xyflow/react';
 import { Form, Input, Select } from 'antd';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
+/**
+ * HTTP 请求节点组件
+ * 这里可以根据类型决定出口和入口
+ */
 const HttpRequestNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
   const title = (data?.title as string) || 'HTTP 请求';
   return (
@@ -19,13 +23,16 @@ const HttpRequestNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, da
         boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
       }}
     >
-      <Handle type="target" position={Position.Top} id={`${id}-target`} style={{ top: '50%', left: 0 }} />
+      <Handle type="target" position={Position.Left} id={`${id}-target`} />
       <div style={{ fontSize: 13, color: '#333' }}>{title}</div>
-      <Handle type="source" position={Position.Bottom} id={`${id}-source`} style={{ bottom: '50%', right: 0 }} />
+      <Handle type="source" position={Position.Right} id={`${id}-source`} />
     </div>
   );
 };
 
+/**
+ * HTTP 请求节点配置面板组件
+ */
 const HttpRequestNodeConfigPanel: React.FC<WorkflowNodeConfigPanelProps> = ({ data, onChange }) => {
   return (
     <Form layout="vertical" size="small">

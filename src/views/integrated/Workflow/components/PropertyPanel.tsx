@@ -26,6 +26,10 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
     setNodes((prev) => prev.map((n) => (n.id === selectedNodeId ? { ...n, data: { ...n.data, ...patch } } : n)));
   };
 
+  if (!selectedNodeId) {
+    return null;
+  }
+
   return (
     <Drawer
       title="属性配置"
@@ -40,7 +44,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
       {node && !plugin && <Empty description={<Text type="secondary">未找到该节点类型的配置</Text>} />}
       {node && plugin && (
         <plugin.ConfigPanel
-          nodeId={selectedNodeId!}
+          nodeId={selectedNodeId}
           data={node.data as import('../types').WorkflowNodeData}
           onChange={handleChange}
         />
