@@ -26,7 +26,7 @@
     "@xyflow/react": "^12.10.1",
     "@zxcvbn-ts/core": "^3.0.4",
     "ahooks": "^3.9.6",
-    "antd": "^6.3.0",
+    "antd": "^6.3.1",
     "axios": "^1.13.5",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",

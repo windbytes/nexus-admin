@@ -1,8 +1,10 @@
 import { Layout, Spin } from 'antd';
 import { memo, type ReactNode, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useShallow } from 'zustand/shallow';
 import { BubbleLoading } from '@/components/icons';
 import KeepAlive from '@/components/KeepAlive';
+import { usePreferencesStore } from '@/stores/store';
 import { ErrorFallback } from './ErrorBoundary';
 
 /**
@@ -19,7 +21,12 @@ interface ContentProps {
 }
 
 const Content = memo(({ children }: ContentProps) => {
-  // 【优化】使用更明显的加载指示器
+  const tabbarEnabled = usePreferencesStore(
+    useShallow((state) => ({
+      tabbarEnable: state.preferences.tabbar.enable,
+    }))
+  );
+
   const loadingFallback = useMemo(
     () => (
       <div className="h-full flex items-center justify-center min-h-[400px]">
@@ -35,9 +42,7 @@ const Content = memo(({ children }: ContentProps) => {
       style={{ overscrollBehavior: 'contain' }}
     >
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense fallback={loadingFallback}>
-          <KeepAlive>{children}</KeepAlive>
-        </Suspense>
+        <Suspense fallback={loadingFallback}>{tabbarEnabled ? <KeepAlive>{children}</KeepAlive> : children}</Suspense>
       </ErrorBoundary>
     </Layout.Content>
   );
