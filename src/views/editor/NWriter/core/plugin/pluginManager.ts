@@ -6,6 +6,12 @@
 import { openModal, registerModal, unregisterModal } from '../../modal';
 import type { IEditorContext } from '../editorContext/types';
 import * as extensionRegistry from '../extension/registry';
+import {
+  registerDropdownContent as regDropdown,
+  registerToolbarContribution as regToolbar,
+  unregisterDropdownContent as unregDropdown,
+  unregisterToolbarContribution as unregToolbar,
+} from '../toolbar';
 import { getAllPlugins, getPlugin } from './registry';
 import type { PluginContext } from './types';
 
@@ -26,6 +32,10 @@ function createPluginContext(getEditor: () => IEditorContext): PluginContext {
     registerCommand: extensionRegistry.registerCommand,
     unregisterCommand: extensionRegistry.unregisterCommand,
     executeCommand: extensionRegistry.executeCommand,
+    registerToolbarContribution: regToolbar,
+    unregisterToolbarContribution: unregToolbar,
+    registerDropdownContent: regDropdown,
+    unregisterDropdownContent: unregDropdown,
   };
 }
 

@@ -5,6 +5,7 @@
 
 import type { ComponentType } from 'react';
 import type { IEditorContext } from '../editorContext/types';
+import type { ToolbarContribution } from '../../types';
 
 /** 插件元信息（标识、版本、依赖，用于加载与兼容性检查） */
 export interface PluginMeta {
@@ -42,6 +43,14 @@ export interface PluginContext {
   unregisterCommand: (name: string) => void;
   /** 执行命令（供插件或 UI 调用） */
   executeCommand: (name: string, ...args: unknown[]) => Promise<void>;
+  /** 注册工具栏贡献（某 Tab 下的分组/工具，与配置合并展示） */
+  registerToolbarContribution: (tabKey: string, contribution: ToolbarContribution) => void;
+  /** 注销工具栏贡献（插件卸载时清理） */
+  unregisterToolbarContribution: (tabKey: string) => void;
+  /** 注册某工具的 Dropdown 自定义内容（toolKey 与配置中工具 key 一致） */
+  registerDropdownContent: (toolKey: string, render: () => import('react').ReactNode) => void;
+  /** 注销 Dropdown 内容 */
+  unregisterDropdownContent: (toolKey: string) => void;
 }
 
 /** 插件实例：实现 install/activate/deactivate，由插件管理器调度 */

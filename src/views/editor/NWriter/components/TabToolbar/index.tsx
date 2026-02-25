@@ -1,6 +1,6 @@
 /**
  * 工具栏：左（文件下拉 + 快捷按钮）| 中（Tab 标签 + 展开/收缩）| 右（上传、分享）
- * 同一行等高；中间 Tab 切换后，下方内容区拉通整行显示，不使用 antd Tabs
+ * 第二行：按分组展示工具（配置 + 插件贡献），组间竖线分隔，支持 1 行/2 行布局
  */
 import {
   CaretDownOutlined,
@@ -12,9 +12,11 @@ import {
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Card, Dropdown } from 'antd';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { fileMenuConfig, leftQuickActionsConfig } from '../../config/fileMenuConfig';
-import type { FileMenuConfigItem, FileMenuItem, TabItemConfig } from '../../types';
+import { getMergedToolbarConfig } from '../../core/toolbar';
+import type { FileMenuConfigItem, FileMenuItem, TabItemConfig, ToolGroupConfig, ToolItemConfig } from '../../types';
+import ToolGroup from './ToolGroup';
 
 /** 将文件菜单配置转为 antd Menu items */
 function fileConfigToMenuItems(config: FileMenuConfigItem[]): MenuProps['items'] {
@@ -55,7 +57,7 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
   config,
   activeTabKey,
   onTabChange,
-  onToolClick,
+  onToolClick: _onToolClick,
   onFileMenuClick,
   onLeftQuickActionClick,
   onUploadClick,
@@ -70,6 +72,23 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
   const currentTab = centerTabs.find((t) => t.key === currentKey);
 
   const fileMenuItems = fileConfigToMenuItems(fileMenuConfig);
+
+  const groups = useMemo((): ToolGroupConfig[] => {
+    const merged = getMergedToolbarConfig(currentKey, currentTab);
+    if (merged.length > 0) {
+      return merged;
+    }
+    if (currentTab?.tools?.length) {
+      const tools: ToolItemConfig[] = currentTab.tools.map((t) => ({
+        key: t.key,
+        label: t.label,
+        icon: t.icon,
+        type: 'button' as const,
+      }));
+      return [{ rows: 1, tools }];
+    }
+    return [];
+  }, [currentKey, currentTab]);
 
   return (
     <div
@@ -158,7 +177,7 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
         </div>
       </div>
 
-      {/* 第二行：Tab 内容区拉通整行（仅展开时显示），收缩图标在 Card 内部最右侧 */}
+      {/* 第二行：分组工具（仅展开时显示），收缩图标在 Card 内右侧 */}
       {toolbarExpanded && currentTab && (
         <div className="w-full border-t border-gray-200 bg-[#f5f5f5]">
           <div className="px-4 pb-2 pt-1">
@@ -171,18 +190,10 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
                 border: '1px solid #f0f0f0',
               }}
             >
-              <div className="flex items-center gap-0.5">
-                <div className="flex flex-1 min-w-0 flex-wrap items-center gap-0.5">
-                  {currentTab.tools.map((tool) => (
-                    <Button
-                      key={tool.key}
-                      type="text"
-                      size="small"
-                      onClick={() => onToolClick?.(currentTab.key, tool.key)}
-                      className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      {tool.icon ?? tool.label}
-                    </Button>
+              <div className="flex min-w-0 items-start gap-2">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                  {groups.map((group, idx) => (
+                    <ToolGroup key={group.key ?? `g-${idx}`} group={group} tabKey={currentKey} groupIndex={idx} />
                   ))}
                 </div>
                 <Button

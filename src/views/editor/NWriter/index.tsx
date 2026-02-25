@@ -2,6 +2,7 @@ import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 import { App, Button } from 'antd';
 import type { Key } from 'react';
 import { useState } from 'react';
+import { registerToolbarPlaceholderCommands } from './commands/toolbarCommands';
 import EditorCanvas from './components/EditorCanvas';
 import StatusBar from './components/StatusBar';
 import TabToolbar from './components/TabToolbar';
@@ -13,8 +14,9 @@ import { executeCommand } from './core/extension';
 import { registerBuiltinPlugins } from './plugins';
 import type { TemplateTreeNode } from './types';
 
-/** 在模块加载时注册内置插件，EditorProvider 挂载后会自动安装 */
+/** 在模块加载时注册内置插件与工具栏占位命令 */
 registerBuiltinPlugins();
+registerToolbarPlaceholderCommands();
 
 /**
  * 病历编辑器主体内容（在 EditorProvider 内使用，可消费 useEditorContext）

@@ -5,8 +5,10 @@
 
 import { registerPlugin } from '../core/plugin';
 import { filePlugin } from './filePlugin';
+import { pasteDropdownPlugin } from './pasteDropdownPlugin';
 
 /** 注册所有内置插件 */
 export function registerBuiltinPlugins(): void {
   registerPlugin(filePlugin);
+  registerPlugin(pasteDropdownPlugin);
 }

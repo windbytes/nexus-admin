@@ -7,6 +7,8 @@
  */
 
 export * from './editorContext';
-export * from './plugin';
+export * from './eventBus';
 export * from './extension';
+export * from './plugin';
+export * from './toolbar';
 export { EditorProvider, useEditorContext, useEditorContextOptional } from './EditorProvider';
