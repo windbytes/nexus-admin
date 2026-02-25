@@ -27,7 +27,7 @@ function ToolItemDropdown({ tool, tabKey, groupKey }: ToolItemDropdownProps) {
     <Dropdown
       trigger={['click']}
       placement="bottomLeft"
-      dropdownRender={() => (
+      popupRender={() => (
         <div className="min-w-[120px] rounded border border-gray-200 bg-white p-2 shadow-lg">{overlay}</div>
       )}
       onOpenChange={handleOpenChange}

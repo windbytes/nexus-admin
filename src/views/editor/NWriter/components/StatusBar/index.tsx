@@ -4,7 +4,7 @@
  */
 import { DownOutlined, FullscreenOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Button, Dropdown, InputNumber, Select, Slider } from 'antd';
+import { Button, Dropdown, InputNumber, Select, Slider, Space } from 'antd';
 import { useState } from 'react';
 
 /** 模式选项 */
@@ -82,23 +82,25 @@ const StatusBar: React.FC<StatusBarProps> = ({
       label: (
         <div className="flex items-center gap-2 py-1" onClick={(e) => e.stopPropagation()}>
           <span className="shrink-0 text-gray-500">自定义</span>
-          <InputNumber
-            size="small"
-            min={SCALE_MIN}
-            max={SCALE_MAX}
-            value={customInput ?? undefined}
-            placeholder={`${scalePercent}`}
-            onChange={(v) => setCustomInput(v ?? null)}
-            onPressEnter={() => {
-              if (customInput != null && Number.isFinite(customInput)) {
-                setScalePercent(customInput);
-                setCustomInput(null);
-                setDropdownOpen(false);
-              }
-            }}
-            addonAfter="%"
-            className="w-24"
-          />
+          <Space.Compact>
+            <InputNumber
+              size="small"
+              min={SCALE_MIN}
+              max={SCALE_MAX}
+              value={customInput ?? undefined}
+              placeholder={`${scalePercent}`}
+              onChange={(v) => setCustomInput(v ?? null)}
+              onPressEnter={() => {
+                if (customInput != null && Number.isFinite(customInput)) {
+                  setScalePercent(customInput);
+                  setCustomInput(null);
+                  setDropdownOpen(false);
+                }
+              }}
+              className="w-24"
+            />
+            <span>%</span>
+          </Space.Compact>
         </div>
       ),
     },
@@ -138,7 +140,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
           onOpenChange={setDropdownOpen}
           menu={{ items: scaleMenuItems }}
           trigger={['click']}
-          placement="topCenter"
+          placement="top"
         >
           <button type="button" className="flex items-center gap-0.5 text-blue-600 hover:text-blue-700">
             <span>{scalePercent}%</span>
