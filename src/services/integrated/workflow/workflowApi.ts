@@ -1,94 +1,80 @@
 /**
  * 流程编排后端 API
- * 按 appId 查询节点配置、边配置、节点属性配置、运行状态等
+ * 按 appId 查询/保存节点配置、边配置、节点属性配置、运行状态等；接口定义与实现参考 userApi 规范
  */
 import { HttpRequest } from '@/utils/request';
+import type {
+  WorkflowConfigResponse,
+  WorkflowRunStatusResponse,
+} from './type';
 
-/** 流程节点（与前端 WorkflowNode 结构一致，便于 loadDocument） */
-export interface WorkflowConfigNode {
-  id: string;
-  type?: string;
-  position: { x: number; y: number };
-  data: Record<string, unknown>;
-  [key: string]: unknown;
-}
+/**
+ * 流程编排接口地址常量（不使用 enum，便于与后端路径一致）
+ */
+const WorkflowAction = {
+  /** 根据 appId 查询流程配置（节点、边、节点属性配置） */
+  getConfig: '/engine/workflow/getConfig',
+  /** 根据 appId 查询流程运行状态 */
+  getRunStatus: '/engine/workflow/getRunStatus',
+  /** 保存流程配置到后端 */
+  saveConfig: '/engine/workflow/saveConfig',
+};
 
-/** 流程边（与前端 WorkflowEdge 结构一致） */
-export interface WorkflowConfigEdge {
-  id?: string;
-  source: string;
-  target: string;
-  [key: string]: unknown;
-}
+/**
+ * 流程编排服务接口定义
+ */
+export interface IWorkflowService {
+  /**
+   * 根据 appId 查询流程配置（节点、边、节点属性配置）
+   * @param appId 应用 ID
+   * @returns 流程配置（nodes、edges、nodePropertyConfigs 等）
+   */
+  getWorkflowConfig(appId: string): Promise<WorkflowConfigResponse>;
 
-/** 后端返回的流程配置（节点 + 边） */
-export interface WorkflowConfigResponse {
-  version?: number;
-  nodes: WorkflowConfigNode[];
-  edges: WorkflowConfigEdge[];
-  meta?: { appId?: string; updatedAt?: string; [key: string]: unknown };
-  /** 各节点类型的属性配置 schema（可选，用于服务端驱动表单） */
-  nodePropertyConfigs?: Record<string, NodePropertyConfigSchema>;
-}
+  /**
+   * 根据 appId 查询流程运行状态
+   * @param appId 应用 ID
+   * @returns 运行状态（idle/running/success/failed 及 lastRunAt、message 等）
+   */
+  getWorkflowRunStatus(appId: string): Promise<WorkflowRunStatusResponse>;
 
-/** 单节点类型的属性配置 schema（后端可扩展） */
-export interface NodePropertyConfigSchema {
-  pluginId: string;
-  schemaVersion?: string;
-  /** 表单项/字段定义，与前端 ConfigPanel 或动态表单对接 */
-  fields?: Array<{
-    key: string;
-    label: string;
-    type: string;
-    required?: boolean;
-    defaultValue?: unknown;
-    options?: Array<{ label: string; value: string | number }>;
-    [k: string]: unknown;
-  }>;
-  [key: string]: unknown;
-}
-
-/** 流程运行状态 */
-export type WorkflowRunStatus = 'idle' | 'running' | 'success' | 'failed';
-
-export interface WorkflowRunStatusResponse {
-  status: WorkflowRunStatus;
-  lastRunAt?: string;
-  message?: string;
-  executionId?: string;
-  /** 各节点执行状态（可选） */
-  nodeStatuses?: Record<string, { status: string; output?: unknown }>;
-}
-
-enum WorkflowAction {
-  getConfig = '/integrated/workflow/getConfig',
-  getRunStatus = '/integrated/workflow/getRunStatus',
-  saveConfig = '/integrated/workflow/saveConfig',
+  /**
+   * 保存流程配置到后端
+   * @param appId 应用 ID
+   * @param doc 流程文档（nodes、edges、version、meta 等）
+   */
+  saveWorkflowConfig(appId: string, doc: WorkflowConfigResponse): Promise<void>;
 }
 
 /**
- * 流程编排服务
+ * 流程编排服务实现
  */
-export const workflowService = {
+export const workflowService: IWorkflowService = {
   /**
-   * 根据 appId 查询流程配置（节点、边、节点属性配置）
+   * 根据 appId 查询流程配置
    */
   async getWorkflowConfig(appId: string): Promise<WorkflowConfigResponse> {
-    const res = await HttpRequest.get<WorkflowConfigResponse>({
-      url: WorkflowAction.getConfig,
-      params: { appId },
-    }, { successMessageMode: 'none' });
+    const res = await HttpRequest.get<WorkflowConfigResponse>(
+      {
+        url: WorkflowAction.getConfig,
+        params: { appId },
+      },
+      { successMessageMode: 'none' }
+    );
     return res as WorkflowConfigResponse;
   },
 
   /**
-   * 查询流程运行状态
+   * 根据 appId 查询流程运行状态
    */
   async getWorkflowRunStatus(appId: string): Promise<WorkflowRunStatusResponse> {
-    const res = await HttpRequest.get<WorkflowRunStatusResponse>({
-      url: WorkflowAction.getRunStatus,
-      params: { appId },
-    }, { successMessageMode: 'none' });
+    const res = await HttpRequest.get<WorkflowRunStatusResponse>(
+      {
+        url: WorkflowAction.getRunStatus,
+        params: { appId },
+      },
+      { successMessageMode: 'none' }
+    );
     return res as WorkflowRunStatusResponse;
   },
 

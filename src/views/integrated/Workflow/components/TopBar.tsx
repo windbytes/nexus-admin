@@ -11,7 +11,7 @@ import {
   UndoOutlined,
 } from '@ant-design/icons';
 import { Badge, Button, Space, Tag, Tooltip, Typography } from 'antd';
-import type { WorkflowRunStatusResponse } from '@/services/integrated/workflow/workflowApi';
+import type { WorkflowRunStatusResponse } from '@/services/integrated/workflow/type';
 import { useWorkflowStore } from '../store/workflowStore';
 
 const { Text } = Typography;

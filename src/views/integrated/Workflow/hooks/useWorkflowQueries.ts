@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import type { WorkflowConfigResponse } from '@/services/integrated/workflow/workflowApi';
 import { workflowService } from '@/services/integrated/workflow/workflowApi';
+import type { WorkflowConfigResponse } from '@/services/integrated/workflow/type';
 import { useWorkflowStore } from '../store/workflowStore';
 import type { WorkflowDocument } from '../types';
 
