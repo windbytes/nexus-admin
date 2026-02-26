@@ -62,11 +62,12 @@ const Apps: React.FC = () => {
     pageSize: 20,
   });
 
-  // 查询应用数据
+  // 查询应用数据（isLoading = 首次加载且无缓存数据，避免与路由 Suspense 双重 Spin）
   const {
     data: result,
     refetch,
     isFetching,
+    isLoading,
   } = useQuery({
     queryKey: ['integrated_app', searchParams],
     queryFn: () => appsService.getApps(searchParams),
@@ -89,10 +90,9 @@ const Apps: React.FC = () => {
   };
 
   useEffect(() => {
-    // 搜索框聚焦
-    if (searchRef.current) {
-      searchRef.current.focus();
-    }
+    // 延后聚焦到下一帧绘制后，避免首帧重绘加剧闪烁
+    const id = requestAnimationFrame(() => searchRef.current?.focus());
+    return () => cancelAnimationFrame(id);
   }, []);
 
   /**
@@ -174,19 +174,26 @@ const Apps: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* 应用列表 */}
-        {isFetching ? (
-          <Spin indicator={<BubbleLoading width={48} />} />
-        ) : (
-          <div className="flex-1 overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
-            {/* 新建应用卡片 */}
-            {hasAddPermission && <CreateAppCard refresh={refetch} />}
-            {/* 应用列表 */}
-            {(result || []).map((item: App) => (
-              <AppCard key={item.id} app={item} onRefresh={refetch} />
-            ))}
-          </div>
-        )}
+        {/* 应用列表：固定容器减少布局跳动，仅无数据时全屏 Spin，有数据时始终展示列表并在拉取中显示轻量 loading */}
+        <div className="flex-1 min-h-[320px] overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
+          {isLoading ? (
+            <div className="col-span-full flex items-center justify-center py-12">
+              <Spin indicator={<BubbleLoading width={48} />} />
+            </div>
+          ) : (
+            <>
+              {hasAddPermission && <CreateAppCard refresh={refetch} />}
+              {(result || []).map((item: App) => (
+                <AppCard key={item.id} app={item} onRefresh={refetch} />
+              ))}
+            </>
+          )}
+          {!isLoading && isFetching && (
+            <div className="absolute top-2 right-2 z-10">
+              <Spin size="small" indicator={<BubbleLoading width={24} />} />
+            </div>
+          )}
+        </div>
       </div>
       {/* 显示标签管理弹窗 */}
       {<TagManagementModal type="app" show={showTagManagementModal} />}

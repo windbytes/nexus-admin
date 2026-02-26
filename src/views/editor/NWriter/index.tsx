@@ -93,12 +93,24 @@ const DocWriterContent: React.FC = () => {
           }}
           onLeftQuickActionClick={(_key) => {
             // 占位：左侧快捷按钮
+            modal.warning({
+              title: '功能开发中',
+              content: `敬请期待。操作key：${_key}`,
+            });
           }}
           onUploadClick={() => {
             // 占位：上传
+            modal.warning({
+              title: '功能开发中',
+              content: '敬请期待。',
+            });
           }}
           onShareClick={() => {
             // 占位：分享
+            modal.warning({
+              title: '功能开发中',
+              content: '敬请期待。',
+            });
           }}
           uploadLabel="未上云"
         />
