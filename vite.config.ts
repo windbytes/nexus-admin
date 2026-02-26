@@ -118,7 +118,7 @@ export default defineConfig(({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "${path.resolve(__dirname, './src/styles/variables.scss').replace(/\\\\/g, '/')}";`,
+          additionalData: `@use "@/styles/variables.scss";`,
         },
       },
     },
