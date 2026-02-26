@@ -30,8 +30,8 @@ function ToolItemInputNumber({ tool, tabKey, groupKey }: ToolItemInputNumberProp
         min={tool.min}
         max={tool.max}
         step={tool.step ?? 0.1}
-        addonAfter={tool.suffix}
         className="w-20"
+        suffix={tool.suffix}
         onChange={handleChange}
       />
     </span>

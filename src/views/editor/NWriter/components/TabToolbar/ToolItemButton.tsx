@@ -1,10 +1,7 @@
-/**
- * 工具栏按钮控件（直接点击）
- */
 import { Button } from 'antd';
 import { memo } from 'react';
-import { executeCommand } from '../../core/extension';
 import { emit, type ToolEventPayload } from '../../core/eventBus';
+import { executeCommand } from '../../core/extension';
 import type { ToolItemConfig } from '../../types';
 
 interface ToolItemButtonProps {
@@ -12,7 +9,9 @@ interface ToolItemButtonProps {
   tabKey: string;
   groupKey?: string;
 }
-
+/**
+ * 工具栏按钮控件（直接点击）
+ */
 function ToolItemButton({ tool, tabKey, groupKey }: ToolItemButtonProps) {
   const handleClick = () => {
     const payload: ToolEventPayload = { tabKey, groupKey, toolKey: tool.key, type: 'button' };
@@ -23,15 +22,17 @@ function ToolItemButton({ tool, tabKey, groupKey }: ToolItemButtonProps) {
   };
 
   return (
-    <Button
-      type="text"
-      size="small"
-      title={tool.label}
-      onClick={handleClick}
-      className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-    >
-      {tool.icon ?? tool.label}
-    </Button>
+    <div className="flex flex-col items-center gap-1">
+      {tool.label && <span className="shrink-0 text-xs text-gray-600">{tool.icon}</span>}
+      <Button
+        type="text"
+        size="small"
+        onClick={handleClick}
+        className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+      >
+        {tool.label ?? tool.icon}
+      </Button>
+    </div>
   );
 }
 

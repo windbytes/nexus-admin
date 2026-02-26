@@ -16,6 +16,7 @@ export interface ToolItemConfig {
   icon?: React.ReactNode;
   /** 控件类型，默认 button */
   type?: ToolItemType;
+  tooltip?: string;
   /** 点击/变更时执行的命令名 */
   command?: string;
   /** 行索引，rows=2 时用于分配到第 1 行或第 2 行，0 或 1 */

@@ -1,13 +1,17 @@
 /**
  * 粘贴下拉插件：为工具栏「粘贴」提供由插件注册的 Dropdown 内容（示例：插件实现）
  */
+import { useEditorContext } from '../core';
 import { executeCommand } from '../core/extension';
 import type { IPlugin } from '../core/plugin/types';
 
 function PasteDropdownContent() {
+  // 获取编辑器上下文对象
+  const editorContext = useEditorContext();
   const handleOption = (mode: string) => {
     executeCommand('edit.paste', 'paste', mode).catch(() => {
       /* 未注册命令时忽略 */
+      console.log('执行粘贴命令', mode, editorContext.editorMode);
     });
   };
 
