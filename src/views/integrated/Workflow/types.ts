@@ -4,8 +4,8 @@
  */
 import type { Edge, Node } from '@xyflow/react';
 
-/** 节点端点大类：工具类型 / 与外部交互类型 */
-export type NodeEndpointCategory = 'tool' | 'external';
+/** 节点端点大类：与后端 NodeCategory 一致 */
+export type NodeEndpointCategory = 'TRIGGER' | 'PROCESSOR' | 'CONNECTOR' | 'CONTROL';
 
 /**
  * 流程节点 data：继承 React Flow 的 data 约定，并扩展流程编排与后端集成所需字段。

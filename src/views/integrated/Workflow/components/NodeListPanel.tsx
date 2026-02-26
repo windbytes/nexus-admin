@@ -54,17 +54,37 @@ function filterPlugins(plugins: WorkflowNodePlugin[], keyword: string): Workflow
   );
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  TRIGGER: '触发器',
+  PROCESSOR: '处理器',
+  CONNECTOR: '连接器',
+  CONTROL: '控制',
+};
+
 /**
- * 添加节点 Popover 内容：节点 / 工具 标签 + 搜索 + 按分类展示的节点列表（动态来自插件注册表）
+ * 添加节点 Popover 内容：按四分类（TRIGGER/PROCESSOR/CONNECTOR/CONTROL）展示节点列表
  */
 export const NodeListPanel: React.FC<NodeListPanelProps> = ({ onAddNode }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
-  const { tool, external } = getNodePluginsByCategory();
+  const { TRIGGER, PROCESSOR, CONNECTOR, CONTROL } = getNodePluginsByCategory();
 
-  const filteredTool = useMemo(() => filterPlugins(tool, searchKeyword), [tool, searchKeyword]);
-  const filteredExternal = useMemo(() => filterPlugins(external, searchKeyword), [external, searchKeyword]);
+  const filtered = useMemo(
+    () => ({
+      TRIGGER: filterPlugins(TRIGGER, searchKeyword),
+      PROCESSOR: filterPlugins(PROCESSOR, searchKeyword),
+      CONNECTOR: filterPlugins(CONNECTOR, searchKeyword),
+      CONTROL: filterPlugins(CONTROL, searchKeyword),
+    }),
+    [TRIGGER, PROCESSOR, CONNECTOR, CONTROL, searchKeyword]
+  );
 
-  const nodeListContent = (
+  const hasAny =
+    filtered.TRIGGER.length > 0 ||
+    filtered.PROCESSOR.length > 0 ||
+    filtered.CONNECTOR.length > 0 ||
+    filtered.CONTROL.length > 0;
+
+  return (
     <div style={{ width: 280 }}>
       <Input
         placeholder="搜索节点"
@@ -75,35 +95,21 @@ export const NodeListPanel: React.FC<NodeListPanelProps> = ({ onAddNode }) => {
         style={{ marginBottom: 12 }}
       />
       <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-        {filteredTool.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
-              工具类型
-            </Text>
-            {filteredTool.map((plugin) => (
-              <NodeItem key={plugin.meta.id} plugin={plugin} onAdd={() => onAddNode(plugin)} />
-            ))}
-          </div>
+        {(['TRIGGER', 'PROCESSOR', 'CONNECTOR', 'CONTROL'] as const).map(
+          (cat) =>
+            filtered[cat].length > 0 && (
+              <div key={cat} style={{ marginBottom: 16 }}>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                  {CATEGORY_LABELS[cat]}
+                </Text>
+                {filtered[cat].map((plugin) => (
+                  <NodeItem key={plugin.meta.id} plugin={plugin} onAdd={() => onAddNode(plugin)} />
+                ))}
+              </div>
+            )
         )}
-        {filteredExternal.length > 0 && (
-          <div>
-            <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
-              与外部交互类型
-            </Text>
-            {filteredExternal.map((plugin) => (
-              <NodeItem key={plugin.meta.id} plugin={plugin} onAdd={() => onAddNode(plugin)} />
-            ))}
-          </div>
-        )}
-        {filteredTool.length === 0 && filteredExternal.length === 0 && <Text type="secondary">暂无匹配节点</Text>}
+        {!hasAny && <Text type="secondary">暂无匹配节点</Text>}
       </div>
     </div>
   );
-
-  const tabItems = [
-    { key: 'node', label: '节点', children: nodeListContent },
-    { key: 'tool', label: '工具', children: nodeListContent },
-  ];
-
-  return <Tabs defaultActiveKey="node" size="small" items={tabItems} />;
 };

@@ -75,3 +75,44 @@ export interface WorkflowRunStatusResponse {
   /** 各节点执行状态（可选） */
   nodeStatuses?: Record<string, WorkflowNodeStatus>;
 }
+
+/** 节点插件 DTO（/engine/node-plugins） */
+export interface NodePluginDTO {
+  pluginId: string;
+  name: string;
+  category: string;
+  protocolType?: string;
+  icon?: string;
+  description?: string;
+  configSchema?: Record<string, unknown>;
+  version?: string;
+  sortOrder?: number;
+}
+
+/** 流程版本 DTO */
+export interface FlowVersionDTO {
+  id?: string;
+  appId?: string;
+  versionNo: number;
+  versionTag?: string;
+  status?: string;
+  nodeCount?: number;
+  remark?: string;
+  publishedTime?: string;
+  flowDsl?: string;
+}
+
+/** 保存草稿请求体 */
+export interface FlowDraftPayload {
+  nodes: WorkflowConfigNode[];
+  edges: WorkflowConfigEdge[];
+}
+
+/** 路由状态（部署） */
+export interface RouteStatusDTO {
+  appId: string;
+  routeId: string;
+  status: string;
+  versionNo?: number;
+  lastTriggered?: string;
+}

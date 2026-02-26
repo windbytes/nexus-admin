@@ -1,10 +1,11 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Spin } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
+import { VersionHistoryModal } from './components/VersionHistoryModal';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
 import { useWorkflowHandlers } from './hooks/useWorkflowHandlers';
 import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuery } from './hooks/useWorkflowQueries';
@@ -19,6 +20,7 @@ registerBuiltinNodePlugins();
  * 流程编排页：基于 appId 拉取节点/边配置与运行状态，组装顶部栏、左侧栏、画布、属性面板
  */
 const Workflow: React.FC = () => {
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
   const {
     appId,
     propertyPanelOpen,
@@ -28,6 +30,7 @@ const Workflow: React.FC = () => {
     handleImportDSL,
     handleExportDSL,
     handlePreview,
+    handleSave,
     handlePublish,
     handleAddComment,
     handleRun,
@@ -55,7 +58,9 @@ const Workflow: React.FC = () => {
               <TopBar
                 appId={appId}
                 onPreview={handlePreview}
+                onSave={handleSave}
                 onPublish={handlePublish}
+                onOpenVersionHistory={() => setVersionHistoryOpen(true)}
                 checklistCount={checklistCount}
                 runStatus={runStatus ?? null}
               />
@@ -80,6 +85,13 @@ const Workflow: React.FC = () => {
           <PropertyPanel open={propertyPanelOpen} onClose={() => setPropertyPanelOpen(false)} width={320} />
         </div>
       </div>
+      {appId && (
+        <VersionHistoryModal
+          open={versionHistoryOpen}
+          onClose={() => setVersionHistoryOpen(false)}
+          appId={appId}
+        />
+      )}
     </ReactFlowProvider>
   );
 };

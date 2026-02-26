@@ -22,22 +22,26 @@ export function getAllNodePlugins(): WorkflowNodePlugin[] {
   return Array.from(registry.values());
 }
 
-/** 按端点大类分组：工具类型 / 与外部交互类型 */
+/** 按端点大类分组：TRIGGER / PROCESSOR / CONNECTOR / CONTROL */
 export function getNodePluginsByCategory(): {
-  tool: WorkflowNodePlugin[];
-  external: WorkflowNodePlugin[];
+  TRIGGER: WorkflowNodePlugin[];
+  PROCESSOR: WorkflowNodePlugin[];
+  CONNECTOR: WorkflowNodePlugin[];
+  CONTROL: WorkflowNodePlugin[];
 } {
   const all = getAllNodePlugins();
-  const tool: WorkflowNodePlugin[] = [];
-  const external: WorkflowNodePlugin[] = [];
+  const TRIGGER: WorkflowNodePlugin[] = [];
+  const PROCESSOR: WorkflowNodePlugin[] = [];
+  const CONNECTOR: WorkflowNodePlugin[] = [];
+  const CONTROL: WorkflowNodePlugin[] = [];
   for (const p of all) {
-    if (p.meta.endpointCategory === 'external') {
-      external.push(p);
-    } else {
-      tool.push(p);
-    }
+    const cat = p.meta.endpointCategory;
+    if (cat === 'TRIGGER') TRIGGER.push(p);
+    else if (cat === 'PROCESSOR') PROCESSOR.push(p);
+    else if (cat === 'CONNECTOR') CONNECTOR.push(p);
+    else if (cat === 'CONTROL') CONTROL.push(p);
   }
-  return { tool, external };
+  return { TRIGGER, PROCESSOR, CONNECTOR, CONTROL };
 }
 
 export function unregisterNodePlugin(pluginId: string): boolean {

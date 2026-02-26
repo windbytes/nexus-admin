@@ -5,6 +5,7 @@
 import {
   CheckOutlined,
   CloudUploadOutlined,
+  HistoryOutlined,
   RedoOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -19,7 +20,9 @@ const { Text } = Typography;
 interface TopBarProps {
   appId?: string;
   onPreview?: () => void;
+  onSave?: () => void;
   onPublish?: () => void;
+  onOpenVersionHistory?: () => void;
   checklistCount?: number;
   /** 流程运行状态（由 useWorkflowRunStatusQuery 提供） */
   runStatus?: WorkflowRunStatusResponse | null;
@@ -32,7 +35,15 @@ const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
   failed: { color: 'error', text: '失败' },
 };
 
-export const TopBar: React.FC<TopBarProps> = ({ appId, onPreview, onPublish, checklistCount = 0, runStatus }) => {
+export const TopBar: React.FC<TopBarProps> = ({
+  appId,
+  onPreview,
+  onSave,
+  onPublish,
+  onOpenVersionHistory,
+  checklistCount = 0,
+  runStatus,
+}) => {
   const { lastSavedAt, dirty, undo, redo, canUndo, canRedo } = useWorkflowStore();
 
   const timeStr = lastSavedAt
@@ -68,9 +79,11 @@ export const TopBar: React.FC<TopBarProps> = ({ appId, onPreview, onPublish, che
         <Badge count={checklistCount} size="small" offset={[-2, 2]}>
           <Button type="text" icon={<CheckOutlined />} title="检查清单" />
         </Badge>
+        <Button onClick={onSave}>保存</Button>
         <Button type="primary" icon={<CloudUploadOutlined />} onClick={onPublish}>
           发布
         </Button>
+        <Button type="text" icon={<HistoryOutlined />} onClick={onOpenVersionHistory} title="版本历史" />
         <Button type="text" icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
         <Button type="text" icon={<ReloadOutlined />} title="刷新" />
       </Space>
