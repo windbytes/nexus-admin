@@ -2,12 +2,9 @@ import { Handle, Position } from '@xyflow/react';
 import { Form, Input, Select } from 'antd';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
-/**
- * HTTP 请求节点组件
- * 这里可以根据类型决定出口和入口
- */
-const HttpRequestNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
-  const title = (data?.title as string) || 'HTTP 请求';
+const HttpConnectorNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
+  const title = (data?.title as string) || 'HTTP 调用';
+  const method = (data?.['method'] as string) || 'GET';
   return (
     <div
       style={{
@@ -20,26 +17,32 @@ const HttpRequestNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, da
       }}
     >
       <Handle type="target" position={Position.Left} id={`${id}-target`} />
-      <div style={{ fontSize: 13, color: '#333' }}>{title}</div>
+      <div style={{ fontSize: 11, color: '#999', marginBottom: 2 }}>连接器</div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: '#333' }}>{title}</div>
+      <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{method}</div>
       <Handle type="source" position={Position.Right} id={`${id}-source`} />
     </div>
   );
 };
 
-/**
- * HTTP 请求节点配置面板组件
- */
-const HttpRequestNodeConfigPanel: React.FC<WorkflowNodeConfigPanelProps> = ({ data, onChange }) => {
+const HttpConnectorNodeConfigPanel: React.FC<WorkflowNodeConfigPanelProps> = ({ data, onChange }) => {
   return (
     <Form layout="vertical" size="small">
       <Form.Item label="节点标题">
         <Input
           value={(data?.title as string) ?? ''}
           onChange={(e) => onChange({ title: e.target.value })}
-          placeholder="HTTP 请求"
+          placeholder="HTTP 调用"
         />
       </Form.Item>
-      <Form.Item label="请求方法">
+      <Form.Item label="目标 URL">
+        <Input
+          value={(data?.['url'] as string) ?? ''}
+          onChange={(e) => onChange({ url: e.target.value })}
+          placeholder="https://api.example.com/data"
+        />
+      </Form.Item>
+      <Form.Item label="HTTP 方法">
         <Select
           style={{ width: '100%' }}
           value={(data?.['method'] as string) ?? 'GET'}
@@ -52,32 +55,25 @@ const HttpRequestNodeConfigPanel: React.FC<WorkflowNodeConfigPanelProps> = ({ da
           ]}
         />
       </Form.Item>
-      <Form.Item label="URL">
-        <Input
-          value={(data?.['url'] as string) ?? ''}
-          onChange={(e) => onChange({ url: e.target.value })}
-          placeholder="https://"
-        />
-      </Form.Item>
     </Form>
   );
 };
 
-export const httpRequestNodePlugin: WorkflowNodePlugin = {
+export const httpConnectorNodePlugin: WorkflowNodePlugin = {
   meta: {
-    id: 'workflow.http',
-    name: 'HTTP 请求',
+    id: 'HTTP_CONNECTOR',
+    name: 'HTTP 调用',
     version: '1.0.0',
-    description: '调用外部 HTTP 接口',
+    description: '向外部 HTTP 服务发起请求',
     endpointCategory: 'CONNECTOR',
   },
   defaultNodeData: {
-    pluginId: 'workflow.http',
-    title: 'HTTP 请求',
+    pluginId: 'HTTP_CONNECTOR',
+    title: 'HTTP 调用',
     endpointCategory: 'CONNECTOR',
     method: 'GET',
     url: '',
   },
-  NodeComponent: HttpRequestNodeComponent,
-  ConfigPanel: HttpRequestNodeConfigPanel,
+  NodeComponent: HttpConnectorNodeComponent,
+  ConfigPanel: HttpConnectorNodeConfigPanel,
 };

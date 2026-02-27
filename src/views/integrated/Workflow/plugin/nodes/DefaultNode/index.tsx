@@ -1,11 +1,10 @@
-/**
- * 默认渲染节点插件
- * 工具类型节点示例
- */
 import { Handle, Position } from '@xyflow/react';
 import { Form, Input } from 'antd';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
+/**
+ * 默认渲染节点组件
+ */
 const DefaultNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
   const title = (data?.title as string) || '默认渲染节点部分';
   return (
@@ -29,6 +28,9 @@ const DefaultNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, 
   );
 };
 
+/**
+ * 默认渲染节点配置面板组件
+ */
 const DefaultNodeConfigPanel: React.FC<WorkflowNodeConfigPanelProps> = ({ nodeId, data, onChange }) => {
   return (
     <Form layout="vertical" size="small">

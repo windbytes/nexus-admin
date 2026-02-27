@@ -36,10 +36,15 @@ export function getNodePluginsByCategory(): {
   const CONTROL: WorkflowNodePlugin[] = [];
   for (const p of all) {
     const cat = p.meta.endpointCategory;
-    if (cat === 'TRIGGER') TRIGGER.push(p);
-    else if (cat === 'PROCESSOR') PROCESSOR.push(p);
-    else if (cat === 'CONNECTOR') CONNECTOR.push(p);
-    else if (cat === 'CONTROL') CONTROL.push(p);
+    if (cat === 'TRIGGER') {
+      TRIGGER.push(p);
+    } else if (cat === 'PROCESSOR') {
+      PROCESSOR.push(p);
+    } else if (cat === 'CONNECTOR') {
+      CONNECTOR.push(p);
+    } else if (cat === 'CONTROL') {
+      CONTROL.push(p);
+    }
   }
   return { TRIGGER, PROCESSOR, CONNECTOR, CONTROL };
 }
