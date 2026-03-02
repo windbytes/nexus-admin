@@ -2,17 +2,10 @@
  * 工具栏：左（文件下拉 + 快捷按钮）| 中（Tab 标签 + 展开/收缩）| 右（上传、分享）
  * 第二行：按分组展示工具（配置 + 插件贡献），组间竖线分隔，支持 1 行/2 行布局
  */
-import {
-  CaretDownOutlined,
-  CloudUploadOutlined,
-  DownOutlined,
-  MenuOutlined,
-  ShareAltOutlined,
-  UpOutlined,
-} from '@ant-design/icons';
+import { CaretDownOutlined, CloudUploadOutlined, MenuOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Card, Dropdown } from 'antd';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { fileMenuConfig, leftQuickActionsConfig } from '../../config/fileMenuConfig';
 import { getMergedToolbarConfig } from '../../core/toolbar';
 import type { FileMenuConfigItem, FileMenuItem, TabItemConfig, ToolGroupConfig, ToolItemConfig } from '../../types';
@@ -65,7 +58,6 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
   uploadLabel = '未上云',
   className = '',
 }) => {
-  const [toolbarExpanded, setToolbarExpanded] = useState(true);
   const centerTabs = config.filter((t) => t.key !== 'file');
   const defaultKey = centerTabs[0]?.key ?? '';
   const currentKey = activeTabKey ?? defaultKey;
@@ -148,16 +140,6 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
               </button>
             ))}
           </div>
-          {!toolbarExpanded && (
-            <Button
-              type="text"
-              size="small"
-              title="展开工具栏"
-              onClick={() => setToolbarExpanded(true)}
-              className="shrink-0 text-gray-500 hover:text-gray-700"
-              icon={<DownOutlined />}
-            />
-          )}
         </div>
 
         {/* 右侧：上传、分享 */}
@@ -178,7 +160,7 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
       </div>
 
       {/* 第二行：分组工具（仅展开时显示），收缩图标在 Card 内右侧 */}
-      {toolbarExpanded && currentTab && (
+      {currentTab && (
         <div className="w-full border-t border-gray-200 bg-[#f5f5f5]">
           <div className="px-4 pb-2 pt-1">
             <Card
@@ -196,14 +178,6 @@ const TabToolbar: React.FC<TabToolbarProps> = ({
                     <ToolGroup key={group.key ?? `g-${idx}`} group={group} tabKey={currentKey} groupIndex={idx} />
                   ))}
                 </div>
-                <Button
-                  type="text"
-                  size="small"
-                  title="收缩工具栏"
-                  onClick={() => setToolbarExpanded(false)}
-                  className="shrink-0 text-gray-500 hover:text-gray-700"
-                  icon={<UpOutlined />}
-                />
               </div>
             </Card>
           </div>
