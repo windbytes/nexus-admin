@@ -318,7 +318,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
             </Space>
           )
         }
-        maskClosable={false}
+        mask={{ closable: false }}
       >
         <Form form={form} disabled={isViewMode} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
           {/* 隐藏字段 */}

@@ -97,7 +97,7 @@ const AssignRoleModal: React.FC<AssignRoleModalProps> = (props) => {
       onCancel={onCancel}
       title="角色分配"
       width={1000}
-      maskClosable={false}
+      mask={{ closable: false }}
       footer={
         <Space>
           <Button onClick={onCancel}>取消</Button>

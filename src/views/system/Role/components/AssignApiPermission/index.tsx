@@ -113,7 +113,7 @@ const AssignApiPermission: React.FC<AssignApiPermissionProps> = ({ open, onOk, o
       onCancel={onCancel}
       title="授权权限"
       width={900}
-      maskClosable={false}
+      mask={{ closable: false }}
       styles={{ body: { minHeight: '400px', overflowY: 'auto' } }}
       footer={
         <Space>

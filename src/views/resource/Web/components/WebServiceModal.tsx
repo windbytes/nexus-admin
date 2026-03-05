@@ -200,7 +200,7 @@ const WebServiceModal: React.FC<WebServiceModalProps> = memo(
             </Space>
           )
         }
-        maskClosable={false}
+        mask={{ closable: false }}
         afterOpenChange={handleAfterOpenChange}
       >
         <Form

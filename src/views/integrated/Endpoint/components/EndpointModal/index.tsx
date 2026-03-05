@@ -106,7 +106,7 @@ const EndpointModal: React.FC<EndpointModalProps> = ({
       onCancel={onCancel}
       confirmLoading={loading}
       width={900}
-      maskClosable={false}
+      mask={{ closable: false }}
       centered
       styles={{
         body: {

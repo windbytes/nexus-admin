@@ -172,7 +172,7 @@ const DriverModal: React.FC<DriverModalProps> = memo(({ open, title, loading, in
           </Button>
         </Space>
       }
-      maskClosable={false}
+      mask={{ closable: false }}
     >
       <Form form={form} layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
         {/* 隐藏字段存储文件信息 */}

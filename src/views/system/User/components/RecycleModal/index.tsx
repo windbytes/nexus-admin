@@ -133,7 +133,7 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
         </div>
       }
       width={1200}
-      maskClosable={false}
+      mask={{ closable: false }}
       footer={
         <Space>
           <Button type="primary" onClick={onOk}>

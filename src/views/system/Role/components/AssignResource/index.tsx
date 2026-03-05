@@ -107,7 +107,7 @@ const AssignResource: React.FC<AssignResourceProps> = ({ open, onOk, onCancel, r
       onCancel={onCancel}
       title="授权资源"
       width={1400}
-      maskClosable={false}
+      mask={{ closable: false }}
       footer={
         <Space>
           <Button onClick={onCancel}>取消</Button>
