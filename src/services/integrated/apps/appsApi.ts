@@ -4,7 +4,7 @@ import type { App, AppSearchParams } from './app';
 /**
  * 项目相关接口
  */
-const AppsApi: Record<string, string> = {
+const AppsApi = {
   /**
    * 获取项目列表
    */
@@ -37,7 +37,7 @@ export interface IAppsService {
   /**
    * 获取项目列表
    */
-  getApps(searchParams: AppSearchParams): Promise<Record<string, any>>;
+  getApps(searchParams: AppSearchParams): Promise<App[]>;
 
   /**
    * 新增项目
@@ -66,7 +66,7 @@ export const appsService: IAppsService = {
   /**
    * 获取项目列表
    */
-  async getApps(searchParams: AppSearchParams): Promise<Record<string, any>> {
+  async getApps(searchParams: AppSearchParams): Promise<App[]> {
     const response = await HttpRequest.get(
       {
         url: AppsApi.getApps,

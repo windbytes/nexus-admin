@@ -67,7 +67,6 @@ const Apps: React.FC = () => {
     data: result,
     refetch,
     isFetching,
-    isLoading,
   } = useQuery({
     queryKey: ['integrated_app', searchParams],
     queryFn: () => appsService.getApps(searchParams),
@@ -174,9 +173,9 @@ const Apps: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* 应用列表：固定容器减少布局跳动，仅无数据时全屏 Spin，有数据时始终展示列表并在拉取中显示轻量 loading */}
+        {/* 应用列表：无数据且请求中时全屏 Spin，有数据时始终展示列表并在拉取中显示轻量 loading */}
         <div className="flex-1 min-h-[320px] overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
-          {isLoading ? (
+          {isFetching ? (
             <div className="col-span-full flex items-center justify-center py-12">
               <Spin indicator={<BubbleLoading width={48} />} />
             </div>
@@ -187,11 +186,6 @@ const Apps: React.FC = () => {
                 <AppCard key={item.id} app={item} onRefresh={refetch} />
               ))}
             </>
-          )}
-          {!isLoading && isFetching && (
-            <div className="absolute top-2 right-2 z-10">
-              <Spin size="small" indicator={<BubbleLoading width={24} />} />
-            </div>
           )}
         </div>
       </div>
