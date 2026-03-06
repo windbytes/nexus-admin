@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 插件市场（Engine - Market）
  * 占位组件，后续实现市场浏览、安装与评价。

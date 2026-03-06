@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 执行记录（Engine - Execution）
  * 占位组件，后续实现流程/节点执行记录与死信管理。

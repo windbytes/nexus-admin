@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 数据处理（Engine - Processing）
  * 占位组件，后续实现代码集、共享脚本、变量、数据转换等。

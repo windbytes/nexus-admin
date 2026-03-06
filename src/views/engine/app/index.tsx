@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 应用管理（Engine - App）
  * 占位组件，后续实现应用与标签的 CRUD 及绑定。
