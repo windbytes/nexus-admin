@@ -1,4 +1,4 @@
-import { mockTemplates, mockCategories, mockFilterOptions } from './mockData';
+import { mockCategories, mockFilterOptions, mockTemplates } from './mockData';
 import type { AppTemplate, TemplateCategory, TemplateFilterOption, TemplateSearchParams } from './types';
 
 /**

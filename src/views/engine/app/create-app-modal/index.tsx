@@ -5,7 +5,7 @@ import { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
-import type { App } from '@/services/integrated/apps/app';
+import type { EngineApp } from '@/services/engine/app/types';
 import { usePreferencesStore } from '@/stores/store';
 import { getShortcutLabel } from '@/utils/utils';
 
@@ -278,7 +278,7 @@ export interface AppInfoModalProps {
    * 窗口确认按钮点击回调
    * @returns
    */
-  onOk: (app: Partial<App>) => void;
+  onOk: (app: Partial<EngineApp>) => void;
   /**
    * 窗口取消按钮点击回调
    * @returns

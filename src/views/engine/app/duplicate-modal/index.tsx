@@ -1,11 +1,6 @@
-/**
- * 复制项目弹窗
- * @returns
- */
-
 import type React from 'react';
-import type { AppIconType } from '@/services/integrated/apps/app';
 import DragModal from '@/components/modal/DragModal';
+import type { AppIconType } from '@/services/engine/app/types';
 
 export type DuplicateAppModalProps = {
   show: boolean;
@@ -23,6 +18,11 @@ export type DuplicateAppModalProps = {
   }) => Promise<void>;
   onCancel: () => void;
 };
+
+/**
+ * 复制项目弹窗
+ * @returns
+ */
 
 const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   show,

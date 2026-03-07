@@ -1,9 +1,3 @@
-import type { HtmlContentProps } from '@/components/popover';
-import CustomPopover from '@/components/popover';
-import { tagsService } from '@/services/common/tags/tagsApi';
-import type { Tag } from '@/services/common/tags/tagsModel';
-import { useTagStore } from '@/stores/useTagStore';
-import cn from '@/utils/classnames';
 import { PlusOutlined, SearchOutlined, TagOutlined, TagsOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { useUnmount } from 'ahooks';
@@ -12,6 +6,12 @@ import { noop } from 'lodash-es';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { HtmlContentProps } from '@/components/popover';
+import CustomPopover from '@/components/popover';
+import { tagsService } from '@/services/common/tags/tagsApi';
+import type { Tag } from '@/services/engine';
+import { useTagStore } from '@/stores/useTagStore';
+import cn from '@/utils/classnames';
 
 type TagSelectorProps = {
   // 对应的应用ID

@@ -1,10 +1,10 @@
+import { HttpRequest } from '@/utils/request';
+import type { AppQuery, EngineApp, Tag } from './types';
+
 /**
  * Engine 应用与标签 API
  * 路径与后端 /engine/apps、/engine/tags 一致
  */
-import { HttpRequest } from '@/utils/request';
-import type { EngineApp, Tag, AppQuery } from './types';
-
 const AppsApi = {
   list: '/engine/apps',
   getById: (id: string) => `/engine/apps/${id}`,

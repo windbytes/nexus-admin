@@ -1,15 +1,15 @@
-import { EditOutlined, CopyOutlined, ExportOutlined, SwitcherOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Divider, App as AntdApp } from 'antd';
-import { useTranslation } from 'react-i18next';
-import type React from 'react';
-import type { HtmlContentProps } from '@/components/popover';
-import type { App } from '@/services/integrated/apps/app';
-import { appsService } from '@/services/integrated/apps/appsApi';
+import { CopyOutlined, DeleteOutlined, EditOutlined, ExportOutlined, SwitcherOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
+import { App as AntdApp, Divider } from 'antd';
+import type React from 'react';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { HtmlContentProps } from '@/components/popover';
+import { appService } from '@/services/engine';
+import type { EngineApp } from '@/services/engine/app/types';
 
 interface AppCardOperationsProps extends HtmlContentProps {
-  app: App;
+  app: EngineApp;
   onRefresh?: () => void;
   setShowEditModal: (show: boolean) => void;
   setShowDuplicateModal: (show: boolean) => void;
@@ -33,7 +33,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
 
   // 处理应用修改
   const updateAppMutation = useMutation({
-    mutationFn: (app: Partial<App>) => appsService.updateApp(app),
+    mutationFn: (app: Partial<EngineApp>) => appService.updateApp(id, app),
     onSuccess: () => {
       message.success(t('app.updateApp.success'));
       onRefresh?.();
@@ -50,7 +50,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
 
   // 处理应用删除
   const deleteAppMutation = useMutation({
-    mutationFn: (id: string) => appsService.deleteApp(id),
+    mutationFn: (id: string) => appService.deleteApp(id),
     onSuccess: () => {
       message.success(t('app.deleteApp.success'));
       onRefresh?.();
@@ -65,7 +65,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
 
   // 复制应用
   const copyAppMutation = useMutation({
-    mutationFn: (app: Partial<App>) => appsService.copyApp(app),
+    mutationFn: (app: Partial<EngineApp>) => appService.createApp(app),
     onSuccess: () => {
       message.success(t('app.copyApp.success'));
       // 刷新列表
@@ -98,7 +98,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
   /**
    * 复制应用(有一个复制弹窗)
    */
-  const onCopy = async ({ name, icon_type, icon, iconBg }: Partial<App>) => {
+  const onCopy = async ({ name, icon_type, icon, iconBg }: Partial<EngineApp>) => {
     copyAppMutation.mutate({
       name,
       icon_type,

@@ -1,14 +1,13 @@
-import TagSelector from '@/components/base/tag-management/selector';
-import CustomPopover from '@/components/popover';
-import { usePermission } from '@/hooks/usePermission';
-import type { Tag } from '@/services/common/tags/tagsModel';
-import type { App } from '@/services/integrated/apps/app';
-import clsx from '@/utils/classnames';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
 import { Card } from 'antd';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import TagSelector from '@/components/base/tag-management/selector';
+import CustomPopover from '@/components/popover';
+import { usePermission } from '@/hooks/usePermission';
+import type { EngineApp, Tag } from '@/services/engine/app/types';
+import clsx from '@/utils/classnames';
 import AppCardOperations from './AppCardOperations';
 import './apps.scss';
 import DuplicateAppModal from './duplicate-modal';
@@ -26,13 +25,9 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   // 复制弹窗
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showSwitchModal, setShowSwitchModal] = useState<boolean>(false);
-  const [tags, setTags] = useState<Tag[]>(app.tags);
+  const [tags, setTags] = useState<Tag[]>(app.tags ?? []);
   // 是否有编辑权限
   const hasEditorPermission = usePermission(['engine.app.edit']);
-
-  useEffect(() => {
-    setTags(app.tags);
-  }, [app.tags]);
 
   /**
    * 应用流程设计
@@ -158,7 +153,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
         <EditAppModal
           open={showEditModal}
           appName={name}
-          appIcon={app.icon}
+          appIcon={app.icon ?? ''}
           appMode={type}
           appDescription={remark || ''}
           onCancel={() => {
@@ -173,10 +168,10 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
       {showDuplicateModal && (
         <DuplicateAppModal
           appName={name}
-          icon_type={app.icon_type}
-          icon={app.icon}
-          icon_url={app.icon_url}
-          icon_background={app.iconBg}
+          icon_type={app.icon_type ?? null}
+          icon={app.icon ?? ''}
+          icon_url={app.icon_url ?? null}
+          icon_background={app.iconBg ?? null}
           show={showDuplicateModal}
           onCancel={() => {
             setShowDuplicateModal(false);
@@ -201,7 +196,7 @@ export interface AppCardProps {
   /**
    * 应用数据
    */
-  app: App;
+  app: EngineApp;
 
   /**
    * 刷新应用列表
