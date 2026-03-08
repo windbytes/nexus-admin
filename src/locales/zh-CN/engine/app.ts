@@ -33,6 +33,7 @@ const translation = {
   editApp: '编辑应用',
   duplicate: '复制',
   export: '导出 DSL',
+  saveAsTemplate: '存为模板',
   switch: '切换为集成项目',
   deleteAppConfirmTitle: '确认删除应用？',
   deleteAppConfirmContent:

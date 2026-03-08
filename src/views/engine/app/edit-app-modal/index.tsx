@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import type { EngineApp } from '@/services/engine/app/types';
+import { appCategoryService } from '@/services/engine';
+import { useQuery } from '@tanstack/react-query';
 
 export interface EditAppModalProps {
   open: boolean;
@@ -34,12 +36,18 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
   const { t } = useTranslation();
   const [form] = Form.useForm<Partial<EngineApp>>();
   const [submitting, setSubmitting] = useState(false);
+  const { data: categories = [] } = useQuery({
+    queryKey: ['app_categories'],
+    queryFn: () => appCategoryService.getAppCategories(),
+    enabled: open,
+  });
 
   useEffect(() => {
     if (open && app) {
       form.setFieldsValue({
         name: app.name,
         type: app.type,
+        categoryId: app.categoryId ?? undefined,
         icon: app.icon ?? '',
         iconBg: app.iconBg ?? '',
         status: app.status ?? 0,
@@ -102,6 +110,13 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
               { label: t('app.segment.interface') ?? '接口应用', value: 2 },
               { label: t('app.segment.tripartite') ?? '三方应用', value: 3 },
             ]}
+          />
+        </Form.Item>
+        <Form.Item name="categoryId" label="应用分类">
+          <Select
+            allowClear
+            placeholder="选择分类"
+            options={categories.map((c) => ({ label: c.name, value: c.id }))}
           />
         </Form.Item>
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>

@@ -1,33 +1,42 @@
-import { mockCategories, mockFilterOptions, mockTemplates } from './mockData';
+import { appTemplateCategoryService, appTemplateService } from '@/services/engine';
 import type { AppTemplate, TemplateCategory, TemplateFilterOption, TemplateSearchParams } from './types';
 
-/**
- * 模拟API延迟
- */
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** 推荐分类的固定 id */
+const RECOMMENDED_ID = 'recommended';
 
 /**
- * 模拟的模板服务
+ * 模板服务：对接后端应用模板分类与模板 API
  */
 export const templateService = {
   /**
-   * 获取模板分类列表
+   * 获取模板分类列表（含推荐）
    */
   async getCategories(): Promise<TemplateCategory[]> {
-    await delay(300);
-    return mockCategories;
+    const list = await appTemplateCategoryService.list();
+    const recommended = await appTemplateCategoryService.listRecommended();
+    const recommendedIds = new Set(recommended.map((c) => String(c.id)));
+    const categories: TemplateCategory[] = [
+      { id: RECOMMENDED_ID, name: '推荐', icon: '⭐', count: 0, isRecommended: true },
+      ...list.map((c) => ({
+        id: String(c.id),
+        name: c.name,
+        icon: c.icon ?? '📁',
+        count: 0,
+        isRecommended: recommendedIds.has(String(c.id)),
+      })),
+    ];
+    return categories;
   },
 
   /**
-   * 获取筛选选项
+   * 获取筛选选项（简化：与分类一致或空）
    */
   async getFilterOptions(): Promise<TemplateFilterOption[]> {
-    await delay(200);
-    return mockFilterOptions;
+    return [];
   },
 
   /**
-   * 搜索模板
+   * 搜索/分页查询模板
    */
   async searchTemplates(params: TemplateSearchParams): Promise<{
     list: AppTemplate[];
@@ -35,43 +44,14 @@ export const templateService = {
     pageNum: number;
     pageSize: number;
   }> {
-    await delay(500);
-
-    let filteredTemplates = [...mockTemplates];
-
-    // 按关键词筛选
-    if (params.keyword) {
-      const keyword = params.keyword.toLowerCase();
-      filteredTemplates = filteredTemplates.filter(
-        (template) =>
-          template.name.toLowerCase().includes(keyword) ||
-          template.description.toLowerCase().includes(keyword) ||
-          template.tags.some((tag) => tag.toLowerCase().includes(keyword))
-      );
-    }
-
-    // 按类型筛选
-    if (params.types && params.types.length > 0) {
-      filteredTemplates = filteredTemplates.filter((template) => params.types!.includes(template.type));
-    }
-
-    // 按分类筛选
-    if (params.category && params.category !== 'recommended') {
-      filteredTemplates = filteredTemplates.filter((template) => template.category === params.category);
-    }
-
-    const total = filteredTemplates.length;
-    const pageNum = params.pageNum || 1;
-    const pageSize = params.pageSize || 20;
-
-    // 分页
-    const start = (pageNum - 1) * pageSize;
-    const end = start + pageSize;
-    const list = filteredTemplates.slice(start, end);
-
+    const categoryId =
+      params.category && params.category !== RECOMMENDED_ID ? Number(params.category) : undefined;
+    const pageNum = params.pageNum ?? 1;
+    const pageSize = params.pageSize ?? 20;
+    const list = await appTemplateService.list(categoryId, pageNum, pageSize);
     return {
-      list,
-      total,
+      list: list.map(mapApiTemplateToLocal),
+      total: list.length,
       pageNum,
       pageSize,
     };
@@ -81,13 +61,46 @@ export const templateService = {
    * 根据分类获取模板
    */
   async getTemplatesByCategory(categoryId: string): Promise<AppTemplate[]> {
-    await delay(400);
-
-    if (categoryId === 'recommended') {
-      // 推荐分类返回评分最高的前20个模板
-      return mockTemplates.sort((a, b) => b.rating - a.rating).slice(0, 20);
+    if (categoryId === RECOMMENDED_ID) {
+      const list = await appTemplateService.list(undefined, 1, 20);
+      return list.map(mapApiTemplateToLocal);
     }
+    const list = await appTemplateService.list(Number(categoryId), 1, 100);
+    return list.map(mapApiTemplateToLocal);
+  },
 
-    return mockTemplates.filter((template) => template.category === categoryId);
+  /**
+   * 从模板创建应用
+   */
+  async createAppFromTemplate(templateId: string, appName?: string): Promise<unknown> {
+    return appTemplateService.createAppFromTemplate(templateId, { appName });
   },
 };
+
+function mapApiTemplateToLocal(t: {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  iconBg?: string;
+  categoryId?: string;
+  type: number;
+  usageCount?: number;
+  createTime?: string;
+  updateTime?: string;
+}): AppTemplate {
+  return {
+    id: String(t.id),
+    name: t.name,
+    type: 'workflow',
+    description: t.description ?? '',
+    icon: t.icon ?? '',
+    iconBg: t.iconBg,
+    category: t.categoryId ?? '',
+    tags: [],
+    createTime: t.createTime ?? '',
+    updateTime: t.updateTime ?? '',
+    usageCount: t.usageCount ?? 0,
+    rating: 0,
+  };
+}

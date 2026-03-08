@@ -9,7 +9,8 @@ import type { PageQueryParams } from '@/types/global';
 export interface EngineApp {
   id: string;
   name: string;
-  type: number;
+  /** 应用分类 ID，用于列表筛选与展示 */
+  categoryId?: string | null;
   status?: number;
   priority?: number;
   logLevel?: number;
@@ -57,10 +58,54 @@ export interface AppModalState {
 /** 应用查询参数（与后端 AppQuery 对齐） */
 export interface AppQuery extends PageQueryParams {
   name?: string;
-  type?: number;
+  /** 应用分类 ID，0 或空表示全部 */
+  categoryId?: number | string | null;
   status?: number;
   tags?: string[];
   isMine?: boolean;
+}
+
+/** 应用分类（t_engine_app_category） */
+export interface AppCategory {
+  id: string;
+  name: string;
+  code?: string;
+  imageUrl?: string;
+  sortOrder?: number;
+}
+
+/** 应用模板分类（t_engine_app_template_category） */
+export interface AppTemplateCategory {
+  id: string;
+  name: string;
+  code?: string;
+  imageUrl?: string;
+  icon?: string;
+  sortOrder?: number;
+  isRecommended?: boolean;
+}
+
+/** 应用模板（t_engine_app_template） */
+export interface AppTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  iconBg?: string;
+  categoryId?: string;
+  usageCount?: number;
+}
+
+/** 存为模板请求（与后端 SaveAppTemplateRequest 对齐） */
+export interface SaveAppTemplateRequest {
+  name: string;
+  description?: string;
+  categoryId?: string | number | null;
+}
+
+/** 从模板创建应用请求（与后端 CreateAppFromTemplateRequest 对齐） */
+export interface CreateAppFromTemplateRequest {
+  appName?: string;
 }
 
 /** 流程定义元数据（与后端 FlowDefinition 对齐，用于导出） */

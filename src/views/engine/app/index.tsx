@@ -1,10 +1,10 @@
-import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SearchOutlined, SolutionOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounceFn } from 'ahooks';
 import { Button, Checkbox, Input, type InputRef, Segmented, type SegmentedProps, Select, Space, Spin } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TagManagementModal from '@/components/base/tag-management';
 import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
@@ -15,7 +15,7 @@ import { useTagStore } from '@/stores/useTagStore.ts';
 import AppCard from './AppCard';
 import CreateAppCard from './NewAppCard';
 import './apps.scss';
-import { appService } from '@/services/engine';
+import { appCategoryService, appService } from '@/services/engine';
 
 /**
  * 应用设计
@@ -29,29 +29,27 @@ const Apps: React.FC = () => {
   // 是否有新增权限
   const hasAddPermission = usePermission(['engine:apps:add']);
 
-  // 分段控制器选项
-  const segmentedOptions: SegmentedProps<number>['options'] = [
-    {
-      label: t('app.segment.all'),
-      value: 0,
-      icon: <AppstoreOutlined />,
-    },
-    {
-      label: t('app.segment.integrated'),
-      value: 1,
-      icon: <ApartmentOutlined />,
-    },
-    {
-      label: t('app.segment.interface'),
-      value: 2,
-      icon: <ApiOutlined />,
-    },
-    {
-      label: t('app.segment.tripartite'),
-      value: 3,
-      icon: <SolutionOutlined />,
-    },
-  ];
+  // 应用分类列表（Segmented 选项来源）
+  const { data: categories = [] } = useQuery({
+    queryKey: ['app_categories'],
+    queryFn: () => appCategoryService.getAppCategories(),
+  });
+
+  // 分段控制器选项：全部 + 应用分类
+  const segmentedOptions: SegmentedProps<number>['options'] = useMemo(
+    () => [
+      {
+        label: t('app.segment.all'),
+        value: 0,
+        icon: <AppstoreOutlined />,
+      },
+      ...categories.map((c) => ({
+        label: c.name,
+        value: Number(c.id) as number,
+      })),
+    ],
+    [categories, t]
+  );
 
   // 选中的标签
   const [tagFilterValue, setTagFilterValue] = useState<string[]>([]);
@@ -59,6 +57,7 @@ const Apps: React.FC = () => {
   // 查询参数（包含分页参数）
   const [searchParams, setSearchParams] = useState<AppQuery>({
     type: 0,
+    categoryId: 0,
     pageNum: 1,
     pageSize: 20,
   });
@@ -78,6 +77,7 @@ const Apps: React.FC = () => {
     const search = {
       name: value,
       type: searchParams.type ?? 0,
+      categoryId: searchParams.categoryId ?? 0,
       status: searchParams.status,
       tags: searchParams.tags,
       pageNum: searchParams.pageNum,
@@ -88,7 +88,7 @@ const Apps: React.FC = () => {
       refetch();
       return;
     }
-    setSearchParams((prev) => ({ ...prev, ...search, type: search.type ?? prev.type }));
+    setSearchParams((prev) => ({ ...prev, ...search }));
   };
 
   useEffect(() => {
@@ -98,13 +98,12 @@ const Apps: React.FC = () => {
   }, []);
 
   /**
-   * 分段控制器切换
-   * @param value 值
+   * 分段控制器切换（按应用分类筛选，0 表示全部）
    */
   const onSegmentedChange = (value: number) => {
     setSearchParams({
       ...searchParams,
-      type: value,
+      categoryId: value,
     });
   };
 
@@ -171,7 +170,7 @@ const Apps: React.FC = () => {
             <Segmented<number>
               options={segmentedOptions}
               onChange={onSegmentedChange}
-              value={searchParams.type ?? (0 as number)}
+              value={Number(searchParams.categoryId) || 0}
             />
             <div className="flex items-center gap-2">
               {/* 状态筛选 */}

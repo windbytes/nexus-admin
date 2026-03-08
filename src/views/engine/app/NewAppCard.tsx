@@ -185,7 +185,15 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
         onCreateFromTemplate={onCreateFromTemplate}
       />
       {/* 模版中心 */}
-      <AppTemplates open={state.openTemplateModal} onClose={closeTemplate} onCreateFromBlank={onCreateFromBlank} />
+      <AppTemplates
+        open={state.openTemplateModal}
+        onClose={closeTemplate}
+        onCreateFromBlank={onCreateFromBlank}
+        onTemplateCreateSuccess={() => {
+          refresh?.();
+          closeTemplate();
+        }}
+      />
       {/* 导入DSL */}
       <ImportDsl
         open={state.openImportModal}

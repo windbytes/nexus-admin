@@ -1,19 +1,23 @@
-import { ColorPicker, Form, Input } from 'antd';
+import { ColorPicker, Form, Input, Select } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import type { AppIconType } from '@/services/engine/app/types';
+import { appCategoryService } from '@/services/engine';
+import { useQuery } from '@tanstack/react-query';
 
 export type DuplicateAppModalProps = {
   show: boolean;
   appName: string;
+  categoryId?: string | null;
   icon_type: AppIconType | null;
   icon: string;
   icon_url: string | null;
   icon_background?: string | null;
   onConfirm: (info: {
     name: string;
+    categoryId?: string | null;
     icon_type?: AppIconType | null;
     icon?: string;
     icon_url?: string | null;
@@ -28,6 +32,7 @@ export type DuplicateAppModalProps = {
 const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   show,
   appName,
+  categoryId: initialCategoryId,
   icon_type,
   icon,
   icon_url,
@@ -36,18 +41,24 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   onCancel,
 }) => {
   const { t } = useTranslation();
-  const [form] = Form.useForm<{ name: string; icon?: string; iconBg?: string }>();
+  const [form] = Form.useForm<{ name: string; categoryId?: string; icon?: string; iconBg?: string }>();
   const [submitting, setSubmitting] = useState(false);
+  const { data: categories = [] } = useQuery({
+    queryKey: ['app_categories'],
+    queryFn: () => appCategoryService.getAppCategories(),
+    enabled: show,
+  });
 
   useEffect(() => {
     if (show) {
       form.setFieldsValue({
         name: appName ? `${appName} - 副本` : '',
+        categoryId: initialCategoryId ?? undefined,
         icon: icon ?? '',
         iconBg: icon_background ?? '',
       });
     }
-  }, [show, appName, icon, icon_background, form]);
+  }, [show, appName, initialCategoryId, icon, icon_background, form]);
 
   const onConfirmClick = async () => {
     try {
@@ -55,6 +66,7 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
       setSubmitting(true);
       await onConfirm({
         name: values.name,
+        categoryId: values.categoryId ?? initialCategoryId ?? undefined,
         icon_type: icon_type ?? undefined,
         icon: values.icon ?? icon,
         icon_url: icon_url ?? undefined,
@@ -92,6 +104,13 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
           rules={[{ required: true, message: t('common.required') ?? '请输入应用名称' }]}
         >
           <Input placeholder={t('app.namePlaceholder') ?? '应用名称'} maxLength={32} />
+        </Form.Item>
+        <Form.Item name="categoryId" label="应用分类">
+          <Select
+            allowClear
+            placeholder="选择分类"
+            options={categories.map((c) => ({ label: c.name, value: c.id }))}
+          />
         </Form.Item>
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
           <Input placeholder="iconify 名称或 URL" />

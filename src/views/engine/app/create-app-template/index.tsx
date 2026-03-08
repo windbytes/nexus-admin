@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { App } from 'antd';
 import type React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
@@ -13,8 +13,25 @@ import type { AppTemplate, TemplateSearchParams, TemplateType } from './types';
 /**
  * 应用模板创建弹窗
  */
-const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreateFromBlank }) => {
+const AppTemplates: React.FC<AppsTemplateModelProps> = ({
+  open,
+  onClose,
+  onCreateFromBlank,
+  onTemplateCreateSuccess,
+}) => {
   const { message } = App.useApp();
+  const createFromTemplateMutation = useMutation({
+    mutationFn: ({ templateId, appName }: { templateId: string; appName?: string }) =>
+      templateService.createAppFromTemplate(templateId, appName),
+    onSuccess: () => {
+      message.success('已从模板创建应用');
+      onTemplateCreateSuccess?.();
+      onClose();
+    },
+    onError: (e) => {
+      message.error((e as Error).message ?? '创建失败');
+    },
+  });
   // 状态管理
   const [selectedCategory, setSelectedCategory] = useState('recommended');
   const [selectedTypes, setSelectedTypes] = useState<TemplateType[]>([]);
@@ -93,12 +110,13 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({ open, onClose, onCreat
     }));
   }, []);
 
-  // 处理模板选择
-  const handleTemplateSelect = useCallback((template: AppTemplate) => {
-    message.success(`已选择模板: ${template.name}`);
-    // 这里可以添加跳转到模板详情或创建应用的逻辑
-    console.log('选择的模板:', template);
-  }, []);
+  // 处理模板选择：从模板创建应用
+  const handleTemplateSelect = useCallback(
+    (template: AppTemplate) => {
+      createFromTemplateMutation.mutate({ templateId: template.id, appName: template.name });
+    },
+    [createFromTemplateMutation]
+  );
 
   // 处理创建空白应用
   const handleCreateBlank = useCallback(() => {
@@ -152,4 +170,6 @@ export interface AppsTemplateModelProps {
   open: boolean;
   onClose: () => void;
   onCreateFromBlank: () => void;
+  /** 从模板创建应用成功后回调（如刷新列表） */
+  onTemplateCreateSuccess?: () => void;
 }

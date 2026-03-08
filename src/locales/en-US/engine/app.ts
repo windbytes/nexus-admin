@@ -30,6 +30,7 @@ const translation = {
   editApp: 'Edit App',
   duplicate: 'Duplicate',
   export: 'Export DSL',
+  saveAsTemplate: 'Save as Template',
   switch: 'Switch to Integrated App',
   deleteAppConfirmTitle: 'Delete this app?',
   deleteAppConfirmContent:

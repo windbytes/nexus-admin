@@ -15,6 +15,7 @@ import AppCardOperations from './AppCardOperations';
 import './apps.scss';
 import DuplicateAppModal from './duplicate-modal';
 import EditAppModal from './edit-app-modal';
+import SaveAsTemplateModal from './save-as-template-modal';
 import SwitchAppModal from './swith-app-modal';
 
 /**
@@ -29,7 +30,7 @@ const STATUS_MAP: Record<number, { text: string; className?: string }> = {
 };
 
 const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
-  const { id, name, type, status = 0, remark = '', updateUser, updateTime } = app;
+  const { id, name, status = 0, remark = '', updateUser, updateTime } = app;
   const statusInfo = STATUS_MAP[status] ?? STATUS_MAP[0];
   const { message, modal } = AntdApp.useApp();
   const { t } = useTranslation();
@@ -65,6 +66,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [showSaveAsTemplateModal, setShowSaveAsTemplateModal] = useState(false);
   const [tags, setTags] = useState<Tag[]>(app.tags ?? []);
   const [switchHandler, setSwitchHandler] = useState<(type?: number) => void>(() => () => {});
 
@@ -108,7 +110,6 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
             <div className="flex items-center gap-1.5 text-[10px] font-medium leading-[18px] text-[#676f83]">
               <span className={clsx('shrink-0', statusInfo?.className)}>{statusInfo?.text ?? '未启动'}</span>
               <div className="truncate">
-                {type}
                 {updateUser} · 编辑于{updateTime}
               </div>
             </div>
@@ -170,6 +171,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                       setShowEditModal={setShowEditModal}
                       setShowDuplicateModal={setShowDuplicateModal}
                       setShowSwitchModal={setShowSwitchModal}
+                      setShowSaveAsTemplateModal={setShowSaveAsTemplateModal}
                       registerSwitchHandler={registerSwitchHandler}
                     />
                   }
@@ -186,9 +188,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                       'h-8 w-8 rounded-md border-none !p-2 hover:!bg-black/5'
                     )
                   }
-                  popupClassName={
-                    app.type === 1 ? '!w-[256px] translate-x-[-224px]' : '!w-[160px] translate-x-[-128px]'
-                  }
+                  popupClassName={'!w-[160px] translate-x-[-128px]'}
                 />
               </div>
             </>
@@ -211,6 +211,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
       {showDuplicateModal && (
         <DuplicateAppModal
           appName={name}
+          categoryId={app.categoryId ?? null}
           icon_type={app.icon_type ?? null}
           icon={app.icon ?? ''}
           icon_url={app.icon_url ?? null}
@@ -220,7 +221,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           onConfirm={async (info) => {
             await copyAppMutation.mutateAsync({
               name: info.name,
-              type: app.type,
+              categoryId: info.categoryId ?? app.categoryId ?? undefined,
               icon: info.icon ?? app.icon,
               iconBg: info.icon_background ?? app.iconBg ?? null,
               icon_type: info.icon_type ?? app.icon_type ?? null,
@@ -236,6 +237,13 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
       )}
       {/* 切换应用类型弹窗 */}
       {showSwitchModal && <SwitchAppModal onConfirm={switchHandler} onClose={() => setShowSwitchModal(false)} />}
+      {/* 存为模板弹窗 */}
+      <SaveAsTemplateModal
+        open={showSaveAsTemplateModal}
+        app={app}
+        onSuccess={onRefresh}
+        onCancel={() => setShowSaveAsTemplateModal(false)}
+      />
     </>
   );
 };

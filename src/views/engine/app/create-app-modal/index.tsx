@@ -1,30 +1,50 @@
-import { ApartmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { Button, Input, type InputRef, Select, Space } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { memo, useRef, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
-import type { EngineApp } from '@/services/engine/app/types';
+import type { AppCategory, EngineApp } from '@/services/engine/app/types';
+import { appCategoryService } from '@/services/engine';
 import { usePreferencesStore } from '@/stores/store';
 import { getShortcutLabel } from '@/utils/utils';
+import { useQuery } from '@tanstack/react-query';
 
 /**
  * 添加项目弹窗
  * @returns
  */
+const SHOW_FIRST_N = 4;
+
 const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCreateFromTemplate }) => {
   const inputRef = useRef<InputRef>(null);
+  const { data: categories = [] } = useQuery({
+    queryKey: ['app_categories'],
+    queryFn: () => appCategoryService.getAppCategories(),
+    enabled: open,
+  });
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | number | null>(null);
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [type, setType] = useState<number>(1);
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [logLevel, setLogLevel] = useState<number>(1);
-  const [status, setStatus] = useState<number>(0);
   const [priority, setPriority] = useState<number>(5);
   const [icon, setIcon] = useState<string>('');
   const [iconBg, setIconBg] = useState<string>('');
   const { t } = useTranslation();
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
+
+  const visibleCategories = useMemo(
+    () => (showMoreCategories ? categories : categories.slice(0, SHOW_FIRST_N)),
+    [categories, showMoreCategories]
+  );
+  const hasMoreCategories = categories.length > SHOW_FIRST_N;
+  const selectedCategory = useMemo(
+    () => categories.find((c) => String(c.id) === String(selectedCategoryId) || Number(c.id) === Number(selectedCategoryId)),
+    [categories, selectedCategoryId]
+  );
 
   // 绑定保存的快捷键
   const shotcut = usePlatformHotkey({
@@ -39,11 +59,11 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
   });
 
   /**
-   * 选择类型
-   * @param value 选择的类型
+   * 选择应用分类
    */
-  const selectType = (value: number) => {
-    setType(value);
+  const selectCategory = (cat: AppCategory) => {
+    setSelectedCategoryId(cat.id);
+    setType(1);
   };
 
   const handleAfterOpen = (open: boolean) => {
@@ -53,15 +73,16 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
   };
 
   /**
-   * 点击确认的回调，payload 与 EngineApp 对齐
+   * 点击确认的回调，payload 与 EngineApp 对齐。新建时状态固定为未启动(0)。
    */
   const handleOk = () => {
     const data: Partial<EngineApp> = {
       type,
+      categoryId: selectedCategoryId != null ? String(selectedCategoryId) : undefined,
       name: name.trim(),
       remark: description.trim() || undefined,
       logLevel,
-      status,
+      status: 0,
       priority,
       icon: icon.trim() || undefined,
       iconBg: iconBg.trim() || undefined,
@@ -88,76 +109,40 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
         <div className="flex-1 shrink-0 flex justify-end">
           <div className="px-10">
             <div className="leading-6 mb-2">
-              <span className="text-[#354052] text-[13px] font-semibold leading-4">选择应用类型</span>
+              <span className="text-[#354052] text-[13px] font-semibold leading-4">选择应用分类</span>
             </div>
             <div className="flex flex-col w-[660px] gap-4">
-              {/* 基础使用 */}
               <div className="w-full">
-                <div className="mb-2">
-                  <span className="text-[#676f83] text-[10px] font-medium leading-3">基础使用</span>
-                </div>
-                <div className="flex flex-row gap-2">
-                  <div
-                    className="w-[191px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
-                    style={{
-                      borderColor: type === 1 ? colorPrimary : '#e9ebf0',
-                    }}
-                    onClick={() => selectType(1)}
-                  >
-                    <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
-                      <ApartmentOutlined className="w-4 h-4 text-[#ffffffe5]!" />
+                <div className="flex flex-row flex-wrap gap-2">
+                  {visibleCategories.map((cat) => (
+                    <div
+                      key={cat.id}
+                      className="w-[191px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
+                      style={{
+                        borderColor:
+                          String(selectedCategoryId) === String(cat.id) ? colorPrimary : '#e9ebf0',
+                      }}
+                      onClick={() => selectCategory(cat)}
+                    >
+                      <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
+                        <AppstoreOutlined className="w-4 h-4 text-[#ffffffe5]!" />
+                      </div>
+                      <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4 truncate">
+                        {cat.name}
+                      </div>
                     </div>
-                    <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4">集成应用</div>
-                    <div className="text-[#676f83] text-[12px] font-normal leading-4">内置高性能调用的数据调度</div>
-                  </div>
-                  <div
-                    className="w-[191px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
-                    style={{
-                      borderColor: type === 2 ? colorPrimary : '#e9ebf0',
-                    }}
-                    onClick={() => selectType(2)}
-                  >
-                    <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
-                      <ApartmentOutlined className="w-4 h-4 text-[#ffffffe5]!" />
-                    </div>
-                    <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4">接口应用</div>
-                    <div className="text-[#676f83] text-[12px] font-normal leading-4">内置高性能调用的数据调度</div>
-                  </div>
-                  <div
-                    className="w-[191px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
-                    style={{
-                      borderColor: type === 3 ? colorPrimary : '#e9ebf0',
-                    }}
-                    onClick={() => selectType(3)}
-                  >
-                    <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
-                      <ApartmentOutlined className="w-4 h-4 text-[#ffffffe5]!" />
-                    </div>
-                    <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4">三方应用</div>
-                    <div className="text-[#676f83] text-[12px] font-normal leading-4">内置高性能调用的数据调度</div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-              {/* 进阶使用 */}
-              <div className="w-full">
-                <div className="mb-2">
-                  <span className="text-[#676f83] text-[10px] font-medium leading-3">进阶使用</span>
-                </div>
-                <div className="flex flex-row gap-2">
-                  <div
-                    className="w-[191px] h-[84px] p-3 border-[0.5px] relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
-                    style={{
-                      borderColor: type === 4 ? colorPrimary : '#e9ebf0',
-                    }}
-                    onClick={() => selectType(4)}
+                {hasMoreCategories && (
+                  <Button
+                    type="link"
+                    className="px-0 mt-2"
+                    icon={<DownOutlined className={showMoreCategories ? 'rotate-180' : ''} />}
+                    onClick={() => setShowMoreCategories((v) => !v)}
                   >
-                    <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
-                      <ApartmentOutlined className="w-4 h-4 text-[#ffffffe5]!" />
-                    </div>
-                    <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4">工作流</div>
-                    <div className="text-[#676f83] text-[12px] font-normal leading-4">内置高性能调用的数据调度</div>
-                  </div>
-                </div>
+                    {showMoreCategories ? '收起' : '更多分类'}
+                  </Button>
+                )}
               </div>
               {/* 分割线 */}
               <div className="w-full h-[0.5px] my-2 bg-[#10182814]" />
@@ -209,23 +194,8 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
                   />
                 </div>
               </div>
-              {/* 状态、优先级、日志级别 */}
+              {/* 优先级、日志级别（新建时状态固定为未启动，不展示） */}
               <div className="flex gap-4">
-                <div className="flex-1">
-                  <div className="mb-1 flex h-6 items-center">状态</div>
-                  <Select
-                    className="w-full h-10"
-                    size="middle"
-                    value={status}
-                    onChange={setStatus}
-                    options={[
-                      { label: '未启动', value: 0 },
-                      { label: '正常', value: 1 },
-                      { label: '异常', value: 2 },
-                      { label: '部分异常', value: 3 },
-                    ]}
-                  />
-                </div>
                 <div className="flex-1">
                   <div className="mb-1 flex h-6 items-center">优先级</div>
                   <Select
@@ -276,24 +246,32 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
             </div>
           </div>
         </div>
-        {/* 右边显示 */}
+        {/* 右边显示：当前选中分类的图片或默认描述 */}
         <div className="flex-1 shrink-0 flex justify-start relative overflow-hidden">
           <div className="h-2 2xl:h-[39px] absolute left-0 top-0 right-0 border-b border-b-[#1018280a]" />
           <div className="max-w-[760px] border-x border-x-[#1018080a]">
             <div className="w-full h-2 2xl:h-[30px]" />
             <div className="px-8 py-4">
               <h4 className="text-[#354052] text-[13px] font-bold leading-4">显示描述</h4>
-              <div className="text-[12px] font-normal leading-4 text-[#676f83] mt-1 min-h-8 max-w-96">
-                <span>通过简单的配置快速搭建一个基于流程的数据流动</span>
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ml-1 text-(--ant-color-primary)!"
-                  href="https://www.baidu.com"
-                >
-                  了解更多
-                </a>
-              </div>
+              {selectedCategory?.imageUrl ? (
+                <img
+                  src={selectedCategory.imageUrl}
+                  alt={selectedCategory.name}
+                  className="mt-2 max-w-full max-h-[280px] object-contain rounded"
+                />
+              ) : (
+                <div className="text-[12px] font-normal leading-4 text-[#676f83] mt-1 min-h-8 max-w-96">
+                  <span>通过简单的配置快速搭建一个基于流程的数据流动</span>
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ml-1 text-(--ant-color-primary)!"
+                    href="https://www.baidu.com"
+                  >
+                    了解更多
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
