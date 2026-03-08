@@ -4,23 +4,23 @@ import { useTranslation } from 'react-i18next';
 import { useDebounceFn } from 'ahooks';
 import type React from 'react';
 import { useState } from 'react';
-import { useTagStore } from '@/stores/useTagStore';
+import { tagService } from '@/services/engine';
 import { tagsService } from '@/services/common/tags/tagsApi';
 import classNames from '@/utils/classnames';
 import type { Tag } from './constant';
 import { useQueryClient } from '@tanstack/react-query';
 
 type TagItemEditorProps = {
-  tag: Tag;
+  tag: Tag & { binding_count?: number };
+  /** 应用标签使用 engine tagService */
+  tagServiceType?: 'engine' | 'common';
 };
 
 /**
  * 标签项编辑
  */
-const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
+const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag, tagServiceType = 'common' }) => {
   const { t } = useTranslation();
-  // 只订阅 setTagList 方法，不订阅 tagList 避免重复渲染
-  const { setTagList } = useTagStore();
   const queryClient = useQueryClient();
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -29,7 +29,7 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
   const [pending, setPending] = useState<boolean>(false);
 
   /**
-   * 编辑标签
+   * 编辑标签（应用标签走 engine tagService）
    */
   const editTag = async (tagID: string, newName: string) => {
     if (!newName || newName === tag.name || pending) {
@@ -38,16 +38,17 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
     }
     setPending(true);
     try {
-      await tagsService.updateTag({ id: tagID, name: newName });
-      // 更新 react-query 缓存
+      if (tagServiceType === 'engine') {
+        await tagService.updateTag(tagID, { name: newName });
+      } else {
+        await tagsService.updateTag({ id: tagID, name: newName });
+      }
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
       setIsEditing(false);
-      notification.success({
-        title: t('common.updateSuccess'),
-      });
-    } catch (err: any) {
+      notification.success({ title: t('common.updateSuccess') });
+    } catch (err: unknown) {
       notification.error({
-        title: t('common.updateFailed') + err.message,
+        title: t('common.updateFailed') + (err instanceof Error ? err.message : ''),
       });
     } finally {
       setPending(false);
@@ -55,21 +56,24 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
   };
 
   /**
-   * 移除标签
+   * 移除标签（应用标签走 engine tagService）
    */
   const removeTag = async (tagID: string) => {
-    if (pending) return;
+    if (pending) {
+      return;
+    }
     setPending(true);
     try {
-      await tagsService.deleteTag(tagID);
-      // 更新 react-query 缓存
+      if (tagServiceType === 'engine') {
+        await tagService.deleteTag(tagID);
+      } else {
+        await tagsService.deleteTag(tagID);
+      }
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
-      notification.success({
-        title: t('common.deleteSuccess'),
-      });
-    } catch (err: any) {
+      notification.success({ title: t('common.deleteSuccess') });
+    } catch (err: unknown) {
       notification.error({
-        title: t('common.deleteFailed') + err.message,
+        title: t('common.deleteFailed') + (err instanceof Error ? err.message : ''),
       });
     } finally {
       setPending(false);
@@ -108,14 +112,14 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
           <AntdTag
             closable
             onClose={() => {
-              if (tag.binding_count) {
+              if (tag.binding_count != null && tag.binding_count > 0) {
                 confirmDelete();
               } else {
                 handleRemove();
               }
             }}
           >
-            {tag.name} {tag.binding_count}
+            {tag.name} {tag.binding_count != null ? tag.binding_count : ''}
             <EditOutlined onClick={() => setIsEditing(true)} />
           </AntdTag>
         )}

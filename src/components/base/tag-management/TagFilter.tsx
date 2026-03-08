@@ -5,8 +5,8 @@ import { Dropdown, Button, Space, Input } from 'antd';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { tagsService } from '@/services/common/tags/tagsApi';
-import type { Tag } from '@/services/common/tags/tagsModel';
+import { tagService } from '@/services/engine';
+import type { Tag } from '@/services/engine/app/types';
 
 type TagFilterProps = {
   type: 'app';
@@ -28,8 +28,8 @@ const TagFilter: React.FC<TagFilterProps> = ({ type, value, onChange }) => {
    * 获取标签数据
    */
   const { data } = useQuery({
-    queryKey: ['integrated_apps_tagsFilter'],
-    queryFn: () => tagsService.getTagsList(type),
+    queryKey: ['integrated_apps_tagsFilter', type],
+    queryFn: () => tagService.listTags(type),
   });
 
   // 防抖输入

@@ -1,7 +1,7 @@
 import { ApartmentOutlined, ApiOutlined, AppstoreOutlined, SearchOutlined, SolutionOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounceFn } from 'ahooks';
-import { Button, Checkbox, Input, type InputRef, Segmented, type SegmentedProps, Space, Spin } from 'antd';
+import { Button, Checkbox, Input, type InputRef, Segmented, type SegmentedProps, Select, Space, Spin } from 'antd';
 import { isEqual } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -78,11 +78,13 @@ const Apps: React.FC = () => {
     const search = {
       name: value,
       type: searchParams.type ?? 0,
+      status: searchParams.status,
+      tags: searchParams.tags,
       pageNum: searchParams.pageNum,
       pageSize: searchParams.pageSize,
+      isMine: searchParams.isMine,
     };
     if (isEqual(search, searchParams)) {
-      // 参数没有变化，手动刷新数据
       refetch();
       return;
     }
@@ -137,6 +139,11 @@ const Apps: React.FC = () => {
     handleTagsUpdate();
   };
 
+  /** 状态筛选：0-未启动 1-正常 2-异常 3-部分异常 */
+  const onStatusChange = (value: number | undefined) => {
+    setSearchParams((prev) => ({ ...prev, status: value }));
+  };
+
   return (
     <>
       <div className="flex flex-col h-full pt-2 pr-4 pl-4">
@@ -166,7 +173,22 @@ const Apps: React.FC = () => {
               onChange={onSegmentedChange}
               value={searchParams.type ?? (0 as number)}
             />
-            <div>
+            <div className="flex items-center gap-2">
+              {/* 状态筛选 */}
+              <Select
+                placeholder={t('app.statusFilter') ?? '状态'}
+                allowClear
+                style={{ width: 100 }}
+                value={searchParams.status}
+                onChange={onStatusChange}
+                options={[
+                  { label: t('app.status.all') ?? '全部', value: undefined },
+                  { label: t('app.status.stopped') ?? '未启动', value: 0 },
+                  { label: t('app.status.normal') ?? '正常', value: 1 },
+                  { label: t('app.status.error') ?? '异常', value: 2 },
+                  { label: t('app.status.partialError') ?? '部分异常', value: 3 },
+                ]}
+              />
               {/* 区分我创建的、标签页 */}
               <Checkbox onChange={(e) => onCreatedChange(e.target.checked)}>{t('app.createBy')}</Checkbox>
               {/* 标签过滤 */}

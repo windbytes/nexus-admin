@@ -1,11 +1,14 @@
 import { EllipsisOutlined } from '@ant-design/icons';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Card } from 'antd';
+import { App as AntdApp, Card } from 'antd';
 import type React from 'react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TagSelector from '@/components/base/tag-management/selector';
 import CustomPopover from '@/components/popover';
 import { usePermission } from '@/hooks/usePermission';
+import { appService } from '@/services/engine';
 import type { EngineApp, Tag } from '@/services/engine/app/types';
 import clsx from '@/utils/classnames';
 import AppCardOperations from './AppCardOperations';
@@ -18,14 +21,56 @@ import SwitchAppModal from './swith-app-modal';
  * 应用
  * @returns
  */
+const STATUS_MAP: Record<number, { text: string; className?: string }> = {
+  0: { text: '未启动', className: 'text-[#676f83]' },
+  1: { text: '正常', className: 'text-[#52c41a]' },
+  2: { text: '异常', className: 'text-[#ff4d4f]' },
+  3: { text: '部分异常', className: 'text-[#faad14]' },
+};
+
 const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
-  const { id, name, type, remark = '', updateUser, updateTime } = app;
+  const { id, name, type, status = 0, remark = '', updateUser, updateTime } = app;
+  const statusInfo = STATUS_MAP[status] ?? STATUS_MAP[0];
+  const { message, modal } = AntdApp.useApp();
+  const { t } = useTranslation();
+
+  const updateAppMutation = useMutation({
+    mutationFn: (payload: Partial<EngineApp>) => appService.updateApp(id, payload),
+    onSuccess: () => {
+      message.success(t('app.updateApp.success'));
+      onRefresh();
+    },
+    onError: (error) => {
+      modal.error({
+        title: t('app.updateApp.error.title'),
+        content: t('app.updateApp.error.content', { error: error.message }),
+      });
+    },
+  });
+
+  const copyAppMutation = useMutation({
+    mutationFn: (payload: Partial<EngineApp>) => appService.createApp(payload),
+    onSuccess: () => {
+      message.success(t('app.copyApp.success'));
+      onRefresh();
+    },
+    onError: (error) => {
+      modal.error({
+        title: t('app.copyApp.error.title'),
+        content: t('app.copyApp.error.content', { error: error.message }),
+      });
+    },
+  });
   const navigate = useNavigate();
   const [showEditModal, setShowEditModal] = useState(false);
-  // 复制弹窗
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [showSwitchModal, setShowSwitchModal] = useState<boolean>(false);
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [tags, setTags] = useState<Tag[]>(app.tags ?? []);
+  const [switchHandler, setSwitchHandler] = useState<(type?: number) => void>(() => () => {});
+
+  const registerSwitchHandler = useCallback((handler: (type?: number) => void) => {
+    setSwitchHandler(() => handler);
+  }, []);
   // 是否有编辑权限
   const hasEditorPermission = usePermission(['engine.app.edit']);
 
@@ -60,7 +105,8 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                 {name}
               </div>
             </div>
-            <div className="flex items-center text-[10px] font-medium leading-[18px] text-[#676f83]">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium leading-[18px] text-[#676f83]">
+              <span className={clsx('shrink-0', statusInfo?.className)}>{statusInfo?.text ?? '未启动'}</span>
               <div className="truncate">
                 {type}
                 {updateUser} · 编辑于{updateTime}
@@ -124,6 +170,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                       setShowEditModal={setShowEditModal}
                       setShowDuplicateModal={setShowDuplicateModal}
                       setShowSwitchModal={setShowSwitchModal}
+                      registerSwitchHandler={registerSwitchHandler}
                     />
                   }
                   position="br"
@@ -152,15 +199,11 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
       {showEditModal && (
         <EditAppModal
           open={showEditModal}
-          appName={name}
-          appIcon={app.icon ?? ''}
-          appMode={type}
-          appDescription={remark || ''}
-          onCancel={() => {
+          app={app}
+          onCancel={() => setShowEditModal(false)}
+          onConfirm={async (payload) => {
+            await updateAppMutation.mutateAsync(payload);
             setShowEditModal(false);
-          }}
-          onConfirm={() => {
-            return Promise.resolve();
           }}
         />
       )}
@@ -173,16 +216,26 @@ const AppCard: React.FC<AppCardProps> = ({ app, onRefresh }) => {
           icon_url={app.icon_url ?? null}
           icon_background={app.iconBg ?? null}
           show={showDuplicateModal}
-          onCancel={() => {
+          onCancel={() => setShowDuplicateModal(false)}
+          onConfirm={async (info) => {
+            await copyAppMutation.mutateAsync({
+              name: info.name,
+              type: app.type,
+              icon: info.icon ?? app.icon,
+              iconBg: info.icon_background ?? app.iconBg ?? null,
+              icon_type: info.icon_type ?? app.icon_type ?? null,
+              icon_url: info.icon_url ?? app.icon_url ?? null,
+              status: app.status,
+              priority: app.priority,
+              logLevel: app.logLevel,
+              remark: app.remark,
+            });
             setShowDuplicateModal(false);
-          }}
-          onConfirm={() => {
-            return Promise.resolve();
           }}
         />
       )}
       {/* 切换应用类型弹窗 */}
-      {showSwitchModal && <SwitchAppModal />}
+      {showSwitchModal && <SwitchAppModal onConfirm={switchHandler} onClose={() => setShowSwitchModal(false)} />}
     </>
   );
 };

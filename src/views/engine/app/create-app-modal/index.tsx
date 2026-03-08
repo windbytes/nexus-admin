@@ -15,15 +15,14 @@ import { getShortcutLabel } from '@/utils/utils';
  */
 const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCreateFromTemplate }) => {
   const inputRef = useRef<InputRef>(null);
-  // 项目类型
   const [type, setType] = useState<number>(1);
-  // 项目名称
   const [name, setName] = useState<string>('');
-  // 项目描述
   const [description, setDescription] = useState<string>('');
-  // 日志级别
   const [logLevel, setLogLevel] = useState<number>(1);
-  // 主题
+  const [status, setStatus] = useState<number>(0);
+  const [priority, setPriority] = useState<number>(5);
+  const [icon, setIcon] = useState<string>('');
+  const [iconBg, setIconBg] = useState<string>('');
   const { t } = useTranslation();
   const colorPrimary = usePreferencesStore((state) => state.preferences.theme.colorPrimary);
 
@@ -54,14 +53,18 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
   };
 
   /**
-   * 点击确认的回调
+   * 点击确认的回调，payload 与 EngineApp 对齐
    */
   const handleOk = () => {
-    const data = {
+    const data: Partial<EngineApp> = {
       type,
-      name,
-      description,
+      name: name.trim(),
+      remark: description.trim() || undefined,
       logLevel,
+      status,
+      priority,
+      icon: icon.trim() || undefined,
+      iconBg: iconBg.trim() || undefined,
     };
     onOk(data);
   };
@@ -177,7 +180,7 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
                   </div>
                 </div>
               </div>
-              {/* 描述 */}
+              {/* 描述/备注 */}
               <div>
                 <div className="mb-1 flex h-6 items-center">
                   <span className="">描述</span>
@@ -185,36 +188,70 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
                 </div>
                 <TextArea rows={3} placeholder="输入应用的描述" onChange={(e) => setDescription(e.target.value)} />
               </div>
-              {/* 优先级 */}
-              {/* 日志级别 */}
-              <div>
-                <Select
-                  options={[
-                    {
-                      label: 'DEBUG',
-                      value: 1,
-                    },
-                    {
-                      label: 'INFO',
-                      value: 2,
-                    },
-                    {
-                      label: 'WARN',
-                      value: 3,
-                    },
-                    {
-                      label: 'ERROR',
-                      value: 4,
-                    },
-                  ]}
-                  defaultValue={1}
-                  className="w-full h-10"
-                  placeholder="日志级别"
-                  size="middle"
-                  allowClear
-                  onChange={(value) => setLogLevel(value)}
-                  maxLength={20}
-                />
+              {/* 图标与背景色 */}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="mb-1 flex h-6 items-center">图标（可选）</div>
+                  <Input
+                    className="w-full h-10"
+                    placeholder="iconify 名称或 URL"
+                    value={icon}
+                    onChange={(e) => setIcon(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="mb-1 flex h-6 items-center">图标背景色（可选）</div>
+                  <Input
+                    className="w-full h-10"
+                    placeholder="CSS 颜色值"
+                    value={iconBg}
+                    onChange={(e) => setIconBg(e.target.value)}
+                  />
+                </div>
+              </div>
+              {/* 状态、优先级、日志级别 */}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="mb-1 flex h-6 items-center">状态</div>
+                  <Select
+                    className="w-full h-10"
+                    size="middle"
+                    value={status}
+                    onChange={setStatus}
+                    options={[
+                      { label: '未启动', value: 0 },
+                      { label: '正常', value: 1 },
+                      { label: '异常', value: 2 },
+                      { label: '部分异常', value: 3 },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="mb-1 flex h-6 items-center">优先级</div>
+                  <Select
+                    className="w-full h-10"
+                    size="middle"
+                    value={priority}
+                    onChange={setPriority}
+                    options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ label: String(n), value: n }))}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="mb-1 flex h-6 items-center">日志级别</div>
+                  <Select
+                    options={[
+                      { label: 'DEBUG', value: 1 },
+                      { label: 'INFO', value: 2 },
+                      { label: 'WARN', value: 3 },
+                      { label: 'ERROR', value: 4 },
+                    ]}
+                    value={logLevel}
+                    className="w-full h-10"
+                    placeholder="日志级别"
+                    size="middle"
+                    onChange={(value) => setLogLevel(value ?? 1)}
+                  />
+                </div>
               </div>
             </div>
             {/* 操作按钮-跳转模板 */}

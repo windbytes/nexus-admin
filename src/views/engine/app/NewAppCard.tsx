@@ -3,8 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 import { Card } from 'antd';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { App, AppModalState } from '@/services/integrated/apps/app.ts';
-import { appsService } from '@/services/integrated/apps/appsApi.ts';
+import type { AppModalState, EngineApp } from '@/services/engine/index.ts';
+import { appService } from '@/services/engine/index.ts';
 import AppCreate from './create-app-modal';
 import ImportDsl from './create-from-dsl-modal';
 
@@ -48,7 +48,7 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
 
   // 处理应用新增
   const addAppMutation = useMutation({
-    mutationFn: (app: Partial<App>) => appsService.addApp(app),
+    mutationFn: (app: Partial<EngineApp>) => appService.createApp(app),
     onSuccess: () => {
       refresh?.();
       // 关闭弹窗
@@ -130,7 +130,7 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
   /**
    * 新增（编辑）应用确认
    */
-  const onModalOk = (app: Partial<App>) => {
+  const onModalOk = (app: Partial<EngineApp>) => {
     addAppMutation.mutate(app);
   };
 
@@ -187,7 +187,14 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
       {/* 模版中心 */}
       <AppTemplates open={state.openTemplateModal} onClose={closeTemplate} onCreateFromBlank={onCreateFromBlank} />
       {/* 导入DSL */}
-      <ImportDsl open={state.openImportModal} onClose={closeImport} />
+      <ImportDsl
+        open={state.openImportModal}
+        onClose={closeImport}
+        onSuccess={() => {
+          refresh?.();
+          closeImport();
+        }}
+      />
     </>
   );
 };

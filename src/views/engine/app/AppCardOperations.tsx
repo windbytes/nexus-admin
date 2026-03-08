@@ -2,7 +2,7 @@ import { CopyOutlined, DeleteOutlined, EditOutlined, ExportOutlined, SwitcherOut
 import { useMutation } from '@tanstack/react-query';
 import { App as AntdApp, Divider } from 'antd';
 import type React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HtmlContentProps } from '@/components/popover';
 import { appService } from '@/services/engine';
@@ -14,6 +14,8 @@ interface AppCardOperationsProps extends HtmlContentProps {
   setShowEditModal: (show: boolean) => void;
   setShowDuplicateModal: (show: boolean) => void;
   setShowSwitchModal: (show: boolean) => void;
+  /** 注册切换应用回调，供 SwitchAppModal 确认时调用 */
+  registerSwitchHandler?: (handler: (type?: number) => void) => void;
 }
 
 /**
@@ -25,30 +27,14 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
   setShowEditModal,
   setShowDuplicateModal,
   setShowSwitchModal,
+  registerSwitchHandler,
   ...props
 }) => {
   const { id } = app;
   const { message, modal } = AntdApp.useApp();
   const { t } = useTranslation();
 
-  // 处理应用修改
-  const updateAppMutation = useMutation({
-    mutationFn: (app: Partial<EngineApp>) => appService.updateApp(id, app),
-    onSuccess: () => {
-      message.success(t('app.updateApp.success'));
-      onRefresh?.();
-      // 关闭编辑弹窗
-      setShowEditModal(false);
-    },
-    onError: (error) => {
-      modal.error({
-        title: t('app.updateApp.error.title'),
-        content: t('app.updateApp.error.content', { error: error.message }),
-      });
-    },
-  });
-
-  // 处理应用删除
+  // 处理应用删除（编辑/复制由 AppCard 内弹窗提交后调用 appService）
   const deleteAppMutation = useMutation({
     mutationFn: (id: string) => appService.deleteApp(id),
     onSuccess: () => {
@@ -63,75 +49,74 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
     },
   });
 
-  // 复制应用
-  const copyAppMutation = useMutation({
-    mutationFn: (app: Partial<EngineApp>) => appService.createApp(app),
-    onSuccess: () => {
-      message.success(t('app.copyApp.success'));
-      // 刷新列表
-      onRefresh?.();
-      // 关闭复制弹窗
-      setShowDuplicateModal(false);
-    },
-    onError: (error) => {
-      modal.error({
-        title: t('app.copyApp.error.title'),
-        content: t('app.copyApp.error.content', { error: error.message }),
-      });
-    },
-  });
-
   /**
    * 确认删除应用
    */
   const onConfirmDelete = useCallback(() => {
     deleteAppMutation.mutate(id);
-  }, [id, onRefresh]);
+  }, [id, deleteAppMutation]);
 
   /**
-   * 编辑应用
+   * 导出应用：请求应用基础信息及其下所有流程的编排快照，并触发 JSON 文件下载，供其他服务或导入功能使用。
    */
-  const onEdit = useCallback(async () => {
-    updateAppMutation.mutate(app);
-  }, [app, onRefresh]);
-
-  /**
-   * 复制应用(有一个复制弹窗)
-   */
-  const onCopy = async ({ name, icon_type, icon, iconBg }: Partial<EngineApp>) => {
-    copyAppMutation.mutate({
-      name,
-      icon_type,
-      icon,
-      iconBg,
-    });
+  const exportCheck = async () => {
+    try {
+      const data = await appService.exportApp(id);
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeName = (app.name || 'app').replace(/[/\\?%*:|"<>]/g, '_');
+      const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+      link.download = `app-export-${safeName}-${timestamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      message.success(t('app.exportSuccess') ?? '导出成功');
+    } catch (error) {
+      modal.error({
+        title: t('app.exportError.title') ?? '导出失败',
+        content: (error as Error).message,
+      });
+    }
   };
 
   /**
-   * 导出应用
+   * 切换应用（阶段一占位）
    */
-  const onExport = async () => {};
+  const handleSwitch = useCallback(
+    (_type?: number) => {
+      message.info(t('app.switch') ?? '切换功能敬请期待');
+    },
+    [message, t]
+  );
 
-  /**
-   * 导出检测
-   */
-  const exportCheck = async () => {};
-
-  /**
-   * 切换应用
-   * @param type 应用类型
-   */
-  const onSwitch = (type?: number) => {};
+  useEffect(() => {
+    registerSwitchHandler?.(handleSwitch);
+    return () => {
+      registerSwitchHandler?.((_t?: number) => {
+        /* cleanup: unregister */
+      });
+    };
+  }, [registerSwitchHandler, handleSwitch]);
 
   const onMouseLeave = async () => {
     props.onClose?.();
   };
+
+  /** 关闭 CustomPopover 并执行回调 */
+  const closePopover = useCallback(() => {
+    props.onClose?.();
+  }, [props.onClose]);
 
   // 点击设置
   const onClickSetting = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     props.onClick?.();
     e.preventDefault();
+    closePopover();
     setShowEditModal(true);
   };
 
@@ -140,15 +125,19 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
     e.stopPropagation();
     props.onClick?.();
     e.preventDefault();
+    closePopover();
     setShowDuplicateModal(true);
   };
 
-  // 点击导出
+  /**
+   * 点击导出：阻止冒泡后执行导出（调用 exportCheck 下载应用与流程编排 JSON）。
+   */
   const onClickExport = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     props.onClick?.();
     e.preventDefault();
-    exportCheck();
+    closePopover();
+    await exportCheck();
   };
 
   // 点击切换
@@ -156,6 +145,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
     e.stopPropagation();
     props.onClick?.();
     e.preventDefault();
+    closePopover();
     setShowSwitchModal(true);
   };
 
@@ -164,6 +154,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
     e.stopPropagation();
     props.onClick?.();
     e.preventDefault();
+    closePopover();
     // 询问是否删除
     modal.confirm({
       title: t('app.deleteAppConfirmTitle'),
@@ -177,7 +168,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
     <div className="relative w-full py-1" onMouseLeave={onMouseLeave}>
       <button
         type="button"
-        className="mx-1 flex h-8 w-[calc(100%_-_8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
+        className="mx-1 flex h-8 w-[calc(100%-8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
         onClick={onClickSetting}
       >
         <span className="text-[13px] text-zinc-500">
@@ -185,10 +176,10 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
           {t('app.editApp')}
         </span>
       </button>
-      <Divider className="!my-1" />
+      <Divider className="my-1!" />
       <button
         type="button"
-        className="mx-1 flex h-8 w-[calc(100%_-_8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
+        className="mx-1 flex h-8 w-[calc(100%-8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
         onClick={onClickDuplicate}
       >
         <span className="text-[13px] text-zinc-500">
@@ -198,7 +189,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
       </button>
       <button
         type="button"
-        className="mx-1 flex h-8 w-[calc(100%_-_8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
+        className="mx-1 flex h-8 w-[calc(100%-8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#c8ceda33]"
         onClick={onClickExport}
       >
         <span className="text-[13px] text-zinc-500">
@@ -208,7 +199,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
       </button>
       {app.type === 1 && (
         <>
-          <Divider className="!my-1" />
+          <Divider className="my-1!" />
           <div
             className="mx-1 flex h-9 cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-[#c8ceda33]"
             onClick={onClickSwitch}
@@ -220,9 +211,9 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
           </div>
         </>
       )}
-      <Divider className="!my-1" />
+      <Divider className="my-1!" />
       <div
-        className="group mx-1 flex h-8 w-[calc(100%_-_8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#fef3f2]"
+        className="group mx-1 flex h-8 w-[calc(100%-8px)] cursor-pointer items-center gap-2 rounded-lg px-3 py-[6px] hover:bg-[#fef3f2]"
         onClick={onClickDelete}
       >
         <span className="text-[13px] text-zinc-500 group-hover:text-red-500">

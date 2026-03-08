@@ -45,6 +45,15 @@ export interface Tag {
   updateTime?: string;
 }
 
+export interface AppModalState {
+  // 打开新增项目弹窗
+  openAddModal: boolean;
+  // 打开模板项目弹窗
+  openTemplateModal: boolean;
+  // 打开上传项目弹窗
+  openImportModal: boolean;
+}
+
 /** 应用查询参数（与后端 AppQuery 对齐） */
 export interface AppQuery extends PageQueryParams {
   name?: string;
@@ -52,4 +61,36 @@ export interface AppQuery extends PageQueryParams {
   status?: number;
   tags?: string[];
   isMine?: boolean;
+}
+
+/** 流程定义元数据（与后端 FlowDefinition 对齐，用于导出） */
+export interface FlowDefinitionExport {
+  id?: string;
+  tenantId?: string;
+  appId?: string;
+  flowKey: string;
+  flowName: string;
+  description?: string;
+}
+
+/** 单条流程导出项：流程定义 + 当前版本编排快照 */
+export interface FlowExportItem {
+  flowDefinition: FlowDefinitionExport;
+  /** 当前版本的编排快照（节点、边等 DSL） */
+  flowSnapshot: Record<string, unknown>;
+}
+
+/** 应用导出结果（与后端 AppExportVO 对齐） */
+export interface AppExportVO {
+  app: EngineApp;
+  flows: FlowExportItem[];
+}
+
+/** 应用导入请求（与后端 AppImportRequest 对齐） */
+export interface AppImportRequest {
+  payload: AppExportVO;
+  /** 导入后的应用名称，不传则使用 payload.app.name */
+  appName?: string;
+  /** 租户 ID，可选 */
+  tenantId?: number;
 }

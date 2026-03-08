@@ -1,4 +1,7 @@
+import { ColorPicker, Form, Input } from 'antd';
 import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import type { AppIconType } from '@/services/engine/app/types';
 
@@ -11,19 +14,17 @@ export type DuplicateAppModalProps = {
   icon_background?: string | null;
   onConfirm: (info: {
     name: string;
-    icon_type: AppIconType;
-    icon: string;
-    icon_url?: string;
+    icon_type?: AppIconType | null;
+    icon?: string;
+    icon_url?: string | null;
     icon_background?: string | null;
   }) => Promise<void>;
   onCancel: () => void;
 };
 
 /**
- * 复制项目弹窗
- * @returns
+ * 复制应用弹窗
  */
-
 const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   show,
   appName,
@@ -34,15 +35,73 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  /**
-   * 确认
-   */
-  const onConfirmClick = async () => {};
+  const { t } = useTranslation();
+  const [form] = Form.useForm<{ name: string; icon?: string; iconBg?: string }>();
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      form.setFieldsValue({
+        name: appName ? `${appName} - 副本` : '',
+        icon: icon ?? '',
+        iconBg: icon_background ?? '',
+      });
+    }
+  }, [show, appName, icon, icon_background, form]);
+
+  const onConfirmClick = async () => {
+    try {
+      const values = await form.validateFields();
+      setSubmitting(true);
+      await onConfirm({
+        name: values.name,
+        icon_type: icon_type ?? undefined,
+        icon: values.icon ?? icon,
+        icon_url: icon_url ?? undefined,
+        icon_background: values.iconBg ?? icon_background ?? undefined,
+      });
+      form.resetFields();
+    } catch (e) {
+      if (e instanceof Error && 'errorFields' in e) {
+        return;
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <DragModal open={show} onCancel={onCancel} title="复制应用">
-      内容
+    <DragModal
+      open={show}
+      title={t('app.duplicate') ?? '复制应用'}
+      onCancel={onCancel}
+      onOk={onConfirmClick}
+      okButtonProps={{ loading: submitting }}
+      destroyOnHidden
+    >
+      <Form
+        form={form}
+        layout="horizontal"
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 18 }}
+        className="mt-2"
+      >
+        <Form.Item
+          name="name"
+          label={t('app.name') ?? '应用名称'}
+          rules={[{ required: true, message: t('common.required') ?? '请输入应用名称' }]}
+        >
+          <Input placeholder={t('app.namePlaceholder') ?? '应用名称'} maxLength={32} />
+        </Form.Item>
+        <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
+          <Input placeholder="iconify 名称或 URL" />
+        </Form.Item>
+        <Form.Item name="iconBg" label={t('app.iconBg') ?? '图标背景色'}>
+          <ColorPicker />
+        </Form.Item>
+      </Form>
     </DragModal>
   );
 };
+
 export default DuplicateAppModal;
