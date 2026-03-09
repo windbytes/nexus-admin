@@ -28,6 +28,7 @@ const translation = {
     selectAll: '全选',
     recover: '恢复',
     recycle: '回收站',
+    operate: '操作',
     more: '更多',
   },
   errorMsg: {

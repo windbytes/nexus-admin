@@ -7,8 +7,8 @@ import {
   SwitcherOutlined,
 } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { App as AntdApp, Menu } from 'antd';
 import type { MenuProps } from 'antd';
+import { App as AntdApp, Menu } from 'antd';
 import type React from 'react';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -68,7 +68,10 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
       const link = document.createElement('a');
       link.href = url;
       const safeName = (app.name || 'app').replace(/[/\\?%*:|"<>]/g, '_');
-      const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[-:T.Z]/g, '')
+        .slice(0, 14);
       link.download = `app-export-${safeName}-${timestamp}.json`;
       document.body.appendChild(link);
       link.click();
@@ -98,7 +101,7 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
   const menuItems: MenuProps['items'] = [
     {
       type: 'group',
-      label: t('common.operation.operate') ?? '操作',
+      label: t('common.operation.operate'),
       children: [
         {
           key: 'edit',
@@ -130,22 +133,19 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
           : []),
       ],
     },
-    ...(app.type === 1
-      ? [
-          {
-            type: 'group' as const,
-            label: t('app.switch') ?? '切换',
-            children: [
-              {
-                key: 'switch',
-                icon: <SwitcherOutlined />,
-                label: t('app.switch'),
-                onClick: () => runAndClose(() => setShowSwitchModal(true)),
-              },
-            ],
-          },
-        ]
-      : []),
+    {
+      type: 'group' as const,
+      label: t('app.switch') ?? '切换',
+      children: [
+        {
+          key: 'switch',
+          icon: <SwitcherOutlined />,
+          label: t('app.switch'),
+          onClick: () => runAndClose(() => setShowSwitchModal(true)),
+        },
+      ],
+    },
+
     {
       type: 'group',
       label: '',

@@ -1,6 +1,6 @@
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
-import { Card } from 'antd';
+import { Card, Tag as AntdTag } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
 import TagSelector from '@/components/base/tag-management/selector';
@@ -8,19 +8,22 @@ import CustomPopover from '@/components/popover';
 import { usePermission } from '@/hooks/usePermission';
 import type { EngineApp, Tag } from '@/services/engine/app/types';
 import clsx from '@/utils/classnames';
-import { useAppCardModalActions } from './hooks/useAppCardModals';
 import AppCardOperations from './AppCardOperations';
+import { useAppCardModalActions } from './hooks/useAppCardModals';
 import './apps.scss';
 
 /**
  * 应用
  * @returns
  */
-const STATUS_MAP: Record<number, { text: string; className?: string }> = {
-  0: { text: '未启动', className: 'text-[#676f83]' },
-  1: { text: '正常', className: 'text-[#52c41a]' },
-  2: { text: '异常', className: 'text-[#ff4d4f]' },
-  3: { text: '部分异常', className: 'text-[#faad14]' },
+const STATUS_MAP: Record<
+  number,
+  { text: string; color?: string; borderColor: string }
+> = {
+  0: { text: '未启动', color: 'default', borderColor: 'rgba(0,0,0,0.12)' },
+  1: { text: '正常', color: 'success', borderColor: '#52c41a' },
+  2: { text: '异常', color: 'error', borderColor: '#ff4d4f' },
+  3: { text: '部分异常', color: 'warning', borderColor: '#faad14' },
 };
 
 const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
@@ -44,34 +47,45 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
     <Card
       hoverable
       onClick={(e) => redirectWorkflow(e)}
-      className="group relative col-span-1 inline-flex h-[160px] cursor-pointer flex-col"
+      className="group relative col-span-1 inline-flex h-[160px] cursor-pointer flex-col overflow-hidden"
+      style={{
+        borderLeftWidth: 3,
+        borderLeftColor: (statusInfo ?? STATUS_MAP[0])?.borderColor ?? 'rgba(0,0,0,0.12)',
+      }}
       styles={{
         body: {
           padding: 0,
         },
       }}
     >
+      {/* 右上角状态角标：不挤占标题，意图清晰 */}
+      <div className="absolute top-2 right-2 z-10">
+        <AntdTag
+          color={statusInfo?.color ?? 'default'}
+          className="!text-[10px] !leading-5 !m-0 !px-1.5 !py-0 !rounded"
+        >
+          {statusInfo?.text ?? '未启动'}
+        </AntdTag>
+      </div>
+
       <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
         {/* icon */}
         <div className="relative shrink-0">icon</div>
-        {/* 应用名称 */}
-        <div className="w-0 grow py">
+        {/* 应用名称与副信息 */}
+        <div className="w-0 grow min-w-0 pr-16">
           <div className="flex items-center text-sm font-semibold leading-5 text-[#354052]">
-            <div className="truncate" title="工作流测试">
+            <div className="truncate" title={name}>
               {name}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-medium leading-[18px] text-[#676f83]">
-            <span className={clsx('shrink-0', statusInfo?.className)}>{statusInfo?.text ?? '未启动'}</span>
-            <div className="truncate">
-              {updateUser} · 编辑于{updateTime}
-            </div>
+          <div className="text-[10px] font-medium leading-[18px] text-[#676f83] truncate">
+            {updateUser} · 编辑于{updateTime}
           </div>
         </div>
       </div>
       <div className="title-wrapper h-[90px] px-[14px] text-xs leading-normal text-[#676f83]">
         <div className="line-clamp-4 group-hover:line-clamp-2" title={remark}>
-          细致描述：{remark}
+          {remark}
         </div>
       </div>
       {/* 隐藏部分 标签、操作按钮 */}
@@ -117,17 +131,17 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
               }}
             >
               {/* 这里是下拉选择编辑 */}
-                <CustomPopover
-                  htmlContent={
-                    <AppCardOperations
-                      app={app}
-                      onRefresh={onRefresh}
-                      setShowEditModal={() => openModal('edit', app)}
-                      setShowDuplicateModal={() => openModal('duplicate', app)}
-                      setShowSwitchModal={() => openModal('switch', app)}
-                      setShowSaveAsTemplateModal={() => openModal('saveAsTemplate', app)}
-                    />
-                  }
+              <CustomPopover
+                htmlContent={
+                  <AppCardOperations
+                    app={app}
+                    onRefresh={onRefresh}
+                    setShowEditModal={() => openModal('edit', app)}
+                    setShowDuplicateModal={() => openModal('duplicate', app)}
+                    setShowSwitchModal={() => openModal('switch', app)}
+                    setShowSaveAsTemplateModal={() => openModal('saveAsTemplate', app)}
+                  />
+                }
                 position="br"
                 trigger="click"
                 btnElement={
