@@ -64,10 +64,11 @@ const SaveAsTemplateModal: React.FC<SaveAsTemplateModalProps> = ({ open, app, on
       title={t('app.saveAsTemplate') ?? '存为模板'}
       onCancel={onCancel}
       onOk={submit}
+      centered
       okButtonProps={{ loading: submitting }}
       destroyOnHidden
     >
-      <Form form={form} layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} className="mt-2">
+      <Form form={form} layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} className="mt-2">
         <Form.Item name="name" label="模板名称" rules={[{ required: true, message: '请输入模板名称' }]}>
           <Input placeholder="模板名称" maxLength={64} />
         </Form.Item>

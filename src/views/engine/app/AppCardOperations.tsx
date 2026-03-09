@@ -1,11 +1,4 @@
-import {
-  CopyOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  ExportOutlined,
-  SaveOutlined,
-  SwitcherOutlined,
-} from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, EditOutlined, ExportOutlined, SaveOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import type { MenuProps } from 'antd';
 import { App as AntdApp, Menu } from 'antd';
@@ -21,19 +14,17 @@ interface AppCardOperationsProps extends HtmlContentProps {
   onRefresh?: () => void;
   setShowEditModal: (show: boolean) => void;
   setShowDuplicateModal: (show: boolean) => void;
-  setShowSwitchModal: (show: boolean) => void;
   setShowSaveAsTemplateModal?: (show: boolean) => void;
 }
 
 /**
- * 应用卡片操作（antd Menu 分组展示）
+ * 应用卡片操作（扁平菜单 + Divider 分隔）
  */
 const AppCardOperations: React.FC<AppCardOperationsProps> = ({
   app,
   onRefresh,
   setShowEditModal,
   setShowDuplicateModal,
-  setShowSwitchModal,
   setShowSaveAsTemplateModal,
   ...props
 }) => {
@@ -100,72 +91,48 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
 
   const menuItems: MenuProps['items'] = [
     {
-      type: 'group',
-      label: t('common.operation.operate'),
-      children: [
-        {
-          key: 'edit',
-          icon: <EditOutlined />,
-          label: t('app.editApp'),
-          onClick: () => runAndClose(() => setShowEditModal(true)),
-        },
-        {
-          key: 'duplicate',
-          icon: <CopyOutlined />,
-          label: t('app.duplicate'),
-          onClick: () => runAndClose(() => setShowDuplicateModal(true)),
-        },
-        {
-          key: 'export',
-          icon: <ExportOutlined />,
-          label: t('app.export'),
-          onClick: () => runAndClose(exportCheck),
-        },
-        ...(setShowSaveAsTemplateModal
-          ? [
-              {
-                key: 'saveAsTemplate',
-                icon: <SaveOutlined />,
-                label: t('app.saveAsTemplate'),
-                onClick: () => runAndClose(() => setShowSaveAsTemplateModal(true)),
-              },
-            ]
-          : []),
-      ],
+      key: 'edit',
+      icon: <EditOutlined />,
+      label: t('app.editApp'),
+      onClick: () => runAndClose(() => setShowEditModal(true)),
     },
     {
-      type: 'group' as const,
-      label: t('app.switch') ?? '切换',
-      children: [
-        {
-          key: 'switch',
-          icon: <SwitcherOutlined />,
-          label: t('app.switch'),
-          onClick: () => runAndClose(() => setShowSwitchModal(true)),
-        },
-      ],
+      key: 'duplicate',
+      icon: <CopyOutlined />,
+      label: t('app.duplicate'),
+      onClick: () => runAndClose(() => setShowDuplicateModal(true)),
     },
-
     {
-      type: 'group',
-      label: '',
-      children: [
-        {
-          key: 'delete',
-          icon: <DeleteOutlined />,
-          label: t('common.operation.delete'),
-          danger: true,
-          onClick: () =>
-            runAndClose(() =>
-              modal.confirm({
-                title: t('app.deleteAppConfirmTitle'),
-                content: t('app.deleteAppConfirmContent'),
-                width: 480,
-                onOk: onConfirmDelete,
-              })
-            ),
-        },
-      ],
+      key: 'export',
+      icon: <ExportOutlined />,
+      label: t('app.export'),
+      onClick: () => runAndClose(exportCheck),
+    },
+    ...(setShowSaveAsTemplateModal
+      ? [
+          {
+            key: 'saveAsTemplate',
+            icon: <SaveOutlined />,
+            label: t('app.saveAsTemplate'),
+            onClick: () => runAndClose(() => setShowSaveAsTemplateModal(true)),
+          },
+        ]
+      : []),
+    { type: 'divider' },
+    {
+      key: 'delete',
+      icon: <DeleteOutlined />,
+      label: t('common.operation.delete'),
+      danger: true,
+      onClick: () =>
+        runAndClose(() =>
+          modal.confirm({
+            title: t('app.deleteAppConfirmTitle'),
+            content: t('app.deleteAppConfirmContent'),
+            width: 480,
+            onOk: onConfirmDelete,
+          })
+        ),
     },
   ];
 

@@ -33,7 +33,6 @@ import { appCategoryService, appService } from '@/services/engine';
 const EditAppModal = lazy(() => import('./edit-app-modal'));
 const DuplicateAppModal = lazy(() => import('./duplicate-modal'));
 const SaveAsTemplateModal = lazy(() => import('./save-as-template-modal'));
-const SwitchAppModal = lazy(() => import('./swith-app-modal'));
 
 /** 分段中默认展示的分类数量，其余放入「更多」下拉 */
 const CATEGORY_VISIBLE_COUNT = 8;
@@ -352,15 +351,6 @@ const Apps: React.FC = () => {
                 logLevel: cardModalApp.logLevel,
                 remark: cardModalApp.remark,
               });
-              closeCardModal();
-            }}
-          />
-        )}
-        {cardModalType === 'switch' && (
-          <SwitchAppModal
-            onClose={closeCardModal}
-            onConfirm={() => {
-              message.info(t('app.switch') ?? '切换功能敬请期待');
               closeCardModal();
             }}
           />

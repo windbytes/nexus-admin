@@ -1,6 +1,6 @@
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
-import { Card, Tag as AntdTag } from 'antd';
+import { Tag as AntdTag, Card } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
 import TagSelector from '@/components/base/tag-management/selector';
@@ -16,10 +16,7 @@ import './apps.scss';
  * 应用
  * @returns
  */
-const STATUS_MAP: Record<
-  number,
-  { text: string; color?: string; borderColor: string }
-> = {
+const STATUS_MAP: Record<number, { text: string; color?: string; borderColor: string }> = {
   0: { text: '未启动', color: 'default', borderColor: 'rgba(0,0,0,0.12)' },
   1: { text: '正常', color: 'success', borderColor: '#52c41a' },
   2: { text: '异常', color: 'error', borderColor: '#ff4d4f' },
@@ -60,10 +57,7 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
     >
       {/* 右上角状态角标：不挤占标题，意图清晰 */}
       <div className="absolute top-2 right-2 z-10">
-        <AntdTag
-          color={statusInfo?.color ?? 'default'}
-          className="!text-[10px] !leading-5 !m-0 !px-1.5 !py-0 !rounded"
-        >
+        <AntdTag color={statusInfo?.color ?? 'default'} className="!text-[10px] !leading-5 !m-0 !px-1.5 !py-0 !rounded">
           {statusInfo?.text ?? '未启动'}
         </AntdTag>
       </div>
@@ -138,7 +132,6 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                     onRefresh={onRefresh}
                     setShowEditModal={() => openModal('edit', app)}
                     setShowDuplicateModal={() => openModal('duplicate', app)}
-                    setShowSwitchModal={() => openModal('switch', app)}
                     setShowSaveAsTemplateModal={() => openModal('saveAsTemplate', app)}
                   />
                 }
@@ -155,7 +148,7 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
                     'h-8 w-8 rounded-md border-none !p-2 hover:!bg-black/5'
                   )
                 }
-                popupClassName={'!w-[160px] translate-x-[-128px]'}
+                popupClassName={'!w-[184px] translate-x-[-128px]'}
               />
             </div>
           </>

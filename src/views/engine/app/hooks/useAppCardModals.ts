@@ -1,15 +1,10 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { EngineApp } from '@/services/engine/app/types';
 
-export type AppCardModalType =
-  | 'edit'
-  | 'duplicate'
-  | 'switch'
-  | 'saveAsTemplate'
-  | null;
+export type AppCardModalType = 'edit' | 'duplicate' | 'saveAsTemplate' | null;
 
 /**
- * 统一管理应用卡片相关弹窗状态（编辑 / 复制 / 切换类型 / 存为模板）
+ * 统一管理应用卡片相关弹窗状态（编辑 / 复制 / 存为模板）
  */
 export const useAppCardModals = () => {
   const [modal, setModal] = useState<AppCardModalType>(null);

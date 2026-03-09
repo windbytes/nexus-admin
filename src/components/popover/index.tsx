@@ -91,7 +91,7 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
       }
       trigger={trigger === 'hover' ? 'hover' : 'click'}
       placement={positionMap[position]}
-      open={trigger === 'hover' ? visible : undefined}
+      open={visible}
       onOpenChange={(open) => {
         if (disabled) {
           return;

@@ -1,12 +1,12 @@
+import { useQuery } from '@tanstack/react-query';
 import { useKeyPress } from 'ahooks';
 import { ColorPicker, Form, Input, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
-import type { EngineApp } from '@/services/engine/app/types';
 import { appCategoryService } from '@/services/engine';
-import { useQuery } from '@tanstack/react-query';
+import type { EngineApp } from '@/services/engine/app/types';
 
 export interface EditAppModalProps {
   open: boolean;
@@ -46,7 +46,6 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
     if (open && app) {
       form.setFieldsValue({
         name: app.name,
-        type: app.type,
         categoryId: app.categoryId ?? undefined,
         icon: app.icon ?? '',
         iconBg: app.iconBg ?? '',
@@ -86,16 +85,12 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
       title={t('app.editApp') ?? '编辑应用'}
       onCancel={onCancel}
       onOk={submit}
+      width={600}
+      centered
       okButtonProps={{ loading: submitting }}
       destroyOnHidden
     >
-      <Form
-        form={form}
-        layout="horizontal"
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 18 }}
-        className="mt-2"
-      >
+      <Form form={form} layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} className="mt-2">
         <Form.Item
           name="name"
           label={t('app.name') ?? '应用名称'}
@@ -103,21 +98,8 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
         >
           <Input placeholder={t('app.namePlaceholder') ?? '应用名称'} maxLength={32} />
         </Form.Item>
-        <Form.Item name="type" label={t('app.type') ?? '应用类型'}>
-          <Select
-            options={[
-              { label: t('app.segment.integrated') ?? '集成应用', value: 1 },
-              { label: t('app.segment.interface') ?? '接口应用', value: 2 },
-              { label: t('app.segment.tripartite') ?? '三方应用', value: 3 },
-            ]}
-          />
-        </Form.Item>
         <Form.Item name="categoryId" label="应用分类">
-          <Select
-            allowClear
-            placeholder="选择分类"
-            options={categories.map((c) => ({ label: c.name, value: c.id }))}
-          />
+          <Select allowClear placeholder="选择分类" options={categories.map((c) => ({ label: c.name, value: c.id }))} />
         </Form.Item>
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
           <Input placeholder="iconify 名称或 URL" />

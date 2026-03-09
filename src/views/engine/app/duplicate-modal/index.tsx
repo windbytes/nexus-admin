@@ -1,11 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { ColorPicker, Form, Input, Select } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
-import type { AppIconType } from '@/services/engine/app/types';
 import { appCategoryService } from '@/services/engine';
-import { useQuery } from '@tanstack/react-query';
+import type { AppIconType } from '@/services/engine/app/types';
 
 export type DuplicateAppModalProps = {
   show: boolean;
@@ -88,16 +88,11 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
       title={t('app.duplicate') ?? '复制应用'}
       onCancel={onCancel}
       onOk={onConfirmClick}
+      centered
       okButtonProps={{ loading: submitting }}
       destroyOnHidden
     >
-      <Form
-        form={form}
-        layout="horizontal"
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 18 }}
-        className="mt-2"
-      >
+      <Form form={form} layout="horizontal" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} className="mt-2">
         <Form.Item
           name="name"
           label={t('app.name') ?? '应用名称'}
@@ -106,11 +101,7 @@ const DuplicateAppModal: React.FC<DuplicateAppModalProps> = ({
           <Input placeholder={t('app.namePlaceholder') ?? '应用名称'} maxLength={32} />
         </Form.Item>
         <Form.Item name="categoryId" label="应用分类">
-          <Select
-            allowClear
-            placeholder="选择分类"
-            options={categories.map((c) => ({ label: c.name, value: c.id }))}
-          />
+          <Select allowClear placeholder="选择分类" options={categories.map((c) => ({ label: c.name, value: c.id }))} />
         </Form.Item>
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
           <Input placeholder="iconify 名称或 URL" />
