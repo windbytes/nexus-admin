@@ -1,7 +1,7 @@
 import { ExportOutlined, FileAddFilled, PlusOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { Card } from 'antd';
-import React, { useReducer } from 'react';
+import React, { Suspense, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AppModalState, EngineApp } from '@/services/engine/index.ts';
 import { appService } from '@/services/engine/index.ts';
@@ -184,16 +184,20 @@ const CreateAppCard: React.FC<CreateAppCardProps> = ({ refresh }) => {
         onCancel={onModalCancel}
         onCreateFromTemplate={onCreateFromTemplate}
       />
-      {/* 模版中心 */}
-      <AppTemplates
-        open={state.openTemplateModal}
-        onClose={closeTemplate}
-        onCreateFromBlank={onCreateFromBlank}
-        onTemplateCreateSuccess={() => {
-          refresh?.();
-          closeTemplate();
-        }}
-      />
+      {/* 模版中心：仅打开时挂载并拉取模板/分类数据，避免列表页切换分段时重复请求 */}
+      {state.openTemplateModal && (
+        <Suspense fallback={null}>
+          <AppTemplates
+            open
+            onClose={closeTemplate}
+            onCreateFromBlank={onCreateFromBlank}
+            onTemplateCreateSuccess={() => {
+              refresh?.();
+              closeTemplate();
+            }}
+          />
+        </Suspense>
+      )}
       {/* 导入DSL */}
       <ImportDsl
         open={state.openImportModal}

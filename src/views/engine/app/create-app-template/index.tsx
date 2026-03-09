@@ -41,30 +41,29 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
     pageSize: 20,
   });
 
-  // 获取分类数据
+  // 仅弹窗打开时请求，避免在列表页切换分段时重复拉取
   const { data: categories = [] } = useQuery({
     queryKey: ['template_categories'],
     queryFn: templateService.getCategories,
+    enabled: open,
   });
 
-  // 获取筛选选项
   const { data: filterOptions = [] } = useQuery({
     queryKey: ['template_filter_options'],
     queryFn: templateService.getFilterOptions,
+    enabled: open,
   });
 
-  // 搜索模板
   const { data: searchResult, isFetching: searchLoading } = useQuery({
     queryKey: ['template_search', searchParams],
     queryFn: () => templateService.searchTemplates(searchParams),
-    enabled: !!searchParams,
+    enabled: open && !!searchParams,
   });
 
-  // 根据分类获取模板
   const { data: categoryTemplates = [], isFetching: categoryLoading } = useQuery({
     queryKey: ['template_category', selectedCategory],
     queryFn: () => templateService.getTemplatesByCategory(selectedCategory),
-    enabled: selectedCategory !== 'recommended',
+    enabled: open && selectedCategory !== 'recommended',
   });
 
   // 当前显示的模板

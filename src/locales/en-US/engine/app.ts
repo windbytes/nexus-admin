@@ -5,6 +5,8 @@
 const translation = {
   segment: {
     all: 'All',
+    more: 'More',
+    collapse: 'Collapse',
     integrated: 'Integrated',
     interface: 'Interface',
     tripartite: 'Third-party',

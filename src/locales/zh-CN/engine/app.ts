@@ -6,6 +6,8 @@ const translation = {
   /** 类型分段（全部 / 集成 / 接口 / 三方） */
   segment: {
     all: '全部',
+    more: '更多',
+    collapse: '收起',
     integrated: '集成项目',
     interface: '接口项目',
     tripartite: '三方项目',

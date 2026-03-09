@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { App as AntdApp, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import type React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { HtmlContentProps } from '@/components/popover';
 import { appService } from '@/services/engine';
@@ -23,8 +23,6 @@ interface AppCardOperationsProps extends HtmlContentProps {
   setShowDuplicateModal: (show: boolean) => void;
   setShowSwitchModal: (show: boolean) => void;
   setShowSaveAsTemplateModal?: (show: boolean) => void;
-  /** 注册切换应用回调，供 SwitchAppModal 确认时调用 */
-  registerSwitchHandler?: (handler: (type?: number) => void) => void;
 }
 
 /**
@@ -37,7 +35,6 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
   setShowDuplicateModal,
   setShowSwitchModal,
   setShowSaveAsTemplateModal,
-  registerSwitchHandler,
   ...props
 }) => {
   const { id } = app;
@@ -85,22 +82,6 @@ const AppCardOperations: React.FC<AppCardOperationsProps> = ({
       });
     }
   }, [id, app.name, message, modal, t]);
-
-  const handleSwitch = useCallback(
-    (_type?: number) => {
-      message.info(t('app.switch') ?? '切换功能敬请期待');
-    },
-    [message, t]
-  );
-
-  useEffect(() => {
-    registerSwitchHandler?.(handleSwitch);
-    return () => {
-      registerSwitchHandler?.((_t?: number) => {
-        /* unregister */
-      });
-    };
-  }, [registerSwitchHandler, handleSwitch]);
 
   const closePopover = useCallback(() => {
     props.onClose?.();

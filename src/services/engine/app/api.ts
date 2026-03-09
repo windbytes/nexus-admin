@@ -19,18 +19,18 @@ import type {
 const AppsApi = {
   list: '/engine/apps',
   getById: (id: string) => `/engine/apps/${id}`,
-  create: '/engine/apps',
-  update: (id: string) => `/engine/apps/${id}`,
-  delete: (id: string) => `/engine/apps/${id}`,
+  create: '/engine/apps/create',
+  update: (id: string) => `/engine/apps/update/${id}`,
+  delete: (id: string) => `/engine/apps/delete/${id}`,
   export: (id: string) => `/engine/apps/${id}/export`,
   import: '/engine/apps/import',
 };
 
 const TagsApi = {
   getTagsList: '/engine/tags/getTagsList',
-  create: '/engine/tags',
-  update: (id: string) => `/engine/tags/${id}`,
-  delete: (id: string) => `/engine/tags/${id}`,
+  create: '/engine/tags/create',
+  update: (id: string) => `/engine/tags/update/${id}`,
+  delete: (id: string) => `/engine/tags/delete/${id}`,
   bind: '/engine/tags/bind',
   unbind: '/engine/tags/unbind',
 };
@@ -58,11 +58,11 @@ export const appService = {
   },
 
   async updateApp(id: string, app: Partial<EngineApp>): Promise<EngineApp> {
-    return HttpRequest.put<EngineApp>({ url: AppsApi.update(id), data: { ...app, id } });
+    return HttpRequest.post<EngineApp>({ url: AppsApi.update(id), data: { ...app, id } });
   },
 
   async deleteApp(id: string): Promise<void> {
-    await HttpRequest.delete({ url: AppsApi.delete(id) });
+    await HttpRequest.post({ url: AppsApi.delete(id) });
   },
 
   /**
@@ -175,11 +175,11 @@ export const tagService = {
   },
 
   async updateTag(id: string, tag: Partial<Tag>): Promise<Tag> {
-    return HttpRequest.put<Tag>({ url: TagsApi.update(id), data: { ...tag, id } });
+    return HttpRequest.post<Tag>({ url: TagsApi.update(id), data: { ...tag, id } });
   },
 
   async deleteTag(id: string): Promise<boolean> {
-    return HttpRequest.delete<boolean>({ url: TagsApi.delete(id) });
+    return HttpRequest.post<boolean>({ url: TagsApi.delete(id) });
   },
 
   async bindTags(tagIds: string[], appId: string): Promise<boolean> {
@@ -187,6 +187,6 @@ export const tagService = {
   },
 
   async unbindTag(tagId: string, appId: string): Promise<boolean> {
-    return HttpRequest.delete<boolean>({ url: TagsApi.unbind, params: { tagId, appId } });
+    return HttpRequest.post<boolean>({ url: TagsApi.unbind, params: { tagId, appId } });
   },
 };
