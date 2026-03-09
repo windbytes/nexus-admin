@@ -264,11 +264,7 @@ const Apps: React.FC = () => {
               />
               {hasRestCategories && (
                 <Dropdown menu={{ items: moreDropdownItems, onClick: onDropdownCategorySelect }} trigger={['click']}>
-                  <Button
-                    type={selectedRestCategory ? 'primary' : 'default'}
-                    className="inline-flex items-center"
-                    variant="filled"
-                  >
+                  <Button type={selectedRestCategory ? 'primary' : 'default'} className="inline-flex items-center">
                     <Space size={6} className="text-[13px] font-medium leading-[18px]">
                       <AppstoreOutlined className="text-current shrink-0" />
                       <span className="truncate max-w-[120px]">

@@ -1,21 +1,21 @@
-import { ArrowRightOutlined, DownOutlined, AppstoreOutlined } from '@ant-design/icons';
-import { Button, Input, type InputRef, Select, Space } from 'antd';
+import { AppstoreOutlined, ArrowRightOutlined, DownOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { Button, ColorPicker, Input, type InputRef, Select, Space } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { usePlatformHotkey } from '@/hooks/usePlatformHotkey';
-import type { AppCategory, EngineApp } from '@/services/engine/app/types';
 import { appCategoryService } from '@/services/engine';
+import type { AppCategory, EngineApp } from '@/services/engine/app/types';
 import { usePreferencesStore } from '@/stores/store';
 import { getShortcutLabel } from '@/utils/utils';
-import { useQuery } from '@tanstack/react-query';
 
 /**
  * 添加项目弹窗
  * @returns
  */
-const SHOW_FIRST_N = 4;
+const SHOW_FIRST_N = 6;
 
 const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCreateFromTemplate }) => {
   const inputRef = useRef<InputRef>(null);
@@ -26,7 +26,6 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
   });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | number | null>(null);
   const [showMoreCategories, setShowMoreCategories] = useState(false);
-  const [type, setType] = useState<number>(1);
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [logLevel, setLogLevel] = useState<number>(1);
@@ -41,8 +40,22 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
     [categories, showMoreCategories]
   );
   const hasMoreCategories = categories.length > SHOW_FIRST_N;
+
+  // 新增时默认选中第一个分类（仅在弹窗打开时生效）
+  const prevOpenRef = useRef(false);
+  useEffect(() => {
+    const first = categories[0];
+    if (open && !prevOpenRef.current && first != null) {
+      setSelectedCategoryId(String(first.id));
+    }
+    prevOpenRef.current = open;
+  }, [open, categories]);
+
   const selectedCategory = useMemo(
-    () => categories.find((c) => String(c.id) === String(selectedCategoryId) || Number(c.id) === Number(selectedCategoryId)),
+    () =>
+      categories.find(
+        (c) => String(c.id) === String(selectedCategoryId) || Number(c.id) === Number(selectedCategoryId)
+      ),
     [categories, selectedCategoryId]
   );
 
@@ -63,7 +76,6 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
    */
   const selectCategory = (cat: AppCategory) => {
     setSelectedCategoryId(cat.id);
-    setType(1);
   };
 
   const handleAfterOpen = (open: boolean) => {
@@ -77,7 +89,6 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
    */
   const handleOk = () => {
     const data: Partial<EngineApp> = {
-      type,
       categoryId: selectedCategoryId != null ? String(selectedCategoryId) : undefined,
       name: name.trim(),
       remark: description.trim() || undefined,
@@ -117,10 +128,9 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
                   {visibleCategories.map((cat) => (
                     <div
                       key={cat.id}
-                      className="w-[191px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
+                      className="w-[180px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
                       style={{
-                        borderColor:
-                          String(selectedCategoryId) === String(cat.id) ? colorPrimary : '#e9ebf0',
+                        borderColor: String(selectedCategoryId) === String(cat.id) ? colorPrimary : '#e9ebf0',
                       }}
                       onClick={() => selectCategory(cat)}
                     >
@@ -186,11 +196,10 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
                 </div>
                 <div className="flex-1">
                   <div className="mb-1 flex h-6 items-center">图标背景色（可选）</div>
-                  <Input
-                    className="w-full h-10"
-                    placeholder="CSS 颜色值"
+                  <ColorPicker
                     value={iconBg}
-                    onChange={(e) => setIconBg(e.target.value)}
+                    onChange={(value) => setIconBg(value.toHexString())}
+                    onClear={() => setIconBg('')}
                   />
                 </div>
               </div>

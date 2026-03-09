@@ -53,8 +53,8 @@ export const appService = {
     return HttpRequest.get<EngineApp>({ url: AppsApi.getById(id) }, { successMessageMode: 'none' });
   },
 
-  async createApp(app: Partial<EngineApp>): Promise<EngineApp> {
-    return HttpRequest.post<EngineApp>({ url: AppsApi.create, data: app });
+  async createApp(app: Partial<EngineApp>): Promise<boolean> {
+    return HttpRequest.post<boolean>({ url: AppsApi.create, data: app });
   },
 
   async updateApp(id: string, app: Partial<EngineApp>): Promise<EngineApp> {
