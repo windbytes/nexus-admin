@@ -128,7 +128,7 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
       footer={null}
       centered
       style={{ height: '90vh' }}
-      styles={{ body: { height: 'calc(90vh - 92px)', overflowY: 'auto' } }}
+      styles={{ body: { height: 'calc(90vh - 92px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' } }}
       width="80%"
       open={open}
       title={
@@ -142,18 +142,22 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
       }
       onCancel={onClose}
     >
-      <div className="relative flex h-full overflow-y-auto">
-        {/* 左侧分类导航 */}
-        <CategorySidebar
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
-          onCreateBlank={handleCreateBlank}
-        />
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        {/* 左侧分类导航：内部自己滚动 */}
+        <div className="h-full min-h-0 shrink-0">
+          <CategorySidebar
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+            onCreateBlank={handleCreateBlank}
+          />
+        </div>
 
-        {/* 右侧模板展示 */}
-        <div className="h-full flex-1 shrink-0 grow overflow-auto px-6">
-          <TemplateGrid templates={currentTemplates} loading={isLoading} onTemplateSelect={handleTemplateSelect} />
+        {/* 右侧模板展示：内部 div 滚动 */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-6">
+          <div className="min-h-0 flex-1 overflow-auto">
+            <TemplateGrid templates={currentTemplates} loading={isLoading} onTemplateSelect={handleTemplateSelect} />
+          </div>
         </div>
       </div>
     </DragModal>
