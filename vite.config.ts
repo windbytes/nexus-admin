@@ -6,6 +6,8 @@ import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
+const buildId = Math.random().toString(36).slice(2, 8);
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
@@ -23,8 +25,8 @@ export default defineConfig(({ mode }) => {
       }),
       tailwindcss(),
       viteCompression({
-        verbose: true,
-        disable: isProduction,
+        verbose: !isProduction,
+        disable: !isProduction,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
@@ -33,48 +35,23 @@ export default defineConfig(({ mode }) => {
       Icons({
         compiler: 'jsx',
       }),
-      mockDevServerPlugin({
-        prefix: '/api',
-      }),
+      // mock 插件仅开发环境启用
+      ...(mode === 'development' ? [mockDevServerPlugin({ prefix: '/api' })] : []),
     ],
     // 配置分包
     build: {
+      // 生产环境可设为 true 或 'hidden' 便于接入 Sentry 等错误追踪
       sourcemap: false,
       // css代码分割
       cssCodeSplit: isProduction,
       cssTarget: 'chrome80',
-      // 只在生产环境下启用terser代码压缩
-      ...(isProduction && {
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-            pure_funcs: ['console.log', 'console.info'],
-            passes: 2,
-          },
-          mangle: {
-            toplevel: true,
-            safari10: true,
-          },
-          format: {
-            comments: false,
-          },
-        },
-      }),
-      // 优化构建
-      target: 'es2015',
+      // 使用 Vite 8 默认 Oxc minifier（比 Terser 更快）
+      target: 'es2020',
       // 设置 chunk 大小警告限制
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 800,
       rolldownOptions: {
         output: {
-          minify: true,
-          chunkFileNames: 'static/js/[hash].js',
-          entryFileNames: 'static/js/[hash].js',
-          // 按文件类型进行拆分文件夹
-          assetFileNames: 'static/[ext]/[hash].[ext]',
-          // 使用 rolldown 的 advancedChunks 进行高级代码分割
-          advancedChunks: {
+          codeSplitting: {
             groups: [
               {
                 name: 'lib-react',
@@ -106,6 +83,11 @@ export default defineConfig(({ mode }) => {
               },
             ],
           },
+          minify: true,
+          chunkFileNames: `static/js/${buildId}-[hash].js`,
+          entryFileNames: `static/js/${buildId}-[hash].js`,
+          // 按文件类型进行拆分文件夹
+          assetFileNames: `static/[ext]/${buildId}-[hash].[ext]`,
         },
       },
     },
@@ -118,7 +100,19 @@ export default defineConfig(({ mode }) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: ['react', 'react-dom', 'antd', 'lodash-es', 'dayjs', 'axios', 'echarts', '@ant-design/icons'],
+      include: [
+        'react',
+        'react-dom',
+        'antd',
+        'lodash-es',
+        'dayjs',
+        'axios',
+        'echarts',
+        '@ant-design/icons',
+        '@tanstack/react-query',
+        '@tanstack/react-router',
+        '@monaco-editor/react',
+      ],
     },
     // css预处理器
     css: {
@@ -131,11 +125,13 @@ export default defineConfig(({ mode }) => {
     // 服务器配置以及代理
     server: {
       port: 8000,
+      host: true,
       proxy: {
         '/api': {
           target: 'http://localhost:9193',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          ws: true,
+          rewrite: (pathName) => pathName.replace(/^\/api/, ''),
         },
       },
     },

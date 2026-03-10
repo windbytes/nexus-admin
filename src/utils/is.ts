@@ -18,4 +18,3 @@ export function isString(val: unknown): val is string {
 // 判断系统平台
 export const isMac = () => /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 export const isWindowsOrLinux = () => !isMac(); // 默认非 Mac 都按 Windows 处理
-

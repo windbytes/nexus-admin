@@ -1,6 +1,3 @@
-import type { RequestOptions } from '@/types/axios';
-import type { Response } from '@/types/global';
-import { isFunction } from '@/utils/is';
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -9,6 +6,9 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { cloneDeep } from 'lodash-es';
+import type { RequestOptions } from '@/types/axios';
+import type { Response } from '@/types/global';
+import { isFunction } from '@/utils/is';
 import type { CreateAxiosOptions } from './transform';
 
 /**

@@ -12,6 +12,7 @@ import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
 import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import type { RoleModel } from '@/services/system/role/type';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
@@ -28,7 +29,7 @@ const Login: React.FC = () => {
   const [form] = Form.useForm();
   const inputRef = useRef(null);
   const navigate = useNavigate();
-  const { setMenus } = useMenuStore();
+  const { setMenus, setButtonPermissions } = useMenuStore();
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ const Login: React.FC = () => {
   // 角色选择相关状态
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [loginData, setLoginData] = useState<LoginResponse | null>(null);
+  const loginData = useRef<LoginResponse | null>(null);
   // 动画状态
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
@@ -58,9 +59,12 @@ const Login: React.FC = () => {
   /**
    * 处理角色选择
    */
+  /**
+   * 处理角色选择
+   */
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
-    const currentLoginData = loginResponseData || loginData;
+    const currentLoginData = loginResponseData || loginData.current;
     if (!currentLoginData) {
       return;
     }
@@ -77,12 +81,13 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
-
+      const loginResponse = await loginService.confirmRole(currentLoginData.accessToken, selectedRole.id);
+      console.log(loginResponse);
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
-      userStore.setCurrentRoleId(roleId);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, loginResponse.accessToken);
+      userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
-      const roleModels = rolesToUse.map((role) => ({
+      const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
         roleCode: role.roleType, // 使用roleType作为roleCode
         roleName: role.roleName,
@@ -99,7 +104,10 @@ const Login: React.FC = () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
-
+      // 获取角色配置的权限点（按钮权限）
+      const buttonPermissions = loginResponse.permissions;
+      setButtonPermissions(buttonPermissions);
+      queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
       let homePath = currentLoginData.homePath;
       if (!homePath) {
@@ -152,7 +160,7 @@ const Login: React.FC = () => {
    */
   const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key || '';
+    values.captchaKey = data?.key || '';
     setLoading(true);
 
     try {
@@ -194,7 +202,7 @@ const Login: React.FC = () => {
         case HttpCodeEnum.SUCCESS:
           {
             // 保存登录数据
-            setLoginData(loginResponse);
+            loginData.current = loginResponse;
 
             // 检查角色信息
             if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
@@ -242,7 +250,6 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
-
   /**
    * 刷新验证码
    */
@@ -420,7 +427,7 @@ const Login: React.FC = () => {
         title="选择角色"
         open={showRoleSelector}
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         footer={null}
         width={600}
         centered

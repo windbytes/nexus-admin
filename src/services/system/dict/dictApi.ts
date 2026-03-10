@@ -1,173 +1,255 @@
+import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
-import type { DictItemSearchParams, DictModel, DictSearchParams } from './type';
+import type {
+  DictColumnModel,
+  DictColumnRecord,
+  DictDataManualModel,
+  DictDataManualQueryParams,
+  DictDataManualRecord,
+  DictModel,
+  DictRecord,
+  DictSaveFullRequest,
+  DictSearchParams,
+  DictSourceModel,
+  DictSourceRecord,
+} from './type.d';
 
 /**
- * 字典相关接口
+ * 数据字典相关接口路径枚举
  */
-const DictApi = {
-  /**
-   * 查询字典数据
-   */
-  getDictList: '/system/dict/getDictList',
-
-  /**
-   * 创建字典
-   */
+const DictAction = {
+  /** 分页查询字典列表 */
+  queryDictListPage: '/system/dict/queryDictListPage',
+  /** 根据 id 查询字典详情 */
+  getDictById: '/system/dict/getDictById',
+  /** 根据编码查询字典 */
+  getDictByCode: '/system/dict/getDictByCode',
+  /** 新增字典定义 */
   addDict: '/system/dict/addDict',
-  /**
-   * 删除字典
-   */
-  deleteDict: '/system/dict/deleteDict',
-  /**
-   * 更新字典
-   */
+  /** 更新字典定义 */
   updateDict: '/system/dict/updateDict',
+  /** 一次提交保存字典及关联表（定义、数据源、列映射、手工数据） */
+  saveDictFull: '/system/dict/saveDictFull',
+  /** 逻辑删除字典定义 */
+  deleteDict: '/system/dict/deleteDict',
+  /** 批量逻辑删除字典定义 */
+  batchDeleteDict: '/system/dict/batchDeleteDict',
+  /** 导出字典 CSV */
+  exportDict: '/system/dict/exportDict',
+  /** 导入字典 CSV */
+  importDict: '/system/dict/importDict',
+  /** 按字典 id 查询数据源配置列表 */
+  listSource: '/system/dict/listSource',
+  /** 保存数据源配置 */
+  saveDictSource: '/system/dict/saveDictSource',
+  /** 按字典 id 查询列映射列表 */
+  listColumn: '/system/dict/listColumn',
+  /** 新增列映射 */
+  addDictColumn: '/system/dict/addDictColumn',
+  /** 更新列映射 */
+  updateDictColumn: '/system/dict/updateDictColumn',
+  /** 删除列映射 */
+  deleteDictColumn: '/system/dict/deleteDictColumn',
+  /** 按字典 id 查询手工数据列表（仅启用） */
+  listDataManual: '/system/dict/listDataManual',
+  /** 分页查询某字典下的手工数据 */
+  pageDataManual: '/system/dict/pageDataManual',
+  /** 新增手工数据项 */
+  addDictDataManual: '/system/dict/addDictDataManual',
+  /** 更新手工数据项 */
+  updateDictDataManual: '/system/dict/updateDictDataManual',
+  /** 删除手工数据项 */
+  deleteDictDataManual: '/system/dict/deleteDictDataManual',
+} as const;
 
-  /**
-   * 查询字典条目
-   */
-  getDictItemList: '/system/dict/getDictItemList',
-  /**
-   * 创建字典条目
-   */
-  addDictItem: '/system/dict/addDictItem',
-  /**
-   * 删除字典条目
-   */
-  deleteDictItem: '/system/dict/deleteDictItem',
-  /**
-   * 更新字典条目
-   */
-  updateDictItem: '/system/dict/updateDictItem',
-};
-
-interface IDictService {
-  /**
-   * 查询字典数据
-   * @param searchParams 字典查询参数
-   * @returns 字典数据
-   */
-  getDictList(searchParams: DictSearchParams): Promise<Record<string, any>>;
-  /**
-   * 创建字典
-   * @param dict 字典信息
-   * @returns 创建结果
-   */
-  addDict(dict: Partial<DictModel>): Promise<boolean>;
-  /**
-   * 删除字典
-   * @param dict 字典编码
-   * @returns 删除结果
-   */
-  deleteDict(dictCode: string): Promise<boolean>;
-  /**
-   * 更新字典
-   * @param dict 字典信息
-   * @returns 更新结果
-   */
-  updateDict(dict: Partial<DictModel>): Promise<boolean>;
-  /**
-   * 查询字典条目
-   * @param dictItems 字典条目查询参数
-   * @returns 字典条目
-   */
-  getDictItemList(dictItems: DictItemSearchParams): Promise<Record<string, any>>;
-  /**
-   * 创建字典条目
-   * @param dictItem 字典条目信息
-   * @returns 创建结果
-   */
-  addDictItem(dictItem: Partial<DictModel>): Promise<boolean>;
-  /**
-   * 删除字典条目
-   * @param dictCode 字典编码
-   * @param itemCode 字典条目编码
-   * @returns 删除结果
-   */
-  deleteDictItem(dictCode: string, itemCode: string): Promise<boolean>;
-  /**
-   * 更新字典条目
-   * @param dictItem 字典条目信息
-   * @returns 更新结果
-   */
-  updateDictItem(dictItem: Partial<DictModel>): Promise<boolean>;
+/**
+ * 数据字典服务接口定义
+ */
+export interface IDictService {
+  /** 分页查询字典列表 */
+  queryDictListPage(params: DictSearchParams): Promise<PageResult<DictModel>>;
+  /** 根据 id 查询字典详情 */
+  getDictById(id: string): Promise<DictModel>;
+  /** 根据编码查询字典 */
+  getDictByCode(dictCode: string): Promise<DictModel>;
+  /** 新增字典定义 */
+  addDict(record: DictRecord): Promise<number>;
+  /** 更新字典定义 */
+  updateDict(record: DictRecord): Promise<number>;
+  /** 一次提交保存字典及关联表 */
+  saveDictFull(request: DictSaveFullRequest): Promise<number>;
+  /** 逻辑删除字典定义 */
+  deleteDict(id: string): Promise<boolean>;
+  /** 批量逻辑删除字典定义 */
+  batchDeleteDict(ids: string[]): Promise<boolean>;
+  /** 导出字典（CSV），返回 Blob */
+  exportDict(options: { type: 'all' | 'selected'; selectedIds?: string[]; searchParams?: DictSearchParams }): Promise<Blob>;
+  /** 导入字典（CSV 文件），返回成功条数 */
+  importDict(file: File): Promise<number>;
+  /** 按字典 id 查询数据源配置列表 */
+  listSourceByDictId(dictId: string): Promise<DictSourceModel[]>;
+  /** 保存数据源配置（新增或更新） */
+  saveDictSource(record: DictSourceRecord): Promise<number>;
+  /** 按字典 id 查询列映射列表 */
+  listColumnByDictId(dictId: string): Promise<DictColumnModel[]>;
+  /** 新增列映射 */
+  addDictColumn(record: DictColumnRecord): Promise<number>;
+  /** 更新列映射 */
+  updateDictColumn(record: DictColumnRecord): Promise<number>;
+  /** 删除列映射 */
+  deleteDictColumn(id: string): Promise<boolean>;
+  /** 按字典 id 查询手工数据列表（仅启用） */
+  listDataManualByDictId(dictId: string): Promise<DictDataManualModel[]>;
+  /** 分页查询某字典下的手工数据 */
+  pageDataManual(params: DictDataManualQueryParams): Promise<PageResult<DictDataManualModel>>;
+  /** 新增手工数据项 */
+  addDictDataManual(record: DictDataManualRecord): Promise<number>;
+  /** 更新手工数据项 */
+  updateDictDataManual(record: DictDataManualRecord): Promise<number>;
+  /** 删除手工数据项 */
+  deleteDictDataManual(id: string): Promise<boolean>;
 }
 
 /**
- * 字典服务实现
+ * 数据字典服务实现
  */
 export const dictService: IDictService = {
-  /**
-   * 查询字典数据
-   * @param searchParams 字典查询参数
-   * @returns 字典数据
-   */
-  getDictList(searchParams: DictSearchParams): Promise<Record<string, any>> {
-    return HttpRequest.get({ url: DictApi.getDictList, params: searchParams }, { successMessageMode: 'none' });
+  /** @inheritdoc */
+  async queryDictListPage(params: DictSearchParams): Promise<PageResult<DictModel>> {
+    const res = await HttpRequest.post(
+      { url: DictAction.queryDictListPage, data: params },
+      { successMessageMode: 'none' }
+    );
+    return res;
+  },
+
+  /** @inheritdoc */
+  async getDictById(id: string): Promise<DictModel> {
+    return HttpRequest.get({ url: `${DictAction.getDictById}/${id}` }, { successMessageMode: 'none' });
+  },
+
+  /** @inheritdoc */
+  async getDictByCode(dictCode: string): Promise<DictModel> {
+    return HttpRequest.get({ url: DictAction.getDictByCode, params: { dictCode } }, { successMessageMode: 'none' });
+  },
+
+  /** @inheritdoc */
+  async addDict(record: DictRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.addDict, data: record });
+  },
+
+  /** @inheritdoc */
+  async updateDict(record: DictRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.updateDict, data: record });
   },
 
   /**
-   * 创建字典
-   * @param dict 字典信息
-   * @returns 创建结果
+   * 一次提交保存字典及关联表（定义、数据源、列映射、手工数据），后端在一个事务内全量覆盖关联表。
+   * @param request 包含 basic（必填）、source（可选）、columns（可选）、manualData（可选）
+   * @returns 字典更新影响行数
    */
-  addDict(dict: Partial<DictModel>): Promise<boolean> {
-    return HttpRequest.post({ url: DictApi.addDict, params: dict });
+  async saveDictFull(request: DictSaveFullRequest): Promise<number> {
+    return HttpRequest.post({ url: DictAction.saveDictFull, data: request });
   },
 
-  /**
-   * 删除字典
-   * @param dict 字典编码
-   * @returns 删除结果
-   */
-  deleteDict(dictCode: string): Promise<boolean> {
-    return HttpRequest.delete({
-      url: DictApi.deleteDict,
-      params: { dictCode },
+  /** @inheritdoc */
+  async deleteDict(id: string): Promise<boolean> {
+    return HttpRequest.post({ url: `${DictAction.deleteDict}/${id}` });
+  },
+
+  /** @inheritdoc */
+  async batchDeleteDict(ids: string[]): Promise<boolean> {
+    const numericIds = ids.map((id) => (typeof id === 'string' ? Number(id) : id));
+    return HttpRequest.post({ url: DictAction.batchDeleteDict, data: numericIds });
+  },
+
+  /** @inheritdoc */
+  async exportDict(options: {
+    type: 'all' | 'selected';
+    selectedIds?: string[];
+    searchParams?: DictSearchParams;
+  }): Promise<Blob> {
+    const body = {
+      type: options.type,
+      selectedIds:
+        options.type === 'selected' && options.selectedIds?.length
+          ? options.selectedIds.map((id) => (typeof id === 'string' ? Number(id) : id))
+          : undefined,
+      searchParams: options.type === 'all' ? options.searchParams : undefined,
+    };
+    return HttpRequest.postDownload<Blob>(
+      { url: DictAction.exportDict, data: body },
+      { successMessageMode: 'none', errorMessageMode: 'none' }
+    );
+  },
+
+  /** @inheritdoc */
+  async importDict(file: File): Promise<number> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return HttpRequest.post({
+      url: DictAction.importDict,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  /**
-   * 更新字典
-   * @param dict 字典信息
-   * @returns 更新结果
-   */
-  updateDict(dict: Partial<DictModel>): Promise<boolean> {
-    return HttpRequest.post({ url: DictApi.updateDict, params: dict });
+
+  /** @inheritdoc */
+  async listSourceByDictId(dictId: string): Promise<DictSourceModel[]> {
+    return HttpRequest.get({ url: DictAction.listSource, params: { dictId } }, { successMessageMode: 'none' });
   },
-  /**
-   * 查询字典条目
-   * @param dictItems 字典条目查询参数
-   * @returns 字典条目
-   */
-  getDictItemList(dictItems: DictItemSearchParams): Promise<Record<string, any>> {
-    return HttpRequest.get({ url: DictApi.getDictItemList, params: dictItems }, { successMessageMode: 'none' });
+
+  /** @inheritdoc */
+  async saveDictSource(record: DictSourceRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.saveDictSource, data: record });
   },
-  /**
-   * 创建字典条目
-   * @param dictItem 字典条目信息
-   * @returns 创建结果
-   */
-  addDictItem(dictItem: Partial<DictModel>): Promise<boolean> {
-    return HttpRequest.post({ url: DictApi.addDictItem, params: dictItem });
+
+  /** @inheritdoc */
+  async listColumnByDictId(dictId: string): Promise<DictColumnModel[]> {
+    return HttpRequest.get({ url: DictAction.listColumn, params: { dictId } }, { successMessageMode: 'none' });
   },
-  /**
-   * 删除字典条目
-   * @param dictCode 字典编码
-   * @param itemCode 字典条目编码
-   * @returns 删除结果
-   */
-  deleteDictItem(dictCode: string, itemCode: string): Promise<boolean> {
-    return HttpRequest.delete({
-      url: DictApi.deleteDictItem,
-      params: { dictCode, itemCode },
-    });
+
+  /** @inheritdoc */
+  async addDictColumn(record: DictColumnRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.addDictColumn, data: record });
   },
-  /**
-   * 更新字典条目
-   * @param dictItem 字典条目信息
-   * @returns 更新结果
-   */
-  updateDictItem(dictItem: Partial<DictModel>): Promise<boolean> {
-    return HttpRequest.post({ url: DictApi.updateDictItem, params: dictItem });
+
+  /** @inheritdoc */
+  async updateDictColumn(record: DictColumnRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.updateDictColumn, data: record });
+  },
+
+  /** @inheritdoc */
+  async deleteDictColumn(id: string): Promise<boolean> {
+    return HttpRequest.post({ url: `${DictAction.deleteDictColumn}/${id}` });
+  },
+
+  /** @inheritdoc */
+  async listDataManualByDictId(dictId: string): Promise<DictDataManualModel[]> {
+    return HttpRequest.get({ url: DictAction.listDataManual, params: { dictId } }, { successMessageMode: 'none' });
+  },
+
+  /** @inheritdoc */
+  async pageDataManual(params: DictDataManualQueryParams): Promise<PageResult<DictDataManualModel>> {
+    const res = await HttpRequest.post(
+      { url: DictAction.pageDataManual, data: params },
+      { successMessageMode: 'none' }
+    );
+    return res;
+  },
+
+  /** @inheritdoc */
+  async addDictDataManual(record: DictDataManualRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.addDictDataManual, data: record });
+  },
+
+  /** @inheritdoc */
+  async updateDictDataManual(record: DictDataManualRecord): Promise<number> {
+    return HttpRequest.post({ url: DictAction.updateDictDataManual, data: record });
+  },
+
+  /** @inheritdoc */
+  async deleteDictDataManual(id: string): Promise<boolean> {
+    return HttpRequest.post({ url: `${DictAction.deleteDictDataManual}/${id}` });
   },
 };

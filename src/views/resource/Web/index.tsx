@@ -2,7 +2,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Card, Modal } from 'antd';
 import type React from 'react';
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import type {
   WebService,
   WebServiceFormData,
@@ -71,12 +71,25 @@ const Web: React.FC = () => {
     pageNum: 1,
     pageSize: 10,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询Web服务列表
-  const { data: result, isLoading } = useQuery({
+  const { data: result, isFetching } = useQuery({
     queryKey: ['webServiceList', searchParams],
-    queryFn: () => webServiceApi.getWebServiceList(searchParams),
+    queryFn: () =>
+      webServiceApi.getWebServiceList({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && result?.totalRow !== undefined) {
+      setTotal(result.totalRow);
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 新增/更新Web服务
   const saveWebServiceMutation = useMutation({
@@ -273,7 +286,7 @@ const Web: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     saveWebServiceMutation.isPending ||
     deleteWebServiceMutation.isPending ||
     batchDeleteMutation.isPending ||
@@ -282,7 +295,7 @@ const Web: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <WebServiceSearchForm onSearch={handleSearch} loading={isLoading} />
+      <WebServiceSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card
@@ -316,7 +329,7 @@ const Web: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.totalRow ?? 0,
+            total,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

@@ -288,7 +288,6 @@ const TabBar: React.FC = memo(() => {
         onTabClick={handleTabClick}
         onEdit={handleTabEdit}
         items={tabItems}
-        size="middle"
         hideAdd
         tabBarGutter={0}
         className="tab-bar-tabs flex-1"

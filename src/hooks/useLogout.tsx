@@ -1,13 +1,12 @@
-import { useCallback } from 'react';
-import { App } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { App } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
+import { commonService } from '@/services/common';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
-import { commonService } from '@/services/common';
 
 /**
  * 退出登录 Hook
@@ -32,7 +31,7 @@ export const useLogout = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = () => {
     modal.confirm({
       title: t('layout.header.userDropdown.logout'),
       icon: <ExclamationCircleOutlined />,
@@ -54,7 +53,7 @@ export const useLogout = () => {
         }
       },
     });
-  }, [modal, t, resetTabs, queryClient, userLogout, navigate]);
+  };
 
   return handleLogout;
 };

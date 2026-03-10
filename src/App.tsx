@@ -16,9 +16,10 @@ import { antdUtils } from '@/utils/antdUtil';
  * 负责菜单数据加载和路由渲染
  */
 const App: React.FC = () => {
-  const { setMenus } = useMenuStore(
+  const { setMenus, setButtonPermissions } = useMenuStore(
     useShallow((state) => ({
       setMenus: state.setMenus,
+      setButtonPermissions: state.setButtonPermissions,
     }))
   );
   const queryClient = useQueryClient();
@@ -26,12 +27,22 @@ const App: React.FC = () => {
   const { notification, message, modal } = AntdApp.useApp();
 
   // 使用 TanStack Query 获取菜单数据
-  const { isLoading, refetch } = useQuery({
+  const { isFetching, refetch } = useQuery({
     queryKey: ['menuData', roleId],
     queryFn: async () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       return menu;
+    },
+    enabled: false, // 初始不自动执行
+  });
+
+  const { isFetching: isFetchingButtonPermissions, refetch: refetchButtonPermissions } = useQuery({
+    queryKey: ['buttonPermissions', roleId],
+    queryFn: async () => {
+      const buttonPermissions = await commonService.getPermissionsByRoleId(roleId);
+      setButtonPermissions(buttonPermissions);
+      return buttonPermissions;
     },
     enabled: false, // 初始不自动执行
   });
@@ -50,10 +61,24 @@ const App: React.FC = () => {
       } else {
         refetch();
       }
+      const cachedButtonPermissions = queryClient.getQueryData(['buttonPermissions', roleId]);
+      if (cachedButtonPermissions) {
+        setButtonPermissions(cachedButtonPermissions as string[]);
+      } else {
+        refetchButtonPermissions();
+      }
     }
   }, [isLogin, roleId]);
 
-  return <>{isLoading ? <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen /> : <Router />}</>;
+  return (
+    <>
+      {isFetching || isFetchingButtonPermissions ? (
+        <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen />
+      ) : (
+        <Router />
+      )}
+    </>
+  );
 };
 
 export default App;

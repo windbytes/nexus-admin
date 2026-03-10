@@ -36,6 +36,8 @@ const menu = {
   system: {
     main: 'System',
     menu: 'Menu',
+    button: 'Button',
+    api: 'API',
     role: 'Role',
     user: 'User',
     dict: 'Dictionary',
@@ -55,10 +57,12 @@ const menu = {
     main: 'Integration',
     apps: 'Apps',
     endpoint: 'Endpoint',
-    endpointConfig: 'EndpointConfig',
+    endpointConfig: 'Endpoint Config',
     workflow: 'Workflow',
     templates: 'Templates',
     version: 'Version',
+    execution: 'Execution',
+    metrics: 'Metrics',
   },
   instance: {
     main: 'Instance',
@@ -78,7 +82,7 @@ const menu = {
   },
   editor: {
     main: 'Editor',
-    docWriter: 'Doc Writer',
+    nwriter: 'NWriter',
   },
   apps: {
     add: 'add app',

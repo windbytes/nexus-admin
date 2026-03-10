@@ -1,10 +1,10 @@
-import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
-import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card } from 'antd';
 import type React from 'react';
-import { lazy, useCallback, useReducer, useState } from 'react';
+import { lazy, useCallback, useEffect, useReducer, useState } from 'react';
+import type { DataModeFormData, DataModeSearchParams, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
+import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import DataModeSearchForm from './components/DataModeSearchForm';
 import DataModeTable from './components/DataModeTable';
 import DataModeTableActions from './components/DataModeTableActions';
@@ -64,16 +64,29 @@ const DataMode: React.FC = () => {
     pageNum: 1,
     pageSize: 20,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询数据模式列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['datamode_list', searchParams],
-    queryFn: () => dataModeService.getDataModeList(searchParams),
+    queryFn: () =>
+      dataModeService.getDataModeList({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && result?.totalRow !== undefined) {
+      setTotal(result.totalRow);
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 新增/编辑数据模式 mutation
   const saveDataModeMutation = useMutation({
@@ -98,7 +111,7 @@ const DataMode: React.FC = () => {
     mutationFn: (id: string) => dataModeService.deleteDataMode(id),
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   // 批量删除数据模式 mutation
@@ -110,7 +123,7 @@ const DataMode: React.FC = () => {
         selectedRows: [],
       });
       refetch();
-    }
+    },
   });
 
   // 更新数据模式状态 mutation
@@ -118,7 +131,7 @@ const DataMode: React.FC = () => {
     mutationFn: (data: DataModeFormData) => dataModeService.updateDataMode(data),
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   // 导出Schema mutation
@@ -323,7 +336,7 @@ const DataMode: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     deleteDataModeMutation.isPending ||
     batchDeleteDataModeMutation.isPending ||
     updateStatusMutation.isPending ||
@@ -332,7 +345,7 @@ const DataMode: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <DataModeSearchForm onSearch={handleSearch} loading={isLoading} />
+      <DataModeSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card className="flex-1">
@@ -363,7 +376,7 @@ const DataMode: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.totalRow ?? 0,
+            total,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,
@@ -387,11 +400,7 @@ const DataMode: React.FC = () => {
       />
 
       {/* 导入Schema弹窗 */}
-      <DataModeImportModal
-        open={state.importModalVisible}
-        onOk={handleImportSuccess}
-        onCancel={handleImportCancel}
-      />
+      <DataModeImportModal open={state.importModalVisible} onOk={handleImportSuccess} onCancel={handleImportCancel} />
     </div>
   );
 };

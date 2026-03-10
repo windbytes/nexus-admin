@@ -36,8 +36,11 @@ const emptyCaches: MenuCaches = {
 interface MenuStore {
   // 菜单状态
   menus: RouteItem[];
+  // 按钮权限点
+  buttonPermissions: string[];
   caches: MenuCaches;
   setMenus: (menus: RouteItem[]) => void;
+  setButtonPermissions: (buttonPermissions: string[]) => void;
 }
 
 interface PreferencesStore {
@@ -53,6 +56,10 @@ interface PreferencesStore {
 const useMenuStore = create<MenuStore>((set) => ({
   // 菜单状态
   menus: [],
+  buttonPermissions: [],
+  setButtonPermissions: (buttonPermissions: string[]) => {
+    set({ buttonPermissions });
+  },
   caches: emptyCaches,
   setMenus: (menus: RouteItem[]) => {
     const caches: MenuCaches = buildMenuCaches(menus);

@@ -1,0 +1,36 @@
+.permissionCodeSelector {
+  width: 100%;
+}
+
+.permissionCodeSelectorDropdown {
+  .paginationSection {
+    padding: 8px 12px;
+    border-top: 1px solid var(--ant-color-border-secondary);
+    background: var(--ant-color-bg-container);
+    
+    :global(.ant-pagination) {
+      margin: 0;
+      
+      :global(.ant-pagination-total-text) {
+        flex: 1;
+      }
+    }
+  }
+  
+  :global(.ant-select-item) {
+    padding: 8px 12px;
+    
+    &:hover {
+      background-color: var(--ant-color-bg-text-hover);
+    }
+  }
+  
+  :global(.ant-select-item-option-selected) {
+    background-color: var(--ant-color-primary-bg);
+    font-weight: normal;
+    
+    &:hover {
+      background-color: var(--ant-color-primary-bg-hover);
+    }
+  }
+}

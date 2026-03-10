@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Radio, Typography, Spin, message } from 'antd';
-import { UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Card, message, Radio, Spin, Typography } from 'antd';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import type { UserRole } from '@/services/login/loginApi';
 
 const { Title, Text } = Typography;
@@ -24,12 +25,7 @@ interface RoleSelectorProps {
 /**
  * 角色选择组件
  */
-const RoleSelector: React.FC<RoleSelectorProps> = ({
-  roles,
-  defaultRoleId,
-  onSelect,
-  loading = false,
-}) => {
+const RoleSelector: React.FC<RoleSelectorProps> = ({ roles, defaultRoleId, onSelect, loading = false }) => {
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -104,10 +100,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Radio
-                  checked={selectedRoleId === role.id}
-                  onChange={() => handleRoleSelect(role.id)}
-                />
+                <Radio checked={selectedRoleId === role.id} onChange={() => handleRoleSelect(role.id)} />
                 <UserOutlined className="text-lg text-gray-500" />
                 <div>
                   <div className="font-medium text-lg">{role.roleName}</div>
@@ -116,14 +109,10 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({
                       {role.remark}
                     </Text>
                   )}
-                  <div className="text-xs text-gray-400 mt-1">
-                    类型: {role.roleType}
-                  </div>
+                  <div className="text-xs text-gray-400 mt-1">类型: {role.roleType}</div>
                 </div>
               </div>
-              {selectedRoleId === role.id && (
-                <CheckCircleOutlined className="text-blue-500 text-xl" />
-              )}
+              {selectedRoleId === role.id && <CheckCircleOutlined className="text-blue-500 text-xl" />}
             </div>
           </Card>
         ))}

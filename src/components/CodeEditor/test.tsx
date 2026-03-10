@@ -6,7 +6,7 @@ const TestCodeEditor: React.FC = () => {
   return (
     <div style={{ padding: '20px' }}>
       <h2>代码编辑器测试</h2>
-      
+
       <h3>JavaScript 示例</h3>
       <CodeEditor
         value={`// JavaScript 测试代码
@@ -22,7 +22,7 @@ test();`}
         height="200px"
         onChange={(value) => console.log('JS代码变化:', value)}
       />
-      
+
       <h3>Python 示例</h3>
       <CodeEditor
         value={`# Python 测试代码
@@ -37,7 +37,7 @@ test()`}
         height="200px"
         onChange={(value) => console.log('Python代码变化:', value)}
       />
-      
+
       <h3>JSON 示例</h3>
       <CodeEditor
         value={`{
@@ -50,7 +50,7 @@ test()`}
         height="150px"
         onChange={(value) => console.log('JSON代码变化:', value)}
       />
-      
+
       <h3>只读模式</h3>
       <CodeEditor
         value="这是一个只读的代码编辑器，无法编辑内容。"

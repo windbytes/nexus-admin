@@ -1,9 +1,3 @@
-import type { HtmlContentProps } from '@/components/popover';
-import CustomPopover from '@/components/popover';
-import { tagsService } from '@/services/common/tags/tagsApi';
-import type { Tag } from '@/services/common/tags/tagsModel';
-import { useTagStore } from '@/stores/useTagStore';
-import cn from '@/utils/classnames';
 import { PlusOutlined, SearchOutlined, TagOutlined, TagsOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { useUnmount } from 'ahooks';
@@ -12,6 +6,15 @@ import { noop } from 'lodash-es';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { HtmlContentProps } from '@/components/popover';
+import CustomPopover from '@/components/popover';
+import { tagService } from '@/services/engine';
+import { tagsService } from '@/services/common/tags/tagsApi';
+import type { Tag } from '@/services/engine';
+import { useTagStore } from '@/stores/useTagStore';
+import cn from '@/utils/classnames';
+
+const isAppTag = (type: string) => type === 'app';
 
 type TagSelectorProps = {
   // 对应的应用ID
@@ -50,7 +53,7 @@ const Panel: React.FC<PanelProps> = (props) => {
   };
 
   // 不存在的节点
- const notExisted = useMemo(() => {
+  const notExisted = useMemo(() => {
     return tagList.every((tag) => tag.type === type && tag.name !== keywords);
   }, [type, tagList, keywords]);
 
@@ -61,19 +64,15 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 过滤后的标签列表
   const filteredTagList = useMemo(() => {
-    return tagList.filter(
-      (tag) =>
-        tag.type === type &&
-        !value.includes(tag.id) &&
-        tag.name.includes(keywords),
-    );
+    return tagList.filter((tag) => tag.type === type && !value.includes(tag.id) && tag.name.includes(keywords));
   }, [type, tagList, value, keywords]);
 
   const [creating, setCreating] = useState<boolean>(false);
 
-  // 标签新建
+  // 标签新建（应用标签走 engine tagService）
   const createTagMutation = useMutation({
-    mutationFn: ({ name, type }: { name: string; type: string }) => tagsService.addTag({ name, type }),
+    mutationFn: ({ name, type }: { name: string; type: string }) =>
+      isAppTag(type) ? tagService.createTag({ name, type }) : tagsService.addTag({ name, type }),
     // 请求前设置状态
     onMutate: () => {
       setCreating(true);
@@ -97,9 +96,10 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
-  // 标签绑定
+  // 标签绑定（应用标签走 engine tagService，bindTags(tagIds, appId)）
   const bindTagMutation = useMutation({
-    mutationFn: (tagIDs: string[]) => tagsService.bindTag(tagIDs, targetID, type),
+    mutationFn: (tagIDs: string[]) =>
+      isAppTag(type) ? tagService.bindTags(tagIDs, targetID) : tagsService.bindTag(tagIDs, targetID, type),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -113,9 +113,10 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
-  // 标签解绑
+  // 标签解绑（应用标签走 engine tagService）
   const unbindTagMutation = useMutation({
-    mutationFn: (tagID: string) => tagsService.unbindTag(tagID, targetID, type),
+    mutationFn: (tagID: string) =>
+      isAppTag(type) ? tagService.unbindTag(tagID, targetID) : tagsService.unbindTag(tagID, targetID, type),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -156,7 +157,7 @@ const Panel: React.FC<PanelProps> = (props) => {
   /**
    * 值未改变
    */
- const valueNotChanged = useMemo(() => {
+  const valueNotChanged = useMemo(() => {
     return (
       value.length === selectedTagIDs.length &&
       value.every((v) => selectedTagIDs.includes(v)) &&
@@ -297,14 +298,14 @@ const TagSelector: React.FC<TagSelectorProps> = ({
    * @returns 标签列表
    */
   const getTagList = async () => {
-    const tags = await tagsService.getTagsList(type);
+    const tags = isAppTag(type) ? await tagService.listTags(type) : await tagsService.getTagsList(type);
     setTagList(tags);
   };
 
   /**
    * 用于显示选中标签的内容
    */
- const triggerContent = useMemo(() => {
+  const triggerContent = useMemo(() => {
     if (selectedTags?.length) {
       return selectedTags
         .filter((tag) => tagList.find((t) => t.id === tag.id))
@@ -322,7 +323,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     return (
       <div
         className={cn(
-          'relative flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-[7px] hover:bg-[#c8ceda33]',
+          'relative flex w-full cursor-pointer items-center gap-1 rounded-md px-2 py-[7px] hover:bg-[#c8ceda33]'
         )}
       >
         <TagOutlined className="h-3 w-3 shrink-0" />
@@ -354,7 +355,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
           btnClassName={(open) =>
             cn(
               open ? '!bg-[#c8ceda33] !text-[#101828]' : '!bg-transparent',
-              '!w-full !border-0 !p-0 !text-[#101828] hover:!bg-[#c8ceda33] hover:!text-[#101828]',
+              '!w-full !border-0 !p-0 !text-[#101828] hover:!bg-[#c8ceda33] hover:!text-[#101828]'
             )
           }
           popupClassName="!w-full !ring-0"

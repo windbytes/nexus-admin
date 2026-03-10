@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
-import { Layout, Skeleton } from 'antd';
+import { Layout, Skeleton, Watermark } from 'antd';
 import { lazy, Suspense } from 'react';
+import { useShallow } from 'zustand/shallow';
 import HotKeyProvider from '@/components/HotKeyProvider';
 import RouteLoadingBar from '@/components/RouteLoadingBar';
 import { usePreferencesStore } from '@/stores/store';
@@ -31,36 +32,55 @@ export const rootRoute = createRootRoute({
  * 认证布局路由
  * 需要登录才能访问的页面都在此布局下
  */
+/** 水平布局：菜单在 Header 中横向展示，左侧不显示菜单栏 */
+const HORIZONTAL_LAYOUT = 'header-nav';
+
 export const authenticatedRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'nexus',
   component: () => {
-    const lockScreenStatus = usePreferencesStore((state) => state.preferences.widget.lockScreenStatus);
+    const { watermarkEnabled, lockScreenStatus, layout } = usePreferencesStore(
+      useShallow((state) => ({
+        watermarkEnabled: state.preferences.app.watermark,
+        lockScreenStatus: state.preferences.widget.lockScreenStatus,
+        layout: state.preferences.app.layout,
+      }))
+    );
+    const showLeftMenu = layout !== HORIZONTAL_LAYOUT;
+
+    const layoutContent = (
+      <Layout className="h-full">
+        {showLeftMenu && (
+          <Suspense fallback={<Skeleton active />}>
+            <LeftMenu />
+          </Suspense>
+        )}
+
+        <Layout>
+          <Suspense fallback={<Skeleton active />}>
+            <Header />
+          </Suspense>
+
+          <Suspense fallback={<Skeleton active />}>
+            <Content>
+              <Outlet />
+            </Content>
+          </Suspense>
+
+          <Suspense fallback={<Skeleton active />}>
+            <Footer />
+          </Suspense>
+        </Layout>
+      </Layout>
+    );
 
     return (
       <HotKeyProvider>
         <RouteLoadingBar />
-        <Layout className="h-full">
-          <Suspense fallback={<Skeleton active />}>
-            <LeftMenu />
-          </Suspense>
-
-          <Layout>
-            <Suspense fallback={<Skeleton active />}>
-              <Header />
-            </Suspense>
-
-            <Suspense fallback={<Skeleton active />}>
-              <Content>
-                <Outlet />
-              </Content>
-            </Suspense>
-
-            <Suspense fallback={<Skeleton active />}>
-              <Footer />
-            </Suspense>
-          </Layout>
-        </Layout>
+        {/* 始终用 Watermark 包裹，仅通过 content 控制显隐，避免切换时整棵布局被卸载重挂 */}
+        <Watermark content={watermarkEnabled ? 'Nexus Pro' : ''} gap={[80, 80]} className="w-full h-full">
+          {layoutContent}
+        </Watermark>
 
         {lockScreenStatus && (
           <Suspense fallback={null}>

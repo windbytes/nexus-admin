@@ -2,7 +2,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card, Divider } from 'antd';
 import type React from 'react';
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import type { DatabaseDriver, DriverFormData, DriverSearchParams } from '@/services/resource/database/driverApi';
 import { driverService } from '@/services/resource/database/driverApi';
 import DriverModal from './components/DriverModal';
@@ -57,16 +57,29 @@ const Database: React.FC = () => {
     pageNum: 1,
     pageSize: 20,
   });
+  // 表格数据总数（首页返回，翻页时传给后端）
+  const [total, setTotal] = useState<number>(0);
 
   // 查询驱动列表
   const {
     data: result,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['driver_list', searchParams],
-    queryFn: () => driverService.getDriverList(searchParams),
+    queryFn: () =>
+      driverService.getDriverList({
+        ...searchParams,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
+
+  // 同步分页总数（仅首页返回的总数用于后续翻页传参）
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && result?.totalRow !== undefined) {
+      setTotal(result.totalRow);
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
 
   // 新增/编辑驱动 mutation
   const saveDriverMutation = useMutation({
@@ -264,7 +277,7 @@ const Database: React.FC = () => {
 
   // 表格加载状态
   const tableLoading =
-    isLoading ||
+    isFetching ||
     deleteDriverMutation.isPending ||
     batchDeleteDriverMutation.isPending ||
     updateStatusMutation.isPending ||
@@ -274,7 +287,7 @@ const Database: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* 搜索表单 */}
-      <DriverSearchForm onSearch={handleSearch} loading={isLoading} />
+      <DriverSearchForm onSearch={handleSearch} loading={isFetching} />
 
       {/* 表格区域 */}
       <Card
@@ -313,7 +326,7 @@ const Database: React.FC = () => {
             current: searchParams.pageNum,
             ...PAGINATION_CONFIG,
             showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-            total: result?.totalRow ?? 0,
+            total,
             onChange(page, pageSize) {
               setSearchParams({
                 ...searchParams,

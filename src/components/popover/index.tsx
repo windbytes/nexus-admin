@@ -1,6 +1,6 @@
-import cn from '@/utils/classnames';
 import { Popover } from 'antd';
-import { cloneElement, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, type ReactElement, type ReactNode, useRef, useState } from 'react';
+import cn from '@/utils/classnames';
 
 /**
  * 通用气泡卡片（使用 antd 的 Popover 实现）
@@ -16,15 +16,19 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
   manualClose,
   disabled = false,
 }) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const visibleRef = useRef(false);
   const [visible, setVisible] = useState(false);
 
   const handleMouseEnter = () => {
-    if (trigger !== 'hover') return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (trigger !== 'hover') {
+      return;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     visibleRef.current = true;
     setVisible(true);
   };
@@ -34,7 +38,9 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
    * @returns 鼠标离开时的处理函数
    */
   const handleMouseLeave = () => {
-    if (trigger !== 'hover') return;
+    if (trigger !== 'hover') {
+      return;
+    }
     timeoutRef.current = setTimeout(() => {
       visibleRef.current = false;
       setVisible(false);
@@ -85,9 +91,11 @@ const CustomPopover: React.FC<CustomPopoverProps> = ({
       }
       trigger={trigger === 'hover' ? 'hover' : 'click'}
       placement={positionMap[position]}
-      open={trigger === 'hover' ? visible : undefined}
+      open={visible}
       onOpenChange={(open) => {
-        if (disabled) return;
+        if (disabled) {
+          return;
+        }
         setVisible(open);
         visibleRef.current = open;
       }}

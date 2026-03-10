@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from 'react';
 
 interface AsyncButtonProps {
   onSuccess?: (data: any) => void;
@@ -12,10 +12,7 @@ interface AsyncButtonProps {
  * @param options - 配置选项
  * @returns 包含 loading 状态和点击处理函数
  */
-export function useAsyncButton<T>(
-  asyncFunction: (...args: any[]) => Promise<T>,
-  options: AsyncButtonProps = {}
-) {
+export function useAsyncButton<T>(asyncFunction: (...args: any[]) => Promise<T>, options: AsyncButtonProps = {}) {
   const { onSuccess, onError, cooldown } = options;
   const [loading, setLoading] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);

@@ -41,7 +41,7 @@ const FileUploadEditor: React.FC<FileUploadEditorProps> = memo(({ onFileChange, 
 
       setFileList([file]);
       onFileChange(file);
-      
+
       return false; // 阻止自动上传
     },
     onRemove: () => {
@@ -58,9 +58,7 @@ const FileUploadEditor: React.FC<FileUploadEditorProps> = memo(({ onFileChange, 
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">点击或拖拽WSDL文件到此区域</p>
-        <p className="ant-upload-hint">
-          支持 .wsdl 或 .xml 格式文件，最大 10MB
-        </p>
+        <p className="ant-upload-hint">支持 .wsdl 或 .xml 格式文件，最大 10MB</p>
       </Dragger>
     </div>
   );
@@ -69,4 +67,3 @@ const FileUploadEditor: React.FC<FileUploadEditorProps> = memo(({ onFileChange, 
 FileUploadEditor.displayName = 'FileUploadEditor';
 
 export default FileUploadEditor;
-

@@ -20,7 +20,7 @@ export const useECharts = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // 使用 Intersection Observer 实现懒加载
       const observer = new IntersectionObserver(
         (entries) => {

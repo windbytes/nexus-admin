@@ -7,6 +7,7 @@ const translation = {
     confirm: 'confirm',
     cancel: 'cancel',
     delete: 'delete',
+    batchDelete: 'batch delete',
     edit: 'edit',
     add: 'add',
     save: 'save',
@@ -27,6 +28,7 @@ const translation = {
     selectAll: 'select all',
     recover: 'recover',
     recycle: 'recycle',
+    operate: 'operate',
     more: 'more',
   },
   errorMsg: {

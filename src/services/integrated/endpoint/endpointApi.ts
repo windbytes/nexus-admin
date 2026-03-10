@@ -159,7 +159,7 @@ export type EndpointConfig =
 /**
  * 端点基础信息
  */
-export interface Endpoint {
+export interface EndpointModel {
   id: string;
   name: string;
   description?: string;
@@ -308,8 +308,8 @@ export const endpointService = {
   /**
    * 分页查询端点列表
    */
-  async getEndpointList(params: EndpointSearchParams): Promise<PageResult<Endpoint>> {
-    const response = await HttpRequest.post<PageResult<Endpoint>>(
+  async getEndpointList(params: EndpointSearchParams): Promise<PageResult<EndpointModel>> {
+    const response = await HttpRequest.post<PageResult<EndpointModel>>(
       {
         url: EndpointAction.queryEndpointsByPage,
         data: params,
@@ -323,8 +323,8 @@ export const endpointService = {
   /**
    * 新增端点
    */
-  async addEndpoint(data: EndpointFormData): Promise<Endpoint> {
-    const response = await HttpRequest.post<Endpoint>({
+  async addEndpoint(data: EndpointFormData): Promise<EndpointModel> {
+    const response = await HttpRequest.post<EndpointModel>({
       url: EndpointAction.add,
       data,
     });
@@ -334,8 +334,8 @@ export const endpointService = {
   /**
    * 更新端点
    */
-  async updateEndpoint(data: EndpointFormData): Promise<Endpoint> {
-    const response = await HttpRequest.post<Endpoint>({
+  async updateEndpoint(data: EndpointFormData): Promise<EndpointModel> {
+    const response = await HttpRequest.post<EndpointModel>({
       url: EndpointAction.update,
       data,
     });
@@ -366,8 +366,8 @@ export const endpointService = {
   /**
    * 获取端点详情
    */
-  async getEndpointDetail(id: string): Promise<Endpoint> {
-    const response = await HttpRequest.get<Endpoint>({
+  async getEndpointDetail(id: string): Promise<EndpointModel> {
+    const response = await HttpRequest.get<EndpointModel>({
       url: `${EndpointAction.detail}/${id}`,
     });
 
@@ -420,11 +420,11 @@ export const endpointService = {
   /**
    * 导入端点配置
    */
-  async importConfig(file: File): Promise<Endpoint> {
+  async importConfig(file: File): Promise<EndpointModel> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await HttpRequest.post<Endpoint>({
+    const response = await HttpRequest.post<EndpointModel>({
       url: EndpointAction.importConfig,
       data: formData,
       headers: {

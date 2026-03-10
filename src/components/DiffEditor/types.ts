@@ -1,13 +1,13 @@
 import type { editor } from 'monaco-editor';
 
 // 支持的语言类型
-export type SupportedLanguage = 
-  | 'javascript' 
-  | 'typescript' 
-  | 'json' 
-  | 'java' 
-  | 'groovy' 
-  | 'sql' 
+export type SupportedLanguage =
+  | 'javascript'
+  | 'typescript'
+  | 'json'
+  | 'java'
+  | 'groovy'
+  | 'sql'
   | 'python'
   | 'html'
   | 'css'
@@ -145,11 +145,14 @@ export interface DiffEditorRef {
 }
 
 // 语言配置映射
-export const LANGUAGE_CONFIG_MAP: Record<SupportedLanguage, {
-  name: string;
-  extensions: string[];
-  mimeType: string;
-}> = {
+export const LANGUAGE_CONFIG_MAP: Record<
+  SupportedLanguage,
+  {
+    name: string;
+    extensions: string[];
+    mimeType: string;
+  }
+> = {
   javascript: {
     name: 'JavaScript',
     extensions: ['.js', '.jsx', '.mjs'],
@@ -224,7 +227,7 @@ export const LANGUAGE_CONFIG_MAP: Record<SupportedLanguage, {
 
 // 主题配置
 export const THEME_CONFIG = {
-  'vs': {
+  vs: {
     name: 'Light',
     description: '浅色主题',
   },

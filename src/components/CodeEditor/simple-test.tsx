@@ -7,7 +7,7 @@ const SimpleTest: React.FC = () => {
   return (
     <div style={{ padding: '20px' }}>
       <h2>代码编辑器简单测试</h2>
-      
+
       <div style={{ marginBottom: '20px' }}>
         <h3>JavaScript 编辑器</h3>
         <CodeEditor
@@ -19,7 +19,7 @@ const SimpleTest: React.FC = () => {
           placeholder="请输入 JavaScript 代码..."
         />
       </div>
-      
+
       <div style={{ marginBottom: '20px' }}>
         <h3>Python 编辑器</h3>
         <CodeEditor
@@ -32,7 +32,7 @@ const SimpleTest: React.FC = () => {
           showMinimap={true}
         />
       </div>
-      
+
       <div style={{ marginBottom: '20px' }}>
         <h3>JSON 编辑器</h3>
         <CodeEditor
@@ -46,15 +46,17 @@ const SimpleTest: React.FC = () => {
           fontSize={12}
         />
       </div>
-      
+
       <div>
         <h3>当前代码内容</h3>
-        <pre style={{ 
-          background: '#f5f5f5', 
-          padding: '10px', 
-          borderRadius: '4px',
-          border: '1px solid #ddd'
-        }}>
+        <pre
+          style={{
+            background: '#f5f5f5',
+            padding: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ddd',
+          }}
+        >
           {code}
         </pre>
       </div>

@@ -71,12 +71,21 @@ const DataModeModal: React.FC<DataModeModalProps> = ({
     enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
   });
 
+<<<<<<< HEAD
   // 从端点查询JSON并生成Schema的 mutation
   const queryFromEndpointMutation = useMutation({
     mutationFn: async (endpointId: string) => {
       // 查询JSON数据
       const jsonResult = await dataModeService.queryJsonFromEndpoint({ endpointId });
       const jsonStr = jsonResult.json || JSON.stringify(jsonResult.data, null, 2);
+=======
+    // 使用 useQuery 加载端点列表
+    const { data: endpoints, isFetching: loadingEndpoints } = useQuery({
+      queryKey: ['endpoints', { endpointType: 'database', status: true }],
+      queryFn: () => dataModeService.getEndpoints({ endpointType: 'database', status: true }),
+      enabled: open === true && dataSource === 'database', // 仅在弹窗打开且选择数据库来源时查询
+    });
+>>>>>>> dev
 
       // 生成Schema
       const schemaResult = await dataModeService.generateSchemaFromJson({ json: jsonStr });
@@ -321,6 +330,35 @@ const DataModeModal: React.FC<DataModeModalProps> = ({
           dataSource: 'database',
           schemaVersion: 'v1.0',
         }}
+<<<<<<< HEAD
+=======
+        footer={
+          !isViewMode ? (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">状态：</span>
+                <Switch
+                  checked={status}
+                  onChange={(checked) => form.setFieldValue('status', checked)}
+                  checkedChildren="启用"
+                  unCheckedChildren="禁用"
+                />
+              </div>
+              <Space>
+                <Button onClick={onCancel}>取消</Button>
+                <Button type="primary" onClick={handleOk} loading={loading}>
+                  确定
+                </Button>
+              </Space>
+            </div>
+          ) : (
+            <Space>
+              <Button onClick={onCancel}>关闭</Button>
+            </Space>
+          )
+        }
+        mask={{ closable: false }}
+>>>>>>> dev
       >
         {/* 基本信息 */}
         <Form.Item

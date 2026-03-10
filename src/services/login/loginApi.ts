@@ -10,9 +10,9 @@ export interface LoginParams {
   /** 密码 */
   password: string;
   /** 验证码 */
-  captcha: string;
+  captchaCode: string;
   /** 验证码key */
-  checkKey: string;
+  captchaKey: string;
   /** 记住密码 */
   remember?: boolean;
 }
@@ -43,6 +43,8 @@ export interface LoginResponse {
   userId: string;
   /** 用户名 */
   username: string;
+  /** 访问令牌 */
+  accessToken: string;
   /** 首页路径 */
   homePath?: string;
   /** 用户角色列表 */
@@ -56,11 +58,17 @@ const LoginApi = {
   /**
    * 登录
    */
-  login: '/login',
+  login: '/auth/login',
+
+  /**
+   * 确认选择角色
+   */
+  confirmRole: '/auth/confirm-role',
+
   /**
    * 获取验证码
    */
-  getCode: '/getCaptcha',
+  getCode: '/sys/framework/captcha',
 };
 
 /**
@@ -73,6 +81,14 @@ interface ILoginService {
    * @returns 登录结果
    */
   login(params: LoginParams): Promise<Response>;
+
+  /**
+   * 确认选择角色
+   * @param loginToken 登录token
+   * @param roleCode 角色code
+   * @returns 确认选择角色结果
+   */
+  confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }>;
 
   /**
    * 获取验证码
@@ -97,6 +113,22 @@ export const loginService: ILoginService = {
         data: params,
       },
       { isTransformResponse: false }
+    );
+  },
+
+  /**
+   * 确认选择角色
+   * @param loginToken 登录token
+   * @param roleCode 角色code
+   * @returns 确认选择角色结果
+   */
+  async confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }> {
+    return HttpRequest.post<{ accessToken: string; permissions: string[] }>(
+      {
+        url: LoginApi.confirmRole,
+        data: { loginToken, roleCode },
+      },
+      { successMessageMode: 'none' }
     );
   },
 

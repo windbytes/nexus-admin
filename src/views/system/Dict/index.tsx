@@ -1,175 +1,160 @@
-import type { DictSearchParams, DictState } from '@/services/system/dict/type';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { App, Card, type TableProps } from 'antd';
+import { useQuery } from '@tanstack/react-query';
 import { isEqual } from 'lodash-es';
-import { useReducer, useState } from 'react';
-import DictTable from './DictTable';
-import getDictTableColumns from './DictTableColumn';
-import DictSearchForm from './SearchForm';
-import TableActionButtons from './TableActionButtons';
+import type { Key } from 'react';
+import { useEffect, useState } from 'react';
+import ProTable from '@/components/ProTable';
+import { dictService } from '@/services/system/dict/dictApi';
+import type { DictModel, DictType } from '@/services/system/dict/type.d';
+import DictInfoModal from './components/DictInfoModal';
+import SearchForm from './components/SearchForm';
+import TableActionButtons from './components/TableActionButtons';
+import { useDictActions } from './hooks/useDictAction';
+import { useDictModals } from './hooks/useDictModals';
+import { useDictTableColumns } from './hooks/useDictTableColumn';
+import type { DictSearchParams } from './types';
 
-// 数据字典模块
+/**
+ * 数据字典管理页：上检索 + 下表格，编辑维护用弹窗（可切换数据元类型展示不同配置）
+ */
 const Dict: React.FC = () => {
-  const { modal, message } = App.useApp();
-
-  // 定义状态
-  const [state, dispatch] = useReducer(
-    (prev: DictState, action: Partial<DictState>) => ({
-      ...prev,
-      ...action,
-    }),
-    {
-      // 编辑窗口的打开状态
-      openEditModal: false,
-      // 当前编辑的行数据
-      editRow: null,
-      // 当前选中的行数据
-      selectRow: [],
-      // 当前操作
-      action: '',
-    }
-  );
-
-  // 查询参数（包含分页参数）
+  const { modal: modalName, current, closeModal, openModal } = useDictModals();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [searchParams, setSearchParams] = useState<DictSearchParams>({
     pageNum: 1,
     pageSize: 20,
   });
+  const [total, setTotal] = useState<number>(0);
 
-  // 查询字典数据
   const {
-    isLoading,
     data: result,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['sys_dict', searchParams],
-    queryFn: () => ({
-      records: [],
-      totalRow: 0,
-    }),
+    queryFn: () =>
+      dictService.queryDictListPage({
+        ...searchParams,
+        dictType: searchParams.dictType as DictType | undefined,
+        total: searchParams.pageNum === 1 ? 0 : total,
+      }),
   });
 
-  // 处理搜索
+  useEffect(() => {
+    if (searchParams.pageNum === 1 && result?.totalRow != null) {
+      setTotal(result.totalRow);
+    }
+  }, [searchParams.pageNum, result?.totalRow]);
+
+  const handleSuccess = () => {
+    setSelectedRowKeys([]);
+    closeModal();
+    refetch();
+  };
+
+  const { handleModalSave, batchDeleteDict, importDict, exportDict } = useDictActions({
+    currentRow: current,
+    onSuccess: handleSuccess,
+  });
+
   const handleSearch = (values: DictSearchParams) => {
-    const search = {
-      ...values,
-      pageNum: searchParams.pageNum,
-      pageSize: searchParams.pageSize,
-    };
-    // 判断参数是否发生变化
-    if (isEqual(search, searchParams)) {
-      // 参数没有变化，手动刷新数据
+    const next = { ...searchParams, ...values };
+    if (isEqual(next, searchParams)) {
       refetch();
       return;
     }
-    setSearchParams((prev) => ({ ...prev, ...search }));
+    setSearchParams((prev) => ({ ...prev, ...values }));
   };
 
-  // 处理逻辑删除角色
-  const logicDeleteUserMutation = useMutation({
-    mutationFn: (ids: string[]) => {
-      return Promise.resolve(true);
-    },
-    onSuccess() {
-      message.success('删除成功!');
-      dispatch({
-        selectRow: [],
-      });
-      refetch();
-    },
-    onError(error) {
-      modal.error({
-        title: '操作失败',
-        content: `原因：${error}`,
-      });
-    },
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      pageNum: page,
+      pageSize: pageSize ?? prev.pageSize,
+    }));
+  };
+
+  const handleSelectionChange = (keys: Key[], _rows: DictModel[]) => {
+    setSelectedRowKeys(keys);
+  };
+
+  const handleBatchDelete = () => {
+    batchDeleteDict(selectedRowKeys);
+  };
+
+  const handleImport = (file: File) => {
+    importDict(file);
+  };
+
+  const handleExport = (type: 'all' | 'selected') => {
+    exportDict(
+      type,
+      type === 'selected' ? selectedRowKeys : undefined,
+      type === 'all' ? (searchParams as import('@/services/system/dict/type.d').DictSearchParams) : undefined
+    );
+  };
+
+  const columns = useDictTableColumns({
+    currentRow: current,
+    openModal,
+    onSuccess: handleSuccess,
   });
 
-  /**
-   * 获取表格列配置
-   */
-  const columns = getDictTableColumns({
-    dispatch,
-    logicDeleteUserMutation,
-  });
-
-  /**
-   * 多行选中的配置
-   */
-  const rowSelection: TableProps['rowSelection'] = {
-    // 行选中的回调
-    onChange(_selectedRowKeys, selectedRows: any[]) {
-      dispatch({
-        selectRow: [...selectedRows],
-      });
-    },
-    columnWidth: 32,
-    fixed: true,
-  };
-
-  /**
-   * 表格行双击显示预览
-   */
-  const onRow = (record: any) => {
-    return {
-      onDoubleClick: () => {
-        dispatch({
-          openEditModal: true,
-          editRow: record,
-          action: 'view',
-        });
-      },
-    };
-  };
-
-  // 处理新增
-  const handleAdd = () => {};
-
-  // 处理批量删除
-  const handleBatchDelete = () => {};
+  const modalAction: 'add' | 'edit' | 'view' = modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit';
 
   return (
     <>
       <div className="h-full flex flex-col gap-2">
-        {/* 搜索表单 */}
-        <DictSearchForm onSearch={handleSearch} />
-        {/* 查询表格 */}
-        <Card style={{ flex: 1, marginTop: '8px', minHeight: 0 }} styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}>
-          {/* 操作按钮 */}
-          <TableActionButtons
-            handleAdd={handleAdd}
-            handleBatchDelete={handleBatchDelete}
-            refetch={refetch}
-            selectedRows={[]}
-          />
-
-          {/* 表格数据 */}
-          <DictTable
-            tableData={result?.records || []}
-            loading={isLoading}
-            columns={columns}
-            onRow={onRow}
-            rowSelection={rowSelection}
-            pagination={{
-              pageSize: searchParams.pageSize,
-              current: searchParams.pageNum,
-              showQuickJumper: true,
-              hideOnSinglePage: false,
-              showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
-              total: result?.totalRow || 0,
-              onChange(page, pageSize) {
-                setSearchParams({
-                  ...searchParams,
-                  pageNum: page,
-                  pageSize: pageSize,
-                });
-              },
-            }}
-          />
-        </Card>
+        <SearchForm onSearch={handleSearch} loading={isFetching} />
+        <ProTable<DictModel>
+          title="字典列表"
+          columns={columns}
+          dataSource={result?.records ?? []}
+          loading={isFetching}
+          rowKey="id"
+          actionButtons={
+            <TableActionButtons
+              openModal={openModal}
+              selectedRowKeys={selectedRowKeys}
+              onBatchDelete={handleBatchDelete}
+              onImport={handleImport}
+              onExport={handleExport}
+            />
+          }
+          onRefresh={refetch}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          pagination={{
+            current: searchParams.pageNum,
+            pageSize: searchParams.pageSize,
+            total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (t: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${t} 条`,
+            hideOnSinglePage: false,
+            onChange: handlePageChange,
+          }}
+          bordered
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
       </div>
+      <DictInfoModal
+        open={modalName === 'add' || modalName === 'edit' || modalName === 'view'}
+        action={modalAction}
+        dictInfo={current ?? null}
+        onOk={(payload) => handleModalSave(payload)}
+        onCancel={closeModal}
+      />
     </>
   );
 };
+
 export default Dict;

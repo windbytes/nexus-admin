@@ -71,4 +71,3 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = memo(({ value, onC
 DataSourceSelector.displayName = 'DataSourceSelector';
 
 export default DataSourceSelector;
-

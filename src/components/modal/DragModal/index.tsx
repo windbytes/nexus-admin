@@ -2,6 +2,7 @@ import { Modal, type ModalProps } from 'antd';
 import { useRef, useState } from 'react';
 import type { DraggableData, DraggableEvent } from 'react-draggable';
 import Draggable from 'react-draggable';
+
 /**
  * 封装可拖动的弹窗
  * @param props 属性
@@ -39,11 +40,11 @@ const DragModal: React.FC<ModalProps> = (props) => {
 
   return (
     <Modal
-      maskClosable={false}
+      mask={{ closable: false }}
       {...props}
       title={
         <div
-          className='w-full cursor-move'
+          className="w-full cursor-move"
           onMouseOver={() => {
             if (disabled) {
               setDisabled(false);

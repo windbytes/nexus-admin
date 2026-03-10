@@ -13,8 +13,8 @@ const General: React.FC = () => {
       <SelectItem title="语言" category="app" pKey="locale" items={SUPPORT_LANGUAGES} />
       {/* 动态标题 */}
       <SwitchItem title="动态标题" category="app" pKey="dynamicTitle" />
-      {/* 水印 */}
-      <SwitchItem title="水印" category="app" pKey="watermark" />
+      {/* 水印 - 允许在设置中动态开关 */}
+      <SwitchItem title="水印" category="app" pKey="watermark" disabled={false} />
       {/* 定时检查更新 */}
       <SwitchItem title="定时检查更新" category="app" pKey="enableCheckUpdates" />
     </>

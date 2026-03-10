@@ -21,14 +21,20 @@ export function useSearchHistory() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, []);
 
-  const add = useCallback((item: SearchHistoryItem) => {
-    const items = [item, ...history.filter(h => h.id !== item.id)].slice(0, MAX_ITEMS);
-    persist(items);
-  }, [history, persist]);
+  const add = useCallback(
+    (item: SearchHistoryItem) => {
+      const items = [item, ...history.filter((h) => h.id !== item.id)].slice(0, MAX_ITEMS);
+      persist(items);
+    },
+    [history, persist]
+  );
 
-  const remove = useCallback((id: string) => {
-    persist(history.filter(h => h.id !== id));
-  }, [history, persist]);
+  const remove = useCallback(
+    (id: string) => {
+      persist(history.filter((h) => h.id !== id));
+    },
+    [history, persist]
+  );
 
   const clear = useCallback(() => {
     setHistory([]);

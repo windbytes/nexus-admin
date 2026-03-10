@@ -1,12 +1,6 @@
-import {
-  ColumnHeightOutlined,
-  DownOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SettingOutlined,
-  UnorderedListOutlined,
-} from '@ant-design/icons';
-import { App, Badge, Button, Dropdown, type MenuProps, Space, Tooltip, Upload } from 'antd';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
+import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ColumnEdit24Regular,
@@ -21,34 +15,37 @@ import {
   Status24Regular,
 } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
-import { usePermission } from '@/hooks/usePermission';
 import type { UserModel } from '@/services/system/user/type';
+import type { ModalType } from '../hooks/useUserModals';
+import { useUserPermissions } from '../hooks/useUserPermissions';
 
 interface TableActionButtonsProps {
-  handleAdd: () => void;
   handleBatchDelete: () => void;
   refetch: () => void;
-  selectedRows: UserModel[];
+  selectedRows: Key[];
+  openModal: (name: ModalType, record?: UserModel) => void;
 }
 
 // 表格操作按钮
 const TableActionButtons: React.FC<TableActionButtonsProps> = ({
-  handleAdd,
   handleBatchDelete,
   refetch,
   selectedRows,
+  openModal,
 }) => {
   const { message, modal } = App.useApp();
   const { t } = useTranslation();
   // 权限检查
-  const canAdd = usePermission(['sys:user:add']);
-  const canBatchDelete = usePermission(['sys:user:delete']);
-  const canBatchImport = usePermission(['sys:user:import']);
-  const canBatchExport = usePermission(['sys:user:export']);
-  const canRecover = usePermission(['sys:user:recover']);
-  const canBatchResetPassword = usePermission(['sys:user:resetPassword']);
-  const canBatchAssignRole = usePermission(['sys:user:assignRole']);
-  const canBatchUpdateStatus = usePermission(['sys:user:updateStatus']);
+  const {
+    canAdd,
+    canDeleteUser,
+    canBatchImport,
+    canBatchExport,
+    canRecover,
+    canBatchResetPassword,
+    canBatchAssignRole,
+    canUpdateStatus,
+  } = useUserPermissions();
   // 导出选项
   const exportItems: MenuProps['items'] = [
     {
@@ -112,7 +109,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       label: '批量更新状态',
       icon: <Status24Regular className="text-sm! block" />,
       onClick: () => {
-        if (!canBatchUpdateStatus) {
+        if (!canUpdateStatus) {
           modal.error({
             title: '权限不足',
             content: '您没有批量更新用户状态的权限，请联系管理员获取相应权限。',
@@ -151,9 +148,9 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       key: 'delete',
       label: '批量删除',
       icon: <DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)" />,
-      disabled: selectedRows.length === 0 || !canBatchDelete,
+      disabled: selectedRows.length === 0 || !canDeleteUser,
       onClick: () => {
-        if (!canBatchDelete) {
+        if (!canDeleteUser) {
           modal.error({
             title: '权限不足',
             content: '您没有批量删除用户的权限，请联系管理员获取相应权限。',
@@ -170,7 +167,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
         {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
             {t('common.operation.add')}
           </Button>
         )}
@@ -191,14 +188,17 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               }
             }}
           >
-            <Button icon={<FolderImport className="text-sm! block!" />}>{t('common.operation.import')}</Button>
+            <Button icon={<FolderImport className="block!" />}>{t('common.operation.import')}</Button>
           </Upload>
         )}
 
         {canBatchExport && (
           <Space.Compact>
-            <Button icon={<FolderExport className="text-sm! block!" />}>{t('common.operation.export')}</Button>
-            <Dropdown menu={{ items: exportItems }} placement="bottom">
+            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
+              {t('common.operation.export')}
+              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+            </Button>
+            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
               <Button icon={<DownOutlined />} />
             </Dropdown>
           </Space.Compact>
@@ -206,7 +206,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>
-          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="text-sm! block!" />}>
+          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="block!" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
@@ -217,85 +217,10 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 回收站按钮 - 移到左边 */}
         {canRecover && (
-          <Button
-            icon={<Recycle className="text-sm! block! text-green-500!" />}
-            onClick={() => {
-              modal.error({
-                title: '功能暂未开放',
-                content: '回收站功能正在开发中，敬请期待。',
-              });
-            }}
-          >
+          <Button icon={<Recycle className="block! text-green-500!" />} onClick={() => openModal('recycle')}>
             {t('common.operation.recycle')}
           </Button>
         )}
-      </Space>
-      {/* 右侧表格工具按钮 */}
-      <Space size="small">
-        <Tooltip title="刷新数据">
-          <Button
-            icon={<ReloadOutlined />}
-            type="text"
-            onClick={refetch}
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="列设置">
-          <Button
-            icon={<ColumnEdit24Regular className="text-sm block!" />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格列设置功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格大小">
-          <Button
-            icon={<ColumnHeightOutlined className="text-sm block" />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格大小调整功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格密度">
-          <Button
-            icon={<UnorderedListOutlined />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格密度调整功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
-
-        <Tooltip title="表格设置">
-          <Button
-            icon={<SettingOutlined />}
-            type="text"
-            onClick={() =>
-              modal.error({
-                title: '功能暂未开放',
-                content: '表格设置功能正在开发中，敬请期待。',
-              })
-            }
-            className="text-gray-500 hover:text-blue-500"
-          />
-        </Tooltip>
       </Space>
     </div>
   );

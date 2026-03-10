@@ -4,7 +4,9 @@ import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import TabBar from '@/components/TabBar';
+import SystemLogo from '@/layouts/LeftMenu/component/SystemLogo';
 import { usePreferencesStore } from '@/stores/store';
+import type { LayoutType } from '@/types/app';
 import BreadcrumbNavWrapper from './component/BreadcrumbNavWrapper';
 import CollapseSwitch from './component/CollapseSwitch';
 import FullScreen from './component/FullScreen';
@@ -13,6 +15,7 @@ import LanguageSwitch from './component/LanguageSwitch';
 import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
 import UserDropdown from './component/UserDropdown';
+import '@/layouts/LeftMenu/leftMenu.scss';
 import './header.scss';
 import useGlobalUIStore from '@/stores/globalUIStore';
 
@@ -31,15 +34,25 @@ const Header = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  // 使用 useShallow 优化选择器，避免不必要的重渲染
-  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig } = usePreferencesStore(
+  /** 双列菜单布局：侧边栏切换在左侧第二列底部，此处不展示 */
+  const DOUBLE_COLUMN_LAYOUTS: LayoutType[] = ['sidebar-mixed-nav', 'header-mixed-nav'];
+  /** 水平布局：无侧边栏，隐藏侧边栏切换和面包屑 */
+  const HORIZONTAL_LAYOUT: LayoutType = 'header-nav';
+
+  const { updatePreferences, headerEnable, tabbarEnable, widgetConfig, layout } = usePreferencesStore(
     useShallow((state) => ({
       updatePreferences: state.updatePreferences,
       headerEnable: state.preferences.header.enable,
       tabbarEnable: state.preferences.tabbar.enable,
       widgetConfig: state.preferences.widget,
+      layout: state.preferences.app.layout,
     }))
   );
+
+  const isDoubleColumnMenu = DOUBLE_COLUMN_LAYOUTS.includes(layout);
+  const isHorizontalLayout = layout === HORIZONTAL_LAYOUT;
+  /** 水平布局下不显示侧边栏切换和面包屑 */
+  const showSidebarAndBreadcrumb = !isHorizontalLayout;
   // 设置窗口
   const { settingMenuModalOpen, setSettingMenuModalOpen } = useGlobalUIStore(
     useShallow((state) => ({
@@ -74,10 +87,16 @@ const Header = () => {
         >
           {/* 第一行：主要功能区域 */}
           <div className="header-main-row">
-            {/* 侧边栏切换按钮 */}
-            {sidebarToggle && <CollapseSwitch />}
-            {/* 面包屑 */}
-            <BreadcrumbNavWrapper />
+            {/* 水平布局：左侧展示系统图标和名称 */}
+            {isHorizontalLayout && (
+              <div className="shrink-0">
+                <SystemLogo variant="full" />
+              </div>
+            )}
+            {/* 侧边栏切换：水平布局无侧边栏不显示，双列布局移至左侧第二列 */}
+            {sidebarToggle && !isDoubleColumnMenu && showSidebarAndBreadcrumb && <CollapseSwitch />}
+            {/* 面包屑：水平布局下不显示 */}
+            {showSidebarAndBreadcrumb && <BreadcrumbNavWrapper />}
             {/* 显示头部横向的菜单 */}
             <HeaderMenu />
             <Space size="large" className="flex justify-end items-center toolbox">

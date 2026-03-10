@@ -24,18 +24,13 @@ const WebServiceTableActions: React.FC<WebServiceTableActionsProps> = memo(
               新增
             </Button>
           </Tooltip>
-          
+
           <Tooltip title={selectedRowKeys.length === 0 ? '请先选择要删除的数据' : '批量删除'}>
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={onBatchDelete}
-              disabled={selectedRowKeys.length === 0}
-            >
+            <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={selectedRowKeys.length === 0}>
               批量删除 {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
             </Button>
           </Tooltip>
-          
+
           <Tooltip title="刷新数据">
             <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
               刷新
@@ -44,10 +39,9 @@ const WebServiceTableActions: React.FC<WebServiceTableActionsProps> = memo(
         </Space>
       </div>
     );
-  },
+  }
 );
 
 WebServiceTableActions.displayName = 'WebServiceTableActions';
 
 export default WebServiceTableActions;
-

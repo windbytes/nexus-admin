@@ -171,16 +171,16 @@ const EmptyState = memo(() => <div className="text-center py-8 text-gray-500">�
 
 EmptyState.displayName = 'EmptyState';
 
-export const StatisticCards: React.FC = memo(() => {
-  const { data: statistics, isLoading } = useQuery({
+export const StatisticCards: React.FC = () => {
+  const { data: statistics, isFetching } = useQuery({
     queryKey: ['statisticsData'],
     queryFn: fetchStatisticsData,
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 
   // 使用 useMemo 缓存渲染逻辑
-  const renderContent = useMemo(() => {
-    if (isLoading) {
+  const renderContent = () => {
+    if (isFetching) {
       return <LoadingSkeleton />;
     }
 
@@ -189,7 +189,7 @@ export const StatisticCards: React.FC = memo(() => {
     }
 
     return (
-      <Row gutter={[12, 12]}>
+      <Row gutter={[8, 8]}>
         {statistics.map((item, index) => (
           <Col xs={24} sm={12} lg={6} key={`stat-${item.title}-${index}`}>
             <StatisticCard item={item} index={index} />
@@ -197,9 +197,9 @@ export const StatisticCards: React.FC = memo(() => {
         ))}
       </Row>
     );
-  }, [isLoading, statistics]);
+  };
 
-  return renderContent;
-});
+  return <>{renderContent()}</>;
+};
 
 StatisticCards.displayName = 'StatisticCards';

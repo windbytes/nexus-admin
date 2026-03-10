@@ -8,15 +8,18 @@ const CommonApi = {
   // 根据token获取菜单（多用于框架上根据角色获取菜单那种）
   getMenuListByRoleId: '/system/menu/getMenusByRole',
 
+  // 获取角色配置的权限点（按钮权限）
+  getButtonPermissionsByRoleId: '/system/permission/getButtonPermissionsByRoleId',
+
   /**
    * 退出登录
    */
-  logout: '/logout',
+  logout: '/auth/logout',
 
   /**
    * 刷新token
    */
-  refreshToken: '/refreshToken',
+  refreshToken: '/auth/refresh',
 };
 
 /**
@@ -31,6 +34,12 @@ interface ICommonService {
   getMenuListByRoleId(roleId: string): Promise<RouteItem[]>;
 
   /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]>;
+
+  /**
    * 用户退出登录
    */
   logout(): Promise<boolean>;
@@ -38,7 +47,7 @@ interface ICommonService {
   /**
    * 刷新token
    */
-  refreshToken(): Promise<void>;
+  refreshToken(): Promise<string>;
 }
 
 /**
@@ -62,6 +71,18 @@ export const commonService: ICommonService = {
   },
 
   /**
+   * 获取角色配置的权限点（按钮权限）
+   * @param roleId
+   * @returns 权限点列表
+   */
+  getPermissionsByRoleId(roleId: string): Promise<string[]> {
+    return HttpRequest.get(
+      { url: CommonApi.getButtonPermissionsByRoleId, params: { roleId }, adapter: 'fetch' },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  /**
    * 用户退出登录
    */
   logout(): Promise<boolean> {
@@ -71,12 +92,12 @@ export const commonService: ICommonService = {
   /**
    * 刷新token
    */
-  refreshToken(): Promise<void> {
-    return HttpRequest.post(
+  refreshToken(): Promise<string> {
+    return HttpRequest.post<string>(
       {
         url: CommonApi.refreshToken,
       },
-      { successMessageMode: 'none', skipAuthInterceptor: true, isReturnNativeResponse: true }
+      { successMessageMode: 'none', skipAuthInterceptor: true }
     );
   },
 };

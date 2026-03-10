@@ -1,3 +1,5 @@
+import type { PageQueryParams } from '@/types/global';
+
 /**
  * 用户模型
  */
@@ -35,7 +37,7 @@ export interface UserModel {
   /**
    * 性别
    */
-  sex: string;
+  sex: number;
 
   /**
    * 状态
@@ -76,15 +78,18 @@ export interface UserModel {
    * 角色ID
    */
   roleId: string;
+
+  /**
+   * 角色名称
+   */
+  roleName: string;
 }
 
 /**
  * 分配用户抽屉模块查询参数
  */
-export interface UserSearchParams {
+export interface UserSearchParams extends PageQueryParams {
   username?: string;
   realName?: string;
   status?: 0 | 1;
-  pageNum: number;
-  pageSize: number;
 }

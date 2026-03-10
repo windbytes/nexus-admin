@@ -21,7 +21,7 @@ interface Props {
  */
 const SearchHistory: React.FC<Props> = ({ items, selectedIndex, onSelect, onRemove, formatTime }) => {
   const { token } = theme.useToken();
-  
+
   return (
     <div className="overflow-y-auto flex-1">
       {items.map((item, index) => (

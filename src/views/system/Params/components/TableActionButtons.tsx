@@ -1,35 +1,30 @@
-import { DeleteOutlined, DownloadOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Space, Upload } from 'antd';
+import { DeleteOutlined, DownloadOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
+
 import type React from 'react';
 import { FolderExport, FolderImport } from '@/components/icons';
-import { usePermission } from '@/hooks/usePermission';
+import type { SysParam } from '@/services/system/params';
+import type { ModalType } from '../hooks/useParamModals';
+import { useParamPermissions } from '../hooks/useParamPermissions';
 
 interface TableActionButtonsProps {
-  onAdd: () => void;
-  onBatchDelete: () => void;
-  onRefresh: () => void;
+  handleBatchDelete: () => void;
+  selectedRows: React.Key[];
+  openModal: (name: ModalType, record?: SysParam) => void;
   onImport?: (file: File) => void;
   onExport?: (type: 'all' | 'selected') => void;
-  selectedRowKeys: React.Key[];
-  loading?: boolean;
 }
 
+// 表格操作按钮
 const TableActionButtons: React.FC<TableActionButtonsProps> = ({
-  onAdd,
-  onBatchDelete,
-  onRefresh,
+  handleBatchDelete,
+  selectedRows,
+  openModal,
   onImport,
   onExport,
-  selectedRowKeys,
-  loading = false,
 }) => {
-  const hasSelection = selectedRowKeys.length > 0;
-
-  // 权限判定
-  const canAdd = usePermission(['sys:param:add']);
-  const canDelete = usePermission(['sys:param:delete']);
-  const canImport = usePermission(['sys:param:import']);
-  const canExport = usePermission(['sys:param:export']);
+  // 权限检查
+  const { canAdd, canDelete, canImport, canExport } = useParamPermissions();
 
   // 处理文件上传
   const handleFileUpload = (file: File) => {
@@ -39,8 +34,8 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     return false; // 阻止自动上传
   };
 
-  // 导出菜单项
-  const exportMenuItems = [
+  // 导出选项
+  const exportItems: MenuProps['items'] = [
     {
       key: 'all',
       label: '导出全部',
@@ -49,43 +44,46 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     },
     {
       key: 'selected',
-      label: `导出选中 (${selectedRowKeys.length})`,
+      label: `导出选中 (${selectedRows.length})`,
       icon: <DownloadOutlined />,
-      disabled: !hasSelection,
+      disabled: selectedRows.length === 0,
       onClick: () => onExport?.('selected'),
     },
   ];
 
   return (
-    <div className="flex items-center justify-start mb-4">
-      <Space>
+    <div className="flex grow items-center justify-between">
+      {/* 左侧主要操作按钮 */}
+      <Space size="middle">
         {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
             新增
           </Button>
         )}
-
-        {canDelete && (
-          <Button icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={!hasSelection} danger>
-            批量删除
-          </Button>
-        )}
-
         {canImport && (
           <Upload accept=".xlsx,.xls,.csv" showUploadList={false} beforeUpload={handleFileUpload}>
-            <Button icon={<FolderImport className="text-xl! block" />}>导入</Button>
+            <Button icon={<FolderImport className="block!" />}>导入</Button>
           </Upload>
         )}
 
         {canExport && (
-          <Dropdown menu={{ items: exportMenuItems }} placement="bottomLeft">
-            <Button icon={<FolderExport className="text-xl! block" />}>导出</Button>
-          </Dropdown>
+          <Space.Compact>
+            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
+              导出
+              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+            </Button>
+            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
+              <Button icon={<DownOutlined />} />
+            </Dropdown>
+          </Space.Compact>
         )}
 
-        <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-          刷新
-        </Button>
+        {canDelete && (
+          <Button icon={<DeleteOutlined />} onClick={handleBatchDelete} disabled={selectedRows.length === 0} danger>
+            批量删除
+            {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+          </Button>
+        )}
       </Space>
     </div>
   );

@@ -1,23 +1,115 @@
-import type { MenuProps } from 'antd';
-import type { RouteItem } from '@/types/route';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import { Menu, type MenuProps, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
+import { BubbleLoading } from '@/components/icons';
+import { buildMenuItems, type MenuItem, resolveMenuSelection } from '@/layouts/LeftMenu/component/menu-utils';
+import { useMenuStore, usePreferencesStore } from '@/stores/store';
+import { searchRoute } from '@/utils/utils';
 
-/**
- * 布局菜单属性
- */
-interface LayoutMenuProps extends MenuProps {
-  menus?: RouteItem[];
-  // 菜单选中事件
-  handleMenuSelect?: (key: string) => void;
-
-  // 菜单展开事件
-  handleMenuOpen?: (key: string, path: string[]) => void;
+interface LayoutMenuProps {
+  className?: string;
+  mode?: 'horizontal' | 'inline';
+  theme?: 'light' | 'dark';
 }
 
 /**
- * 布局菜单
- * @returns
+ * 布局菜单：用于 Header 横向展示或侧边栏内联展示
+ * - 横向模式：菜单在顶部水平排列，超出部分自动折叠到「更多」下拉
+ * - 内联模式：菜单在侧边栏垂直展开
  */
-const LayoutMenu: React.FC<LayoutMenuProps> = () => {
-  return <div>布局菜单</div>;
+const LayoutMenu: React.FC<LayoutMenuProps> = ({ className, mode = 'horizontal', theme = 'light' }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const { menus, caches } = useMenuStore(
+    useShallow((state) => ({
+      menus: state.menus,
+      caches: state.caches,
+    }))
+  );
+  const { dynamicTitle, locale } = usePreferencesStore(
+    useShallow((state) => ({
+      dynamicTitle: state.preferences.app.dynamicTitle,
+      locale: state.preferences.app.locale,
+    }))
+  );
+
+  const [menuList, setMenuList] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  /** 选中项：根据当前路由高亮；横向模式下不传 openKeys，避免子菜单常开导致其他菜单无法点击 */
+  const { selectedKeys, openKeys } = (() => {
+    if (!caches?.pathMap?.size) {
+      return { selectedKeys: [] as string[], openKeys: [] as string[] };
+    }
+    const { selectedPath, openKeys: keys } = resolveMenuSelection(pathname, caches);
+    return {
+      selectedKeys: selectedPath ? [selectedPath] : [],
+      openKeys: keys ?? [],
+    };
+  })();
+
+  const onMenuClick: MenuProps['onClick'] = ({ key }) => {
+    navigate({ to: key, replace: true });
+  };
+
+  const menuProps: MenuProps = {
+    mode,
+    theme,
+    selectedKeys,
+    items: menuList,
+    onClick: onMenuClick,
+    overflowedIndicator: <EllipsisOutlined />,
+    className: 'border-none! flex-1 min-w-0',
+    ...(mode === 'inline' ? { openKeys } : {}),
+  };
+
+  useEffect(() => {
+    const route = searchRoute(pathname, menus);
+    if (route?.meta?.title && dynamicTitle) {
+      document.title = `Nexus - ${t(route.meta.title)}`;
+    }
+  }, [pathname, menus, dynamicTitle, t]);
+
+  useEffect(() => {
+    if (!menus?.length) {
+      setMenuList([]);
+      return;
+    }
+    setLoading(true);
+    const tid = setTimeout(() => {
+      setMenuList(buildMenuItems(menus, t));
+      setLoading(false);
+    }, 0);
+    return () => clearTimeout(tid);
+  }, [menus, locale, t]);
+
+  if (loading) {
+    return (
+      <div className={`flex items-center justify-center ${className ?? ''}`}>
+        <Spin indicator={<BubbleLoading width={24} />} spinning />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex-1 h-full min-w-0 overflow-hidden flex items-center ${className ?? ''}`}>
+      <Menu
+        {...menuProps}
+        styles={{
+          root: {
+            lineHeight: 'var(--ant-menu-horizontal-line-height)',
+          },
+        }}
+      />
+    </div>
+  );
 };
+
+LayoutMenu.displayName = 'LayoutMenu';
+
 export default LayoutMenu;

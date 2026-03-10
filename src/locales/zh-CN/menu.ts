@@ -36,6 +36,8 @@ const menu = {
   system: {
     main: '系统管理',
     menu: '菜单管理',
+    button: '按钮管理',
+    api: '接口管理',
     role: '角色维护',
     user: '用户管理',
     dict: '数据字典',
@@ -59,6 +61,8 @@ const menu = {
     workflow: '流程编排',
     templates: '模板库',
     version: '版本管理',
+    execution: '执行记录',
+    metrics: '指标汇集',
   },
   instance: {
     main: '实例监控',
@@ -78,7 +82,7 @@ const menu = {
   },
   editor: {
     main: '编辑器',
-    docWriter: '文档编辑器',
+    nwriter: '编辑器',
   },
   apps: {
     add: '新增应用',

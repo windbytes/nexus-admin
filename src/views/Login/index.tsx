@@ -12,6 +12,7 @@ import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
 import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import type { RoleModel } from '@/services/system/role/type';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
@@ -19,6 +20,9 @@ import { antdUtils } from '@/utils/antdUtil';
 import styles from './login.module.css';
 
 const { Text } = Typography;
+
+/** 本地存储「记住我」用户名的 key */
+const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
 
 /**
  * 登录模块
@@ -28,7 +32,7 @@ const Login: React.FC = () => {
   const [form] = Form.useForm();
   const inputRef = useRef(null);
   const navigate = useNavigate();
-  const { setMenus } = useMenuStore();
+  const { setMenus, setButtonPermissions } = useMenuStore();
   const userStore = useUserStore();
   const { resetTabs } = useTabStore();
   const { t } = useTranslation();
@@ -40,7 +44,7 @@ const Login: React.FC = () => {
   // 角色选择相关状态
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [loginData, setLoginData] = useState<LoginResponse | null>(null);
+  const loginData = useRef<LoginResponse | null>(null);
   // 动画状态
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
@@ -55,12 +59,24 @@ const Login: React.FC = () => {
     setIsAnimating(true);
   }, []);
 
+  // 页面加载时：若本地存在已记住的用户名，回填并勾选「记住我」
+  useEffect(() => {
+    try {
+      const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+      if (savedUsername?.trim()) {
+        form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+      }
+    } catch {
+      // 忽略本地存储不可用等情况
+    }
+  }, [form]);
+
   /**
    * 处理角色选择
    */
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
     // 使用传入的loginResponseData或当前状态中的loginData
-    const currentLoginData = loginResponseData || loginData;
+    const currentLoginData = loginResponseData || loginData.current;
     if (!currentLoginData) {
       return;
     }
@@ -77,13 +93,17 @@ const Login: React.FC = () => {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
+      const { accessToken, permissions } = await loginService.confirmRole(
+        currentLoginData.accessToken,
+        selectedRole.roleCode
+      );
       // 更新用户存储
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode);
-      userStore.setCurrentRoleId(roleId);
+      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, accessToken);
+      userStore.setRoleId(roleId);
       // 将UserRole转换为RoleModel格式
-      const roleModels = rolesToUse.map((role) => ({
+      const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
-        roleCode: role.roleType, // 使用roleType作为roleCode
+        roleCode: role.roleCode,
         roleName: role.roleName,
         roleType: role.roleType,
         status: role.status,
@@ -98,6 +118,10 @@ const Login: React.FC = () => {
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
+      // 获取角色配置的权限点（按钮权限）
+      const buttonPermissions = permissions;
+      setButtonPermissions(buttonPermissions);
+      queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
       // 确定首页路径
       let homePath = currentLoginData.homePath;
       if (!homePath) {
@@ -150,7 +174,7 @@ const Login: React.FC = () => {
    */
   const submit = async (values: LoginParams) => {
     // 加入验证码校验key
-    values.checkKey = data?.key || '';
+    values.captchaKey = data?.key || '';
     setLoading(true);
 
     try {
@@ -177,8 +201,8 @@ const Login: React.FC = () => {
         // 验证码错误或过期
         case HttpCodeEnum.RC300:
         case HttpCodeEnum.RC301:
-          form.setFields([{ name: 'captcha', errors: [message] }]);
-          form.getFieldInstance('captcha').focus();
+          form.setFields([{ name: 'captchaCode', errors: [message] }]);
+          form.getFieldInstance('captchaCode').focus();
           // 刷新验证码
           refetch();
           break;
@@ -191,8 +215,15 @@ const Login: React.FC = () => {
         // 登录成功
         case HttpCodeEnum.SUCCESS:
           {
+            // 根据「记住我」勾选状态，写入或清除本地用户名
+            if (values.remember) {
+              localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username);
+            } else {
+              localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+            }
+
             // 保存登录数据
-            setLoginData(loginResponse);
+            loginData.current = loginResponse;
 
             // 检查角色信息
             if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
@@ -224,10 +255,10 @@ const Login: React.FC = () => {
             content: (
               <>
                 <p>
-                  {t('common.statusCode')}:{code}
+                  {t('common.errorMsg.statusCode')}:{code}
                 </p>
                 <p>
-                  {t('common.reason')}:{message}
+                  {t('common.errorMsg.reason')}:{message}
                 </p>
               </>
             ),
@@ -258,7 +289,7 @@ const Login: React.FC = () => {
   return (
     <div className={`w-full h-full flex flex-col ${isAnimating ? styles['login-page-animated'] : ''}`}>
       {/* 标题 */}
-      <div className="h-[80px] flex items-center justify-between px-40">
+      <div className="h-20 flex items-center justify-between px-40">
         <div className="flex items-center">
           <img
             className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`}
@@ -349,7 +380,11 @@ const Login: React.FC = () => {
                 <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
                   <Row gutter={8}>
                     <Col span={18}>
-                      <Form.Item name="captcha" noStyle rules={[{ required: true, message: t('login.enterCaptcha') }]}>
+                      <Form.Item
+                        name="captchaCode"
+                        noStyle
+                        rules={[{ required: true, message: t('login.enterCaptcha') }]}
+                      >
                         <Input
                           size="large"
                           allowClear
@@ -407,7 +442,7 @@ const Login: React.FC = () => {
         title="选择角色"
         open={showRoleSelector}
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         footer={null}
         width={600}
         centered

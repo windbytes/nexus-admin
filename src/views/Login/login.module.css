@@ -12,7 +12,7 @@
   min-width: 550px;
   height: calc(100% - 200px);
   min-height: 500px;
-  background-image: url('@/assets/svg/login/background.svg');
+  background-image: url("@/assets/svg/login/background.svg");
   background-position: center;
   background-size: cover;
 
@@ -24,7 +24,7 @@
     border-radius: 6px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
     border: 0;
-    
+
     .login-left {
       border: 0;
       width: 330px;
@@ -33,7 +33,7 @@
       flex-direction: column;
       text-align: center;
       line-height: 24px;
-      background-image: url('@/assets/svg/login/left.svg');
+      background-image: url("@/assets/svg/login/left.svg");
       background-position: center;
       background-size: cover;
     }
@@ -65,7 +65,7 @@
   justify-content: center;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+
   &:hover {
     background: rgba(255, 255, 255, 1);
     border-color: rgba(0, 0, 0, 0.2);
@@ -73,11 +73,11 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   .anticon {
     font-size: 20px;
   }
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  
+
   img {
     width: 16px;
     height: 16px;
@@ -191,7 +191,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.8;
     transform: scale(1);
   }

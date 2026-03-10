@@ -87,6 +87,9 @@ export interface DataModeSearchParams {
 
   /** 每页数量 */
   pageSize: number;
+
+  /** 数据总数（首页传 0，翻页时传首页返回的 totalRow） */
+  total?: number;
 }
 
 /**

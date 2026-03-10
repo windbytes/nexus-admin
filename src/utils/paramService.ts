@@ -287,7 +287,11 @@ class ParamService {
    * @param expireTime 有效期（毫秒）
    * @returns 参数值映射
    */
-  async getParams(codes: string[], defaultValue: string = '', expireTime: number = 30 * 60 * 1000): Promise<Record<string, string>> {
+  async getParams(
+    codes: string[],
+    defaultValue: string = '',
+    expireTime: number = 30 * 60 * 1000
+  ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
 
     // 并行获取所有参数

@@ -524,4 +524,3 @@ export const endpointSchemaMap: Record<string, FormSchemaField[]> = {
 export const getEndpointConfigSchema = (endpointType: string): FormSchemaField[] => {
   return endpointSchemaMap[endpointType] || [];
 };
-

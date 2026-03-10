@@ -130,7 +130,7 @@ export const transform: AxiosTransform = {
     }
     if (options.errorMessageMode === 'modal') {
       antdUtils.modal?.error({
-        title: `${t('common.errorMsg.serverException')},${t('common.errorMsg.statusCode')}(${code})`,
+        title: `${code === HttpCodeEnum.RC403 ? t('common.errorMsg.forbidden') : t('common.errorMsg.serverException')},${t('common.errorMsg.statusCode')}(${code})`,
         content: msg,
         okText: t('common.operation.confirm'),
       });
@@ -238,6 +238,11 @@ export const transform: AxiosTransform = {
     }
     // 将加密配置放到请求头里面
     config.headers['X-Encrypted'] = cpt;
+    // 添加访问令牌
+    const accessToken = useUserStore.getState().accessToken;
+    config.headers.Authorization = options.authenticationScheme
+      ? `${options.authenticationScheme} ${accessToken}`
+      : accessToken;
     return config;
   },
 
@@ -350,6 +355,8 @@ export const transform: AxiosTransform = {
         },
         okText: t('common.operation.confirm'),
       });
+      // 清空请求队列，避免重复错误请求
+      onTokenRefreshFailed(new Error(t('login.loginValid')));
       return Promise.reject(t('login.loginValid'));
     }
     // 判断responseCode是否为401(即token失效),添加_retry属性防止重复刷新token
@@ -360,7 +367,9 @@ export const transform: AxiosTransform = {
         isRefreshing = true;
         try {
           // 调用刷新token的接口
-          await commonService.refreshToken();
+          const newToken = await commonService.refreshToken();
+          // 更新用户状态中的token
+          userStore.setAccessToken(newToken);
           // 执行等待的请求
           onTokenRefreshed();
           // 重新发起原始请求(这里需要注意一点的是，内部的url可能是有前缀的，所以需要把前缀去掉)

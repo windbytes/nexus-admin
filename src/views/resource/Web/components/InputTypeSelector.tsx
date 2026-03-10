@@ -42,38 +42,33 @@ const inputTypeOptions: InputTypeOption[] = [
 /**
  * 录入方式选择器组件（卡片样式）
  */
-const InputTypeSelector: React.FC<InputTypeSelectorProps> = memo(
-  ({ value, onChange, disabled }) => {
-    const handleSelect = (typeValue: InputType) => {
-      if (!disabled && onChange) {
-        onChange(typeValue);
-      }
-    };
+const InputTypeSelector: React.FC<InputTypeSelectorProps> = memo(({ value, onChange, disabled }) => {
+  const handleSelect = (typeValue: InputType) => {
+    if (!disabled && onChange) {
+      onChange(typeValue);
+    }
+  };
 
-    return (
-      <div className="input-type-selector">
-        <div className="input-type-cards">
-          {inputTypeOptions.map((option) => (
-            <div
-              key={option.value}
-              className={`input-type-card ${value === option.value ? 'active' : ''} ${
-                disabled ? 'disabled' : ''
-              }`}
-              onClick={() => handleSelect(option.value)}
-            >
-              <div className="card-icon">{option.icon}</div>
-              <div className="card-title">{option.title}</div>
-              <div className="card-description">{option.description}</div>
-              {value === option.value && <div className="card-check">✓</div>}
-            </div>
-          ))}
-        </div>
+  return (
+    <div className="input-type-selector">
+      <div className="input-type-cards">
+        {inputTypeOptions.map((option) => (
+          <div
+            key={option.value}
+            className={`input-type-card ${value === option.value ? 'active' : ''} ${disabled ? 'disabled' : ''}`}
+            onClick={() => handleSelect(option.value)}
+          >
+            <div className="card-icon">{option.icon}</div>
+            <div className="card-title">{option.title}</div>
+            <div className="card-description">{option.description}</div>
+            {value === option.value && <div className="card-check">✓</div>}
+          </div>
+        ))}
       </div>
-    );
-  },
-);
+    </div>
+  );
+});
 
 InputTypeSelector.displayName = 'InputTypeSelector';
 
 export default InputTypeSelector;
-

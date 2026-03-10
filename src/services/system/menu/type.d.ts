@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export interface MenuModel {
   /**
    * 菜单ID
@@ -67,6 +69,11 @@ export interface MenuModel {
    * 图标
    */
   icon: string;
+
+  /**
+   * 原始图标
+   */
+  originalIcon?: ReactNode | null;
 
   /**
    * 是路由

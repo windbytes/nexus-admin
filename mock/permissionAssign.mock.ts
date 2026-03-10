@@ -116,7 +116,7 @@ const mockPermissionAssignData = [
 
 // 模拟角色权限详情数据
 const mockRolePermissionDetails = {
-  'admin': {
+  admin: {
     menuPermissions: [
       '235123826202185728', // 系统管理
       '259950204508307456', // 用户管理
@@ -127,9 +127,17 @@ const mockRolePermissionDetails = {
       '295692346073440256', // 系统公告
     ],
     buttonPermissions: [
-      '1', '2', '3', '4', // 用户管理按钮
-      '5', '6', '7', '8', // 角色管理按钮
-      '9', '10', '11',    // 菜单管理按钮
+      '1',
+      '2',
+      '3',
+      '4', // 用户管理按钮
+      '5',
+      '6',
+      '7',
+      '8', // 角色管理按钮
+      '9',
+      '10',
+      '11', // 菜单管理按钮
     ],
     interfacePermissions: [
       'api_user_add',
@@ -154,14 +162,12 @@ const mockRolePermissionDetails = {
       '297120015839297536', // 版本管理
     ],
     buttonPermissions: [
-      '12', '13', '14', '15', // 应用中心按钮
+      '12',
+      '13',
+      '14',
+      '15', // 应用中心按钮
     ],
-    interfacePermissions: [
-      'api_apps_add',
-      'api_apps_edit',
-      'api_apps_delete',
-      'api_apps_view',
-    ],
+    interfacePermissions: ['api_apps_add', 'api_apps_edit', 'api_apps_delete', 'api_apps_view'],
   },
   'operator-role': {
     menuPermissions: [
@@ -171,11 +177,7 @@ const mockRolePermissionDetails = {
       '295688138591014912', // 数据处理
     ],
     buttonPermissions: [],
-    interfacePermissions: [
-      'api_statics_view',
-      'api_resource_view',
-      'api_connection_view',
-    ],
+    interfacePermissions: ['api_statics_view', 'api_resource_view', 'api_connection_view'],
   },
 };
 
@@ -187,34 +189,34 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { pageNumber = 1, pageSize = 10, roleId, userId, permissionType } = req.query;
-      
+
       let filteredData = [...mockPermissionAssignData];
-      
+
       // 根据查询条件过滤数据
       if (roleId) {
-        filteredData = filteredData.filter(item => item.roleId === roleId);
+        filteredData = filteredData.filter((item) => item.roleId === roleId);
       }
       if (userId) {
         // 这里可以根据用户ID查找对应的角色，然后过滤
         // 简化处理，假设用户ID对应的角色ID
         const userRoleMap: Record<string, string> = {
-          'user1': 'admin-role',
-          'user2': 'user-role',
-          'user3': 'operator-role',
+          user1: 'admin-role',
+          user2: 'user-role',
+          user3: 'operator-role',
         };
         const userRole = userRoleMap[userId as string];
         if (userRole) {
-          filteredData = filteredData.filter(item => item.roleId === userRole);
+          filteredData = filteredData.filter((item) => item.roleId === userRole);
         }
       }
       if (permissionType) {
-        filteredData = filteredData.filter(item => item.permissionType === permissionType);
+        filteredData = filteredData.filter((item) => item.permissionType === permissionType);
       }
-      
+
       const startIndex = (pageNumber - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const records = filteredData.slice(startIndex, endIndex);
-      
+
       return {
         code: 200,
         message: '操作成功',
@@ -228,7 +230,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 分配角色权限
   {
     url: '/api/system/permission/assign/role',
@@ -236,27 +238,24 @@ export default defineMock([
     enabled: false,
     body: (req) => {
       const { roleId, permissionType, permissionIds } = req.body;
-      
+
       // 先删除该角色该类型的所有权限
       const existingIndexes = mockPermissionAssignData
-        .map((item, index) => 
-          item.roleId === roleId && item.permissionType === permissionType ? index : -1
-        )
-        .filter(index => index !== -1)
+        .map((item, index) => (item.roleId === roleId && item.permissionType === permissionType ? index : -1))
+        .filter((index) => index !== -1)
         .reverse(); // 从后往前删除，避免索引变化
-      
-      existingIndexes.forEach(index => {
+
+      existingIndexes.forEach((index) => {
         mockPermissionAssignData.splice(index, 1);
       });
-      
+
       // 添加新的权限分配
       permissionIds.forEach((permissionId: string, index: number) => {
-        const roleName = roleId === 'admin-role' ? '系统管理员' : 
-                        roleId === 'user-role' ? '普通用户' : '操作员';
-        
+        const roleName = roleId === 'admin-role' ? '系统管理员' : roleId === 'user-role' ? '普通用户' : '操作员';
+
         let permissionName = '';
         let permissionCode = '';
-        
+
         // 根据权限类型和ID生成权限名称和代码
         if (permissionType === 'menu') {
           const menuMap: Record<string, { name: string; code: string }> = {
@@ -285,7 +284,7 @@ export default defineMock([
           permissionName = `接口${permissionId}`;
           permissionCode = `/api/interface/${permissionId}`;
         }
-        
+
         mockPermissionAssignData.push({
           id: String(Date.now() + index),
           roleId,
@@ -298,7 +297,7 @@ export default defineMock([
           assignBy: 'admin',
         });
       });
-      
+
       return {
         code: 200,
         message: '权限分配成功',
@@ -306,7 +305,7 @@ export default defineMock([
       };
     },
   },
-  
+
   // 获取角色权限详情
   {
     url: '/api/system/permission/assign/roleDetail',
@@ -315,7 +314,7 @@ export default defineMock([
     body: (req) => {
       const { roleId } = req.query;
       const rolePermission = mockRolePermissionDetails[roleId as keyof typeof mockRolePermissionDetails];
-      
+
       if (!rolePermission) {
         return {
           code: 404,
@@ -323,7 +322,7 @@ export default defineMock([
           data: null,
         };
       }
-      
+
       return {
         code: 200,
         message: '操作成功',

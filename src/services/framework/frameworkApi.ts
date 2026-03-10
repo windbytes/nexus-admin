@@ -1,5 +1,6 @@
 import { HttpRequest } from '@/utils/request';
 import type { RoleModel } from '../system/role/type';
+import type { UserModel } from '../system/user/type';
 
 /**
  * 框架相关接口
@@ -9,6 +10,16 @@ export const FrameworkApi = {
    * 根据用户ID获取角色列表
    */
   getUserRolesByUserName: '/sys/framework/queryRolesByUserName',
+
+  /**
+   * 根据角色ID获取角色信息
+   */
+  getUserRoleByRoleId: '/system/role/getRole',
+
+  /**
+   * 获取当前用户的基础信息（包括当前登录的角色）
+   */
+  getUserInfo: '/system/user/getUserInfo',
 
   /**
    * 上传文件分片
@@ -41,6 +52,16 @@ interface IFrameworkService {
    * 根据用户名获取角色列表
    */
   getUserRolesByUserName(username: string): Promise<RoleModel[]>;
+
+  /**
+   * 根据角色ID获取角色信息
+   */
+  getUserRoleByRoleId(roleId: string): Promise<RoleModel>;
+
+  /**
+   * 获取当前用户的基础信息（包括当前登录的角色）
+   */
+  getCurrentUserInfo(username: string, roleId: string): Promise<UserModel>;
 
   /**
    * 上传分片
@@ -104,6 +125,40 @@ export const frameworkService: IFrameworkService = {
       },
       { successMessageMode: 'none' }
     );
+  },
+
+  /**
+   * 根据角色ID获取角色信息
+   * @param roleId 角色ID
+   * @returns 角色信息
+   */
+  async getUserRoleByRoleId(roleId: string): Promise<RoleModel> {
+    const response = await HttpRequest.get<RoleModel>(
+      {
+        url: `${FrameworkApi.getUserRoleByRoleId}/${roleId}`,
+        adapter: 'fetch',
+      },
+      { successMessageMode: 'none' }
+    );
+    return response;
+  },
+
+  /**
+   * 获取当前用户的基础信息（包括当前登录的角色）
+   * @param username 用户名
+   * @param roleId 角色ID
+   * @returns 角色信息
+   */
+  async getCurrentUserInfo(username: string, roleId: string): Promise<UserModel> {
+    const response = await HttpRequest.get<UserModel>(
+      {
+        url: FrameworkApi.getUserInfo,
+        params: { username, roleId },
+        adapter: 'fetch',
+      },
+      { successMessageMode: 'none' }
+    );
+    return response;
   },
 
   /**

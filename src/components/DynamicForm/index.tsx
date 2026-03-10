@@ -1,14 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Radio,
-  Switch,
-  DatePicker,
-  type FormInstance,
-} from 'antd';
+import { Form, Input, InputNumber, Select, Radio, Switch, DatePicker, type FormInstance } from 'antd';
 import type { FormSchemaField } from '@/services/integrated/endpoint/endpointApi';
 
 const { TextArea, Password } = Input;
@@ -48,10 +39,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema, form }) => {
    * @param value 配置值，可能是静态值或函数
    * @param context 上下文（表单值）
    */
-  const computeValue = <T,>(
-    value: T | ((values: any) => T) | undefined,
-    context: any
-  ): T | undefined => {
+  const computeValue = <T,>(value: T | ((values: any) => T) | undefined, context: any): T | undefined => {
     if (typeof value === 'function') {
       return (value as (values: any) => T)(context);
     }
@@ -107,4 +95,3 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema, form }) => {
 };
 
 export default React.memo(DynamicForm);
-

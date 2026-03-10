@@ -6,4 +6,3 @@ export { default as InputTypeSelector } from './InputTypeSelector';
 export { default as ManualWsdlEditor } from './ManualWsdlEditor';
 export { default as FileUploadEditor } from './FileUploadEditor';
 export { default as UrlFetchEditor } from './UrlFetchEditor';
-

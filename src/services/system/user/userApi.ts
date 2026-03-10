@@ -1,7 +1,6 @@
-import { HttpRequest } from '@/utils/request';
-import type { UserModel } from './type';
-import type { UserSearchParams } from './type';
 import type { PageResult } from '@/types/global';
+import { HttpRequest } from '@/utils/request';
+import type { UserModel, UserSearchParams } from './type';
 
 /**
  * 用户信息操作枚举
@@ -28,14 +27,14 @@ const UserAction = {
   modifyUser: '/system/user/updateUser',
 
   /**
-   * 查询用户
-   */
-  getUserList: '/system/user/queryUserList',
-
-  /**
    * 查询用户列表（分页）
    */
   queryUserListPage: '/system/user/queryUserListPage',
+
+  /**
+   * 分页查询回收站用户列表
+   */
+  queryRecycleUserListPage: '/system/user/queryRecycleUserListPage',
 
   /**
    * 批量锁定用户
@@ -56,6 +55,16 @@ const UserAction = {
    * 修改用户密码
    */
   changeUserPwd: '/system/user/modifyPwd',
+
+  /**
+   * 分配角色
+   */
+  assignRole: '/system/user/assignRole',
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   */
+  restoreUsers: '/system/user/recoverFromRecycle',
 };
 
 /**
@@ -91,18 +100,18 @@ export interface IUserService {
   updateUser(user: Partial<UserModel>): Promise<boolean>;
 
   /**
-   * 查询用户
-   * @param searchParams 查询参数（包括分页）
-   * @returns 用户列表、分页信息
-   */
-  queryUsers(searchParams: UserSearchParams): Promise<Record<string, any>>;
-
-  /**
    * 查询用户列表（分页）
    * @param searchParams 查询参数（包括分页）
    * @returns 用户列表、分页信息
    */
   queryUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>>;
+
+  /**
+   * 分页查询回收站用户列表
+   * @param searchParams 查询参数（包括分页）
+   * @returns 用户列表、分页信息
+   */
+  queryRecycleUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>>;
 
   /**
    * 批量更新用户状态
@@ -126,6 +135,21 @@ export interface IUserService {
    * @returns 修改结果
    */
   changeUserPwd(id: string, newPassword: string): Promise<boolean>;
+
+  /**
+   * 分配角色
+   * @param userId 用户ID
+   * @param roleIds 角色ID列表
+   * @returns 分配结果
+   */
+  assignRole(userId: string, roleIds: string[]): Promise<boolean>;
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   * @param ids 用户ID列表
+   * @returns 恢复结果
+   */
+  restoreUsers(ids: string[]): Promise<boolean>;
 }
 
 /**
@@ -184,25 +208,6 @@ export const userService: IUserService = {
   },
 
   /**
-   * 查询用户
-   * @param pageParams 分页参数
-   * @param searchParams 搜索参数
-   * @returns 用户列表、分页信息
-   */
-  async queryUsers(searchParams: UserSearchParams): Promise<Record<string, any>> {
-    const response = await HttpRequest.post(
-      {
-        url: UserAction.getUserList,
-        params: searchParams,
-      },
-      {
-        successMessageMode: 'none',
-      },
-    );
-    return response;
-  },
-
-  /**
    * 查询用户列表（分页）
    * @param searchParams 查询参数（包括分页）
    * @returns 用户列表、分页信息
@@ -215,13 +220,30 @@ export const userService: IUserService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return response;
   },
 
   /**
-   * 批量更新用户状态
+   * 分页查询回收站用户列表
+   * @param searchParams 查询参数（包括分页）
+   * @returns 用户列表、分页信息
+   */
+  async queryRecycleUserListPage(searchParams: UserSearchParams): Promise<PageResult<UserModel>> {
+    const response = await HttpRequest.post(
+      {
+        url: UserAction.queryRecycleUserListPage,
+        data: searchParams,
+      },
+      {
+        successMessageMode: 'none',
+      }
+    );
+    return response;
+  },
+
+  /* 批量更新用户状态
    * @param ids 用户ID列表
    * @param status 用户状态
    * @returns 更新结果
@@ -234,7 +256,7 @@ export const userService: IUserService = {
         url,
         data: ids,
       },
-      { successMessageMode: 'none' },
+      { successMessageMode: 'none' }
     );
   },
 
@@ -262,6 +284,36 @@ export const userService: IUserService = {
       url: UserAction.changeUserPwd,
       data: { id, password: newPassword },
     });
+    return response;
+  },
+
+  /**
+   * 分配角色
+   * @param userId 用户ID
+   * @param roleIds 角色ID列表
+   * @returns 分配结果
+   */
+  async assignRole(userId: string, roleIds: string[]): Promise<boolean> {
+    const response = await HttpRequest.post({
+      url: UserAction.assignRole,
+      data: { userId, roleIds },
+    });
+    return response;
+  },
+
+  /**
+   * 批量恢复用户（从回收站恢复）
+   * @param ids 用户ID列表
+   * @returns 恢复结果
+   */
+  async restoreUsers(ids: string[]): Promise<boolean> {
+    const response = await HttpRequest.post(
+      {
+        url: UserAction.restoreUsers,
+        data: ids,
+      },
+      { successMessageMode: 'none' }
+    );
     return response;
   },
 };

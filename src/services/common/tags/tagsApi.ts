@@ -81,7 +81,7 @@ export const tagsService: ITagsService = {
       },
       {
         successMessageMode: 'none',
-      },
+      }
     );
     return response;
   },
@@ -120,11 +120,7 @@ export const tagsService: ITagsService = {
   /**
    * 绑定标签
    */
-  async bindTag(
-    tagIDs: string[],
-    targetID: string,
-    type: string,
-  ): Promise<boolean> {
+  async bindTag(tagIDs: string[], targetID: string, type: string): Promise<boolean> {
     const response = await HttpRequest.post({
       url: TagsApi.bindTag,
       data: { tagIDs, targetID, type },
@@ -134,11 +130,7 @@ export const tagsService: ITagsService = {
   /**
    * 解绑标签
    */
-  async unbindTag(
-    tagID: string,
-    targetID: string,
-    type: string,
-  ): Promise<boolean> {
+  async unbindTag(tagID: string, targetID: string, type: string): Promise<boolean> {
     const response = await HttpRequest.post({
       url: TagsApi.unbindTag,
       data: { tagID, targetID, type },
