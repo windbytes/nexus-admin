@@ -4,7 +4,7 @@ import type { Key, ReactNode } from 'react';
 
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { type MenuCaches, matchPathname, matchRoutePath } from '@/utils/utils';
+import { getMenuKey, type MenuCaches, matchPathname, matchRoutePath } from '@/utils/utils';
 
 export type MenuItem = Required<MenuProps>['items'][number];
 
@@ -178,12 +178,13 @@ export const buildMenuItems = (menuList: RouteItem[], t: TFunction): MenuItem[] 
       continue;
     }
 
+    const key = getMenuKey(item);
     if (!item?.children?.length) {
-      result.push(getItem(t, item.meta?.title, item.path, getIcon(item.meta?.icon)));
+      result.push(getItem(t, item.meta?.title, key, getIcon(item.meta?.icon)));
       continue;
     }
 
-    result.push(getItem(t, item.meta?.title, item.path, getIcon(item.meta?.icon), buildMenuItems(item.children, t)));
+    result.push(getItem(t, item.meta?.title, key, getIcon(item.meta?.icon), buildMenuItems(item.children, t)));
   }
 
   return result;
@@ -231,6 +232,7 @@ export const hasRoutePath = (routes: RouteItem[] | undefined, targetPath: string
  * 根据 pathname 决定选中/展开的菜单 path。
  * 若命中纯路由节点，则退回最近的可见菜单。
  * 若完全未命中，则尝试做动态匹配。
+ * openKeys 使用 getMenuKey 与侧栏菜单项 key 一致，保证刷新后父级能正确展开。
  */
 export function resolveMenuSelection(
   pathname: string,
@@ -255,7 +257,9 @@ export function resolveMenuSelection(
     return { selectedPath: null, openKeys: [] };
   }
 
-  // 纯路由回退到最近的可见菜单 path
+  const menuKey = getMenuKey(entity);
+
+  // 纯路由回退到最近的可见菜单（fallback 为父级的 menuKey）
   if (entity.meta?.menuType === 2 || entity.hidden) {
     const fallback = routeToMenuPathMap.get(targetPath);
     if (!fallback) {
@@ -268,7 +272,7 @@ export function resolveMenuSelection(
   }
 
   return {
-    selectedPath: entity.path,
-    openKeys: ancestorsMap.get(entity.path) ?? [],
+    selectedPath: menuKey,
+    openKeys: ancestorsMap.get(menuKey) ?? [],
   };
 }

@@ -16,6 +16,19 @@ export type MenuCaches = {
 };
 
 /**
+ * 菜单项在侧栏中使用的稳定 key（与 path 可能为空的一级菜单兼容）
+ * 用于 ancestorsMap、Menu openKeys 与菜单项 key 一致，保证刷新后父级能正确展开
+ */
+export function getMenuKey(node: { path?: string; id?: string; redirect?: string }): string {
+  const path = node.path?.trim();
+  if (path) return path;
+  if (node.id) return String(node.id);
+  const redirect = node.redirect?.trim();
+  if (redirect) return redirect;
+  return String(node.id ?? '');
+}
+
+/**
  * Add the object as a parameter to the URL
  * @param baseUrl url
  * @param obj
@@ -201,25 +214,26 @@ export function buildMenuCaches(menuList: MenuEntity[]): MenuCaches {
 
   const dfs = (node: MenuEntity, parentVisibleAncestors: string[]) => {
     const isPureRoute = node.meta?.menuType === 2;
+    const menuKey = getMenuKey(node);
 
-    // 可见菜单：自身 path 是 key；隐藏/纯路由：仅记录 pathMap 方便匹配
-    pathMap.set(node.path, node);
+    // pathMap 仅用 path 注册，供 pathname 匹配；有 path 的节点才参与路径查找
+    if (node.path?.trim()) {
+      pathMap.set(node.path.trim(), node);
+    }
 
     if (!isPureRoute && !node.hidden) {
-      ancestorsMap.set(node.path, [...parentVisibleAncestors]);
+      ancestorsMap.set(menuKey, [...parentVisibleAncestors]);
     }
 
     if (isPureRoute) {
-      // 路由节点指向最近的可见菜单
       const nearestVisible = parentVisibleAncestors[parentVisibleAncestors.length - 1];
-      if (nearestVisible) {
-        routeToMenuPathMap.set(node.path, nearestVisible);
+      if (nearestVisible && node.path?.trim()) {
+        routeToMenuPathMap.set(node.path.trim(), nearestVisible);
       }
     }
 
-    // 计算下一层可见菜单的父链
     const nextVisibleAncestors =
-      isPureRoute || node.hidden ? parentVisibleAncestors : [...parentVisibleAncestors, node.path];
+      isPureRoute || node.hidden ? parentVisibleAncestors : [...parentVisibleAncestors, menuKey];
 
     node.children?.forEach((child) => {
       dfs(child, nextVisibleAncestors);
