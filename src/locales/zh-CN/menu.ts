@@ -61,6 +61,8 @@ const menu = {
     workflow: '流程编排',
     templates: '模板库',
     version: '版本管理',
+    execution: '执行记录',
+    metrics: '指标汇集',
   },
   instance: {
     main: '实例监控',

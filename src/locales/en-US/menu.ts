@@ -57,10 +57,12 @@ const menu = {
     main: 'Integration',
     apps: 'Apps',
     endpoint: 'Endpoint',
-    endpointConfig: 'EndpointConfig',
+    endpointConfig: 'Endpoint Config',
     workflow: 'Workflow',
     templates: 'Templates',
     version: 'Version',
+    execution: 'Execution',
+    metrics: 'Metrics',
   },
   instance: {
     main: 'Instance',
