@@ -4,13 +4,8 @@ import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
-<<<<<<< HEAD
-=======
-import { useTagStore } from '@/stores/useTagStore.ts';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { tagService } from '@/services/engine';
->>>>>>> dev
 import { tagsService } from '@/services/common/tags/tagsApi';
+import { tagService } from '@/services/engine';
 import { useTagStore } from '@/stores/useTagStore.ts';
 import TagItemEditor from './tag-item-editor';
 
@@ -48,9 +43,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
   // 创建新标签（应用标签走 engine tagService）
   const createNewTagMutation = useMutation({
     mutationFn: async (name: string) => {
-      const res = isAppTag
-        ? await tagService.createTag({ name, type })
-        : await tagsService.addTag({ name, type });
+      const res = isAppTag ? await tagService.createTag({ name, type }) : await tagsService.addTag({ name, type });
       return res;
     },
     onMutate: () => {
