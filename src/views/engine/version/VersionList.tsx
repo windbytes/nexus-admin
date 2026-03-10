@@ -8,7 +8,7 @@ import {
   usePublishVersion,
   useRollbackVersion,
   useVersionList,
-} from '@/views/integrated/Versions/useVersionQueries';
+} from '@/views/engine/version/useVersionQueries';
 import ReleaseConfirmation from './ReleaseConfirmation';
 import VersionListItem from './VersionListItem';
 
