@@ -95,14 +95,10 @@ const UserDropdown: React.FC = () => {
     onSuccess: () => {
       // 清空当前标签页
       resetTabs();
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      window.location.reload();
     },
     onError: (error) => {
-      console.error('角色切换失败:', error);
-      message.error('角色切换失败');
+      message.error(`角色切换失败: ${error.message}`);
     },
   });
 

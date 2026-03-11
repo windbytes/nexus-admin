@@ -107,36 +107,44 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       <Space size="middle">
         {/* 新增按钮 */}
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
-            {t('common.operation.add')}
-          </Button>
-        )}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          disabled={!canAdd}
+          onClick={() => openModal('add')}
+        >
+          {t('common.operation.add')}
+        </Button>
 
         {/* 导入按钮 */}
-        {canImport && (
-          <Upload
-            accept=".xlsx,.xls"
-            showUploadList={false}
-            action="/api/system/permission/import"
-            onChange={handleImportChange}
-          >
-            <Button icon={<FolderImport className="block!" />}>{t('common.operation.import')}</Button>
-          </Upload>
-        )}
+        <Upload
+          accept=".xlsx,.xls"
+          showUploadList={false}
+          action="/api/system/permission/import"
+          onChange={handleImportChange}
+        >
+          <Button icon={<FolderImport className="block!" />} disabled={!canImport}>
+            {t('common.operation.import')}
+          </Button>
+        </Upload>
 
         {/* 导出按钮 */}
-        {canExport && (
-          <Space.Compact>
-            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
-              {t('common.operation.export')}
-              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
-            </Button>
-            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
-              <Button icon={<DownOutlined />} />
-            </Dropdown>
-          </Space.Compact>
-        )}
+        <Space.Compact>
+          <Button
+            disabled={selectedRows.length === 0 || !canExport}
+            icon={<FolderExport className="block!" />}
+          >
+            {t('common.operation.export')}
+            {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+          </Button>
+          <Dropdown
+            disabled={selectedRows.length === 0 || !canExport}
+            menu={{ items: exportItems }}
+            placement="bottom"
+          >
+            <Button icon={<DownOutlined />} />
+          </Dropdown>
+        </Space.Compact>
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>

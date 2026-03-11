@@ -47,30 +47,34 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   return (
     <div className="flex grow items-center justify-between">
       <Space size="middle">
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
-            {t('common.operation.add')}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          disabled={!canAdd}
+          onClick={() => openModal('add')}
+        >
+          {t('common.operation.add')}
+        </Button>
+        <Upload accept=".csv,.xlsx,.xls" showUploadList={false} beforeUpload={handleFileUpload}>
+          <Button icon={<FolderImport className="block!" />} disabled={!canImport}>
+            导入
           </Button>
-        )}
-        {canImport && (
-          <Upload accept=".csv,.xlsx,.xls" showUploadList={false} beforeUpload={handleFileUpload}>
-            <Button icon={<FolderImport className="block!" />}>导入</Button>
-          </Upload>
-        )}
-        {canExport && (
-          <Dropdown menu={{ items: exportItems }} placement="bottom">
-            <Button icon={<FolderExport className="block!" />}>
-              导出
-              {selectedRowKeys.length > 0 && <Badge count={selectedRowKeys.length} size="small" className="ml-1" />}
-            </Button>
-          </Dropdown>
-        )}
-        {canDelete && (
-          <Button danger icon={<DeleteOutlined />} onClick={onBatchDelete} disabled={selectedRowKeys.length === 0}>
-            批量删除
+        </Upload>
+        <Dropdown menu={{ items: exportItems }} placement="bottom" disabled={!canExport}>
+          <Button icon={<FolderExport className="block!" />} disabled={!canExport}>
+            导出
             {selectedRowKeys.length > 0 && <Badge count={selectedRowKeys.length} size="small" className="ml-1" />}
           </Button>
-        )}
+        </Dropdown>
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+          onClick={onBatchDelete}
+          disabled={selectedRowKeys.length === 0 || !canDelete}
+        >
+          批量删除
+          {selectedRowKeys.length > 0 && <Badge count={selectedRowKeys.length} size="small" className="ml-1" />}
+        </Button>
       </Space>
     </div>
   );
