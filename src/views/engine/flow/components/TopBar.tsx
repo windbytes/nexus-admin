@@ -74,18 +74,21 @@ export const TopBar: React.FC<TopBarProps> = ({
       </Space>
 
       <Space size="small">
-        <Button type="text" icon={<UndoOutlined />} disabled={!canUndo()} onClick={undo} title="撤销" />
-        <Button type="text" icon={<SearchOutlined />} onClick={onPreview} title="预览" />
-        <Badge count={checklistCount} size="small" offset={[-2, 2]}>
-          <Button type="text" icon={<CheckOutlined />} title="检查清单" />
-        </Badge>
+        <Space.Compact block>
+          <Button icon={<UndoOutlined />} disabled={!canUndo()} onClick={undo} title="撤销" />
+          <Button icon={<SearchOutlined />} onClick={onPreview} title="预览" />
+          <Badge count={checklistCount}>
+            <Button icon={<CheckOutlined />} title="检查清单" />
+          </Badge>
+        </Space.Compact>
+
         <Button onClick={onSave}>保存</Button>
         <Button type="primary" icon={<CloudUploadOutlined />} onClick={onPublish}>
           发布
         </Button>
-        <Button type="text" icon={<HistoryOutlined />} onClick={onOpenVersionHistory} title="版本历史" />
-        <Button type="text" icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
-        <Button type="text" icon={<ReloadOutlined />} title="刷新" />
+        <Button icon={<HistoryOutlined />} onClick={onOpenVersionHistory} title="版本历史" />
+        <Button icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
+        <Button icon={<ReloadOutlined />} title="刷新" />
       </Space>
     </div>
   );

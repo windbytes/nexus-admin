@@ -1,15 +1,18 @@
 /**
  * 流程编排页的交互逻辑：添加节点、DSL、保存草稿、发布等
  * 全部使用 flow API（flowId）；配置加载为 getDraft(flowId)，运行状态为 getRouteStatus(flowId)
+ * 无 flowId 时点击保存会先创建流程定义再保存草稿
  */
-import { message } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import { useCallback, useState } from 'react';
-import { flowVersionService } from '@/services/engine/flow/api';
+import { flowDefinitionService, flowVersionService } from '@/services/engine/flow/api';
 import type { FlowDraftEdge, FlowDraftNode, FlowDraftPayload } from '@/services/engine/flow/types';
 import type { WorkflowNodePlugin } from '../plugin/types';
 import { useWorkflowStore } from '../store/workflowStore';
-import { downloadDSL, importDSLFromFile } from '../utils/dsl';
 import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from '../types';
+import { downloadDSL, importDSLFromFile } from '../utils/dsl';
+import { flowDefinitionQueryKeys } from './useFlowId';
 
 /**
  * 将画布文档转为后端草稿 DTO 格式（nodeKey / sourceNodeKey / targetNodeKey）
@@ -36,8 +39,10 @@ function toFlowDraftPayload(doc: WorkflowDocument | null): FlowDraftPayload {
  * @param flowId 流程定义 ID（用于草稿/发布等 flow API，可选；无则保存/发布不请求）
  */
 export function useWorkflowHandlers(appId: string | undefined, flowId: string | undefined) {
+  const queryClient = useQueryClient();
   const [propertyPanelOpen, setPropertyPanelOpen] = useState(false);
   const [checklistCount] = useState(1);
+  const { message } = App.useApp();
 
   const { nodes, setNodes, setLastSavedAt, pushHistory, loadDocument, getDocument } = useWorkflowStore();
 
@@ -77,37 +82,59 @@ export function useWorkflowHandlers(appId: string | undefined, flowId: string | 
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!flowId) {
-      message.warning('流程未就绪，请稍后再保存');
+    if (!appId) {
+      message.warning('应用未就绪，请稍后再保存');
       return;
     }
     try {
       const doc = getDocument(appId);
       const payload = toFlowDraftPayload(doc);
-      await flowVersionService.saveDraft(flowId, payload);
+      let targetFlowId = flowId;
+      if (!targetFlowId) {
+        const newFlow = await flowDefinitionService.create({
+          appId,
+          tenantId: '1',
+          flowKey: 'DEFAULT',
+          flowName: '默认流程',
+        });
+        targetFlowId = newFlow.id;
+        void queryClient.invalidateQueries({ queryKey: flowDefinitionQueryKeys.listByApp(appId) });
+      }
+      await flowVersionService.saveDraft(targetFlowId, payload);
       setLastSavedAt(new Date().toISOString());
-      message.success('草稿已保存');
+      message.success(targetFlowId === flowId ? '草稿已保存' : '流程已创建并保存');
     } catch {
       message.error('保存失败');
     }
-  }, [appId, flowId, getDocument, setLastSavedAt]);
+  }, [appId, flowId, getDocument, setLastSavedAt, queryClient]);
 
   const handlePublish = useCallback(async () => {
-    if (!flowId) {
-      message.warning('流程未就绪，请稍后再发布');
+    if (!appId) {
+      message.warning('应用未就绪，请稍后再发布');
       return;
     }
     try {
       const doc = getDocument(appId);
       const payload = toFlowDraftPayload(doc);
-      await flowVersionService.saveDraft(flowId, payload);
-      await flowVersionService.publish(flowId);
+      let targetFlowId = flowId;
+      if (!targetFlowId) {
+        const newFlow = await flowDefinitionService.create({
+          appId,
+          tenantId: '1',
+          flowKey: 'DEFAULT',
+          flowName: '默认流程',
+        });
+        targetFlowId = newFlow.id;
+        void queryClient.invalidateQueries({ queryKey: flowDefinitionQueryKeys.listByApp(appId) });
+      }
+      await flowVersionService.saveDraft(targetFlowId, payload);
+      await flowVersionService.publish(targetFlowId);
       setLastSavedAt(new Date().toISOString());
       message.success('发布成功');
     } catch {
       message.error('发布失败');
     }
-  }, [appId, flowId, getDocument, setLastSavedAt]);
+  }, [appId, flowId, getDocument, setLastSavedAt, queryClient]);
 
   const handleAddComment = useCallback(() => {
     message.info('添加注释');
