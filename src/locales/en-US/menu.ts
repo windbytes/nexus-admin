@@ -81,7 +81,7 @@ const menu = {
     template: 'Template',
   },
   editor: {
-    main: 'Editor',
+    main: 'Document Center',
     nwriter: 'NWriter',
   },
   apps: {
