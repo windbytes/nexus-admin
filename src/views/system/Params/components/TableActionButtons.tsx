@@ -55,35 +55,46 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
-            新增
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          disabled={!canAdd}
+          onClick={() => openModal('add')}
+        >
+          新增
+        </Button>
+        <Upload accept=".xlsx,.xls,.csv" showUploadList={false} beforeUpload={handleFileUpload}>
+          <Button icon={<FolderImport className="block!" />} disabled={!canImport}>
+            导入
           </Button>
-        )}
-        {canImport && (
-          <Upload accept=".xlsx,.xls,.csv" showUploadList={false} beforeUpload={handleFileUpload}>
-            <Button icon={<FolderImport className="block!" />}>导入</Button>
-          </Upload>
-        )}
+        </Upload>
 
-        {canExport && (
-          <Space.Compact>
-            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
-              导出
-              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
-            </Button>
-            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
-              <Button icon={<DownOutlined />} />
-            </Dropdown>
-          </Space.Compact>
-        )}
-
-        {canDelete && (
-          <Button icon={<DeleteOutlined />} onClick={handleBatchDelete} disabled={selectedRows.length === 0} danger>
-            批量删除
+        <Space.Compact>
+          <Button
+            disabled={selectedRows.length === 0 || !canExport}
+            icon={<FolderExport className="block!" />}
+          >
+            导出
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
-        )}
+          <Dropdown
+            disabled={selectedRows.length === 0 || !canExport}
+            menu={{ items: exportItems }}
+            placement="bottom"
+          >
+            <Button icon={<DownOutlined />} />
+          </Dropdown>
+        </Space.Compact>
+
+        <Button
+          icon={<DeleteOutlined />}
+          onClick={handleBatchDelete}
+          disabled={selectedRows.length === 0 || !canDelete}
+          danger
+        >
+          批量删除
+          {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+        </Button>
       </Space>
     </div>
   );

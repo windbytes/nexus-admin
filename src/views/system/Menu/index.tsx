@@ -131,20 +131,21 @@ const Menu: React.FC = () => {
           rowKey="id"
           actionButtons={
             <div className="flex gap-2">
-              {permissions.canAddMenu && (
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
-                  新增菜单
-                </Button>
-              )}
-              {permissions.canDeleteMenu && (
-                <Button
-                  danger
-                  onClick={() => handleBatchDelete(selectedRowKeys)}
-                  disabled={selectedRowKeys.length === 0}
-                >
-                  批量删除
-                </Button>
-              )}
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                disabled={!permissions.canAddMenu}
+                onClick={() => openModal('add')}
+              >
+                新增菜单
+              </Button>
+              <Button
+                danger
+                onClick={() => handleBatchDelete(selectedRowKeys)}
+                disabled={selectedRowKeys.length === 0 || !permissions.canDeleteMenu}
+              >
+                批量删除
+              </Button>
             </div>
           }
           onRefresh={refetch}

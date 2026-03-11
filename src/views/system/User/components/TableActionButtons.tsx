@@ -166,43 +166,51 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
-        {canAdd && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal('add')}>
-            {t('common.operation.add')}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          disabled={!canAdd}
+          onClick={() => openModal('add')}
+        >
+          {t('common.operation.add')}
+        </Button>
+        <Upload
+          accept=".xlsx,.xls"
+          showUploadList={false}
+          action="/api/user/import"
+          onChange={(info) => {
+            if (info.file.status === 'done') {
+              message.success('导入成功');
+              refetch();
+            } else if (info.file.status === 'error') {
+              modal.error({
+                title: '导入失败',
+                content: '用户数据导入失败，请检查文件格式或联系技术支持。',
+              });
+            }
+          }}
+        >
+          <Button icon={<FolderImport className="block!" />} disabled={!canBatchImport}>
+            {t('common.operation.import')}
           </Button>
-        )}
-        {canBatchImport && (
-          <Upload
-            accept=".xlsx,.xls"
-            showUploadList={false}
-            action="/api/user/import"
-            onChange={(info) => {
-              if (info.file.status === 'done') {
-                message.success('导入成功');
-                refetch();
-              } else if (info.file.status === 'error') {
-                modal.error({
-                  title: '导入失败',
-                  content: '用户数据导入失败，请检查文件格式或联系技术支持。',
-                });
-              }
-            }}
-          >
-            <Button icon={<FolderImport className="block!" />}>{t('common.operation.import')}</Button>
-          </Upload>
-        )}
+        </Upload>
 
-        {canBatchExport && (
-          <Space.Compact>
-            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
-              {t('common.operation.export')}
-              {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
-            </Button>
-            <Dropdown disabled={selectedRows.length === 0} menu={{ items: exportItems }} placement="bottom">
-              <Button icon={<DownOutlined />} />
-            </Dropdown>
-          </Space.Compact>
-        )}
+        <Space.Compact>
+          <Button
+            disabled={selectedRows.length === 0 || !canBatchExport}
+            icon={<FolderExport className="block!" />}
+          >
+            {t('common.operation.export')}
+            {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
+          </Button>
+          <Dropdown
+            disabled={selectedRows.length === 0 || !canBatchExport}
+            menu={{ items: exportItems }}
+            placement="bottom"
+          >
+            <Button icon={<DownOutlined />} />
+          </Dropdown>
+        </Space.Compact>
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>
@@ -216,11 +224,13 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         </Space.Compact>
 
         {/* 回收站按钮 - 移到左边 */}
-        {canRecover && (
-          <Button icon={<Recycle className="block! text-green-500!" />} onClick={() => openModal('recycle')}>
-            {t('common.operation.recycle')}
-          </Button>
-        )}
+        <Button
+          icon={<Recycle className="block! text-green-500!" />}
+          disabled={!canRecover}
+          onClick={() => openModal('recycle')}
+        >
+          {t('common.operation.recycle')}
+        </Button>
       </Space>
     </div>
   );

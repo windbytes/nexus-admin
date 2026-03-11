@@ -23,7 +23,7 @@ interface UseRoleTableColumnProps {
 export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
-  const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission } = useRolePermissions();
+  const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } = useRolePermissions();
   // 授权资源、授权权限共用同一权限点
   const canAssignResource = canAssignPermission;
   const { t } = useTranslation();
@@ -188,8 +188,8 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       render(value, record) {
         return (
           <Switch
-            size="small"
             checked={value}
+            disabled={!canEditRole}
             onChange={(checked) => {
               updateRoleStatus(record.id, checked);
             }}
@@ -256,6 +256,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
             <Button
               size="small"
               type="link"
+              disabled={!canEditRole}
               classNames={{ content: 'text-(--ant-color-primary)' }}
               onClick={() => openModal('edit', record)}
             >
