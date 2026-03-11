@@ -37,7 +37,7 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate({ to: `/integrated/app/${id}/workflow`, params: { appId: id } });
+    navigate({ to: `/engine/${id}/flow`, params: { appId: id } });
   };
 
   return (

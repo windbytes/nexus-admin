@@ -1,5 +1,6 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useParams } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useMemo, useState } from 'react';
 import { LeftSidebar } from './components/LeftSidebar';
@@ -7,6 +8,7 @@ import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
 import { VersionHistoryModal } from './components/VersionHistoryModal';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
+import { useFlowId } from './hooks/useFlowId';
 import { useWorkflowHandlers } from './hooks/useWorkflowHandlers';
 import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuery } from './hooks/useWorkflowQueries';
 import { registerBuiltinNodePlugins } from './plugin/nodes';
@@ -17,12 +19,13 @@ import './workflow.scss';
 registerBuiltinNodePlugins();
 
 /**
- * 流程编排页：基于 appId 拉取节点/边配置与运行状态，组装顶部栏、左侧栏、画布、属性面板
+ * 流程编排页：基于 appId 拉取节点/边配置与运行状态，解析 flowId 后用于草稿/发布/版本/路由接口
  */
 const Workflow: React.FC = () => {
+  const { appId } = useParams({ strict: false });
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
+  const { flowId, isLoading: flowIdLoading } = useFlowId(appId);
   const {
-    appId,
     propertyPanelOpen,
     setPropertyPanelOpen,
     checklistCount,
@@ -34,11 +37,11 @@ const Workflow: React.FC = () => {
     handlePublish,
     handleAddComment,
     handleRun,
-  } = useWorkflowHandlers();
+  } = useWorkflowHandlers(appId, flowId);
 
-  useWorkflowConfigSync(appId);
-  const { isLoading: configLoading } = useWorkflowConfigQuery(appId);
-  const { data: runStatus } = useWorkflowRunStatusQuery(appId);
+  useWorkflowConfigSync(flowId);
+  const { isLoading: configLoading } = useWorkflowConfigQuery(flowId);
+  const { data: runStatus } = useWorkflowRunStatusQuery(flowId);
 
   const nodeTypes = useMemo(() => buildNodeTypes(), []);
 
@@ -65,7 +68,7 @@ const Workflow: React.FC = () => {
                 runStatus={runStatus ?? null}
               />
             </div>
-            {configLoading && (
+            {(configLoading || flowIdLoading) && (
               <div
                 style={{
                   position: 'absolute',
@@ -85,11 +88,11 @@ const Workflow: React.FC = () => {
           <PropertyPanel open={propertyPanelOpen} onClose={() => setPropertyPanelOpen(false)} width={320} />
         </div>
       </div>
-      {appId && (
+      {flowId && (
         <VersionHistoryModal
           open={versionHistoryOpen}
           onClose={() => setVersionHistoryOpen(false)}
-          appId={appId}
+          flowId={flowId}
         />
       )}
     </ReactFlowProvider>

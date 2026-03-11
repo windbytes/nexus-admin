@@ -1,16 +1,41 @@
 /**
  * 流程编排页的交互逻辑：添加节点、DSL、保存草稿、发布等
+ * 全部使用 flow API（flowId）；配置加载为 getDraft(flowId)，运行状态为 getRouteStatus(flowId)
  */
-import { useParams } from '@tanstack/react-router';
 import { message } from 'antd';
 import { useCallback, useState } from 'react';
-import { workflowService } from '@/services/integrated/workflow/workflowApi';
+import { flowVersionService } from '@/services/engine/flow/api';
+import type { FlowDraftEdge, FlowDraftNode, FlowDraftPayload } from '@/services/engine/flow/types';
 import type { WorkflowNodePlugin } from '../plugin/types';
 import { useWorkflowStore } from '../store/workflowStore';
 import { downloadDSL, importDSLFromFile } from '../utils/dsl';
+import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from '../types';
 
-export function useWorkflowHandlers() {
-  const { appId } = useParams({ strict: false });
+/**
+ * 将画布文档转为后端草稿 DTO 格式（nodeKey / sourceNodeKey / targetNodeKey）
+ */
+function toFlowDraftPayload(doc: WorkflowDocument | null): FlowDraftPayload {
+  const nodes: FlowDraftNode[] = (doc?.nodes ?? []).map((node: WorkflowNode) => ({
+    nodeKey: node.id,
+    name: (node.data as { title?: string })?.title,
+    description: (node.data as { description?: string })?.description,
+    config: (node.data as Record<string, unknown>) ?? {},
+    uiConfig: { position: node.position },
+    pluginId: node.type,
+  }));
+  const edges: FlowDraftEdge[] = (doc?.edges ?? []).map((edge: WorkflowEdge) => ({
+    sourceNodeKey: edge.source,
+    targetNodeKey: edge.target,
+    conditionExpr: (edge.data as { conditionExpr?: string })?.conditionExpr,
+  }));
+  return { nodes, edges };
+}
+
+/**
+ * @param appId 应用 ID（来自路由，用于 getDocument 的 meta）
+ * @param flowId 流程定义 ID（用于草稿/发布等 flow API，可选；无则保存/发布不请求）
+ */
+export function useWorkflowHandlers(appId: string | undefined, flowId: string | undefined) {
   const [propertyPanelOpen, setPropertyPanelOpen] = useState(false);
   const [checklistCount] = useState(1);
 
@@ -52,41 +77,37 @@ export function useWorkflowHandlers() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!appId) {
-      message.warning('缺少应用 ID');
+    if (!flowId) {
+      message.warning('流程未就绪，请稍后再保存');
       return;
     }
     try {
       const doc = getDocument(appId);
-      await workflowService.saveDraft(appId, {
-        nodes: doc?.nodes ?? [],
-        edges: doc?.edges ?? [],
-      });
+      const payload = toFlowDraftPayload(doc);
+      await flowVersionService.saveDraft(flowId, payload);
       setLastSavedAt(new Date().toISOString());
       message.success('草稿已保存');
-    } catch (e) {
+    } catch {
       message.error('保存失败');
     }
-  }, [appId, getDocument, setLastSavedAt]);
+  }, [appId, flowId, getDocument, setLastSavedAt]);
 
   const handlePublish = useCallback(async () => {
-    if (!appId) {
-      message.warning('缺少应用 ID');
+    if (!flowId) {
+      message.warning('流程未就绪，请稍后再发布');
       return;
     }
     try {
       const doc = getDocument(appId);
-      await workflowService.saveDraft(appId, {
-        nodes: doc?.nodes ?? [],
-        edges: doc?.edges ?? [],
-      });
-      await workflowService.publish(appId);
+      const payload = toFlowDraftPayload(doc);
+      await flowVersionService.saveDraft(flowId, payload);
+      await flowVersionService.publish(flowId);
       setLastSavedAt(new Date().toISOString());
       message.success('发布成功');
-    } catch (e) {
+    } catch {
       message.error('发布失败');
     }
-  }, [appId, getDocument, setLastSavedAt]);
+  }, [appId, flowId, getDocument, setLastSavedAt]);
 
   const handleAddComment = useCallback(() => {
     message.info('添加注释');
@@ -98,6 +119,7 @@ export function useWorkflowHandlers() {
 
   return {
     appId,
+    flowId,
     propertyPanelOpen,
     setPropertyPanelOpen,
     checklistCount,

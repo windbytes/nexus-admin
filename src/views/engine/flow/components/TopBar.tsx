@@ -12,7 +12,7 @@ import {
   UndoOutlined,
 } from '@ant-design/icons';
 import { Badge, Button, Space, Tag, Tooltip, Typography } from 'antd';
-import type { WorkflowRunStatusResponse } from '@/services/integrated/workflow/type';
+import type { FlowRunStatusResponse } from '@/services/engine/flow/types';
 import { useWorkflowStore } from '../store/workflowStore';
 
 const { Text } = Typography;
@@ -24,8 +24,8 @@ interface TopBarProps {
   onPublish?: () => void;
   onOpenVersionHistory?: () => void;
   checklistCount?: number;
-  /** 流程运行状态（由 useWorkflowRunStatusQuery 提供） */
-  runStatus?: WorkflowRunStatusResponse | null;
+  /** 流程运行状态（由 useWorkflowRunStatusQuery 提供，已从 RouteStatusDTO 映射） */
+  runStatus?: FlowRunStatusResponse | null;
 }
 
 const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
