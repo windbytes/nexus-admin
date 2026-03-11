@@ -96,10 +96,6 @@ const UserDropdown: React.FC = () => {
       // 清空当前标签页
       resetTabs();
 
-      // 显示成功消息
-      message.success('角色切换成功，页面将刷新');
-
-      // 延迟刷新页面，让用户看到成功消息
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -110,9 +106,18 @@ const UserDropdown: React.FC = () => {
     },
   });
 
-  // 角色切换处理
+  // 角色切换处理：先确认再切换并整体刷新
   const handleRoleSwitch = (roleId: string) => {
-    roleSwitchMutation.mutate(roleId);
+    modal.confirm({
+      title: '切换角色',
+      icon: <ExclamationCircleOutlined />,
+      content: '切换角色后，系统将整体刷新以加载新角色权限与菜单，是否继续？',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        roleSwitchMutation.mutate(roleId);
+      },
+    });
   };
 
   // 菜单栏
