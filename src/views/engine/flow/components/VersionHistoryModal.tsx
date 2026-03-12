@@ -3,7 +3,7 @@
  * 使用 flow API：flowVersionService.listVersions(flowId) 返回 Page<FlowVersionDTO>
  */
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, message, Modal, Table } from 'antd';
+import { Button, Modal, message, Table } from 'antd';
 import { useCallback, useState } from 'react';
 import { flowVersionService } from '@/services/engine/flow/api';
 import type { FlowVersionDTO } from '@/services/engine/flow/types';
@@ -99,12 +99,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, 
             title: '操作',
             width: 80,
             render: (_, record) => (
-              <Button
-                type="link"
-                size="small"
-                loading={loading}
-                onClick={() => handleRollback(record.version)}
-              >
+              <Button type="link" size="small" loading={loading} onClick={() => handleRollback(record.version)}>
                 回滚
               </Button>
             ),

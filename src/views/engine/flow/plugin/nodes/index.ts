@@ -1,13 +1,13 @@
 import { registerNodePlugin } from '../registry';
+import { conditionNodePlugin } from './ConditionNode';
+import { dbQueryNodePlugin } from './DbQueryNode';
 import { defaultNodePlugin } from './DefaultNode';
+import { httpConnectorNodePlugin } from './HttpConnectorNode';
 import { httpRequestNodePlugin } from './HttpRequestNode';
 import { httpTriggerNodePlugin } from './HttpTriggerNode';
-import { timerTriggerNodePlugin } from './TimerTriggerNode';
 import { msgFilterNodePlugin } from './MsgFilterNode';
-import { dbQueryNodePlugin } from './DbQueryNode';
-import { conditionNodePlugin } from './ConditionNode';
-import { httpConnectorNodePlugin } from './HttpConnectorNode';
 import { scriptExecNodePlugin } from './ScriptExecNode';
+import { timerTriggerNodePlugin } from './TimerTriggerNode';
 
 /**
  * 注册所有内置工作流节点插件。

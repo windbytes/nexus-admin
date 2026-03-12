@@ -59,6 +59,7 @@ export const dbQueryNodePlugin: WorkflowNodePlugin = {
     version: '1.0.0',
     description: '执行 SQL 查询或写入',
     endpointCategory: 'CONNECTOR',
+    runnable: true,
   },
   defaultNodeData: {
     pluginId: 'DB_QUERY',

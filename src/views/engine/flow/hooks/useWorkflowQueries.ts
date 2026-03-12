@@ -4,10 +4,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import {
-  flowVersionService,
-  mapRouteStatusToRunStatus,
-} from '@/services/engine/flow/api';
+import { flowVersionService, mapRouteStatusToRunStatus } from '@/services/engine/flow/api';
 import type {
   FlowDraftEdge,
   FlowDraftNode,
@@ -28,10 +25,7 @@ export const workflowQueryKeys = {
 /**
  * 将 GET draft 返回的 FlowDraftPayload 转为画布 WorkflowDocument（nodeKey→id, sourceNodeKey/targetNodeKey→source/target）
  */
-function draftToWorkflowDocument(
-  draft: FlowDraftPayload,
-  flowId?: string
-): WorkflowDocument {
+function draftToWorkflowDocument(draft: FlowDraftPayload, flowId?: string): WorkflowDocument {
   const nodes: WorkflowNode[] = (draft.nodes ?? []).map((n: FlowDraftNode) => {
     const uiConfig = (n.uiConfig ?? {}) as { position?: { x: number; y: number } };
     return {

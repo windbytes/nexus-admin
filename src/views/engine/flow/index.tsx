@@ -3,11 +3,12 @@ import '@xyflow/react/dist/style.css';
 import { useParams } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
 import { VersionHistoryModal } from './components/VersionHistoryModal';
-import { WorkflowCanvas } from './components/WorkflowCanvas';
+import { WorkflowCanvas, type WorkflowCanvasRef } from './components/WorkflowCanvas';
 import { useFlowId } from './hooks/useFlowId';
 import { useWorkflowHandlers } from './hooks/useWorkflowHandlers';
 import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuery } from './hooks/useWorkflowQueries';
@@ -57,7 +58,20 @@ const Workflow: React.FC = () => {
     handlePublish,
     handleAddComment,
     handleRun,
+    handleRunNode,
+    handleReplaceNode,
+    handleCopy,
+    handleDuplicate,
+    handleDelete,
+    handlePaste,
+    hasClipboard,
   } = useWorkflowHandlers(appId, flowId);
+
+  useHotkeys('alt+r', handleRun, { preventDefault: true });
+  useHotkeys('ctrl+v', () => handlePaste(), { preventDefault: true });
+  useHotkeys('ctrl+c', handleCopy, { preventDefault: true });
+  useHotkeys('ctrl+d', handleDuplicate, { preventDefault: true });
+  useHotkeys('delete', handleDelete, { preventDefault: true });
 
   useWorkflowConfigSync(flowId);
   const { isLoading: configLoading } = useWorkflowConfigQuery(flowId);
@@ -65,6 +79,7 @@ const Workflow: React.FC = () => {
 
   const nodeTypes = useMemo(() => buildNodeTypes(), []);
   const drawerContainerRef = useRef<HTMLDivElement>(null);
+  const workflowCanvasRef = useRef<WorkflowCanvasRef>(null);
 
   return (
     <ReactFlowProvider>
@@ -76,6 +91,7 @@ const Workflow: React.FC = () => {
             onRun={handleRun}
             onImportDSL={handleImportDSL}
             onExportDSL={handleExportDSL}
+            onAddNodePanelOpen={() => workflowCanvasRef.current?.closeContextMenu()}
           />
           <div className="workflow-canvas-wrap">
             <div className="workflow-top-bar-float">
@@ -104,7 +120,23 @@ const Workflow: React.FC = () => {
                 <Spin size="large" description="加载流程配置..." />
               </div>
             )}
-            <WorkflowCanvas nodeTypes={nodeTypes} onOpenPropertyPanel={() => setPropertyPanelOpen(true)} />
+            <WorkflowCanvas
+              ref={workflowCanvasRef}
+              nodeTypes={nodeTypes}
+              onOpenPropertyPanel={() => setPropertyPanelOpen(true)}
+              onAddNode={handleAddNode}
+              onAddComment={handleAddComment}
+              onRun={handleRun}
+              onImportDSL={handleImportDSL}
+              onExportDSL={handleExportDSL}
+              onCopy={handleCopy}
+              onPaste={handlePaste}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onRunNode={handleRunNode}
+              onReplaceNode={handleReplaceNode}
+              hasClipboard={hasClipboard}
+            />
           </div>
           <PropertyPanel open={propertyPanelOpen} onClose={() => setPropertyPanelOpen(false)} width={420} />
         </div>

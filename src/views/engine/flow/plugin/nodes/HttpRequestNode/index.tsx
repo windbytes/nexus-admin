@@ -68,8 +68,9 @@ export const httpRequestNodePlugin: WorkflowNodePlugin = {
     id: 'workflow.http',
     name: 'HTTP 请求',
     version: '1.0.0',
-    description: '调用外部 HTTP 接口',
+    description: '允许通过 HTTP 协议发送服务器请求',
     endpointCategory: 'CONNECTOR',
+    runnable: true,
   },
   defaultNodeData: {
     pluginId: 'workflow.http',
