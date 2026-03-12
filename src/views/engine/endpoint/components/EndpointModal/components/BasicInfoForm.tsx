@@ -1,7 +1,7 @@
 import type { InputRef } from 'antd';
 import { Form, Input, Select } from 'antd';
 import type React from 'react';
-import { ENDPOINT_CATEGORIES } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_CATEGORIES } from '@/services/engine/endpoint/types';
 import type { UseEndpointTypeConfigReturn } from '../types';
 
 const { TextArea } = Input;

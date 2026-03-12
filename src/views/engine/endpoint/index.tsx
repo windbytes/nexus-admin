@@ -3,8 +3,8 @@ import { useLocation } from '@tanstack/react-router';
 import { Card, Divider, Spin } from 'antd';
 import type React from 'react';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
-import { endpointService } from '@/services/integrated/endpoint/endpointApi';
+import { endpointService } from '@/services/engine/endpoint/api';
+import type { Endpoint as EndpointRow } from '@/services/engine/endpoint/types';
 import EndpointTable from './components/EndpointTable';
 import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
@@ -79,7 +79,7 @@ const Endpoint: React.FC = () => {
   };
 
   // 端点操作hook
-  const { deleteEndpoint, batchDeleteEndpoint, handleModalSave, isLoading } = useEndpointActions({
+  const { batchDeleteEndpoint, handleModalSave, isLoading } = useEndpointActions({
     currentRow: current,
     onSuccess: handleSuccess,
   });
@@ -116,7 +116,7 @@ const Endpoint: React.FC = () => {
   };
 
   // 处理行选择变化
-  const handleSelectionChange = (keys: React.Key[], _rows: EndpointModel[]) => {
+  const handleSelectionChange = (keys: React.Key[], _rows: EndpointRow[]) => {
     setSelectedRowKeys(keys as string[]);
   };
 
@@ -159,9 +159,9 @@ const Endpoint: React.FC = () => {
             datasource={result?.records || []}
             loading={tableLoading}
             pagination={{
-              pageNum: searchParams.pageNum,
-              pageSize: searchParams.pageSize,
-              total: total,
+              pageNum: searchParams.pageNum ?? 1,
+              pageSize: searchParams.pageSize ?? 20,
+              total: total ?? 0,
             }}
             selectedRowKeys={selectedRowKeys}
             currentRow={current}

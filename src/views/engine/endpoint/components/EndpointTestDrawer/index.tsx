@@ -1,7 +1,7 @@
 import { Alert, Button, Drawer, Spin } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 import EndpointInfoCard from './components/EndpointInfoCard';
 import TestResultCard from './components/TestResultCard';
 
@@ -17,11 +17,11 @@ interface EndpointTestDrawerProps {
   /** 是否显示 */
   open: boolean;
   /** 当前端点信息 */
-  endpoint: EndpointModel | null;
+  endpoint: Endpoint | null;
   /** 关闭回调 */
   onClose: () => void;
   /** 测试函数 */
-  onTest: (endpoint: EndpointModel) => Promise<TestResult>;
+  onTest: (endpoint: Endpoint) => Promise<TestResult>;
 }
 
 /**

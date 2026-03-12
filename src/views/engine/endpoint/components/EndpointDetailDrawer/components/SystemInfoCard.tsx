@@ -1,9 +1,9 @@
 import { Card, Descriptions } from 'antd';
 import type React from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 
 interface SystemInfoCardProps {
-  endpoint: EndpointModel;
+  endpoint: Endpoint;
 }
 
 /**

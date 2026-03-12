@@ -1,5 +1,4 @@
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
-import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { Endpoint, EndpointTypeConfig, SchemaField } from '@/services/engine/endpoint/types';
 
 /**
  * 端点弹窗组件 Props

@@ -2,7 +2,7 @@ import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Swi
 import { useMemo } from 'react';
 import JSONDynamicForm from '@/components/base/JSONDynamicForm';
 import CodeEditor from '@/components/CodeEditor';
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { SchemaField } from '@/services/engine/endpoint/types';
 
 const { TextArea, Password } = Input;
 

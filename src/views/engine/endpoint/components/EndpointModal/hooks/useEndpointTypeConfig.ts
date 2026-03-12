@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Form } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { endpointConfigService, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { endpointService } from '@/services/engine/endpoint/api';
+import type { EndpointTypeConfig } from '@/services/engine/endpoint/types';
+import { MODE_OPTIONS } from '@/services/engine/endpoint/types';
 import type { UseEndpointTypeConfigReturn } from '../types';
 
 /**
@@ -23,32 +24,31 @@ export const useEndpointTypeConfig = (
   const isInitializingRef = useRef<boolean>(false);
 
   /**
-   * 获取所有启用的端点类型配置列表
+   * 获取所有启用的端点类型配置列表（GET /engine/endpoints/config-schemas）
    */
   const { data: endpointTypeListModule, isFetching: typeListLoading } = useQuery({
-    queryKey: ['endpoint_type_list_for_modal'],
-    queryFn: async () => {
-      const result = await endpointConfigService.getEndpointTypeList({
+    queryKey: ['endpoint_config_schema_list'],
+    queryFn: () =>
+      endpointService.getConfigSchemaList({
         pageNum: 1,
-        pageSize: 1000, // 获取所有启用的类型
-        status: true, // 只获取启用的类型
-      });
-      return result;
-    },
-    enabled: open, // 只在弹窗打开时查询
+        pageSize: 1000,
+        status: true,
+      }),
+    enabled: open,
   });
 
   /**
    * 端点类型选项 - 使用 useMemo 缓存
    */
   const endpointTypeOptions = useMemo(() => {
-    if (!endpointTypeListModule?.records) {
+    const records = (endpointTypeListModule as { records?: EndpointTypeConfig[] })?.records;
+    if (!records?.length) {
       return [];
     }
-    return endpointTypeListModule.records.map((item) => ({
+    return records.map((item) => ({
       value: item.typeName,
       label: item.typeName,
-      config: item, // 保存完整配置对象
+      config: item,
     }));
   }, [endpointTypeListModule]);
 
@@ -56,12 +56,12 @@ export const useEndpointTypeConfig = (
    * 模式选项 - 根据选择的端点类型的 supportMode 动态生成
    */
   const modeOptions = useMemo(() => {
-    if (!selectedEndpointTypeConfig?.supportMode) {
+    const supportMode = selectedEndpointTypeConfig?.supportMode;
+    if (!supportMode) {
       return [];
     }
-
-    // 从 MODE_OPTIONS 中过滤出 supportMode 支持的选项
-    return MODE_OPTIONS.filter((option) => selectedEndpointTypeConfig.supportMode.includes(option.value));
+    const arr = Array.isArray(supportMode) ? supportMode : (supportMode as string[]);
+    return MODE_OPTIONS.filter((option) => arr.includes(option.value));
   }, [selectedEndpointTypeConfig]);
 
   /**
@@ -83,13 +83,14 @@ export const useEndpointTypeConfig = (
    * 当端点类型改变时，清空 mode 字段（但初始化时不清空）
    */
   useEffect(() => {
-    if (!endpointTypeName || !endpointTypeListModule?.records) {
+    const records = (endpointTypeListModule as { records?: EndpointTypeConfig[] })?.records;
+    if (!endpointTypeName || !records?.length) {
       setSelectedEndpointTypeConfig(null);
       prevEndpointTypeNameRef.current = endpointTypeName;
       return;
     }
 
-    const config = endpointTypeListModule.records.find((item) => item.typeName === endpointTypeName);
+    const config = records.find((item) => item.typeName === endpointTypeName);
 
     if (config) {
       setSelectedEndpointTypeConfig(config);
@@ -123,8 +124,9 @@ export const useEndpointTypeConfig = (
    * 支持新增时通过 initialValues 传入 endpointType
    */
   useEffect(() => {
-    if (open && initialValues?.endpointType && endpointTypeListModule?.records) {
-      const config = endpointTypeListModule.records.find((item) => item.typeName === initialValues.endpointType);
+    const records = (endpointTypeListModule as { records?: EndpointTypeConfig[] })?.records;
+    if (open && initialValues?.endpointType && records?.length) {
+      const config = records.find((item) => item.typeName === initialValues.endpointType);
       if (config && !selectedEndpointTypeConfig) {
         setSelectedEndpointTypeConfig(config);
       }

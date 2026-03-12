@@ -3,7 +3,7 @@ import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
 import type { EndpointSearchParams } from '../types';
 
 interface SearchFormProps {

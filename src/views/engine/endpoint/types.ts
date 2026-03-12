@@ -1,12 +1,5 @@
-import type { PageQueryParams } from '@/types/global';
-
 /**
- * 查询参数
+ * 端点维护页类型
+ * 查询参数与后端 /engine/endpoints 列表接口对齐，直接使用 engine 模块定义
  */
-export interface EndpointSearchParams extends PageQueryParams {
-  name?: string;
-  code?: string;
-  endpointType?: string;
-  category?: string;
-  status?: boolean;
-}
+export type { EndpointSearchParams } from '@/services/engine/endpoint/types';

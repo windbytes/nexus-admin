@@ -9,7 +9,7 @@ import type { TablePaginationConfig } from 'antd';
 import { Button, Drawer, Empty, Input, Select, Space, Table, Tag, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 
 const { Text } = Typography;
 
@@ -26,7 +26,7 @@ interface EndpointLogDrawerProps {
   /** 是否显示 */
   open: boolean;
   /** 端点信息 */
-  endpoint: EndpointModel | null;
+  endpoint: Endpoint | null;
   /** 关闭回调 */
   onClose: () => void;
 }

@@ -1,11 +1,11 @@
 import { Card, Typography } from 'antd';
 import type React from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 
 const { Paragraph, Text } = Typography;
 
 interface ConfigInfoCardProps {
-  endpoint: EndpointModel;
+  endpoint: Endpoint;
 }
 
 /**

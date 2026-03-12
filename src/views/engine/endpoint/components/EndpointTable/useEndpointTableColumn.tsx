@@ -13,17 +13,17 @@ import {
 } from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 import { useEndpointActions } from '../../hooks/useEndpointActions';
 import type { DrawerType, ModalType } from '../../hooks/useEndpointModals';
 import { useEndpointPermissions } from '../../hooks/useEndpointPermissions';
 
 interface UseEndpointTableColumnProps {
   // 当前操作行的数据
-  currentRow: Partial<EndpointModel> | null;
-  openModal: (name: ModalType, record?: EndpointModel) => void;
-  openDrawer: (name: DrawerType, record?: EndpointModel) => void;
+  currentRow: Partial<Endpoint> | null;
+  openModal: (name: ModalType, record?: Endpoint) => void;
+  openDrawer: (name: DrawerType, record?: Endpoint) => void;
   // 成功的回调
   onSuccess?: () => void;
 }
@@ -63,7 +63,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
   };
 
   // 更多操作菜单项
-  const moreActionItems = (record: EndpointModel): MenuProps['items'] => {
+  const moreActionItems = (record: Endpoint): MenuProps['items'] => {
     return [
       {
         key: 'clone',
@@ -172,7 +172,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
     ];
   };
 
-  const columns: TableProps<EndpointModel>['columns'] = [
+  const columns: TableProps<Endpoint>['columns'] = [
     {
       dataIndex: 'id',
       title: 'ID',
@@ -235,7 +235,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       key: 'status',
       align: 'center',
       width: 100,
-      render: (status: boolean, record: EndpointModel) => (
+      render: (status: boolean, record: Endpoint) => (
         <Switch
           checked={status}
           checkedChildren="启用"
@@ -255,7 +255,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       key: 'createTime',
       align: 'center',
       width: 180,
-      sorter: (a: EndpointModel, b: EndpointModel) => (a.createTime || '').localeCompare(b.createTime || ''),
+      sorter: (a: Endpoint, b: Endpoint) => (a.createTime || '').localeCompare(b.createTime || ''),
       render: (time: string) => time || '-',
     },
     {
@@ -264,7 +264,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       align: 'center',
       width: 120,
       fixed: 'right',
-      render: (_, record: EndpointModel) => (
+      render: (_, record: Endpoint) => (
         <>
           {canEditEndpoint && (
             <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openModal('edit', record)}>

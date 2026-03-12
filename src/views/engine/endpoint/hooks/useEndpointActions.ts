@@ -1,12 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { App } from 'antd';
-import type { EndpointFormData, EndpointModel } from '@/services/integrated/endpoint/endpointApi';
-import { endpointService } from '@/services/integrated/endpoint/endpointApi';
+import { endpointService } from '@/services/engine/endpoint/api';
+import type { Endpoint, EndpointFormData } from '@/services/engine/endpoint/types';
 
+/** 当前操作的行数据 */
 interface UseEndpointActionsProps {
-  // 当前操作的行数据
-  currentRow: Partial<EndpointModel> | null;
-  // 成功的回调
+  currentRow: Partial<Endpoint> | null;
   onSuccess?: () => void;
 }
 
@@ -17,7 +16,7 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
   const { modal, message } = App.useApp();
 
   /**
-   * 新增端点
+   * 新增端点（调用 engine 后端 POST /engine/endpoints/create）
    */
   const createEndpointMutation = useMutation({
     mutationFn: (values: EndpointFormData) => endpointService.addEndpoint(values),
@@ -33,13 +32,15 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     },
   });
 
-  // 更新端点
+  /**
+   * 更新端点（调用 engine 后端 POST /engine/endpoints/update/{id}）
+   */
   const updateEndpointMutation = useMutation({
     mutationFn: (values: EndpointFormData) => {
       if (!currentRow?.id) {
         throw new Error('当前行数据不存在');
       }
-      return endpointService.updateEndpoint({ ...values, id: currentRow.id });
+      return endpointService.updateEndpoint(currentRow.id, { ...values, id: currentRow.id });
     },
     onSuccess: () => {
       message.success('修改端点成功');
@@ -53,9 +54,14 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     },
   });
 
-  // 更新端点状态
+  /** 更新端点状态（复用更新接口） */
   const updateStatusMutation = useMutation({
-    mutationFn: (data: EndpointFormData) => endpointService.updateEndpoint(data),
+    mutationFn: (data: EndpointFormData) => {
+      if (!data.id) {
+        throw new Error('端点 id 不能为空');
+      }
+      return endpointService.updateEndpoint(data.id, data);
+    },
     onSuccess,
   });
 
@@ -64,7 +70,9 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     updateStatusMutation.mutate(data);
   };
 
-  // 删除端点
+  /**
+   * 删除端点（调用 engine 后端 POST /engine/endpoints/delete/{id}）
+   */
   const deleteEndpointMutation = useMutation({
     mutationFn: (id: string) => endpointService.deleteEndpoint(id),
     onSuccess: () => {
@@ -79,9 +87,11 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     },
   });
 
-  // 批量删除端点
+  /**
+   * 批量删除端点（调用 engine 后端 POST /engine/endpoints/batch）
+   */
   const batchDeleteEndpointMutation = useMutation({
-    mutationFn: (ids: string[]) => endpointService.batchDeleteEndpoint(ids),
+    mutationFn: (ids: string[]) => endpointService.batchDelete(ids),
     onSuccess: () => {
       message.success('批量删除端点成功');
       onSuccess?.();
@@ -104,7 +114,9 @@ export const useEndpointActions = ({ currentRow, onSuccess }: UseEndpointActions
     batchDeleteEndpointMutation.mutate(ids);
   };
 
-  // 导出端点配置
+  /**
+   * 导出端点配置（GET /engine/endpoints/export/{id}）
+   */
   const exportConfigMutation = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => endpointService.exportConfig(id, name),
     onSuccess: () => {
