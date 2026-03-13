@@ -1,5 +1,6 @@
+import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import path from 'path';
 import Icons from 'unplugin-icons/vite';
 import { defineConfig } from 'vite';
@@ -14,15 +15,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      react({
-        // 启用 React 编译器优化
-        babel: {
-          plugins: [
-            // React 编译器插件
-            ['babel-plugin-react-compiler'],
-          ],
-        },
-      }),
+      react(),
+      babel({ presets: [reactCompilerPreset()] }),
       tailwindcss(),
       viteCompression({
         verbose: !isProduction,
