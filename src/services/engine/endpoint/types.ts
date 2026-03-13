@@ -1,7 +1,10 @@
 /**
  * Engine 端点管理模块类型定义
- * 与后端 entity/endpoint、dto 及 controller 对齐；原 integrated/endpoint 用到的类型已迁移至此
+ * 与后端 entity/endpoint、dto 及 controller 对齐；
+ * 原 integrated/endpoint 与 integrated/endpointConfig 用到的类型已统一迁移至此。
  */
+
+import type { PageQueryParams } from '@/types/global';
 
 /**
  * 端点实体（与后端 t_engine_endpoint 表对应）
@@ -132,6 +135,22 @@ export interface EndpointValidateResult {
   errors?: string[];
 }
 
+// ---------- integrated/endpointConfig 迁移的类型与常量 ----------
+
+/** 组件类型选项（端点类型 Schema 字段渲染所用组件） */
+export const COMPONENT_TYPE_OPTIONS = [
+  { value: 'Input', label: '输入框' },
+  { value: 'InputPassword', label: '密码输入框' },
+  { value: 'InputNumber', label: '数字输入框' },
+  { value: 'TextArea', label: '文本域' },
+  { value: 'JSON', label: 'JSON编辑器' },
+  { value: 'Select', label: '下拉选择' },
+  { value: 'Radio', label: '单选框' },
+  { value: 'Checkbox', label: '复选框' },
+  { value: 'Switch', label: '开关' },
+  { value: 'DatePicker', label: '日期选择器' },
+] as const;
+
 // ---------- 表单 Schema（与后端 EndpointConfig.schemaFields 结构一致） ----------
 
 /** 表单 Schema 字段配置（驱动动态表单渲染） */
@@ -170,6 +189,13 @@ export const MODE_OPTIONS = [
   { value: 'OUT_IN', label: 'OUT_IN' },
 ] as const;
 
+/** 端点类型配置搜索参数（原 integrated EndpointTypeSearchParams） */
+export interface EndpointTypeSearchParams extends PageQueryParams {
+  typeName?: string;
+  typeCode?: string;
+  status?: boolean;
+}
+
 /** Schema 字段配置（与 integrated SchemaField 兼容，用于动态表单） */
 export interface SchemaField {
   id?: string;
@@ -178,7 +204,7 @@ export interface SchemaField {
   component: string;
   properties?: Record<string, unknown>;
   componentProps?: Record<string, unknown>;
-  rules?: string | unknown[];
+  rules?: string;
   showCondition?: string;
   sortOrder?: number;
   mode?: string[];

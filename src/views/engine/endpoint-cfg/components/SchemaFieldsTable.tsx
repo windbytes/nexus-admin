@@ -1,5 +1,5 @@
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { SchemaField } from '@/services/engine';
+import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/engine';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,

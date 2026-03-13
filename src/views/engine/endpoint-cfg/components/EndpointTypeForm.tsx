@@ -1,5 +1,4 @@
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
-import { MODE_OPTIONS, type EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import { ENDPOINT_TYPE_OPTIONS, MODE_OPTIONS, type EndpointTypeConfig } from '@/services/engine';
 import { usePreferencesStore } from '@/stores/store';
 import type { FormInstance } from 'antd';
 import { ConfigProvider, Form, Input, Select, Skeleton, Switch } from 'antd';

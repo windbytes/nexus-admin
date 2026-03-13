@@ -1,8 +1,8 @@
-import DragModal from '@/components/modal/DragModal';
-import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { CloseOutlined, CodeOutlined, EyeOutlined, FileTextOutlined, SaveOutlined } from '@ant-design/icons';
 import { App, Badge, Button, Divider, Empty, Form, Modal, Space, Tabs } from 'antd';
 import React, { memo, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
+import type { EndpointTypeConfig } from '@/services/engine';
 import PreviewFormRenderer from './PreviewFormRenderer';
 
 interface PreviewModalProps {
@@ -68,7 +68,9 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    * 渲染配置的 JSON 视图
    */
   const renderJsonView = () => {
-    if (!config) return null;
+    if (!config) {
+      return null;
+    }
 
     return (
       <div className="json-view-container">
@@ -97,7 +99,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
           </div>
         </div>
 
-        <Divider orientation="left" className="text-sm">
+        <Divider orientation="horizontal" className="text-sm">
           完整配置 JSON
         </Divider>
 
@@ -112,7 +114,9 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    * 根据模式获取对应的字段数量
    */
   const getFieldCountByMode = (mode: string) => {
-    if (!config?.schemaFields) return 0;
+    if (!config?.schemaFields) {
+      return 0;
+    }
     return config.schemaFields.filter((field) => !field.mode || field.mode.includes(mode)).length;
   };
 

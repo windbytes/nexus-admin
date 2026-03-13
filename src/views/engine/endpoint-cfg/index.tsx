@@ -2,12 +2,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { App, Card, Form, Skeleton } from 'antd';
 import type React from 'react';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  EndpointTypeConfig,
-  EndpointTypeSearchParams,
-  SchemaField,
-} from '@/services/integrated/endpointConfig/endpointConfigApi';
-import { endpointConfigService } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { EndpointTypeConfig, EndpointTypeSearchParams, SchemaField } from '@/services/engine';
+import { endpointConfigService } from '@/services/engine';
 import ActionButtons from './components/ActionButtons';
 import EndpointTypeForm from './components/EndpointTypeForm';
 import EndpointTypeList from './components/EndpointTypeList';

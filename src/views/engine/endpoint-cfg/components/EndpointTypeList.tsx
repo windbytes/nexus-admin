@@ -1,4 +1,4 @@
-import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { EndpointTypeConfig } from '@/services/engine';
 import { getIcon } from '@/utils/optimized-icons';
 import { ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';

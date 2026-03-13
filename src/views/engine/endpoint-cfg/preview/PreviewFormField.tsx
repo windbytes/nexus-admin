@@ -1,8 +1,8 @@
-import CodeEditor from '@/components/CodeEditor';
-import JSONDynamicForm from '@/components/base/JSONDynamicForm';
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
 import React, { memo } from 'react';
+import JSONDynamicForm from '@/components/base/JSONDynamicForm';
+import CodeEditor from '@/components/CodeEditor';
+import type { SchemaField } from '@/services/engine';
 
 const { TextArea, Password } = Input;
 
@@ -40,7 +40,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       /\bconstructor\b/gi,
     ];
 
-    let sanitized = condition.trim();
+    const sanitized = condition.trim();
 
     // 检查是否包含危险模式
     for (const pattern of dangerousPatterns) {
@@ -59,7 +59,9 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
    * 使用 new Function 替代 eval，避免安全风险
    */
   const conditionFunc = React.useMemo(() => {
-    if (!field.showCondition) return null;
+    if (!field.showCondition) {
+      return null;
+    }
 
     try {
       const condition = field.showCondition.trim();
@@ -102,7 +104,9 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
    * 将函数创建和函数执行分离，优化性能
    */
   const shouldShow = React.useMemo(() => {
-    if (!conditionFunc) return true; // 没有条件或条件创建失败时默认显示
+    if (!conditionFunc) {
+      return true; // 没有条件或条件创建失败时默认显示
+    }
 
     try {
       return Boolean(conditionFunc(formValues));
@@ -153,7 +157,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
       case 'TextArea':
         return <TextArea {...rest} />;
 
-      case 'JSON':
+      case 'JSON': {
         const editorMode = rest['editorMode'] || 'editor'; // 默认为编辑器模式
 
         if (editorMode === 'form') {
@@ -179,6 +183,7 @@ const PreviewFormField: React.FC<PreviewFormFieldProps> = memo(({ field, formVal
             />
           );
         }
+      }
 
       case 'Select':
         return (

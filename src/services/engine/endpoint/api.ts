@@ -11,7 +11,9 @@ import type {
   EndpointSearchParams,
   EndpointTestRequest,
   EndpointTestResponse,
+  EndpointTypeSearchParams,
   EndpointValidateResult,
+  SchemaField,
 } from './types';
 
 /** 端点接口路径（与后端 @RequestMapping + @PostMapping/@GetMapping 一致） */
@@ -30,13 +32,17 @@ const EndpointsApi = {
   configSchemaList: '/engine/endpoints/config-schemas',
 };
 
-/** 端点类型配置接口路径（若后端有独立 Controller 可与此一致） */
+/** 端点类型配置接口路径（与后端 EndpointConfigController 对齐） */
 const EndpointConfigsApi = {
   list: '/engine/endpoint-configs',
   getById: (id: string) => `/engine/endpoint-configs/${id}`,
   create: '/engine/endpoint-configs',
-  update: (id: string) => `/engine/endpoint-configs/${id}`,
-  delete: (id: string) => `/engine/endpoint-configs/${id}`,
+  // 为满足“变更统一使用 POST”的约束，这里使用后端兼容的 POST 路径
+  update: (id: string) => `/engine/endpoint-configs/update/${id}`,
+  delete: (id: string) => `/engine/endpoint-configs/delete/${id}`,
+  validateSchema: '/engine/endpoint-configs/validate-schema',
+  exportSchema: (id: string) => `/engine/endpoint-configs/export-schema/${id}`,
+  importSchema: '/engine/endpoint-configs/import-schema',
 };
 
 export const endpointService = {
@@ -224,7 +230,7 @@ export const endpointConfigService = {
    * @param config 配置数据
    */
   async update(id: string, config: Partial<EndpointConfig>): Promise<EndpointConfig> {
-    return HttpRequest.put<EndpointConfig>({ url: EndpointConfigsApi.update(id), data: { ...config, id } });
+    return HttpRequest.post<EndpointConfig>({ url: EndpointConfigsApi.update(id), data: { ...config, id } });
   },
 
   /**
@@ -232,6 +238,84 @@ export const endpointConfigService = {
    * @param id 配置 ID
    */
   async delete(id: string): Promise<void> {
-    await HttpRequest.delete({ url: EndpointConfigsApi.delete(id) });
+    await HttpRequest.post({ url: EndpointConfigsApi.delete(id) });
+  },
+
+  /**
+   * 分页查询端点类型配置列表（与原 integrated getEndpointTypeList 能力等价）。
+   *
+   * @param params 查询参数（typeName、typeCode、status 及分页）
+   */
+  async getEndpointTypeList(params: EndpointTypeSearchParams): Promise<PageResult<EndpointConfig>> {
+    const { pageNum = 1, pageSize = 10, typeName, typeCode, status } = params;
+    const query: Record<string, unknown> = {
+      page: pageNum,
+      size: pageSize,
+    };
+    if (typeName) {
+      query['typeName'] = typeName;
+    }
+    if (typeCode) {
+      query['typeCode'] = typeCode;
+    }
+    if (typeof status === 'boolean') {
+      query['status'] = status;
+    }
+
+    return HttpRequest.get<PageResult<EndpointConfig>>(
+      { url: EndpointConfigsApi.list, params: query },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  /**
+   * 验证端点类型配置 Schema（与原 integrated validateSchema 能力等价）。
+   *
+   * @param schemaFields Schema 字段列表
+   */
+  async validateSchema(schemaFields: SchemaField[]): Promise<{ valid: boolean; errors?: string[] }> {
+    return HttpRequest.post<{ valid: boolean; errors?: string[] }>({
+      url: EndpointConfigsApi.validateSchema,
+      data: { schemaFields },
+    });
+  },
+
+  /**
+   * 导出端点类型配置 Schema（与原 integrated exportSchema 能力等价）。
+   *
+   * @param id       配置 ID
+   * @param typeName 类型名称，用于拼接下载文件名
+   */
+  async exportSchema(id: string, typeName: string): Promise<void> {
+    const blob = await HttpRequest.getDownload<Blob>({
+      url: EndpointConfigsApi.exportSchema(id),
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${typeName}_schema.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  },
+
+  /**
+   * 导入端点类型配置 Schema（与原 integrated importSchema 能力等价）。
+   *
+   * @param file 上传的 JSON Schema 文件
+   */
+  async importSchema(file: File): Promise<SchemaField[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return HttpRequest.post<SchemaField[]>({
+      url: EndpointConfigsApi.importSchema,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };

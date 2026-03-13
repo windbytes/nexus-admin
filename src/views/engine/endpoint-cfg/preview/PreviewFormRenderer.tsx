@@ -1,8 +1,8 @@
-import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import type { FormInstance } from 'antd';
 import { Divider, Form, InputNumber, Switch } from 'antd';
 import React, { memo, useState } from 'react';
+import type { EndpointTypeConfig, SchemaField } from '@/services/engine';
 import PreviewFormField from './PreviewFormField';
 
 interface PreviewFormRendererProps {
