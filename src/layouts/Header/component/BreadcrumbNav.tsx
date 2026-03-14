@@ -8,8 +8,31 @@ import { useShallow } from 'zustand/react/shallow';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { type MenuCaches, matchPathname } from '@/utils/utils';
+import { type MenuCaches, getMenuKey, matchPathname } from '@/utils/utils';
 import '../header.scss';
+
+/**
+ * 在菜单树中根据 menuKey 查找对应的路由项（与 resolveMenuSelection 使用的 key 一致）
+ */
+function findRouteByMenuKey(routes: RouteItem[] | undefined, menuKey: string): RouteItem | undefined {
+  if (!routes?.length) {
+    return undefined;
+  }
+  for (const route of routes) {
+    if (getMenuKey(route) === menuKey) {
+      return route;
+    }
+    const inChildren = findRouteByMenuKey(route.children, menuKey);
+    if (inChildren) {
+      return inChildren;
+    }
+    const inChildrenRoute = findRouteByMenuKey(route.childrenRoute as RouteItem[] | undefined, menuKey);
+    if (inChildrenRoute) {
+      return inChildrenRoute;
+    }
+  }
+  return undefined;
+}
 
 /**
  * 面包屑
@@ -45,9 +68,10 @@ const BreadcrumbNav: React.FC = () => {
 export default BreadcrumbNav;
 
 /**
- * 根据路径生成面包屑的路径内容
+ * 根据当前打开的菜单生成完整的面包屑路径（与 resolveMenuSelection 逻辑一致：使用 menuKey 链）
  * @param routerList 菜单集合
- * @param pathname 路径
+ * @param caches 菜单缓存（pathMap / ancestorsMap / routeToMenuPathMap）
+ * @param pathname 当前路径
  * @param joinIcon 是否显示图标
  * @returns 面包屑内容集合
  */
@@ -84,26 +108,38 @@ function patchBreadcrumb(
     return [];
   }
 
-  const visiblePath = routeToMenuPathMap.get(matchedPath) ?? matchedPath;
-  const ancestorPaths = ancestorsMap.get(visiblePath) ?? [];
-  const breadcrumbPaths = [...ancestorPaths, visiblePath];
+  // 与 resolveMenuSelection 一致：当前选中项的 menuKey，以及需要展开的祖先 menuKey 链
+  const menuKey = getMenuKey(matchedEntity);
+  const isPureRoute = matchedEntity.meta?.menuType === 2 || matchedEntity.hidden;
+  const visibleKey = isPureRoute ? (routeToMenuPathMap.get(matchedPath) ?? menuKey) : menuKey;
+  const ancestorKeys = ancestorsMap.get(visibleKey) ?? [];
+  const breadcrumbKeys: string[] = [...ancestorKeys, visibleKey];
 
-  if (matchedPath !== visiblePath) {
-    breadcrumbPaths.push(matchedPath);
+  // 若当前页是纯路由（如详情页），面包屑末尾追加当前页
+  if (isPureRoute) {
+    breadcrumbKeys.push(matchedPath);
   }
 
-  breadcrumbPaths.forEach((path, index) => {
-    const menu = pathMap.get(path);
+  for (let i = 0; i < breadcrumbKeys.length; i++) {
+    const key = breadcrumbKeys[i];
+    if (key === undefined) {
+      continue;
+    }
+    const isLast = i === breadcrumbKeys.length - 1;
+    // menuKey 可能是 path 或 id，先查 pathMap，再在菜单树中按 getMenuKey 查找
+    const menu = pathMap.get(key) ?? findRouteByMenuKey(routerList, key);
     if (!menu) {
-      return;
+      continue;
     }
 
-    const isLast = index === breadcrumbPaths.length - 1;
-    const iconNode = joinIcon && menu.meta?.icon ? getIcon(menu.meta.icon) : null;
+    const iconName = menu.meta?.icon ?? '';
+    const iconNode = joinIcon && iconName ? getIcon(iconName) : null;
     const titleContent = t(menu.meta?.title as string);
     const isNotRoute = menu.meta?.menuType !== 2;
+    const hasPath = Boolean(menu.path?.trim());
+    const toPath: string = menu.path ?? '/';
     const title =
-      isLast || isNotRoute ? (
+      isLast || isNotRoute || !hasPath ? (
         <>
           {iconNode}
           <span className="px-1">{titleContent}</span>
@@ -111,15 +147,16 @@ function patchBreadcrumb(
       ) : (
         <>
           {iconNode}
-          <Link to={menu.path}>{titleContent}</Link>
+          <Link to={toPath}>{titleContent}</Link>
         </>
       );
 
+    const itemKey: string = menu.path?.trim() || getMenuKey(menu);
     breadcrumbItems.push({
-      key: menu.path,
+      key: itemKey,
       title,
     });
-  });
+  }
 
   return breadcrumbItems;
 }
