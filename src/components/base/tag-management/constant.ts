@@ -1,6 +1,9 @@
-export type Tag = {
+export interface Tag {
   id: string;
   name: string;
   type: string;
-  binding_count: number;
-};
+  createBy?: string;
+  createTime?: string;
+  updateBy?: string;
+  updateTime?: string;
+}

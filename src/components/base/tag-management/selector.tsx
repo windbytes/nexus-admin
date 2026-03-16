@@ -6,15 +6,12 @@ import { noop } from 'lodash-es';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Tag } from '@/components/base/tag-management/constant';
 import type { HtmlContentProps } from '@/components/popover';
 import CustomPopover from '@/components/popover';
 import { tagService } from '@/services/engine';
-import { tagsService } from '@/services/common/tags/tagsApi';
-import type { Tag } from '@/services/engine';
 import { useTagStore } from '@/stores/useTagStore';
 import cn from '@/utils/classnames';
-
-const isAppTag = (type: string) => type === 'app';
 
 type TagSelectorProps = {
   // 对应的应用ID
@@ -71,8 +68,7 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 标签新建（应用标签走 engine tagService）
   const createTagMutation = useMutation({
-    mutationFn: ({ name, type }: { name: string; type: string }) =>
-      isAppTag(type) ? tagService.createTag({ name, type }) : tagsService.addTag({ name, type }),
+    mutationFn: (name: string) => tagService.createTag({ name, type }),
     // 请求前设置状态
     onMutate: () => {
       setCreating(true);
@@ -98,8 +94,7 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 标签绑定（应用标签走 engine tagService，bindTags(tagIds, appId)）
   const bindTagMutation = useMutation({
-    mutationFn: (tagIDs: string[]) =>
-      isAppTag(type) ? tagService.bindTags(tagIDs, targetID) : tagsService.bindTag(tagIDs, targetID, type),
+    mutationFn: (tagIDs: string[]) => tagService.bindTags(tagIDs, targetID),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -115,8 +110,7 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 标签解绑（应用标签走 engine tagService）
   const unbindTagMutation = useMutation({
-    mutationFn: (tagID: string) =>
-      isAppTag(type) ? tagService.unbindTag(tagID, targetID) : tagsService.unbindTag(tagID, targetID, type),
+    mutationFn: (tagID: string) => tagService.unbindTag(tagID, targetID),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -140,7 +134,7 @@ const Panel: React.FC<PanelProps> = (props) => {
     if (creating) {
       return;
     }
-    await createTagMutation.mutateAsync({ name: keywords, type });
+    await createTagMutation.mutateAsync(keywords);
   };
 
   /**
@@ -298,7 +292,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
    * @returns 标签列表
    */
   const getTagList = async () => {
-    const tags = isAppTag(type) ? await tagService.listTags(type) : await tagsService.getTagsList(type);
+    const tags = await tagService.listTags(type);
     setTagList(tags);
   };
 

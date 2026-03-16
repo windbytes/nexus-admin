@@ -1,12 +1,11 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Input } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
-import { useTagStore } from '@/stores/useTagStore.ts';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tagService } from '@/services/engine';
-import { tagsService } from '@/services/common/tags/tagsApi';
+import { useTagStore } from '@/stores/useTagStore.ts';
 import TagItemEditor from './tag-item-editor';
 
 type TagManagementModalProps = {
@@ -24,13 +23,11 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
   const { notification } = App.useApp();
   const queryClient = useQueryClient();
 
-  const isAppTag = type === 'app';
-
   // 查询标签列表（应用标签走 engine tagService）
   const { data: tagList = [] } = useQuery({
     queryKey: ['tag_management_list', type],
     queryFn: async () => {
-      const res = isAppTag ? await tagService.listTags(type) : await tagsService.getTagsList(type);
+      const res = await tagService.listTags(type);
       setTagList(res);
       return res;
     },
@@ -43,9 +40,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
   // 创建新标签（应用标签走 engine tagService）
   const createNewTagMutation = useMutation({
     mutationFn: async (name: string) => {
-      const res = isAppTag
-        ? await tagService.createTag({ name, type })
-        : await tagsService.addTag({ name, type });
+      const res = await tagService.createTag({ name, type });
       return res;
     },
     onMutate: () => {
@@ -106,7 +101,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({ type, show }) =
           onPressEnter={(e) => !e.nativeEvent.isComposing && createNewTag()}
         />
         {tagList.map((tag) => (
-          <TagItemEditor key={tag.id} tag={tag} tagServiceType={isAppTag ? 'engine' : 'common'} />
+          <TagItemEditor key={tag.id} tag={tag} />
         ))}
       </div>
     </DragModal>

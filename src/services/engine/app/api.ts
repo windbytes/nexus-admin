@@ -1,3 +1,4 @@
+import type { Tag } from '@/components/base/tag-management/constant';
 import { HttpRequest } from '@/utils/request';
 import type {
   AppCategory,
@@ -9,7 +10,6 @@ import type {
   CreateAppFromTemplateRequest,
   EngineApp,
   SaveAppTemplateRequest,
-  Tag,
 } from './types';
 
 /**
