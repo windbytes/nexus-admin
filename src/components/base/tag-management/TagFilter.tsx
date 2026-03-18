@@ -5,8 +5,8 @@ import { Button, Dropdown, Input, Space } from 'antd';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Tag } from '@/components/base/tag-management/constant';
 import { tagService } from '@/services/engine';
-import type { Tag } from '@/services/engine/app/types';
 
 type TagFilterProps = {
   type: 'app';

@@ -13,6 +13,36 @@ import { tagService } from '@/services/engine';
 import { useTagStore } from '@/stores/useTagStore';
 import cn from '@/utils/classnames';
 
+const TAG_TYPE_COLOR_PALETTE = [
+  '#2F54EB', // blue
+  '#13C2C2', // cyan
+  '#52C41A', // green
+  '#FAAD14', // gold
+  '#FA541C', // volcano
+  '#EB2F96', // magenta
+  '#722ED1', // purple
+  '#A0D911', // lime
+  '#1890FF', // geekblue-ish
+  '#F5222D', // red
+];
+
+function hashStringToIndex(input: string, modulo: number) {
+  // djb2
+  let hash = 5381;
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash * 33) ^ input.charCodeAt(i);
+  }
+  return Math.abs(hash) % modulo;
+}
+
+function getTagColorByType(type?: string) {
+  if (!type) {
+    return TAG_TYPE_COLOR_PALETTE[0];
+  }
+  const idx = hashStringToIndex(type, TAG_TYPE_COLOR_PALETTE.length);
+  return TAG_TYPE_COLOR_PALETTE[idx];
+}
+
 type TagSelectorProps = {
   // 对应的应用ID
   targetID: string;
@@ -38,6 +68,8 @@ const Panel: React.FC<PanelProps> = (props) => {
   const { notification } = App.useApp();
   const { type, targetID, value, selectedTags, onCacheUpdate, onChange, onCreate } = props;
   const { tagList, setTagList, setShowTagManagementModal } = useTagStore();
+
+  const typeColor = useMemo(() => getTagColorByType(type), [type]);
 
   // 选中的标签id
   const [selectedTagIDs, setSelectedTagIDs] = useState<string[]>(value ?? []);
@@ -222,6 +254,10 @@ const Panel: React.FC<PanelProps> = (props) => {
               onClick={() => selectTag(tag)}
             >
               <Checkbox checked={selectedTagIDs.includes(tag.id)} className="shrink-0" onChange={noop} />
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: getTagColorByType(tag.type ?? type) }}
+              />
               <div title={tag.name} className="grow truncate text-sm leading-5 text-[#354052]">
                 {tag.name}
               </div>
@@ -234,6 +270,7 @@ const Panel: React.FC<PanelProps> = (props) => {
               onClick={() => selectTag(tag)}
             >
               <Checkbox className="shrink-0" checked={selectedTagIDs.includes(tag.id)} onChange={noop} />
+              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: typeColor }} />
               <div title={tag.name} className="grow truncate text-sm leading-5 text-[#354052]">
                 {tag.name}
               </div>
@@ -329,7 +366,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
               {visibleTags.map((tag) => (
                 <Tooltip key={tag.id} title={tag.name}>
                   <AntdTag
-                    className="!m-0"
+                    color={getTagColorByType(tag.type)}
                     style={{
                       maxWidth: 120,
                       overflow: 'hidden',
@@ -343,7 +380,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
                   </AntdTag>
                 </Tooltip>
               ))}
-              {overflow > 0 && <AntdTag className="!m-0">{`+${overflow}`}</AntdTag>}
+              {overflow > 0 && <AntdTag>{`+${overflow}`}</AntdTag>}
             </div>
           </div>
         )}
