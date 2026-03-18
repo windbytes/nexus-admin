@@ -106,7 +106,7 @@ export const ContextMenuOverlay: React.FC<ContextMenuOverlayProps> = ({
         top: contextMenu.y,
         zIndex: 1000,
         boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        borderRadius: 4,
+        borderRadius: 'var(--ant-border-radius)',
         overflow: 'hidden',
       }}
     >

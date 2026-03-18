@@ -84,6 +84,7 @@ export function useNodeContextMenu(
     items.push({
       key: 'delete',
       label: '删除',
+      danger: true,
       onClick: () => {
         onDelete();
         onClose();
