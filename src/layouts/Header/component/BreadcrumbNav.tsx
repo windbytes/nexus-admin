@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, type BreadcrumbProps } from 'antd';
 import { t } from 'i18next';
 import type React from 'react';
 import { useEffect, useState } from 'react';
@@ -8,8 +8,10 @@ import { useShallow } from 'zustand/react/shallow';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
-import { type MenuCaches, getMenuKey, matchPathname } from '@/utils/utils';
+import { getMenuKey, type MenuCaches, matchPathname } from '@/utils/utils';
 import '../header.scss';
+
+type BreadcrumbItem = NonNullable<BreadcrumbProps['items']>[number];
 
 /**
  * 在菜单树中根据 menuKey 查找对应的路由项（与 resolveMenuSelection 使用的 key 一致）
@@ -48,7 +50,7 @@ const BreadcrumbNav: React.FC = () => {
       caches: state.caches,
     }))
   );
-  const [items, setItems] = useState<Record<string, any>[]>([]);
+  const [items, setItems] = useState<BreadcrumbItem[]>([]);
   // 从全局状态中获取配置是否开启面包屑、图标
   const breadcrumb = usePreferencesStore((state) => state.preferences.breadcrumb);
   const { t, i18n } = useTranslation();
@@ -80,13 +82,13 @@ function patchBreadcrumb(
   caches: MenuCaches,
   pathname: string,
   joinIcon: boolean
-): Record<string, any>[] {
+): BreadcrumbItem[] {
   if (!routerList?.length || !caches?.pathMap?.size) {
     return [];
   }
 
   const { pathMap, ancestorsMap, routeToMenuPathMap } = caches;
-  const breadcrumbItems: Record<string, any>[] = [];
+  const breadcrumbItems: BreadcrumbItem[] = [];
 
   let matchedPath: string | null = null;
   let matchedEntity: RouteItem | undefined;
@@ -125,7 +127,6 @@ function patchBreadcrumb(
     if (key === undefined) {
       continue;
     }
-    const isLast = i === breadcrumbKeys.length - 1;
     // menuKey 可能是 path 或 id，先查 pathMap，再在菜单树中按 getMenuKey 查找
     const menu = pathMap.get(key) ?? findRouteByMenuKey(routerList, key);
     if (!menu) {
@@ -135,11 +136,11 @@ function patchBreadcrumb(
     const iconName = menu.meta?.icon ?? '';
     const iconNode = joinIcon && iconName ? getIcon(iconName) : null;
     const titleContent = t(menu.meta?.title as string);
-    const isNotRoute = menu.meta?.menuType !== 2;
+    const isRouteNode = menu.route;
     const hasPath = Boolean(menu.path?.trim());
     const toPath: string = menu.path ?? '/';
     const title =
-      isLast || isNotRoute || !hasPath ? (
+      !isRouteNode || !hasPath ? (
         <>
           {iconNode}
           <span className="px-1">{titleContent}</span>
@@ -147,7 +148,9 @@ function patchBreadcrumb(
       ) : (
         <>
           {iconNode}
-          <Link to={toPath}>{titleContent}</Link>
+          <Link to={toPath}>
+            <span className="px-1">{titleContent}</span>
+          </Link>
         </>
       );
 
