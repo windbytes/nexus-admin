@@ -80,6 +80,29 @@ export const searchRoute = (path: string, routes: RouteItem[] = []): RouteItem |
   return null;
 };
 
+/** 用于 getFirstMenuPath 的菜单节点类型（仅需 path/route/children） */
+type MenuNodeForFirstPath = { path?: string; route?: boolean; children?: MenuNodeForFirstPath[] };
+
+/**
+ * 从菜单树中取第一个「路由」项（与登录选角色时首页逻辑一致）
+ * @param menus 菜单树
+ * @returns 第一个 route 为 true 的菜单 path，若无则 null
+ */
+export function getFirstMenuPath(menus: MenuNodeForFirstPath[]): string | null {
+  for (const menu of menus) {
+    if (menu.route && menu.path?.trim()) {
+      return menu.path.trim();
+    }
+    if (menu.children?.length) {
+      const found = getFirstMenuPath(menu.children);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
 /**
  * 图标库
  * @param name 图表名
