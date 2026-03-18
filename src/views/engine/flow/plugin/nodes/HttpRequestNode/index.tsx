@@ -1,5 +1,6 @@
-import { Handle, Position } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 import { Form, Input, Select } from 'antd';
+import { FlowHandle } from '../../../components/FlowHandle';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
 /**
@@ -19,9 +20,9 @@ const HttpRequestNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, da
         boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
       }}
     >
-      <Handle type="target" position={Position.Left} id={`${id}-target`} />
+      <FlowHandle type="target" position={Position.Left} id={`${id}-target`} />
       <div style={{ fontSize: 13, color: '#333' }}>{title}</div>
-      <Handle type="source" position={Position.Right} id={`${id}-source`} />
+      <FlowHandle type="source" position={Position.Right} id={`${id}-source`} />
     </div>
   );
 };
