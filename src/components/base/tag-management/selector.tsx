@@ -1,10 +1,10 @@
 import { PlusOutlined, SearchOutlined, TagOutlined, TagsOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { useUnmount } from 'ahooks';
-import { App, Checkbox, Divider, Input } from 'antd';
+import { Tag as AntdTag, App, Checkbox, Divider, Input, Tooltip } from 'antd';
 import { noop } from 'lodash-es';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Tag } from '@/components/base/tag-management/constant';
 import type { HtmlContentProps } from '@/components/popover';
@@ -36,13 +36,25 @@ type PanelProps = {
 const Panel: React.FC<PanelProps> = (props) => {
   const { t } = useTranslation();
   const { notification } = App.useApp();
-  const { type, targetID, value, selectedTags, onCacheUpdate, onChange } = props;
+  const { type, targetID, value, selectedTags, onCacheUpdate, onChange, onCreate } = props;
   const { tagList, setTagList, setShowTagManagementModal } = useTagStore();
 
   // 选中的标签id
-  const [selectedTagIDs, setSelectedTagIDs] = useState<string[]>([]);
+  const [selectedTagIDs, setSelectedTagIDs] = useState<string[]>(value ?? []);
   // 检索关键词
   const [keywords, setKeywords] = useState<string>('');
+
+  // 面板打开时拉取最新标签列表
+  useEffect(() => {
+    onCreate?.();
+    // 只在 mount 时拉取一次即可
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 打开面板时同步选中态（外部 value 变化时也同步）
+  useEffect(() => {
+    setSelectedTagIDs(value ?? []);
+  }, [value]);
 
   // 输入框值改变
   const handleKeywordsChange = (value: string) => {
@@ -74,11 +86,17 @@ const Panel: React.FC<PanelProps> = (props) => {
       setCreating(true);
     },
     onSuccess: (data) => {
-      setCreating(true);
       setTagList([...tagList, data]);
       notification.success({
         title: t('common.tag.created'),
         description: t('common.tag.created'),
+      });
+      // 创建后自动选中并立刻更新触发器展示（真正写入在卸载时统一提交）
+      setSelectedTagIDs((prev) => {
+        const next = prev.includes(data.id) ? prev : [...prev, data.id];
+        const nextSelectedTags = [...selectedTags, data];
+        onCacheUpdate(nextSelectedTags);
+        return next;
       });
       setKeywords('');
       setCreating(false);
@@ -92,25 +110,9 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
-  // 标签绑定（应用标签走 engine tagService，bindTags(tagIds, appId)）
-  const bindTagMutation = useMutation({
+  // 覆盖式绑定（后端 bind 会先删后插）
+  const bindTagsMutation = useMutation({
     mutationFn: (tagIDs: string[]) => tagService.bindTags(tagIDs, targetID),
-    onSuccess: () => {
-      notification.success({
-        title: t('common.actionMsg.modifiedSuccessfully'),
-      });
-    },
-    onError: (error) => {
-      notification.error({
-        title: t('common.actionMsg.modifiedFailed'),
-        description: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
-      });
-    },
-  });
-
-  // 标签解绑（应用标签走 engine tagService）
-  const unbindTagMutation = useMutation({
-    mutationFn: (tagID: string) => tagService.unbindTag(tagID, targetID),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -163,19 +165,11 @@ const Panel: React.FC<PanelProps> = (props) => {
    * 处理值改变
    */
   const handleValueChange = () => {
-    const addTagIDs = selectedTagIDs.filter((v) => !!value.includes(v));
-    const removeTagIDs = value.filter((v) => !selectedTagIDs.includes(v));
+    const nextSelectedTags = tagList.filter((tag) => tag.type === type && selectedTagIDs.includes(tag.id));
+    onCacheUpdate(nextSelectedTags);
 
-    const selectedTags = tagList.filter((tag) => selectedTagIDs.includes(tag.id));
-    onCacheUpdate(selectedTags);
-
-    Promise.all([
-      ...(addTagIDs.length ? [bindTagMutation.mutateAsync(addTagIDs)] : []),
-      ...(removeTagIDs.length ? removeTagIDs.map((id) => unbindTagMutation.mutateAsync(id)) : []),
-    ]).finally(() => {
-      if (onChange) {
-        onChange();
-      }
+    bindTagsMutation.mutateAsync(selectedTagIDs).finally(() => {
+      onChange?.();
     });
   };
 
@@ -285,7 +279,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   onChange,
 }) => {
   const { t } = useTranslation();
-  const { tagList, setTagList } = useTagStore();
+  const { setTagList } = useTagStore();
 
   /**
    * 获取标签列表
@@ -297,23 +291,27 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   };
 
   /**
-   * 用于显示选中标签的内容
+   * 用于显示选中标签的内容（优先使用 selectedTags）
    */
-  const triggerContent = useMemo(() => {
-    if (selectedTags?.length) {
-      return selectedTags
-        .filter((tag) => tagList.find((t) => t.id === tag.id))
-        .map((tag) => tag.name)
-        .join(', ');
-    }
-    return '';
-  }, [selectedTags, tagList]);
+  const triggerTags = useMemo(() => {
+    const unique = new Map<string, Tag>();
+    (selectedTags ?? []).forEach((tag) => {
+      if (tag?.id) {
+        unique.set(tag.id, tag);
+      }
+    });
+    return Array.from(unique.values());
+  }, [selectedTags]);
 
   /**
    * 触发器内容
    * @returns 触发器内容
    */
   const Trigger = () => {
+    const maxVisible = 2;
+    const visibleTags = triggerTags.slice(0, maxVisible);
+    const overflow = triggerTags.length - visibleTags.length;
+
     return (
       <div
         className={cn(
@@ -321,9 +319,34 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         )}
       >
         <TagOutlined className="h-3 w-3 shrink-0" />
-        <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-normal leading-5">
-          {!triggerContent ? t('common.tag.addTag') : triggerContent}
-        </div>
+        {!triggerTags.length ? (
+          <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-normal leading-5">
+            {t('common.tag.addTag')}
+          </div>
+        ) : (
+          <div className="min-w-0 grow truncate text-start">
+            <div className="flex items-center gap-1 truncate">
+              {visibleTags.map((tag) => (
+                <Tooltip key={tag.id} title={tag.name}>
+                  <AntdTag
+                    className="!m-0"
+                    style={{
+                      maxWidth: 120,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    {tag.name}
+                  </AntdTag>
+                </Tooltip>
+              ))}
+              {overflow > 0 && <AntdTag className="!m-0">{`+${overflow}`}</AntdTag>}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
