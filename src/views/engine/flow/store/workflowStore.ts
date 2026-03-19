@@ -24,6 +24,7 @@ interface WorkflowState {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   selectedNodeId: string | null;
+  hoveredEdgeId: string | null;
   lastSavedAt: string | null;
   dirty: boolean;
   history: HistoryEntry[];
@@ -36,6 +37,7 @@ interface WorkflowState {
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: OnConnect;
   setSelectedNodeId: (id: string | null) => void;
+  setHoveredEdgeId: (id: string | null) => void;
   setLastSavedAt: (at: string | null) => void;
   setDirty: (dirty: boolean) => void;
   undo: () => void;
@@ -52,6 +54,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNodeId: null,
+  hoveredEdgeId: null,
   lastSavedAt: null,
   dirty: false,
   history: [],
@@ -95,6 +98,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   },
 
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+  setHoveredEdgeId: (id) => set({ hoveredEdgeId: id }),
   setLastSavedAt: (at) => set({ lastSavedAt: at }),
   setDirty: (dirty) => set({ dirty }),
 
@@ -159,6 +163,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       redoStack: [],
       dirty: false,
       selectedNodeId: null,
+      hoveredEdgeId: null,
     });
   },
 
@@ -178,6 +183,7 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
       nodes: [],
       edges: [],
       selectedNodeId: null,
+      hoveredEdgeId: null,
       lastSavedAt: null,
       dirty: false,
       history: [],

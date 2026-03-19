@@ -1,8 +1,3 @@
-/**
- * 流程画布组件
- * 职责：ReactFlow 画布渲染、节点/边变更事件、右键菜单状态管理
- * 菜单项构建与渲染逻辑已抽取至 contextMenu 模块
- */
 import {
   Background,
   Controls,
@@ -25,13 +20,16 @@ import {
   type NodeContextMenuActions,
   type PaneContextMenuActions,
 } from './contextMenu';
+import { DeleteEdgeHover } from './DeleteEdgeHover';
 
 const fitViewOptions: FitViewOptions = { padding: 0.2 };
-const defaultEdgeOptions: DefaultEdgeOptions = { animated: true };
+const deleteEdgeType = 'deleteHoverEdge';
+const defaultEdgeOptions: DefaultEdgeOptions = { animated: true, type: deleteEdgeType };
 
 /** 流程画布 Props */
 export interface WorkflowCanvasProps {
   /** 已注册的 ReactFlow nodeTypes */
+  // biome-ignore lint/suspicious/noExplicitAny: nodeTypes 的具体 prop 类型由调用方的 ReactFlow 泛型推导决定，这里只做宽松透传。
   nodeTypes: Record<string, ComponentType<any>>;
   /** 打开属性面板 */
   onOpenPropertyPanel: () => void;
@@ -96,10 +94,14 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     onEdgesChange: storeOnEdgesChange,
     onConnect: storeOnConnect,
     setSelectedNodeId,
+    setHoveredEdgeId,
     setNodes,
   } = useWorkflowStore();
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+
+  // 确保所有边都走自定义边渲染（避免后端/DSL 边数据不带 type 时失效）
+  const edgesForRender = useMemo(() => edges.map((e) => ({ ...e, type: e.type ?? deleteEdgeType })), [edges]);
 
   const closeMenus = useCallback(() => {
     setContextMenu(null);
@@ -173,17 +175,24 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     <>
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={edgesForRender}
         onNodesChange={onNodesChangeWrap}
         onEdgesChange={storeOnEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={{ [deleteEdgeType]: DeleteEdgeHover }}
         fitViewOptions={fitViewOptions}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         defaultEdgeOptions={defaultEdgeOptions}
         onNodeClick={(_, node) => {
           setSelectedNodeId(node.id);
           onOpenPropertyPanel();
+        }}
+        onEdgeMouseEnter={(_, edge) => {
+          setHoveredEdgeId(edge.id);
+        }}
+        onEdgeMouseLeave={() => {
+          setHoveredEdgeId(null);
         }}
         onPaneClick={handlePaneClick}
         onPaneContextMenu={onPaneContextMenu}
