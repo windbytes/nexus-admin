@@ -109,132 +109,134 @@ const AppInfoModal: React.FC<AppInfoModalProps> = ({ open, onOk, onCancel, onCre
       centered
       style={{ height: '90vh' }} // 控制 Modal 外壳
       styles={{
-        body: { height: 'calc(90vh - 50px)', overflowY: 'auto' },
+        body: { height: 'calc(90vh - 50px)', overflow: 'hidden' },
       }}
       title="创建空白应用"
       width="75%"
       afterOpenChange={handleAfterOpen}
     >
-      <div className="flex justify-center h-full overflow-y-auto overflow-x-hidden">
+      <div className="flex justify-center h-full overflow-hidden">
         {/* 左边显示 */}
         <div className="flex-1 shrink-0 flex justify-end">
-          <div className="px-10">
-            <div className="leading-6 mb-2">
-              <span className="text-[#354052] text-[13px] font-semibold leading-4">选择应用分类</span>
-            </div>
-            <div className="flex flex-col w-[660px] gap-4">
-              <div className="w-full">
-                <div className="flex flex-row flex-wrap gap-2">
-                  {visibleCategories.map((cat) => (
-                    <div
-                      key={cat.id}
-                      className="w-[180px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
-                      style={{
-                        borderColor: String(selectedCategoryId) === String(cat.id) ? colorPrimary : '#e9ebf0',
-                      }}
-                      onClick={() => selectCategory(cat)}
-                    >
-                      <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
-                        <AppstoreOutlined className="w-4 h-4 text-[#ffffffe5]!" />
-                      </div>
-                      <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4 truncate">
-                        {cat.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {hasMoreCategories && (
-                  <Button
-                    type="link"
-                    className="px-0 mt-2"
-                    icon={<DownOutlined className={showMoreCategories ? 'rotate-180' : ''} />}
-                    onClick={() => setShowMoreCategories((v) => !v)}
-                  >
-                    {showMoreCategories ? '收起' : '更多分类'}
-                  </Button>
-                )}
+          <div className="px-10 h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className="leading-6 mb-2">
+                <span className="text-[#354052] text-[13px] font-semibold leading-4">选择应用分类</span>
               </div>
-              {/* 分割线 */}
-              <div className="w-full h-[0.5px] my-2 bg-[#10182814]" />
-              {/* 应用名称 */}
-              <div className="flex space-x-3 items-center">
-                <div className="flex-1">
-                  <div className="h-6 flex items-center mb-1">
-                    <span>应用名称 & 图标</span>
+              <div className="flex flex-col w-[660px] gap-4">
+                <div className="w-full">
+                  <div className="flex flex-row flex-wrap gap-2">
+                    {visibleCategories.map((cat) => (
+                      <div
+                        key={cat.id}
+                        className="w-[180px] h-[84px] p-3 border relative box-content! rounded-xl cursor-pointer shadow-xs hover:shadow-md"
+                        style={{
+                          borderColor: String(selectedCategoryId) === String(cat.id) ? colorPrimary : '#e9ebf0',
+                        }}
+                        onClick={() => selectCategory(cat)}
+                      >
+                        <div className="w-6 h-6 bg-[#7839ee] rounded-md justify-center items-center flex">
+                          <AppstoreOutlined className="w-4 h-4 text-[#ffffffe5]!" />
+                        </div>
+                        <div className="text-[#354052] mt-2 mb-0.5 text-[13px] font-semibold leading-4 truncate">
+                          {cat.name}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="relative w-full">
+                  {hasMoreCategories && (
+                    <Button
+                      type="link"
+                      className="px-0 mt-2"
+                      icon={<DownOutlined className={showMoreCategories ? 'rotate-180' : ''} />}
+                      onClick={() => setShowMoreCategories((v) => !v)}
+                    >
+                      {showMoreCategories ? '收起' : '更多分类'}
+                    </Button>
+                  )}
+                </div>
+                {/* 分割线 */}
+                <div className="w-full h-[0.5px] my-2 bg-[#10182814]" />
+                {/* 应用名称 */}
+                <div className="flex space-x-3 items-center">
+                  <div className="flex-1">
+                    <div className="h-6 flex items-center mb-1">
+                      <span>应用名称 & 图标</span>
+                    </div>
+                    <div className="relative w-full">
+                      <Input
+                        ref={inputRef}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full h-10"
+                        placeholder="给你的应用起一个名字"
+                        size="middle"
+                        allowClear
+                        maxLength={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* 描述/备注 */}
+                <div>
+                  <div className="mb-1 flex h-6 items-center">
+                    <span className="">描述</span>
+                    <span>（可选）</span>
+                  </div>
+                  <TextArea rows={3} placeholder="输入应用的描述" onChange={(e) => setDescription(e.target.value)} />
+                </div>
+                {/* 图标与背景色 */}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-1 flex h-6 items-center">图标（可选）</div>
                     <Input
-                      ref={inputRef}
-                      onChange={(e) => setName(e.target.value)}
                       className="w-full h-10"
-                      placeholder="给你的应用起一个名字"
+                      placeholder="iconify 名称或 URL"
+                      value={icon}
+                      onChange={(e) => setIcon(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-1 flex h-6 items-center">图标背景色（可选）</div>
+                    <ColorPicker
+                      value={iconBg}
+                      onChange={(value) => setIconBg(value.toHexString())}
+                      onClear={() => setIconBg('')}
+                    />
+                  </div>
+                </div>
+                {/* 优先级、日志级别（新建时状态固定为未启动，不展示） */}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-1 flex h-6 items-center">优先级</div>
+                    <Select
+                      className="w-full h-10"
                       size="middle"
-                      allowClear
-                      maxLength={20}
+                      value={priority}
+                      onChange={setPriority}
+                      options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ label: String(n), value: n }))}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-1 flex h-6 items-center">日志级别</div>
+                    <Select
+                      options={[
+                        { label: 'DEBUG', value: 1 },
+                        { label: 'INFO', value: 2 },
+                        { label: 'WARN', value: 3 },
+                        { label: 'ERROR', value: 4 },
+                      ]}
+                      value={logLevel}
+                      className="w-full h-10"
+                      placeholder="日志级别"
+                      size="middle"
+                      onChange={(value) => setLogLevel(value ?? 1)}
                     />
                   </div>
                 </div>
               </div>
-              {/* 描述/备注 */}
-              <div>
-                <div className="mb-1 flex h-6 items-center">
-                  <span className="">描述</span>
-                  <span>（可选）</span>
-                </div>
-                <TextArea rows={3} placeholder="输入应用的描述" onChange={(e) => setDescription(e.target.value)} />
-              </div>
-              {/* 图标与背景色 */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <div className="mb-1 flex h-6 items-center">图标（可选）</div>
-                  <Input
-                    className="w-full h-10"
-                    placeholder="iconify 名称或 URL"
-                    value={icon}
-                    onChange={(e) => setIcon(e.target.value)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="mb-1 flex h-6 items-center">图标背景色（可选）</div>
-                  <ColorPicker
-                    value={iconBg}
-                    onChange={(value) => setIconBg(value.toHexString())}
-                    onClear={() => setIconBg('')}
-                  />
-                </div>
-              </div>
-              {/* 优先级、日志级别（新建时状态固定为未启动，不展示） */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <div className="mb-1 flex h-6 items-center">优先级</div>
-                  <Select
-                    className="w-full h-10"
-                    size="middle"
-                    value={priority}
-                    onChange={setPriority}
-                    options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ label: String(n), value: n }))}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="mb-1 flex h-6 items-center">日志级别</div>
-                  <Select
-                    options={[
-                      { label: 'DEBUG', value: 1 },
-                      { label: 'INFO', value: 2 },
-                      { label: 'WARN', value: 3 },
-                      { label: 'ERROR', value: 4 },
-                    ]}
-                    value={logLevel}
-                    className="w-full h-10"
-                    placeholder="日志级别"
-                    size="middle"
-                    onChange={(value) => setLogLevel(value ?? 1)}
-                  />
-                </div>
-              </div>
             </div>
-            {/* 操作按钮-跳转模板 */}
-            <div className="pt-5 pb-10 flex justify-between items-center">
+            {/* 操作按钮-跳转模板（固定在左侧底部） */}
+            <div className="pt-5 pb-10 flex justify-between items-center shrink-0 bg-white">
               <div
                 className="flex gap-1 items-center cursor-pointer text-[12px] text-[#676f83] font-normal leading-4"
                 onClick={onCreateFromTemplate}

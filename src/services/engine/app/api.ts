@@ -186,8 +186,8 @@ export const tagService = {
     return HttpRequest.post<boolean>({
       url: TagsApi.bind,
       data: {
-        tagIds: tagIds.map((id) => Number(id)),
-        appId: Number(appId),
+        tagIds: tagIds,
+        appId: appId,
       },
     });
   },
@@ -196,8 +196,8 @@ export const tagService = {
     return HttpRequest.post<boolean>({
       url: TagsApi.unbind,
       data: {
-        tagId: Number(tagId),
-        appId: Number(appId),
+        tagId: tagId,
+        appId: appId,
       },
     });
   },
