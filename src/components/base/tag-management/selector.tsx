@@ -1,6 +1,5 @@
 import { PlusOutlined, SearchOutlined, TagOutlined, TagsOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { useUnmount } from 'ahooks';
 import { Tag as AntdTag, App, Checkbox, Divider, Input, Tooltip } from 'antd';
 import { noop } from 'lodash-es';
 import type React from 'react';
@@ -105,10 +104,27 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 过滤后的标签列表
   const filteredTagList = useMemo(() => {
-    return tagList.filter((tag) => tag.type === type && !value.includes(tag.id) && tag.name.includes(keywords));
-  }, [type, tagList, value, keywords]);
+    return tagList.filter(
+      (tag) => tag.type === type && !selectedTagIDs.includes(tag.id) && tag.name.includes(keywords)
+    );
+  }, [type, tagList, selectedTagIDs, keywords]);
 
   const [creating, setCreating] = useState<boolean>(false);
+
+  const resolveSelectedTags = (ids: string[]) => {
+    const dict = new Map<string, Tag>();
+    (selectedTags ?? []).forEach((tag) => {
+      if (tag?.id) {
+        dict.set(tag.id, tag);
+      }
+    });
+    tagList.forEach((tag) => {
+      if (tag?.id) {
+        dict.set(tag.id, tag);
+      }
+    });
+    return ids.map((id) => dict.get(id)).filter(Boolean) as Tag[];
+  };
 
   // 标签新建（应用标签走 engine tagService）
   const createTagMutation = useMutation({
@@ -123,11 +139,13 @@ const Panel: React.FC<PanelProps> = (props) => {
         title: t('common.tag.created'),
         description: t('common.tag.created'),
       });
-      // 创建后自动选中并立刻更新触发器展示（真正写入在卸载时统一提交）
+      // 创建后自动选中并立即绑定
       setSelectedTagIDs((prev) => {
         const next = prev.includes(data.id) ? prev : [...prev, data.id];
-        const nextSelectedTags = [...selectedTags, data];
-        onCacheUpdate(nextSelectedTags);
+        onCacheUpdate(resolveSelectedTags(next));
+        bindTagsMutation.mutateAsync(next).finally(() => {
+          onChange?.();
+        });
         return next;
       });
       setKeywords('');
@@ -158,6 +176,21 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
+  const unbindTagMutation = useMutation({
+    mutationFn: (tagId: string) => tagService.unbindTag(tagId, targetID),
+    onSuccess: () => {
+      notification.success({
+        title: t('common.actionMsg.modifiedSuccessfully'),
+      });
+    },
+    onError: (error) => {
+      notification.error({
+        title: t('common.actionMsg.modifiedFailed'),
+        description: `${t('common.actionMsg.modifiedFailed')}:${error.message}`,
+      });
+    },
+  });
+
   /**
    * 新建标签
    */
@@ -174,46 +207,28 @@ const Panel: React.FC<PanelProps> = (props) => {
   /**
    * 选中标签
    */
-  const selectTag = (tag: Tag) => {
-    if (selectedTagIDs.includes(tag.id)) {
-      setSelectedTagIDs(selectedTagIDs.filter((v) => v !== tag.id));
-    } else {
-      setSelectedTagIDs([...selectedTagIDs, tag.id]);
+  const selectTag = async (tag: Tag) => {
+    const isSelected = selectedTagIDs.includes(tag.id);
+    const nextSelectedTagIDs = isSelected ? selectedTagIDs.filter((v) => v !== tag.id) : [...selectedTagIDs, tag.id];
+
+    // 乐观更新 UI
+    setSelectedTagIDs(nextSelectedTagIDs);
+    onCacheUpdate(resolveSelectedTags(nextSelectedTagIDs));
+
+    if (isSelected) {
+      await unbindTagMutation.mutateAsync(tag.id).finally(() => {
+        onChange?.();
+      });
+      return;
     }
-  };
 
-  /**
-   * 值未改变
-   */
-  const valueNotChanged = useMemo(() => {
-    return (
-      value.length === selectedTagIDs.length &&
-      value.every((v) => selectedTagIDs.includes(v)) &&
-      selectedTagIDs.every((v) => value.includes(v))
-    );
-  }, [value, selectedTagIDs]);
-
-  /**
-   * 处理值改变
-   */
-  const handleValueChange = () => {
-    const nextSelectedTags = tagList.filter((tag) => tag.type === type && selectedTagIDs.includes(tag.id));
-    onCacheUpdate(nextSelectedTags);
-
-    bindTagsMutation.mutateAsync(selectedTagIDs).finally(() => {
+    // bind 为覆盖式绑定：必须传全量 ids，避免覆盖掉已有绑定
+    await bindTagsMutation.mutateAsync(nextSelectedTagIDs).finally(() => {
       onChange?.();
     });
   };
 
-  /**
-   * 组件卸载的时候（判定是否发生了改变）
-   */
-  useUnmount(() => {
-    if (valueNotChanged) {
-      return;
-    }
-    handleValueChange();
-  });
+  // 注意：缓存更新由 selectTag / createTag 主动触发，避免与外部 value 同步产生循环更新
 
   return (
     <div className="relative w-[300px] rounded-lg border-[0.5px] border-blue-100 bg-white">

@@ -183,10 +183,22 @@ export const tagService = {
   },
 
   async bindTags(tagIds: string[], appId: string): Promise<boolean> {
-    return HttpRequest.post<boolean>({ url: TagsApi.bind, params: { tagIds, appId } });
+    return HttpRequest.post<boolean>({
+      url: TagsApi.bind,
+      data: {
+        tagIds: tagIds.map((id) => Number(id)),
+        appId: Number(appId),
+      },
+    });
   },
 
   async unbindTag(tagId: string, appId: string): Promise<boolean> {
-    return HttpRequest.post<boolean>({ url: TagsApi.unbind, params: { tagId, appId } });
+    return HttpRequest.post<boolean>({
+      url: TagsApi.unbind,
+      data: {
+        tagId: Number(tagId),
+        appId: Number(appId),
+      },
+    });
   },
 };
