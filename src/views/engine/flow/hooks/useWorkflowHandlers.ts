@@ -6,6 +6,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+import { appService } from '@/services/engine/app/api';
 import { flowDefinitionService, flowVersionService } from '@/services/engine/flow/api';
 import type { FlowDraftEdge, FlowDraftNode, FlowDraftPayload } from '@/services/engine/flow/types';
 import type { WorkflowNodePlugin } from '../plugin/types';
@@ -25,9 +26,13 @@ function toFlowDraftPayload(doc: WorkflowDocument | null): FlowDraftPayload {
     nodeKey: node.id,
     name: (node.data as { title?: string })?.title,
     description: (node.data as { description?: string })?.description,
-    config: (node.data as Record<string, unknown>) ?? {},
+    // 让后端能通过 `t_engine_flow_node.node_config.pluginId` 反推出节点类型
+    config: {
+      ...(node.data as Record<string, unknown> ?? {}),
+      pluginId: node.type ?? (node.data as { pluginId?: string })?.pluginId ?? '',
+    },
     uiConfig: { position: node.position },
-    pluginId: node.type,
+    pluginId: node.type ?? (node.data as { pluginId?: string })?.pluginId ?? '',
   }));
   const edges: FlowDraftEdge[] = (doc?.edges ?? []).map((edge: WorkflowEdge) => ({
     sourceNodeKey: edge.source,
@@ -128,11 +133,13 @@ export function useWorkflowHandlers(appId: string | undefined, flowId: string | 
       const payload = toFlowDraftPayload(doc);
       let targetFlowId = flowId;
       if (!targetFlowId) {
+        const app = await appService.getAppById(appId);
+        const appName = app?.name ?? '应用';
         const newFlow = await flowDefinitionService.create({
           appId,
-          tenantId: '1',
-          flowKey: 'DEFAULT',
-          flowName: '默认流程',
+          flowKey: `${appId}-FLOW-1`,
+          flowName: `${appName}-流程1`,
+          description: '',
         });
         targetFlowId = newFlow.id;
         void queryClient.invalidateQueries({ queryKey: flowDefinitionQueryKeys.listByApp(appId) });
@@ -143,7 +150,7 @@ export function useWorkflowHandlers(appId: string | undefined, flowId: string | 
     } catch {
       message.error('保存失败');
     }
-  }, [appId, flowId, getDocument, setLastSavedAt, queryClient]);
+  }, [appId, flowId, getDocument, setLastSavedAt, queryClient, message]);
 
   /**
    * 发布流程
@@ -161,9 +168,9 @@ export function useWorkflowHandlers(appId: string | undefined, flowId: string | 
       if (!targetFlowId) {
         const newFlow = await flowDefinitionService.create({
           appId,
-          tenantId: '1',
-          flowKey: 'DEFAULT',
-          flowName: '默认流程',
+          flowKey: `${appId}-FLOW-1`,
+          flowName: `${(await appService.getAppById(appId))?.name ?? '应用'}-流程1`,
+          description: '',
         });
         targetFlowId = newFlow.id;
         void queryClient.invalidateQueries({ queryKey: flowDefinitionQueryKeys.listByApp(appId) });

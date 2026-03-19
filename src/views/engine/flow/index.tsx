@@ -3,6 +3,7 @@ import '@xyflow/react/dist/style.css';
 import { useParams } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -15,6 +16,7 @@ import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuer
 import { registerBuiltinNodePlugins } from './plugin/nodes';
 import { useWorkflowStore } from './store/workflowStore';
 import { buildNodeTypes } from './utils/nodeTypes';
+import { pluginService } from '@/services/engine/plugin/api';
 import './workflow.scss';
 
 // 模块加载时即注册内置节点插件，保证 useMemo(buildNodeTypes) 首次执行时能拿到所有插件
@@ -29,6 +31,14 @@ const Workflow: React.FC = () => {
   const { flowId, isLoading: flowIdLoading } = useFlowId(appId);
   const loadDocument = useWorkflowStore((s) => s.loadDocument);
   const emptyLoadedForAppRef = useRef<string | null>(null);
+
+  // 预加载：进入应用时先拉取该租户可用插件列表，确保「添加节点」列表与后端一致
+  useQuery({
+    queryKey: ['engine', 'plugins', 'available'],
+    queryFn: () => pluginService.listAvailable(),
+    enabled: !!appId,
+    staleTime: 60_000,
+  });
 
   // 应用下无流程定义时加载空画布（仅一次），避免显示其他应用的残留内容或重复覆盖未保存编辑
   useEffect(() => {

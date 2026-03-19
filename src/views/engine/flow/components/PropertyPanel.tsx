@@ -5,8 +5,11 @@
  */
 import { Drawer, Empty, Typography } from 'antd';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { getNodePlugin } from '../plugin/registry';
 import { useWorkflowStore } from '../store/workflowStore';
+import type { MarketListingVO } from '@/services/engine/plugin/types';
+import { SchemaDrivenConfigPanel } from './SchemaDrivenConfigPanel';
 
 const { Text } = Typography;
 
@@ -21,6 +24,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null;
   const plugin = node?.data?.pluginId ? getNodePlugin(node.data.pluginId as string) : null;
   const [size, setSize] = useState(width);
+  const queryClient = useQueryClient();
 
   const handleChange = (patch: Record<string, unknown>) => {
     if (!selectedNodeId) {
@@ -28,6 +32,11 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
     }
     setNodes((prev) => prev.map((n) => (n.id === selectedNodeId ? { ...n, data: { ...n.data, ...patch } } : n)));
   };
+
+  const availablePlugins = queryClient.getQueryData<MarketListingVO[]>(['engine', 'plugins', 'available']) ?? [];
+  const currentPluginKey = (node?.data?.pluginId as string | undefined) ?? '';
+  const currentListing = availablePlugins.find((p) => p.pluginKey === currentPluginKey) ?? null;
+  const configSchema = (currentListing?.latestVersion?.configSchema as unknown) ?? null;
 
   if (!selectedNodeId) {
     return null;
@@ -52,7 +61,10 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
     >
       {!node && <Empty description={<Text type="secondary">选中一个节点以配置属性</Text>} />}
       {node && !plugin && <Empty description={<Text type="secondary">未找到该节点类型的配置</Text>} />}
-      {node && plugin && (
+      {node && plugin && configSchema && (
+        <SchemaDrivenConfigPanel schema={configSchema} value={(node.data ?? {}) as Record<string, unknown>} onChange={handleChange} />
+      )}
+      {node && plugin && !configSchema && (
         <plugin.ConfigPanel
           nodeId={selectedNodeId}
           data={node.data as import('../types').WorkflowNodeData}

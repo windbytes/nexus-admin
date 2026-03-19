@@ -1,7 +1,3 @@
-/**
- * 流程编排顶部栏
- * 自动保存状态、appId、运行状态、撤销/重做、预览/搜索/检查清单/发布/刷新
- */
 import {
   CheckOutlined,
   CloudUploadOutlined,
@@ -35,6 +31,10 @@ const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
   failed: { color: 'error', text: '失败' },
 };
 
+/**
+ * 流程编排顶部栏
+ * 自动保存状态、appId、运行状态、撤销/重做、预览/搜索/检查清单/发布/刷新
+ */
 export const TopBar: React.FC<TopBarProps> = ({
   appId,
   onPreview,
