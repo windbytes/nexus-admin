@@ -171,34 +171,40 @@ export const tagService = {
   },
 
   async createTag(tag: Partial<Tag>): Promise<Tag> {
-    return HttpRequest.post<Tag>({ url: TagsApi.create, data: tag });
+    return HttpRequest.post<Tag>({ url: TagsApi.create, data: tag }, { successMessageMode: 'none' });
   },
 
   async updateTag(id: string, tag: Partial<Tag>): Promise<Tag> {
-    return HttpRequest.post<Tag>({ url: TagsApi.update(id), data: { ...tag, id } });
+    return HttpRequest.post<Tag>({ url: TagsApi.update(id), data: { ...tag, id } }, { successMessageMode: 'none' });
   },
 
   async deleteTag(id: string): Promise<boolean> {
-    return HttpRequest.post<boolean>({ url: TagsApi.delete(id) });
+    return HttpRequest.post<boolean>({ url: TagsApi.delete(id) }, { successMessageMode: 'none' });
   },
 
   async bindTags(tagIds: string[], appId: string): Promise<boolean> {
-    return HttpRequest.post<boolean>({
-      url: TagsApi.bind,
-      data: {
-        tagIds: tagIds,
-        appId: appId,
+    return HttpRequest.post<boolean>(
+      {
+        url: TagsApi.bind,
+        data: {
+          tagIds: tagIds,
+          appId: appId,
+        },
       },
-    });
+      { successMessageMode: 'none' }
+    );
   },
 
   async unbindTag(tagId: string, appId: string): Promise<boolean> {
-    return HttpRequest.post<boolean>({
-      url: TagsApi.unbind,
-      data: {
-        tagId: tagId,
-        appId: appId,
+    return HttpRequest.post<boolean>(
+      {
+        url: TagsApi.unbind,
+        data: {
+          tagId: tagId,
+          appId: appId,
+        },
       },
-    });
+      { successMessageMode: 'none' }
+    );
   },
 };

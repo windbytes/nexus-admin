@@ -45,6 +45,16 @@ const translation = {
     clientError: '客户端请求错误',
     serverError: '服务器错误',
   },
+  actionMsg: {
+    modifiedSuccessfully: '修改成功',
+    modifiedFailed: '修改失败',
+  },
+  createSuccess: '创建成功',
+  createFailed: '创建失败：',
+  updateSuccess: '更新成功',
+  updateFailed: '更新失败：',
+  deleteSuccess: '删除成功',
+  deleteFailed: '删除失败：',
   placeholder: '请输入搜索内容',
   // 标签相关
   tag: {
