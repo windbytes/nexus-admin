@@ -13,8 +13,7 @@ import {
 } from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
-import type { Endpoint } from '@/services/engine/endpoint/types';
+import { ENDPOINT_TYPE_OPTIONS, type Endpoint, type EndpointSelectOption } from '@/services/engine/endpoint/types';
 import { useEndpointActions } from '../../hooks/useEndpointActions';
 import type { DrawerType, ModalType } from '../../hooks/useEndpointModals';
 import { useEndpointPermissions } from '../../hooks/useEndpointPermissions';
@@ -58,8 +57,8 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
    * 获取端点类型名称
    */
   const getEndpointTypeName = (type: string): string => {
-    const option = ENDPOINT_TYPE_OPTIONS?.find((opt) => opt.value === type);
-    return (option?.label as string) || type;
+    const option = ENDPOINT_TYPE_OPTIONS?.find((opt: EndpointSelectOption) => opt.value === type);
+    return option?.label || type;
   };
 
   // 更多操作菜单项
@@ -262,7 +261,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 120,
+      width: 140,
       fixed: 'right',
       render: (_, record: Endpoint) => (
         <>
