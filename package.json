@@ -33,7 +33,7 @@
     "dayjs": "^1.11.20",
     "echarts": "^6.0.0",
     "html-to-image": "^1.11.13",
-    "i18next": "^25.8.19",
+    "i18next": "^25.8.20",
     "jsencrypt": "^3.5.4",
     "keepalive-for-react": "5.0.6",
     "lodash-es": "^4.17.23",
