@@ -29,6 +29,20 @@ const LOG_LEVEL_OPTIONS = [
   { label: 'ERROR', value: 4 },
 ];
 
+/** 与 create-app-modal 中 ColorPicker 一致：表单内只存 hex 字符串，避免提交 Color 对象 */
+function colorPickerValueToHex(color: unknown): string {
+  if (color == null || color === '') {
+    return '';
+  }
+  if (typeof color === 'string') {
+    return color;
+  }
+  if (typeof color === 'object' && color !== null && 'toHexString' in color) {
+    return (color as { toHexString: () => string }).toHexString();
+  }
+  return '';
+}
+
 /**
  * 编辑应用弹窗
  */
@@ -61,7 +75,11 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
     try {
       const values = await form.validateFields();
       setSubmitting(true);
-      await onConfirm(values);
+      const iconBgStr = colorPickerValueToHex(values.iconBg).trim();
+      await onConfirm({
+        ...values,
+        iconBg: iconBgStr || undefined,
+      });
       form.resetFields();
     } catch (e) {
       if (e instanceof Error && 'errorFields' in e) {
@@ -104,8 +122,12 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
           <Input placeholder="iconify 名称或 URL" />
         </Form.Item>
-        <Form.Item name="iconBg" label={t('app.iconBg') ?? '图标背景色'}>
-          <ColorPicker />
+        <Form.Item
+          name="iconBg"
+          label={t('app.iconBg') ?? '图标背景色'}
+          getValueFromEvent={colorPickerValueToHex}
+        >
+          <ColorPicker onClear={() => form.setFieldValue('iconBg', '')} />
         </Form.Item>
         <Form.Item name="status" label={t('app.statusLabel') ?? '状态'}>
           <Select options={STATUS_OPTIONS} />
