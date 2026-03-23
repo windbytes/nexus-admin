@@ -12,6 +12,7 @@ import clsx from '@/utils/classnames';
 import AppCardOperations from './AppCardOperations';
 import { useAppCardModalActions } from './hooks/useAppCardModals';
 import './apps.scss';
+import { getIcon } from '@/utils/optimized-icons';
 
 /**
  * 应用
@@ -25,7 +26,7 @@ const STATUS_MAP: Record<number, { text: string; color?: string; borderColor: st
 };
 
 const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
-  const { id, name, status = 0, remark = '', updateUser, updateTime } = app;
+  const { id, name, status = 0, remark = '', updateUser, updateTime, icon } = app;
   const statusInfo = STATUS_MAP[status] ?? STATUS_MAP[0];
   const navigate = useNavigate();
   const [tags, setTags] = useState<Tag[]>(app.tags ?? []);
@@ -65,7 +66,9 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
 
       <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
         {/* icon */}
-        <div className="relative shrink-0">icon</div>
+        <div className="relative shrink-0 p-2 text-white text-2xl w-10 h-10 bg-[var(--ant-color-primary)] rounded-md flex items-center justify-center">
+          {getIcon(icon)}
+        </div>
         {/* 应用名称与副信息 */}
         <div className="w-0 grow min-w-0 pr-16">
           <div className="flex items-center text-sm font-semibold leading-5 text-[#354052]">

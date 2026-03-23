@@ -129,7 +129,6 @@ const Apps: React.FC = () => {
   const updateAppMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<EngineApp> }) => appService.updateApp(id, payload),
     onSuccess: () => {
-      message.success(t('app.updateApp.success'));
       refetch();
     },
     onError: (error) => {
