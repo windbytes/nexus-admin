@@ -1,5 +1,5 @@
 const translation = {
-  description: 'Nexus',
+  description: 'Syndra',
   title: 'User Login',
   enterUsername: 'please enter username',
   enterPassword: 'please enter password',
@@ -9,7 +9,7 @@ const translation = {
   login: 'Sign In',
   loginSuccess: 'login success',
   loginFail: 'login fail',
-  welcome: 'Welcome to Nexus',
+  welcome: 'Welcome to Syndra',
   username: 'username',
   password: 'password',
   loginValid: 'Invalid credentials',

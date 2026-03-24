@@ -1,4 +1,4 @@
-.nexus-layout-sider {
+.syndra-layout-sider {
   overflow: hidden;
   position: relative;
   transition: width .2s cubic-bezier(.34, .69, .1, 1);
@@ -13,25 +13,25 @@
 }
 
 /* 双列菜单时侧栏内容区占满并允许内部 flex 分布 */
-.nexus-layout-sider-double .ant-layout-sider-children {
+.syndra-layout-sider-double .ant-layout-sider-children {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-.nexus-double-column-menu {
+.syndra-double-column-menu {
   display: flex;
   min-height: 0;
   overflow: hidden;
 }
 
-.nexus-double-column-menu-left,
-.nexus-double-column-menu-right {
+.syndra-double-column-menu-left,
+.syndra-double-column-menu-right {
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.nexus-double-column-menu-left {
+.syndra-double-column-menu-left {
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
@@ -48,7 +48,7 @@
 }
 
 /* 第二列：由 Layout.Sider 包裹，宽度来自状态库 */
-.nexus-double-column-menu-right.ant-layout-sider {
+.syndra-double-column-menu-right.ant-layout-sider {
   flex: 0 0 auto;
   min-width: 0;
   height: 100%;

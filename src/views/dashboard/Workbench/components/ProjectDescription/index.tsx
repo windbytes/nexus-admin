@@ -11,7 +11,7 @@ const ProjectDescription: React.FC = () => {
       <h4 className="text-base font-semibold text-gray-800 mb-3">项目介绍</h4>
       <Descriptions column={1} size="small" bordered className="text-sm">
         <Descriptions.Item label="项目名称" span={1}>
-          Nexus Platform 一体化平台
+          Syndra Platform 一体化平台
         </Descriptions.Item>
         <Descriptions.Item label="版本号" span={1}>
           v0.0.1

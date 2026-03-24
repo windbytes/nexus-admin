@@ -22,7 +22,7 @@ import styles from './login.module.css';
 const { Text } = Typography;
 
 /** 本地存储「记住我」用户名的 key */
-const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
+const REMEMBERED_USERNAME_KEY = 'syndra_login_remembered_username';
 
 /**
  * 登录模块
@@ -360,7 +360,7 @@ const Login: React.FC = () => {
                     autoFocus
                     autoComplete="off"
                     allowClear
-                    placeholder={`${t('login.username')}:nexus`}
+                    placeholder={`${t('login.username')}:syndra`}
                     prefix={<UserOutlined />}
                   />
                 </Form.Item>

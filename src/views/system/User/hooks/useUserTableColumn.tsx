@@ -49,7 +49,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'assignRole',
         label: '分配角色',
-        icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
         disabled: !canAssignRole,
         onClick: () => {
           if (!canAssignRole) {

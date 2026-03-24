@@ -344,7 +344,7 @@ const Login: React.FC = () => {
                       autoFocus
                       autoComplete="off"
                       allowClear
-                      placeholder={`${t('login.username')}:nexus`}
+                      placeholder={`${t('login.username')}:syndra`}
                       className={styles['form-input']}
                     />
                   </div>

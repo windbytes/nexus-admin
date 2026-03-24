@@ -97,7 +97,7 @@ const MenuComponent = () => {
     if (route && Object.keys(route).length && dynamicTitle) {
       const title = route.meta?.title;
       if (title) {
-        document.title = `Nexus - ${t(title)}`;
+        document.title = `Syndra - ${t(title)}`;
       }
     }
   }, [pathname, menus, dynamicTitle]);

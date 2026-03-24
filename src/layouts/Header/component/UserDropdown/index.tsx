@@ -274,7 +274,7 @@ const UserDropdown: React.FC = () => {
             // 清理用户信息
             userStore.clear();
             // 修改回document.title
-            document.title = 'nexus';
+            document.title = 'syndra';
             // 跳转登录界面
             navigate({ to: '/login', replace: true });
           },

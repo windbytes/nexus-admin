@@ -47,7 +47,7 @@ export const useLogout = () => {
           // 清理用户信息
           userLogout();
           // 修改回document.title
-          document.title = 'nexus';
+          document.title = 'syndra';
           // 退出到登录页面
           navigate({ to: '/login', replace: true });
         }

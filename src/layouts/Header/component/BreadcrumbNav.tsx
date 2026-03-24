@@ -65,7 +65,7 @@ const BreadcrumbNav: React.FC = () => {
   }, [pathname, menus, caches, breadcrumb, t, i18n.language]);
 
   // 组件的DOM内容
-  return <Breadcrumb items={items} className="flex justify-between items-center ml-[16px]! nexus-breadcrumb" />;
+  return <Breadcrumb items={items} className="flex justify-between items-center ml-[16px]! syndra-breadcrumb" />;
 };
 export default BreadcrumbNav;
 

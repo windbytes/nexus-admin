@@ -37,7 +37,7 @@ const HORIZONTAL_LAYOUT = 'header-nav';
 
 export const authenticatedRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'nexus',
+  id: 'syndra',
   component: () => {
     const { watermarkEnabled, lockScreenStatus, layout } = usePreferencesStore(
       useShallow((state) => ({
@@ -78,7 +78,7 @@ export const authenticatedRoute = createRoute({
       <HotKeyProvider>
         <RouteLoadingBar />
         {/* 始终用 Watermark 包裹，仅通过 content 控制显隐，避免切换时整棵布局被卸载重挂 */}
-        <Watermark content={watermarkEnabled ? 'Nexus Pro' : ''} gap={[80, 80]} className="w-full h-full">
+        <Watermark content={watermarkEnabled ? 'Syndra Pro' : ''} gap={[80, 80]} className="w-full h-full">
           {layoutContent}
         </Watermark>
 

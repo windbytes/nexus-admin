@@ -71,7 +71,7 @@ const LayoutMenu: React.FC<LayoutMenuProps> = ({ className, mode = 'horizontal',
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route?.meta?.title && dynamicTitle) {
-      document.title = `Nexus - ${t(route.meta.title)}`;
+      document.title = `Syndra - ${t(route.meta.title)}`;
     }
   }, [pathname, menus, dynamicTitle, t]);
 

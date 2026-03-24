@@ -119,7 +119,7 @@ const DoubleColumnMenu = () => {
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route?.meta?.title && dynamicTitle) {
-      document.title = `Nexus - ${t(route.meta.title)}`;
+      document.title = `Syndra - ${t(route.meta.title)}`;
     }
   }, [pathname, menus, dynamicTitle, t]);
 
@@ -148,8 +148,8 @@ const DoubleColumnMenu = () => {
   const rightSelectedKeys = selectedPath ? [selectedPath] : [];
 
   return (
-    <div className="nexus-double-column-menu flex flex-1 min-h-0">
-      <div className="nexus-double-column-menu-left flex flex-col min-w-0 flex-1">
+    <div className="syndra-double-column-menu flex flex-1 min-h-0">
+      <div className="syndra-double-column-menu-left flex flex-col min-w-0 flex-1">
         <SystemLogo variant="iconOnly" />
         <Menu
           className="side-menu border-r border-[#00000012] flex-1 min-h-0"
@@ -164,7 +164,7 @@ const DoubleColumnMenu = () => {
       </div>
 
       <Layout.Sider
-        className="nexus-double-column-menu-right shrink-0"
+        className="syndra-double-column-menu-right shrink-0"
         collapsedWidth={collapsed ? 56 : sidebarWidth}
         width={sidebarWidth}
         theme={mode}
@@ -189,7 +189,7 @@ const DoubleColumnMenu = () => {
             items={secondLevelItems}
             onClick={onRightClick}
           />
-          <div className="nexus-double-column-menu-footer shrink-0 flex items-center justify-center border-t border-[#00000012] py-2">
+          <div className="syndra-double-column-menu-footer shrink-0 flex items-center justify-center border-t border-[#00000012] py-2">
             <CollapseSwitch />
           </div>
         </div>

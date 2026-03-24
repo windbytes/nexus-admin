@@ -1,13 +1,13 @@
-# Nexus 集成信息管理平台
+# Syndra 集成信息管理平台
 
 <div align="center">
-  <img src="images/工作台.png" alt="Nexus 工作台" width="800"/>
-  <p><em>Nexus 集成信息管理平台 - 工作台界面</em></p>
+  <img src="images/工作台.png" alt="Syndra 工作台" width="800"/>
+  <p><em>Syndra 集成信息管理平台 - 工作台界面</em></p>
 </div>
 
 ## 📋 项目简介
 
-Nexus 是一个现代化的集成信息管理平台，专为多协议、多系统耦合而设计。通过配置服务和发布机制，实现不同厂商系统之间的最简化对接，为企业数字化转型提供强大的集成解决方案。
+Syndra 是一个现代化的集成信息管理平台，专为多协议、多系统耦合而设计。通过配置服务和发布机制，实现不同厂商系统之间的最简化对接，为企业数字化转型提供强大的集成解决方案。
 
 ### 🎯 核心特性
 
@@ -35,12 +35,13 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 ### 后端技术栈
 
-- **Spring Boot 3.x** - 企业级 Java 应用框架（等sa-token适配spring4后再考虑整体迁移到springboot4 - 哎：可惜undertow不支持springboot4）
+- **Spring Boot 4.0.3** - 企业级 Java 应用框架
 - **JDK 25** - 最新的 Java 开发工具包
-- **MyBatis-Flex** - 灵活的 ORM 框架（1.11.5已支持springboot4）
-- **Apache Camel** - 企业集成模式框架
-- **Sa-token** -- 权限校验（咱不支持springboot4，所以只能继续用springboot3）
-- **Redis** -- 缓存实现与分布式锁
+- **Spring Security + JWT** - 认证授权框架
+- **MyBatis-Flex** - 灵活的 ORM 框架
+- **Apache Camel 4.18** - 企业集成模式框架
+- **Redis** - 缓存实现与分布式锁
+- **PostgreSQL** - 关系型数据库
 
 ### 开发工具
 
@@ -140,7 +141,7 @@ Nexus 是一个现代化的集成信息管理平台，专为多协议、多系�
 
 ### 集成架构
 
-Nexus 平台深度集成 Apache Camel，作为核心的数据交互引擎：
+Syndra 平台深度集成 Apache Camel，作为核心的数据交互引擎：
 
 ```mermaid
 graph TB
@@ -198,7 +199,7 @@ public class IntegrationRoute extends RouteBuilder {
 ## 📁 项目结构
 
 ```
-nexus-admin/
+syndra-admin/
 ├── src/
 │   ├── components/          # 通用组件
 │   │   ├── base/           # 基础组件
@@ -261,11 +262,11 @@ bun run preview
 ```bash
 # 开发环境
 VITE_API_BASE_URL=http://localhost:9193
-VITE_APP_TITLE=Nexus Admin
+VITE_APP_TITLE=Syndra Admin
 
 # 生产环境
 VITE_API_BASE_URL=https://xxx.xxx.com
-VITE_APP_TITLE=Nexus 集成平台
+VITE_APP_TITLE=Syndra 集成平台
 ```
 
 ### 代理配置
@@ -342,7 +343,7 @@ CMD ["nginx", "-g", "daemon off;"]
 bun run build:prod
 
 # 部署到服务器
-rsync -av dist/ user@server:/var/www/nexus-admin/
+rsync -av dist/ user@server:/var/www/syndra-admin/
 ```
 
 ## 🤝 贡献指南
@@ -361,9 +362,9 @@ rsync -av dist/ user@server:/var/www/nexus-admin/
 
 ## 📞 联系我们
 
-- **项目主页**: [GitHub Repository](https://github.com/your-org/nexus-admin)
-- **问题反馈**: [Issues](https://github.com/your-org/nexus-admin/issues)
-- **文档**: [Wiki](https://github.com/your-org/nexus-admin/wiki)
+- **项目主页**: [GitHub Repository](https://github.com/your-org/syndra-admin)
+- **问题反馈**: [Issues](https://github.com/your-org/syndra-admin/issues)
+- **文档**: [Wiki](https://github.com/your-org/syndra-admin/wiki)
 
 ## 🔮 未来规划
 
@@ -385,5 +386,5 @@ rsync -av dist/ user@server:/var/www/nexus-admin/
 
 <div align="center">
   <p>⭐ 如果这个项目对您有帮助，请给我们一个 Star！</p>
-  <p>Made with ❤️ by Nexus Team</p>
+  <p>Made with ❤️ by Syndra Team</p>
 </div>

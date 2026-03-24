@@ -166,7 +166,7 @@ console.log("Hello, World!");
 echo "Hello, World!"
 
 # 定义变量
-NAME="Nexus Admin"
+NAME="Syndra Admin"
 VERSION="1.0.0"
 
 # 条件判断

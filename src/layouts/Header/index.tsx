@@ -68,7 +68,7 @@ const Header = () => {
    * 跳转到github - 使用 useCallback 缓存
    */
   const routeGitHub = () => {
-    window.open('https://github.com/windbytes/nexus-admin', '_blank');
+    window.open('https://github.com/windbytes/syndra-admin', '_blank');
   };
 
   /**

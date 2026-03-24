@@ -54,7 +54,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignMenu',
         label: '授权菜单',
-        icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
         disabled: !canAssignMenu,
         onClick: () => {
           if (!canAssignMenu) {
@@ -70,7 +70,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignResource',
         label: '授权资源',
-        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
         disabled: !canAssignResource,
         onClick: () => {
           if (!canAssignResource) {
@@ -86,7 +86,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignPermission',
         label: '授权权限',
-        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
         disabled: !canAssignPermission,
         onClick: () => {
           if (!canAssignPermission) {

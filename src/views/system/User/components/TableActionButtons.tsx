@@ -88,7 +88,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'assignRole',
       label: '批量分配角色',
-      icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+      icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
       disabled: selectedRows.length === 0 || !canBatchAssignRole,
       onClick: () => {
         if (!canBatchAssignRole) {

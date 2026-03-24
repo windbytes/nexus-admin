@@ -1,6 +1,6 @@
 const translation = {
   app: {
-    name: 'Nexus',
+    name: 'Syndra',
   },
   api: {},
   operation: {

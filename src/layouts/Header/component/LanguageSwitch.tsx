@@ -30,7 +30,7 @@ const LanguageSwitch = () => {
   };
   return (
     <Dropdown menu={{ items: menuItems }} placement="bottom">
-      <MyIcon type="nexus-language" className="text-[18px] cursor-pointer" />
+      <MyIcon type="syndra-language" className="text-[18px] cursor-pointer" />
     </Dropdown>
   );
 };

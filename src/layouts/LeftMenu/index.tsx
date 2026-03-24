@@ -45,7 +45,7 @@ const LeftMenu: React.FC = () => {
 
   return (
     <Layout.Sider
-      className={`nexus-layout-sider shrink-0 ${isDoubleColumn ? 'nexus-layout-sider-double' : ''}`}
+      className={`syndra-layout-sider shrink-0 ${isDoubleColumn ? 'syndra-layout-sider-double' : ''}`}
       trigger={null}
       collapsedWidth={isDoubleColumn ? 56 : 64}
       style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}
