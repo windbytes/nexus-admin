@@ -76,7 +76,7 @@ if (container) {
         retry: false,
         refetchOnWindowFocus: false, // 窗口聚焦时不重新获取数据
         refetchOnReconnect: true, // 网络重连时重新获取数据
-        gcTime: 1000 * 60 * 60 * 12, // 12小时后自动垃圾回收
+        gcTime: 1000 * 60 * 60 * 3, // 3小时后自动垃圾回收
         networkMode: 'online', // 只在在线时执行查询
       },
       mutations: {
