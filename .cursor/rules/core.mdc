@@ -1,0 +1,13 @@
+---
+description: syndra-admin 全局工程约定（工具链、仓库边界、协作）
+alwaysApply: true
+---
+
+# syndra-admin 核心约定
+
+- **定位**：Syndra 管理后台 SPA，配套后端仓库为 **syndra**（独立仓库）；改接口路径时须与后端 Controller 保持一致。
+- **运行时**：Node ≥ 22.12（见 `package.json` engines）；包管理器与锁文件以仓库已有为准，勿混用。
+- **格式化与 Lint**：以 **Biome** 为准（`biome.json`）。提交前执行 `npm run check` 或 `npm run check:fix`；风格冲突时服从 Biome，不手写与 Biome 矛盾的规范。
+- **构建**：Vite 8 + TypeScript project references（`npm run build`）；开发 `npm run dev`。
+- **变更原则**：最小必要改动；不无关重构；与用户可见文案、权限、路由变更同步考虑 i18n 与路由配置。
+- **安全**：不在前端硬编码密钥；敏感配置走环境变量；请求经统一封装（如 `HttpRequest`），错误信息对用户友好、对日志可诊断。

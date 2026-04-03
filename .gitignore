@@ -1,5 +1,3 @@
-# cursor 配置文件
-.cursor/*
 # vscode 配置
 .vscode/*
 node_modules
@@ -9,4 +7,3 @@ bun.lock
 *.idea
 .vscode
 *.lock
-.cursor

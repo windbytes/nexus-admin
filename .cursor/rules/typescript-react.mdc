@@ -1,0 +1,14 @@
+---
+description: TypeScript + React 19 组件、数据获取与状态（对齐本仓库依赖）
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript / React
+
+- **栈**：React 19、Vite 8、**@tanstack/react-router**、**@tanstack/react-query**、**zustand**、**ahooks**；路由与数据请求优先用上述库而非自造轮子。
+- **类型**：导出组件 props 与公共 API 显式标注；避免滥用 `any`（Biome 对 `any` 为 warn）；`import type` 用于仅类型导入。
+- **组件**：函数组件；可复用逻辑抽到 **hooks** 或小组件；与现有 `views/**` 目录结构一致（页面、hooks、components 分层）。
+- **性能**：非关键路径用 `React.lazy` / 动态 import；列表注意 key 稳定；谨慎使用 `useEffect`，优先事件驱动与 Query 缓存。
+- **错误边界**：关键路由可使用 `react-error-boundary` 等既有模式，避免静默吞错。
+- **请求**：API 路径、方法必须与后端一致；在 `src/services/**` 集中定义，注释中标注对应 Controller（参考现有 `engine`、`system` 服务写法）。
