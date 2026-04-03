@@ -1,19 +1,24 @@
 import type { Response } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 
+/** 与后端 {@code LoginMethod} 一致 */
+export type LoginMethodType = 'PASSWORD' | 'PHONE_SMS' | 'GITHUB' | 'WECHAT_QR';
+
 /**
- * 登录请求参数
+ * 登录请求参数（按登录方式选填；{@code remember} 仅前端使用，不会提交后端）
  */
 export interface LoginParams {
-  /** 用户名 */
-  username: string;
-  /** 密码 */
-  password: string;
-  /** 验证码 */
-  captchaCode: string;
-  /** 验证码key */
-  captchaKey: string;
-  /** 记住密码 */
+  loginMethod?: LoginMethodType;
+  username?: string;
+  password?: string;
+  roleCode?: string;
+  captchaKey?: string;
+  captchaCode?: string;
+  phone?: string;
+  smsCode?: string;
+  oauthCode?: string;
+  oauthRedirectUri?: string;
+  wechatCode?: string;
   remember?: boolean;
 }
 
@@ -51,77 +56,47 @@ export interface LoginResponse {
   userRoles: UserRole[];
 }
 
-/**
- * 枚举登录需要的接口地址
- */
-const LoginApi = {
-  /**
-   * 登录
-   */
-  login: '/auth/login',
-
-  /**
-   * 确认选择角色
-   */
-  confirmRole: '/auth/confirm-role',
-
-  /**
-   * 获取验证码
-   */
-  getCode: '/sys/framework/captcha',
-};
-
-/**
- * 登录服务接口
- */
-interface ILoginService {
-  /**
-   * 登录
-   * @param params 登录参数
-   * @returns 登录结果
-   */
-  login(params: LoginParams): Promise<Response>;
-
-  /**
-   * 确认选择角色
-   * @param loginToken 登录token
-   * @param roleCode 角色code
-   * @returns 确认选择角色结果
-   */
-  confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }>;
-
-  /**
-   * 获取验证码
-   * @returns 验证码
-   */
-  getCaptcha(): Promise<{ key: string; code: any }>;
+/** 微信扫码会话 */
+export interface WeChatQrStartData {
+  ticket: string;
+  authorizeUrl: string;
 }
 
-/**
- * 登录服务实现
- */
+export interface WeChatPollData {
+  status: string;
+  wechatCode?: string;
+}
+
+const LoginApi = {
+  login: '/auth/login',
+  confirmRole: '/auth/confirm-role',
+  getCode: '/sys/framework/captcha',
+  smsSend: '/auth/sms/send',
+  wechatQr: '/auth/oauth/wechat/qrcode',
+  wechatPoll: '/auth/oauth/wechat/poll',
+};
+
+interface ILoginService {
+  login(params: LoginParams): Promise<Response>;
+  confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }>;
+  getCaptcha(): Promise<{ key: string; code: string }>;
+  sendLoginSms(phone: string): Promise<void>;
+  startWeChatQr(): Promise<WeChatQrStartData>;
+  pollWeChatQr(ticket: string): Promise<WeChatPollData>;
+}
+
 export const loginService: ILoginService = {
-  /**
-   * 登录
-   * @param params 登录参数
-   * @returns 登录结果
-   */
   login(params: LoginParams): Promise<Response> {
+    const { remember: _remember, ...data } = params;
     return HttpRequest.post<Response>(
       {
         url: LoginApi.login,
-        data: params,
+        data,
       },
       { isTransformResponse: false }
     );
   },
 
-  /**
-   * 确认选择角色
-   * @param loginToken 登录token
-   * @param roleCode 角色code
-   * @returns 确认选择角色结果
-   */
   async confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }> {
     return HttpRequest.post<{ accessToken: string; permissions: string[] }>(
       {
@@ -132,12 +107,7 @@ export const loginService: ILoginService = {
     );
   },
 
-  /**
-   * 获取验证码
-   * @param checkKey 验证码key
-   * @returns 验证码
-   */
-  async getCaptcha(): Promise<{ key: string; code: any }> {
+  async getCaptcha(): Promise<{ key: string; code: string }> {
     const key = Date.now().toString();
     const code = await HttpRequest.get(
       {
@@ -148,5 +118,34 @@ export const loginService: ILoginService = {
       }
     );
     return { key, code };
+  },
+
+  async sendLoginSms(phone: string): Promise<void> {
+    await HttpRequest.post(
+      {
+        url: LoginApi.smsSend,
+        data: { phone },
+      },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  async startWeChatQr(): Promise<WeChatQrStartData> {
+    return HttpRequest.get<WeChatQrStartData>(
+      {
+        url: LoginApi.wechatQr,
+      },
+      { successMessageMode: 'none' }
+    );
+  },
+
+  async pollWeChatQr(ticket: string): Promise<WeChatPollData> {
+    return HttpRequest.get<WeChatPollData>(
+      {
+        url: LoginApi.wechatPoll,
+        params: { ticket },
+      },
+      { successMessageMode: 'none' }
+    );
   },
 };

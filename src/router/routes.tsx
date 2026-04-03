@@ -10,6 +10,7 @@ import { useUserStore } from '@/stores/userStore';
 // 懒加载组件
 const LoginComponent = lazy(() => import('@/views/Login'));
 const Login2Component = lazy(() => import('@/views/Login2'));
+const GitHubOAuthCallbackComponent = lazy(() => import('@/views/Login/GitHubOAuthCallback'));
 const NotFoundComponent = lazy(() => import('@/views/error/404'));
 const ForbiddenComponent = lazy(() => import('@/views/error/403'));
 const ServerErrorComponent = lazy(() => import('@/views/error/500'));
@@ -141,6 +142,15 @@ export const login2Route = createRoute({
 });
 
 /**
+ * GitHub OAuth 回调（需在 GitHub App 中登记同址）
+ */
+export const githubOAuthCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login/github-callback',
+  component: GitHubOAuthCallbackComponent,
+});
+
+/**
  * 根路径路由 - 重定向
  */
 export const indexRoute = createRoute({
@@ -200,6 +210,7 @@ export const baseRoutes = [
   indexRoute,
   loginRoute,
   login2Route,
+  githubOAuthCallbackRoute,
   notFoundRoute,
   forbiddenRoute,
   serverErrorRoute,

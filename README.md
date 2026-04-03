@@ -1,13 +1,12 @@
-# Syndra 异构流量治理平台
-
+# Syndra Integration Orchestration Platform 异构系统集成编排平台
 <div align="center">
   <img src="images/工作台.png" alt="Syndra 工作台" width="800"/>
-  <p><em>Syndra 集成信息管理平台 - 工作台界面</em></p>
+  <p><em>Syndra 异构系统集成编排平台 - 工作台界面</em></p>
 </div>
 
 ## 📋 项目简介
 
-Syndra（Synergy（协同）+ Data（数据）） 是一个现代化的异构流量治理平台，专为多协议、多系统耦合而设计。通过配置服务和发布机制，实现不同厂商系统之间的最简化对接，为企业数字化转型提供强大的集成解决方案。
+Syndra（Synergy（协同）+ Data（数据）） 是一个现代化的异构系统集成编排平台，专为多协议、多系统耦合而设计。通过配置服务和发布机制，实现不同厂商系统之间的最简化对接，为企业数字化转型提供强大的集成解决方案。
 
 ### 🎯 核心特性
 

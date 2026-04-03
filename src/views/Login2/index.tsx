@@ -17,6 +17,7 @@ import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
+import { copyrightYearRangeFrom } from '@/utils/copyrightDisplay';
 import styles from './login.module.css';
 
 const { Text } = Typography;
@@ -405,7 +406,9 @@ const Login: React.FC = () => {
 
       {/* 底部版权信息 */}
       <div className={styles['login-footer']}>
-        <Text className={styles['copyright'] || ''}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
+        <Text className={styles['copyright'] || ''}>
+          Copyright@{copyrightYearRangeFrom()} 499475142@qq.com All Rights Reserved
+        </Text>
         <div className={styles['filing-info']}>
           <a
             target="_blank"
