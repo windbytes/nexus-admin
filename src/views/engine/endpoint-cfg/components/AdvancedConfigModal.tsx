@@ -1,8 +1,9 @@
-import { CodeEditor } from '@/components/CodeEditor';
-import DragModal from '@/components/modal/DragModal';
 import { DeleteOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { App, Button, Card, Form, Input, Radio, Select, Space, Switch, Tooltip } from 'antd';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { CodeEditor } from '@/components/CodeEditor';
+import DragModal from '@/components/modal/DragModal';
 
 /**
  * Ant Design Form 支持的验证类型
@@ -146,7 +147,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       setRulesJson(jsonStr);
       setRulesMode('json');
     } catch (error: any) {
-      message.error('转换失败：' + error.message);
+      message.error(`转换失败：${error.message}`);
     }
   };
 
@@ -168,7 +169,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
         setRulesMode('visual');
       }
     } catch (error: any) {
-      message.error('JSON格式错误：' + error.message);
+      message.error(`JSON格式错误：${error.message}`);
     }
   };
 
@@ -182,7 +183,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       const ruleNum = index + 1;
 
       // 1. 必须有错误提示信息
-      if (!rule.message || !rule.message.trim()) {
+      if (!rule.message?.trim()) {
         errors.push(`规则${ruleNum}：缺少错误提示信息（message字段为必填项）`);
       }
 
@@ -194,7 +195,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       }
 
       // 3. 如果配置了正则表达式，验证其有效性
-      if (rule.pattern && rule.pattern.trim()) {
+      if (rule.pattern?.trim()) {
         try {
           new RegExp(rule.pattern);
         } catch (e) {
@@ -218,7 +219,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
    * 验证显示条件的有效性
    */
   const validateShowCondition = (condition: string): { valid: boolean; error?: string } => {
-    if (!condition || !condition.trim()) {
+    if (!condition?.trim()) {
       return { valid: true };
     }
 
@@ -278,7 +279,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
             rulesToValidate = parsed;
             rulesStr = rulesJson.trim();
           } catch (error: any) {
-            message.error('JSON格式错误：' + error.message);
+            message.error(`JSON格式错误：${error.message}`);
             return;
           }
         }
@@ -349,7 +350,7 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
       if (error.errorFields) {
         message.error('请检查表单填写');
       } else {
-        message.error('配置验证失败：' + error.message);
+        message.error(`配置验证失败：${error.message}`);
       }
     }
   };
@@ -498,10 +499,10 @@ const AdvancedConfigModal: React.FC<AdvancedConfigModalProps> = ({
                           onChange={(value) => handleUpdateRule(index, 'type', value)}
                           options={VALIDATION_TYPES}
                           allowClear
-                          showSearch
-                          filterOption={(input, option) =>
-                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                          }
+                          showSearch={{
+                            filterOption: (input, option) =>
+                              (option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+                          }}
                         />
                       </div>
 

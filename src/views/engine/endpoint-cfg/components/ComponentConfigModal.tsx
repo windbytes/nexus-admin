@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
 import { SettingOutlined } from '@ant-design/icons';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
 import {
+  type ComponentConfigProps,
+  DatePickerConfig,
   InputConfig,
   InputNumberConfig,
-  SelectConfig,
-  DatePickerConfig,
-  TextAreaConfig,
-  RadioConfig,
-  SwitchConfig,
   JSONConfig,
-  type ComponentConfigProps,
+  RadioConfig,
+  SelectConfig,
+  SwitchConfig,
+  TextAreaConfig,
 } from '../component-configs';
-import DragModal from '@/components/modal/DragModal';
 
 interface ComponentConfigModalProps {
   /** 是否显示弹窗 */

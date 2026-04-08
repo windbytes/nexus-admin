@@ -1,13 +1,48 @@
-import { ENDPOINT_TYPE_OPTIONS, MODE_OPTIONS, type EndpointTypeConfig } from '@/services/engine';
-import { usePreferencesStore } from '@/stores/store';
-import type { FormInstance } from 'antd';
+import type { FormInstance, FormItemProps, InputRef } from 'antd';
 import { ConfigProvider, Form, Input, Select, Skeleton, Switch } from 'antd';
+import type { Rule } from 'antd/es/form';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import React, { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/shallow';
+import { ENDPOINT_TYPE_OPTIONS, type EndpointTypeConfig, MODE_OPTIONS } from '@/services/engine';
+import { usePreferencesStore } from '@/stores/store';
+
+type OptionItem = {
+  value: string;
+  label: string;
+};
 
 const { TextArea } = Input;
+
+type BaseFieldSchema = {
+  name: string;
+  label: string;
+  rules?: Rule[];
+  tooltip?: FormItemProps['tooltip'];
+};
+
+type InputFieldSchema = BaseFieldSchema & {
+  kind: 'input';
+  placeholder: string;
+  withTypeNameRef?: boolean;
+};
+
+type SelectFieldSchema = BaseFieldSchema & {
+  kind: 'select';
+  placeholder: string;
+  options: OptionItem[];
+  mode?: 'multiple';
+  maxTagCount?: 'responsive' | number;
+};
+
+type SwitchFieldSchema = BaseFieldSchema & {
+  kind: 'switch';
+  checkedChildren: string;
+  unCheckedChildren: string;
+};
+
+type FieldSchema = InputFieldSchema | SelectFieldSchema | SwitchFieldSchema;
 
 /**
  * 响应式 labelCol 配置 - 移到组件外部，避免每次渲染都创建新对象
@@ -51,6 +86,81 @@ const formTheme = {
  */
 const formInitialValues = { status: true, schemaVersion: '1.0.0', supportRetry: false };
 
+const modeTooltip = (
+  <span>
+    • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
+  </span>
+);
+
+const formFieldSchemas: FieldSchema[] = [
+  {
+    kind: 'input',
+    name: 'typeName',
+    label: '名称',
+    placeholder: '请输入类型名称，如：HTTP端点',
+    withTypeNameRef: true,
+    rules: [{ required: true, message: '请输入类型名称' }],
+  },
+  {
+    kind: 'input',
+    name: 'typeCode',
+    label: '编码',
+    placeholder: '请输入类型编码，如：http',
+    rules: [
+      { required: true, message: '请输入类型编码' },
+      {
+        pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
+        message: '编码必须以字母开头，只能包含字母、数字和下划线',
+      },
+    ],
+  },
+  {
+    kind: 'select',
+    name: 'endpointType',
+    label: '分类',
+    placeholder: '请选择端点类型分类',
+    options: ENDPOINT_TYPE_OPTIONS as unknown as OptionItem[],
+    rules: [{ required: true, message: '请选择端点类型分类' }],
+  },
+  {
+    kind: 'select',
+    name: 'supportMode',
+    label: '模式',
+    tooltip: modeTooltip,
+    placeholder: '请选择支持模式',
+    options: MODE_OPTIONS as unknown as OptionItem[],
+    mode: 'multiple',
+    maxTagCount: 'responsive',
+    rules: [{ required: true, message: '请选择支持模式' }],
+  },
+  {
+    kind: 'input',
+    name: 'icon',
+    label: '图标',
+    placeholder: '请输入图标类名，如：icon-http',
+  },
+  {
+    kind: 'input',
+    name: 'schemaVersion',
+    label: '版本',
+    placeholder: '请输入版本号，如：1.0.0',
+  },
+  {
+    kind: 'switch',
+    name: 'status',
+    label: '状态',
+    checkedChildren: '启用',
+    unCheckedChildren: '禁用',
+  },
+  {
+    kind: 'switch',
+    name: 'supportRetry',
+    label: '支持重试',
+    checkedChildren: '是',
+    unCheckedChildren: '否',
+  },
+];
+
 interface EndpointTypeFormProps {
   /** 表单实例 */
   form: FormInstance;
@@ -63,9 +173,9 @@ interface EndpointTypeFormProps {
 /**
  * 端点类型基本信息表单组件（右上）
  */
-const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, selectedType, isEditing = false }) => {
+const EndpointTypeForm = ({ form, selectedType, isEditing = false }: EndpointTypeFormProps) => {
   // 类型名称输入框的引用
-  const typeNameInputRef = useRef<any>(null);
+  const typeNameInputRef = useRef<InputRef>(null);
   const { locale } = usePreferencesStore(
     useShallow((state) => ({
       locale: state.preferences.app.locale,
@@ -88,7 +198,43 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
         }
       }, 100);
     }
-  }, [isEditing]);
+  }, [form, selectedType, isEditing]);
+
+  const renderField = (field: FieldSchema) => {
+    const itemProps: FormItemProps = {
+      name: field.name,
+      label: field.label,
+      rules: field.rules,
+      tooltip: field.tooltip,
+    };
+
+    if (field.kind === 'input') {
+      return (
+        <Form.Item key={field.name} {...itemProps}>
+          <Input ref={field.withTypeNameRef ? typeNameInputRef : undefined} placeholder={field.placeholder} />
+        </Form.Item>
+      );
+    }
+
+    if (field.kind === 'select') {
+      return (
+        <Form.Item key={field.name} {...itemProps}>
+          <Select
+            mode={field.mode}
+            options={field.options}
+            placeholder={field.placeholder}
+            maxTagCount={field.maxTagCount}
+          />
+        </Form.Item>
+      );
+    }
+
+    return (
+      <Form.Item key={field.name} {...itemProps} valuePropName="checked">
+        <Switch checkedChildren={field.checkedChildren} unCheckedChildren={field.unCheckedChildren} />
+      </Form.Item>
+    );
+  };
 
   return (
     <ConfigProvider theme={formTheme} locale={locale === 'zh-CN' ? zhCN : enUS}>
@@ -110,61 +256,7 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
               marginBottom: '16px',
             }}
           >
-            <Form.Item name="typeName" label="名称" rules={[{ required: true, message: '请输入类型名称' }]}>
-              <Input ref={typeNameInputRef} placeholder="请输入类型名称，如：HTTP端点" />
-            </Form.Item>
-
-            <Form.Item
-              name="typeCode"
-              label="编码"
-              rules={[
-                { required: true, message: '请输入类型编码' },
-                {
-                  pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/,
-                  message: '编码必须以字母开头，只能包含字母、数字和下划线',
-                },
-              ]}
-            >
-              <Input placeholder="请输入类型编码，如：http" />
-            </Form.Item>
-
-            <Form.Item name="endpointType" label="分类" rules={[{ required: true, message: '请选择端点类型分类' }]}>
-              <Select placeholder="请选择端点类型分类" options={ENDPOINT_TYPE_OPTIONS as any} />
-            </Form.Item>
-
-            <Form.Item
-              name="supportMode"
-              tooltip={
-                <span>
-                  • IN、IN_OUT用于暴露入口给其他地方调用 <br /> • OUT、OUT_IN用于调用其他地方的入口
-                </span>
-              }
-              label="模式"
-              rules={[{ required: true, message: '请选择支持模式' }]}
-            >
-              <Select
-                mode="multiple"
-                options={MODE_OPTIONS as any}
-                placeholder="请选择支持模式"
-                maxTagCount="responsive"
-              />
-            </Form.Item>
-
-            <Form.Item name="icon" label="图标">
-              <Input placeholder="请输入图标类名，如：icon-http" />
-            </Form.Item>
-
-            <Form.Item name="schemaVersion" label="版本">
-              <Input placeholder="请输入版本号，如：1.0.0" />
-            </Form.Item>
-
-            <Form.Item name="status" label="状态" valuePropName="checked">
-              <Switch checkedChildren="启用" unCheckedChildren="禁用" />
-            </Form.Item>
-
-            <Form.Item name="supportRetry" label="支持重试" valuePropName="checked">
-              <Switch checkedChildren="是" unCheckedChildren="否" />
-            </Form.Item>
+            {formFieldSchemas.map(renderField)}
           </div>
 
           <Form.Item name="description" label="描述" labelCol={{ span: 2 }} wrapperCol={{ span: 22 }}>
@@ -174,6 +266,6 @@ const EndpointTypeForm: React.FC<EndpointTypeFormProps> = React.memo(({ form, se
       </Suspense>
     </ConfigProvider>
   );
-});
+};
 
 export default EndpointTypeForm;

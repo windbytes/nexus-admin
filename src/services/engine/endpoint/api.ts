@@ -11,6 +11,7 @@ import type {
   EndpointSearchParams,
   EndpointTestRequest,
   EndpointTestResponse,
+  EndpointTypeConfig,
   EndpointTypeSearchParams,
   EndpointValidateResult,
   SchemaField,
@@ -37,8 +38,9 @@ const EndpointConfigsApi = {
   list: '/engine/endpoint-configs',
   getById: (id: string) => `/engine/endpoint-configs/${id}`,
   create: '/engine/endpoint-configs',
-  // 为满足“变更统一使用 POST”的约束，这里使用后端兼容的 POST 路径
+  /** 对应 EndpointConfigController#update 的 POST /update/{id} */
   update: (id: string) => `/engine/endpoint-configs/update/${id}`,
+  /** 对应 EndpointConfigController#delete 的 POST /delete/{id} */
   delete: (id: string) => `/engine/endpoint-configs/delete/${id}`,
   validateSchema: '/engine/endpoint-configs/validate-schema',
   exportSchema: (id: string) => `/engine/endpoint-configs/export-schema/${id}`,
@@ -197,12 +199,12 @@ export const endpointConfigService = {
    * @param page 页码
    * @param size 每页条数
    */
-  async list(endpointType?: string, page = 1, size = 20): Promise<PageResult<EndpointConfig>> {
+  async list(endpointType?: string, page = 1, size = 20): Promise<PageResult<EndpointTypeConfig>> {
     const params: Record<string, unknown> = { page, size };
     if (endpointType) {
       params['endpointType'] = endpointType;
     }
-    return HttpRequest.get<PageResult<EndpointConfig>>(
+    return HttpRequest.get<PageResult<EndpointTypeConfig>>(
       { url: EndpointConfigsApi.list, params },
       { successMessageMode: 'none' }
     );
@@ -212,16 +214,19 @@ export const endpointConfigService = {
    * 根据 ID 查询端点类型配置详情
    * @param id 配置 ID
    */
-  async getById(id: string): Promise<EndpointConfig | null> {
-    return HttpRequest.get<EndpointConfig>({ url: EndpointConfigsApi.getById(id) }, { successMessageMode: 'none' });
+  async getById(id: string): Promise<EndpointTypeConfig | null> {
+    return HttpRequest.get<EndpointTypeConfig>(
+      { url: EndpointConfigsApi.getById(id) },
+      { successMessageMode: 'none' }
+    );
   },
 
   /**
    * 新增端点类型配置
    * @param config 配置数据
    */
-  async create(config: Partial<EndpointConfig>): Promise<EndpointConfig> {
-    return HttpRequest.post<EndpointConfig>({ url: EndpointConfigsApi.create, data: config });
+  async create(config: Partial<EndpointTypeConfig>): Promise<EndpointTypeConfig> {
+    return HttpRequest.post<EndpointTypeConfig>({ url: EndpointConfigsApi.create, data: config });
   },
 
   /**
@@ -229,8 +234,8 @@ export const endpointConfigService = {
    * @param id 配置 ID
    * @param config 配置数据
    */
-  async update(id: string, config: Partial<EndpointConfig>): Promise<EndpointConfig> {
-    return HttpRequest.post<EndpointConfig>({ url: EndpointConfigsApi.update(id), data: { ...config, id } });
+  async update(id: string, config: Partial<EndpointTypeConfig>): Promise<EndpointTypeConfig> {
+    return HttpRequest.post<EndpointTypeConfig>({ url: EndpointConfigsApi.update(id), data: { ...config, id } });
   },
 
   /**
@@ -242,27 +247,63 @@ export const endpointConfigService = {
   },
 
   /**
-   * 分页查询端点类型配置列表（与原 integrated getEndpointTypeList 能力等价）。
+   * 新增端点类型配置（页面兼容别名）。
    *
-   * @param params 查询参数（typeName、typeCode、status 及分页）
+   * @param config 配置数据
+   * @returns 新增后的配置
    */
-  async getEndpointTypeList(params: EndpointTypeSearchParams): Promise<PageResult<EndpointConfig>> {
-    const { pageNum = 1, pageSize = 10, typeName, typeCode, status } = params;
+  async addEndpointType(config: Partial<EndpointTypeConfig>): Promise<EndpointTypeConfig> {
+    return this.create(config);
+  },
+
+  /**
+   * 更新端点类型配置（页面兼容别名）。
+   *
+   * 优先调用标准 PUT 路径；若服务端网关仅放行旧 POST 路径，则自动回退到兼容路径。
+   *
+   * @param config 配置数据（必须包含 id）
+   * @returns 更新后的配置
+   */
+  async updateEndpointType(config: Partial<EndpointTypeConfig>): Promise<EndpointTypeConfig> {
+    const id = config.id;
+    if (!id) {
+      throw new Error('updateEndpointType 缺少必填字段 id');
+    }
+    return this.update(id, config);
+  },
+
+  /**
+   * 删除端点类型配置（页面兼容别名）。
+   *
+   * 优先调用标准 DELETE 路径；若服务端网关仅放行旧 POST 路径，则自动回退到兼容路径。
+   *
+   * @param id 配置 ID
+   */
+  async deleteEndpointType(id: string): Promise<void> {
+    await this.delete(id);
+  },
+
+  /**
+   * 分页查询端点类型配置列表（对齐 EndpointConfigController#list）。
+   *
+   * 后端当前支持：endpointType、page、size。为兼容旧页面参数，当前会优先取：
+   * endpointType -> typeCode -> typeName（最后一个仅作兜底透传）。
+   *
+   * @param params 查询参数（endpointType/typeCode/typeName 及分页）
+   */
+  async getEndpointTypeList(params: EndpointTypeSearchParams): Promise<PageResult<EndpointTypeConfig>> {
+    const { pageNum = 1, pageSize = 10, endpointType, typeName, typeCode } = params;
     const query: Record<string, unknown> = {
       page: pageNum,
       size: pageSize,
     };
-    if (typeName) {
-      query['typeName'] = typeName;
-    }
-    if (typeCode) {
-      query['typeCode'] = typeCode;
-    }
-    if (typeof status === 'boolean') {
-      query['status'] = status;
+
+    const normalizedEndpointType = endpointType || typeCode || typeName;
+    if (normalizedEndpointType) {
+      query['endpointType'] = normalizedEndpointType;
     }
 
-    return HttpRequest.get<PageResult<EndpointConfig>>(
+    return HttpRequest.get<PageResult<EndpointTypeConfig>>(
       { url: EndpointConfigsApi.list, params: query },
       { successMessageMode: 'none' }
     );

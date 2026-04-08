@@ -191,6 +191,7 @@ export const MODE_OPTIONS = [
 
 /** 端点类型配置搜索参数（原 integrated EndpointTypeSearchParams） */
 export interface EndpointTypeSearchParams extends PageQueryParams {
+  endpointType?: string;
   typeName?: string;
   typeCode?: string;
   status?: boolean;
