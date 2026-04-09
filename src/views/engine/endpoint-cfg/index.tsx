@@ -1,13 +1,13 @@
 import { Card, Form, Skeleton } from 'antd';
 import type React from 'react';
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import ActionButtons from './components/ActionButtons';
 import EndpointTypeForm from './components/EndpointTypeForm';
 import EndpointTypeList from './components/EndpointTypeList';
 import SchemaFieldsTable, { type SchemaFieldsTableRef } from './components/SchemaFieldsTable';
 import { useEndpointConfigPage } from './hooks/useEndpointConfigPage';
 
-// 懒加载预览弹窗组件
+// 懒加载预览弹窗组件（进入页面即预取 chunk，减少首次点击预览时的等待）
 const PreviewModal = lazy(() => import('./preview/PreviewModal'));
 
 /**
@@ -16,6 +16,10 @@ const PreviewModal = lazy(() => import('./preview/PreviewModal'));
 const EndpointConfig: React.FC = () => {
   const [basicForm] = Form.useForm();
   const schemaFieldsTableRef = useRef<SchemaFieldsTableRef>(null);
+
+  useEffect(() => {
+    void import('./preview/PreviewModal');
+  }, []);
   const {
     selectedType,
     isEditing,

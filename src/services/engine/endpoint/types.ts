@@ -153,26 +153,14 @@ export const COMPONENT_TYPE_OPTIONS = [
 
 // ---------- 表单 Schema（与后端 EndpointConfig.schemaFields 结构一致） ----------
 
-/** 表单 Schema 字段配置（驱动动态表单渲染） */
-export interface FormSchemaField {
-  field: string;
-  label: string;
-  component: string;
-  required?: boolean;
-  defaultValue?: unknown;
-  componentProps?: Record<string, unknown>;
-  rules?: unknown[];
-  formItemProps?: Record<string, unknown>;
-}
-
 /** 端点类型配置 Schema（前端用于动态表单；后端返回 EndpointConfig，schemaFields 即此类数组） */
 export interface EndpointConfigSchema {
   id: string;
   endpointType: string;
   schemaName?: string;
   schemaVersion?: string;
-  schemaConfig?: FormSchemaField[];
-  schemaFields?: FormSchemaField[];
+  schemaConfig?: SchemaField[];
+  schemaFields?: SchemaField[];
   status?: boolean;
   description?: string;
   typeName?: string;
@@ -219,10 +207,10 @@ export interface EndpointTypeConfig {
   typeName: string;
   typeCode: string;
   icon?: string;
-  supportMode?: string[] | unknown;
+  supportMode?: string[];
   description?: string;
   schemaVersion?: string;
-  schemaFields: SchemaField[] | FormSchemaField[];
+  schemaFields: SchemaField[];
   status?: boolean;
   supportRetry?: boolean;
   delFlag?: boolean;

@@ -64,7 +64,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
         return <SelectConfig {...configProps} />;
       case 'DatePicker':
         return <DatePickerConfig {...configProps} />;
-      case 'TextArea':
+      case 'Textarea':
         return <TextAreaConfig {...configProps} />;
       case 'Radio':
         return <RadioConfig {...configProps} />;
@@ -91,7 +91,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       InputNumber: '数字输入框',
       Select: '下拉选择',
       DatePicker: '日期选择器',
-      TextArea: '文本域',
+      Textarea: '文本域',
       Radio: '单选框',
       Switch: '开关',
       JSON: 'JSON编辑器',

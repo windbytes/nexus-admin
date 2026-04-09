@@ -1,5 +1,5 @@
+import { Col, Form, Input, InputNumber, Row, Switch } from 'antd';
 import React from 'react';
-import { Form, Input, Switch, InputNumber, Row, Col } from 'antd';
 import type { ComponentConfigProps } from './index';
 
 /**

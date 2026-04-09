@@ -1,7 +1,8 @@
 import { App, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Select, Switch } from 'antd';
+import type { editor } from 'monaco-editor';
 import { useMemo } from 'react';
 import JSONDynamicForm from '@/components/base/JSONDynamicForm';
-import CodeEditor from '@/components/CodeEditor';
+import CodeEditor, { type EditorTheme } from '@/components/CodeEditor';
 import type { SchemaField } from '@/services/engine/endpoint/types';
 
 const { TextArea, Password } = Input;
@@ -114,7 +115,7 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = ({ field
       case 'InputNumber':
         return <InputNumber {...rest} className="w-full" />;
 
-      case 'TextArea':
+      case 'Textarea':
         return <TextArea {...rest} />;
 
       case 'JSON': {
@@ -125,21 +126,28 @@ const SchemaFormFieldRenderer: React.FC<SchemaFormFieldRendererProps> = ({ field
           return <JSONDynamicForm properties={rest} />;
         } else {
           // 编辑器模式：使用 CodeEditor
+          const customOptions = rest['options'];
+          const extraEditorOptions: editor.IStandaloneEditorConstructionOptions =
+            typeof customOptions === 'object' && customOptions !== null && !Array.isArray(customOptions)
+              ? (customOptions as editor.IStandaloneEditorConstructionOptions)
+              : {};
           return (
             <CodeEditor
               language="json"
-              height={rest['height'] || '300px'}
-              theme={rest['theme'] || 'vs'}
+              height={(rest['height'] as string) || '300px'}
+              theme={(rest['theme'] as EditorTheme) || 'vs'}
               showLineNumbers={rest['showLineNumbers'] !== false}
               showMinimap={rest['showMinimap'] === true}
               value={value ? JSON.stringify(value, null, 2) : '{}'}
-              options={{
-                readOnly: rest['disabled'],
-                formatOnSave: rest['formatOnSave'] !== false,
-                validateOnChange: rest['validateOnChange'] !== false,
-                ...rest['options'],
-              }}
-              placeholder={rest['placeholder'] || '请输入JSON数据'}
+              options={
+                {
+                  readOnly: Boolean(rest['disabled']),
+                  formatOnSave: rest['formatOnSave'] !== false,
+                  validateOnChange: rest['validateOnChange'] !== false,
+                  ...extraEditorOptions,
+                } as editor.IStandaloneEditorConstructionOptions
+              }
+              placeholder={(rest['placeholder'] as string) || '请输入JSON数据'}
             />
           );
         }

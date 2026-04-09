@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { FormInstance } from 'antd';
 import { App } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import {
   type EndpointTypeConfig,
   type EndpointTypeSearchParams,
@@ -173,7 +173,9 @@ export function useEndpointConfigPage({ basicForm, schemaFieldsTableRef }: UseEn
           status: basicValues.status ?? true,
           supportRetry: basicValues.supportRetry ?? false,
         });
-        setPreviewVisible(true);
+        startTransition(() => {
+          setPreviewVisible(true);
+        });
         return;
       }
 
@@ -185,7 +187,9 @@ export function useEndpointConfigPage({ basicForm, schemaFieldsTableRef }: UseEn
         message.warning('当前端点类型暂无字段配置');
         return;
       }
-      setPreviewVisible(true);
+      startTransition(() => {
+        setPreviewVisible(true);
+      });
     } catch (error: unknown) {
       const firstError = getFormErrorFields(error).at(0);
       if (firstError) {

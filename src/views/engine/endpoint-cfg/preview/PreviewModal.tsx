@@ -5,6 +5,14 @@ import DragModal from '@/components/modal/DragModal';
 import type { EndpointTypeConfig } from '@/services/engine';
 import PreviewFormRenderer from './PreviewFormRenderer';
 
+function getFirstPreviewTabKey(supportMode: string[] | undefined): string {
+  const first = supportMode?.[0];
+  if (first !== undefined && first !== '') {
+    return first;
+  }
+  return 'default';
+}
+
 interface PreviewModalProps {
   /** 是否显示 */
   visible: boolean;
@@ -23,7 +31,7 @@ interface PreviewModalProps {
 const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClose }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState<string>('IN');
+  const [activeTab, setActiveTab] = useState<string>(() => getFirstPreviewTabKey(config?.supportMode));
   const [viewMode, setViewMode] = useState<'form' | 'json'>('form');
 
   /**
@@ -155,7 +163,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    */
   const handleModalClose = () => {
     form.resetFields();
-    setActiveTab('IN');
+    setActiveTab(getFirstPreviewTabKey(config?.supportMode));
     setViewMode('form');
     onClose();
   };
@@ -266,6 +274,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
                 onChange={setActiveTab}
                 items={tabItems}
                 size="large"
+                destroyOnHidden
                 tabBarStyle={{
                   marginBottom: 24,
                 }}
