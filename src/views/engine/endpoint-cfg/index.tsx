@@ -74,7 +74,6 @@ const EndpointConfig: React.FC = () => {
               flexDirection: 'column',
             },
           }}
-          loading={listLoading}
         >
           {/* 基础信息 */}
           <EndpointTypeForm form={basicForm} selectedType={selectedType} isEditing={isEditing} />
