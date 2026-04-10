@@ -67,15 +67,14 @@
   overflow-y: auto;
   border-right: 0;
   height: 100%;
-  overflow-y: auto;
   overflow-x: hidden;
 
   .ant-menu-inline .ant-menu-sub.ant-menu-inline {
     border-radius: var(--ant-border-radius);
   }
 
-  // 左侧菜单滚动条隐藏样式
-  // 隐藏滚动条但保持滚动功能
+  /* 左侧菜单滚动条隐藏样式 */
+  /* 隐藏滚动条但保持滚动功能 */
   &::-webkit-scrollbar {
     width: 0 !important;
     height: 0 !important;
@@ -89,14 +88,14 @@
     display: none !important;
   }
 
-  // Firefox 隐藏滚动条
+  /* Firefox 隐藏滚动条 */
   scrollbar-width: none !important;
 
-  // IE 隐藏滚动条
+  /* IE 隐藏滚动条 */
   -ms-overflow-style: none !important;
 }
 
-// 协调系统主题的logo卡片风格
+/* 协调系统主题的logo卡片风格 */
 .system-logo-card {
   height: 40px;
   margin: 8px 12px;
@@ -106,7 +105,7 @@
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
 
-  // 卡片内容
+  /* 卡片内容 */
   .logo-card-content {
     height: 100%;
     padding: 0 16px;
@@ -116,13 +115,13 @@
     z-index: 2;
   }
 
-  // logo容器
+  /* logo容器 */
   .logo-container {
     position: relative;
     z-index: 1;
   }
 
-  // logo背景
+  /* logo背景 */
   .logo-background {
     width: 40px;
     height: 40px;
@@ -131,15 +130,15 @@
     justify-content: center;
   }
 
-  // logo图片
+  /* logo图片 */
   .logo-image {
     border-radius: 8px;
     transition: all 0.3s ease;
   }
 
-  // 系统名称
+  /* 系统名称 */
   .system-name {
-    // padding-left: 16px;
+    /* padding-left: 16px; */
     white-space: nowrap;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     line-height: 1.5;
@@ -149,14 +148,14 @@
     z-index: 1;
     font-weight: 600;
     font-size: 28px;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-style: italic;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     margin-left: 12px;
   }
 }
 
-/* 仅图标形态的 logo 卡片 */
+/* 仅图标形态的 logo 卡片样式 */
 .system-logo-card-icon-only {
   margin: 8px 12px;
   height: 40px;
@@ -171,7 +170,7 @@
   }
 }
 
-/* 仅系统名（双列右侧列头） */
+/* 仅系统名（双列右侧列头）样式 */
 .system-logo-name-only {
   min-height: 40px;
   padding: 8px 12px 8px 16px;
@@ -188,13 +187,14 @@
     z-index: 1;
     font-weight: 600;
     font-size: 28px;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-style: italic;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     margin-left: 12px;
   }
 }
 
+/* 折叠状态下的样式 */
 .ant-layout-sider-collapsed {
   .system-logo-card {
     margin: 8px 4px;
