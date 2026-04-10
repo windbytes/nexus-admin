@@ -1,14 +1,13 @@
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { Col, Form, Input, type InputRef, Progress, Row } from 'antd';
 import { keys, values } from 'lodash-es';
 import type React from 'react';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import type { UserModel } from '@/services/system/user/type';
 import { strengthMeterOptions } from '../constants';
 import { useUserActions } from '../hooks/useUserAction';
-import styles from '../index.module.scss';
+import styles from '../index.module.css';
 
 interface UserPasswordModalProps {
   open: boolean;
@@ -25,6 +24,7 @@ const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, us
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const passwordRef = useRef<InputRef>(null);
+  const [strength, setStrength] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -35,15 +35,16 @@ const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, us
   // 监听密码改变
   const password = Form.useWatch('password', form);
 
-  /**
-   * 监听密码强度
-   * @param password 密码
-   */
-  const watchStrength = (password: string) => {
-    const analysisValue = zxcvbn(password);
-    // score得分只有0~4，且只有整数范围并没有小数
-    return (analysisValue.score + 1) * 20;
-  };
+  useEffect(() => {
+    if (!password) {
+      setStrength(0);
+      return;
+    }
+    import('@zxcvbn-ts/core').then(({ zxcvbn }) => {
+      // score得分只有0~4，且只有整数范围并没有小数
+      setStrength((zxcvbn(password).score + 1) * 20);
+    });
+  }, [password]);
 
   const handleOk = () => {
     // 调用表单验证
@@ -114,12 +115,7 @@ const UserPasswordModal: React.FC<UserPasswordModalProps> = ({ open, onClose, us
       </Form>
       {/* 显示密码强度 */}
       <div className={styles['process-steps']}>
-        <Progress
-          percent={password ? watchStrength(password) : 0}
-          steps={5}
-          strokeColor={values(strengthMeterOptions)}
-          showInfo={false}
-        />
+        <Progress percent={strength} steps={5} strokeColor={values(strengthMeterOptions)} showInfo={false} />
       </div>
       <Row justify="space-around" className={styles['process-steps']}>
         {keys(strengthMeterOptions).map((value: string) => (

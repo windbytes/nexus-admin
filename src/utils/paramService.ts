@@ -313,7 +313,7 @@ class ParamService {
 export const paramService = new ParamService();
 
 // 导出类和接口
-export { ParamService, type GetParamOptions, type ParamServiceConfig, type ParamCacheItem };
+export { type GetParamOptions, type ParamCacheItem, ParamService, type ParamServiceConfig };
 
 // 导出便捷方法
 export const getParam = (code: string, defaultValue: string = '', expireTime: number = 30 * 60 * 1000) =>

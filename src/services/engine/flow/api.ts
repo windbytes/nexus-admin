@@ -166,11 +166,7 @@ export const flowVersionService = {
    * @param pageSize 每页大小
    * @returns 分页结果（records + totalRow）
    */
-  async listVersions(
-    flowId: string,
-    pageNum: number = 1,
-    pageSize: number = 20
-  ): Promise<Page<FlowVersionDTO>> {
+  async listVersions(flowId: string, pageNum: number = 1, pageSize: number = 20): Promise<Page<FlowVersionDTO>> {
     const res = await HttpRequest.get<Page<FlowVersionDTO>>(
       {
         url: `${flowVersionBase(flowId)}/versions`,
@@ -212,10 +208,7 @@ export const flowVersionService = {
    * @returns 当前版本实体或 null
    */
   async getCurrent(flowId: string): Promise<FlowVersion | null> {
-    return HttpRequest.get<FlowVersion>(
-      { url: `${flowVersionBase(flowId)}/current` },
-      { successMessageMode: 'none' }
-    );
+    return HttpRequest.get<FlowVersion>({ url: `${flowVersionBase(flowId)}/current` }, { successMessageMode: 'none' });
   },
 
   /**

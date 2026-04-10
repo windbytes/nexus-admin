@@ -45,8 +45,7 @@ export const templateService = {
     pageNum: number;
     pageSize: number;
   }> {
-    const categoryId =
-      params.category && params.category !== RECOMMENDED_ID ? String(params.category) : undefined;
+    const categoryId = params.category && params.category !== RECOMMENDED_ID ? String(params.category) : undefined;
     const pageNum = params.pageNum ?? 1;
     const pageSize = params.pageSize ?? 20;
     const list = await appTemplateService.list({ categoryId, pageNum, pageSize });

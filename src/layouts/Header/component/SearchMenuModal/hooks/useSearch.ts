@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import type { Menus, SearchResultItem } from '../types';
 import type { RouteItem } from '@/types/route';
+import type { Menus, SearchResultItem } from '../types';
 
 // 计算搜索匹配度分数
 function calculateSearchScore(text: string, keyword: string): number {

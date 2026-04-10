@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { useKeyPress } from 'ahooks';
 import { ColorPicker, Form, Input, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useCallback, useEffect, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import DragModal from '@/components/modal/DragModal';
 import { appCategoryService } from '@/services/engine';
@@ -90,12 +90,17 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
     }
   }, [form, onConfirm]);
 
-  useKeyPress(['meta.enter', 'ctrl.enter'], (e) => {
-    if (open) {
-      e.preventDefault();
-      submit();
-    }
-  });
+  useHotkeys(
+    'mod+enter',
+    (e) => {
+      if (open) {
+        e.preventDefault();
+        submit();
+      }
+    },
+    { enableOnFormTags: true },
+    [open, submit]
+  );
 
   return (
     <DragModal
@@ -122,11 +127,7 @@ const EditAppModal: React.FC<EditAppModalProps> = ({ open, app, onConfirm, onCan
         <Form.Item name="icon" label={t('app.icon') ?? '图标'}>
           <Input placeholder="iconify 名称或 URL" />
         </Form.Item>
-        <Form.Item
-          name="iconBg"
-          label={t('app.iconBg') ?? '图标背景色'}
-          getValueFromEvent={colorPickerValueToHex}
-        >
+        <Form.Item name="iconBg" label={t('app.iconBg') ?? '图标背景色'} getValueFromEvent={colorPickerValueToHex}>
           <ColorPicker onClear={() => form.setFieldValue('iconBg', '')} />
         </Form.Item>
         <Form.Item name="status" label={t('app.statusLabel') ?? '状态'}>

@@ -1,8 +1,8 @@
+import { LoadingOutlined } from '@ant-design/icons';
 import { Layout, Spin } from 'antd';
 import { memo, type ReactNode, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useShallow } from 'zustand/shallow';
-import { BubbleLoading } from '@/components/icons';
 import KeepAlive from '@/components/KeepAlive';
 import { usePreferencesStore } from '@/stores/store';
 import { ErrorFallback } from './ErrorBoundary';
@@ -30,7 +30,7 @@ const Content = memo(({ children }: ContentProps) => {
   const loadingFallback = useMemo(
     () => (
       <div className="h-full flex items-center justify-center min-h-[400px]">
-        <Spin indicator={<BubbleLoading width={48} />} size="large" />
+        <Spin indicator={<LoadingOutlined width={48} />} size="large" />
       </div>
     ),
     []

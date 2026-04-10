@@ -3,7 +3,7 @@ import { Button, Divider, Space } from 'antd';
 import type { ToolbarProps } from '../types';
 import { ColumnSettingComponent } from './ColumnSetting';
 import { DensitySetting } from './DensitySetting';
-import './Toolbar.scss';
+import './Toolbar.css';
 
 /**
  * 表格工具栏组件

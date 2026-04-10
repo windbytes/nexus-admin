@@ -1,7 +1,7 @@
+import { FormOutlined, LinkOutlined, UploadOutlined } from '@ant-design/icons';
 import type React from 'react';
 import { memo } from 'react';
-import { FormOutlined, UploadOutlined, LinkOutlined } from '@ant-design/icons';
-import './InputTypeSelector.scss';
+import './InputTypeSelector.css';
 
 export type InputType = 'manual' | 'file' | 'url';
 

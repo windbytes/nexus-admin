@@ -1,9 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import type { Key } from 'react';
 import { App } from 'antd';
+import type { Key } from 'react';
 import { dictService } from '@/services/system/dict/dictApi';
-import type { DictModel, DictSaveFullRequest } from '@/services/system/dict/type.d';
-import type { DictSearchParams } from '@/services/system/dict/type.d';
+import type { DictModel, DictSaveFullRequest, DictSearchParams } from '@/services/system/dict/type.d';
 import type { DictSubmitPayload } from '../components/DictInfoModal';
 
 interface UseDictActionsProps {
@@ -105,11 +104,7 @@ export const useDictActions = ({ currentRow, onSuccess }: UseDictActionsProps) =
   };
 
   const exportMutation = useMutation({
-    mutationFn: (options: {
-      type: 'all' | 'selected';
-      selectedIds?: string[];
-      searchParams?: DictSearchParams;
-    }) => {
+    mutationFn: (options: { type: 'all' | 'selected'; selectedIds?: string[]; searchParams?: DictSearchParams }) => {
       return dictService.exportDict({
         type: options.type,
         selectedIds: options.type === 'selected' && options.selectedIds?.length ? options.selectedIds : undefined,
@@ -132,11 +127,7 @@ export const useDictActions = ({ currentRow, onSuccess }: UseDictActionsProps) =
     },
   });
 
-  const exportDict = (
-    type: 'all' | 'selected',
-    selectedIds?: Key[],
-    searchParams?: DictSearchParams
-  ) => {
+  const exportDict = (type: 'all' | 'selected', selectedIds?: Key[], searchParams?: DictSearchParams) => {
     exportMutation.mutate({
       type,
       ...(type === 'selected' && selectedIds?.length ? { selectedIds: selectedIds.map((k) => String(k)) } : {}),

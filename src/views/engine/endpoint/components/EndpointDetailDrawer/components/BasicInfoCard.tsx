@@ -1,7 +1,7 @@
 import { Card, Descriptions, Tag, Typography } from 'antd';
 import type React from 'react';
-import { ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
 import type { Endpoint } from '@/services/engine/endpoint/types';
+import { ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
 
 const { Text } = Typography;
 

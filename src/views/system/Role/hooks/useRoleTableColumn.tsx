@@ -1,7 +1,12 @@
-import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  ExclamationCircleFilled,
+  UserAddOutlined,
+} from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { RoleModel } from '@/services/system/role/type';
 import { useUserStore } from '@/stores/userStore';
@@ -38,7 +43,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignUser',
         label: '授权用户',
-        icon: <UserPlus className="text-sm! block" />,
+        icon: <UserAddOutlined className="text-sm! block" />,
         disabled: !canAssignUser,
         onClick: () => {
           if (!canAssignUser) {
@@ -102,7 +107,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'copy',
         label: '复制',
-        icon: <Copy16Regular className="text-sm! block text-(--ant-blue-4)" />,
+        icon: <CopyOutlined className="text-sm! block text-(--ant-blue-4)" />,
         onClick: () => {
           modal.warning({
             title: '功能暂未实现',
@@ -113,7 +118,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
+        icon: <DeleteOutlined className="text-sm! block text-(--ant-color-error)!" />,
         disabled: !canDeleteRole,
         onClick: () => {
           if (!canDeleteRole) {

@@ -1,7 +1,7 @@
+import { LoadingOutlined } from '@ant-design/icons';
 import { createRouter, type RegisteredRouter, RouterProvider } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
-import { BubbleLoading } from '@/components/icons';
 import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
 import { useMenuStore } from '@/stores/store';
 import { authenticatedRoute, baseRoutes, rootRoute } from './routes';
@@ -57,7 +57,7 @@ export function Router() {
   if (!routerInstance) {
     return (
       <div className="h-full flex items-center justify-center min-h-[400px]">
-        <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen />
+        <Spin indicator={<LoadingOutlined width={48} />} size="large" fullscreen />
       </div>
     );
   }

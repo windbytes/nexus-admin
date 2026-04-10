@@ -1,8 +1,8 @@
-import type React from 'react';
-import { memo, useState } from 'react';
-import { Upload, App } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
+import { App, Upload } from 'antd';
+import type React from 'react';
+import { memo, useState } from 'react';
 
 const { Dragger } = Upload;
 

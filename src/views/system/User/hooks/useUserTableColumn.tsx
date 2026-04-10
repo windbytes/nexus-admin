@@ -1,7 +1,14 @@
-import { DownOutlined, ExclamationCircleFilled, ManOutlined, WomanOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownOutlined,
+  ExclamationCircleFilled,
+  HistoryOutlined,
+  KeyOutlined,
+  ManOutlined,
+  WomanOutlined,
+} from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DeleteDismiss24Filled, History48Regular, PasswordReset48Regular } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { UserModel } from '@/services/system/user/type';
 import { useUserActions } from './useUserAction';
@@ -33,7 +40,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'updatePwd',
         label: '修改密码',
-        icon: <PasswordReset48Regular className="text-sm! block text-orange-300" />,
+        icon: <KeyOutlined className="text-sm! block text-orange-300" />,
         disabled: !canUpdatePassword,
         onClick: () => {
           if (!canUpdatePassword) {
@@ -65,7 +72,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'operation',
         label: '操作记录',
-        icon: <History48Regular className="text-sm! block" />,
+        icon: <HistoryOutlined className="text-sm! block" />,
         disabled: !canViewActionLog,
         onClick: () => {
           if (!canViewActionLog) {
@@ -81,7 +88,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
+        icon: <DeleteOutlined className="text-sm! block text-(--ant-color-error)!" />,
         disabled: !canDeleteUser,
         onClick: () => {
           if (!canDeleteUser) {

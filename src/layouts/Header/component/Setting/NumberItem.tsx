@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import './switchItem.scss';
+import './switchItem.css';
 import { InputNumber } from 'antd';
 import type { ReactNode } from 'react';
 import { useShallow } from 'zustand/shallow';

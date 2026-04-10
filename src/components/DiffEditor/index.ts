@@ -2,10 +2,10 @@ export { default as DiffEditor } from './DiffEditor';
 export type {
   DiffEditorProps,
   DiffEditorRef,
-  DiffStatistics,
-  SupportedLanguage,
-  EditorTheme,
   DiffRenderMode,
+  DiffStatistics,
+  EditorTheme,
+  SupportedLanguage,
 } from './types';
 export {
   LANGUAGE_CONFIG_MAP,

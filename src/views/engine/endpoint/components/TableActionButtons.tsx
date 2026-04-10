@@ -1,15 +1,16 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownOutlined,
+  ExportOutlined,
+  FileExcelOutlined,
+  FilePdfOutlined,
+  FileTextOutlined,
+  ImportOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { App, Badge, Button, Dropdown, type MenuProps, Space } from 'antd';
 import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  CsvOutline,
-  DeleteDismiss24Filled,
-  FileTypeExcel,
-  FolderExport,
-  FolderImport,
-  PdfIcon,
-} from '@/components/icons';
 import type { ModalType } from '../hooks/useEndpointModals';
 import { useEndpointPermissions } from '../hooks/useEndpointPermissions';
 
@@ -37,7 +38,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'csv',
       label: '导出为CSV',
-      icon: <CsvOutline className="text-sm! block! text-orange-400" />,
+      icon: <FileTextOutlined className="text-sm! block! text-orange-400" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -48,7 +49,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'excel',
       label: '导出为Excel',
-      icon: <FileTypeExcel className="text-sm! block!" />,
+      icon: <FileExcelOutlined className="text-sm! block!" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -59,7 +60,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'pdf',
       label: '导出为PDF',
-      icon: <PdfIcon className="text-sm! block" />,
+      icon: <FilePdfOutlined className="text-sm! block" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -80,7 +81,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         )}
         {canImportEndpoint && (
           <Button
-            icon={<FolderImport className="block!" />}
+            icon={<ImportOutlined className="block!" />}
             onClick={() => {
               message.info('导入功能开发中...');
             }}
@@ -91,7 +92,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {canExportEndpoint && (
           <Space.Compact>
-            <Button disabled={selectedRows.length === 0} icon={<FolderExport className="block!" />}>
+            <Button disabled={selectedRows.length === 0} icon={<ExportOutlined className="block!" />}>
               {t('common.operation.export')}
               {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
             </Button>
@@ -105,7 +106,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
           <Button
             type="default"
             danger
-            icon={<DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)!" />}
+            icon={<DeleteOutlined className="text-sm! block! text-(--ant-color-error)!" />}
             disabled={selectedRows.length === 0}
             onClick={handleBatchDelete}
           >

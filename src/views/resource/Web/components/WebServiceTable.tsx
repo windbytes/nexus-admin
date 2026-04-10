@@ -5,7 +5,7 @@ import type React from 'react';
 import { memo } from 'react';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { WebService } from '@/services/resource/webservice/webServiceApi';
-import '@/styles/table.full.scss';
+import '@/styles/table.full.css';
 
 interface WebServiceTableProps {
   data: WebService[];

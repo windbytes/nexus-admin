@@ -1,7 +1,7 @@
 import { Badge, theme } from 'antd';
 import { getIcon } from '@/utils/optimized-icons';
-import HighlightText from './HighlightText';
 import type { SearchResultItem } from '../types';
+import HighlightText from './HighlightText';
 
 interface Props {
   items: SearchResultItem[];

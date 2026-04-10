@@ -1,16 +1,16 @@
+import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 import type {
-  WorkflowVersion,
-  WorkflowLock,
-  WorkflowBranch,
-  WorkflowVersionDelta,
-  VersionListParams,
   CreateVersionParams,
   PublishVersionParams,
-  VersionCompareParams,
   RollbackVersionParams,
+  VersionCompareParams,
+  VersionListParams,
+  WorkflowBranch,
+  WorkflowLock,
+  WorkflowVersion,
+  WorkflowVersionDelta,
 } from './model';
-import type { PageResult } from '@/types/global';
 
 /**
  * 版本管理相关接口地址

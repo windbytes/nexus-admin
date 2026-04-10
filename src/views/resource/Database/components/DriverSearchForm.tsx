@@ -1,8 +1,8 @@
-import type { DriverSearchParams } from '@/services/resource/database/driverApi';
 import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import type { DriverSearchParams } from '@/services/resource/database/driverApi';
 
 interface DriverSearchFormProps {
   onSearch: (values: Omit<DriverSearchParams, 'pageNum' | 'pageSize'>) => void;

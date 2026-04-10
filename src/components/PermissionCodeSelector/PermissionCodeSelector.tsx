@@ -4,7 +4,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { permissionService } from '@/services/system/permission/permissionApi';
 import type { PermissionModel } from '@/services/system/permission/type';
-import './PermissionCodeSelector.scss';
+import './PermissionCodeSelector.css';
 import type { PermissionCodeSelectorProps } from './types';
 
 const DEFAULT_PAGE_SIZE = 10;

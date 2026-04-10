@@ -38,8 +38,7 @@ const translation = {
   saveAsTemplate: '存为模板',
   switch: '切换为集成项目',
   deleteAppConfirmTitle: '确认删除应用？',
-  deleteAppConfirmContent:
-    '删除应用后，用户将无法访问该应用，所有配置和日志均将一并被永久删除。',
+  deleteAppConfirmContent: '删除应用后，用户将无法访问该应用，所有配置和日志均将一并被永久删除。',
   deleteApp: {
     success: '删除成功',
     error: {

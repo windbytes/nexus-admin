@@ -3,12 +3,13 @@
  * 根据选中节点类型渲染对应插件的 ConfigPanel
  * 使用 getContainer 挂载到主组件内，mask 控制遮罩，resizable 支持拖拽调整宽度
  */
+
+import { useQueryClient } from '@tanstack/react-query';
 import { Drawer, Empty, Typography } from 'antd';
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import type { MarketListingVO } from '@/services/engine/plugin/types';
 import { getNodePlugin } from '../plugin/registry';
 import { useWorkflowStore } from '../store/workflowStore';
-import type { MarketListingVO } from '@/services/engine/plugin/types';
 import { SchemaDrivenConfigPanel } from './SchemaDrivenConfigPanel';
 
 const { Text } = Typography;
@@ -62,7 +63,11 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ open, onClose, wid
       {!node && <Empty description={<Text type="secondary">选中一个节点以配置属性</Text>} />}
       {node && !plugin && <Empty description={<Text type="secondary">未找到该节点类型的配置</Text>} />}
       {node && plugin && configSchema && (
-        <SchemaDrivenConfigPanel schema={configSchema} value={(node.data ?? {}) as Record<string, unknown>} onChange={handleChange} />
+        <SchemaDrivenConfigPanel
+          schema={configSchema}
+          value={(node.data ?? {}) as Record<string, unknown>}
+          onChange={handleChange}
+        />
       )}
       {node && plugin && !configSchema && (
         <plugin.ConfigPanel

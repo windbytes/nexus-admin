@@ -2,7 +2,7 @@ import { Input, Table } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import cn from '@/utils/classnames';
-import styles from './TableSelect.module.scss';
+import styles from './TableSelect.module.css';
 import type { TableSelectProps, TableSelectState } from './types';
 
 /**

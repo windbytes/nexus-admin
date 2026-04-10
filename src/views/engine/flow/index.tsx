@@ -1,10 +1,11 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { pluginService } from '@/services/engine/plugin/api';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
@@ -16,8 +17,7 @@ import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuer
 import { registerBuiltinNodePlugins } from './plugin/nodes';
 import { useWorkflowStore } from './store/workflowStore';
 import { buildNodeTypes } from './utils/nodeTypes';
-import { pluginService } from '@/services/engine/plugin/api';
-import './workflow.scss';
+import './workflow.css';
 
 // 模块加载时即注册内置节点插件，保证 useMemo(buildNodeTypes) 首次执行时能拿到所有插件
 registerBuiltinNodePlugins();

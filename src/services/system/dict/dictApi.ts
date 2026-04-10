@@ -83,7 +83,11 @@ export interface IDictService {
   /** 批量逻辑删除字典定义 */
   batchDeleteDict(ids: string[]): Promise<boolean>;
   /** 导出字典（CSV），返回 Blob */
-  exportDict(options: { type: 'all' | 'selected'; selectedIds?: string[]; searchParams?: DictSearchParams }): Promise<Blob>;
+  exportDict(options: {
+    type: 'all' | 'selected';
+    selectedIds?: string[];
+    searchParams?: DictSearchParams;
+  }): Promise<Blob>;
   /** 导入字典（CSV 文件），返回成功条数 */
   importDict(file: File): Promise<number>;
   /** 按字典 id 查询数据源配置列表 */

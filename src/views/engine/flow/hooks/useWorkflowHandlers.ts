@@ -28,7 +28,7 @@ function toFlowDraftPayload(doc: WorkflowDocument | null): FlowDraftPayload {
     description: (node.data as { description?: string })?.description,
     // 让后端能通过 `t_engine_flow_node.node_config.pluginId` 反推出节点类型
     config: {
-      ...(node.data as Record<string, unknown> ?? {}),
+      ...((node.data as Record<string, unknown>) ?? {}),
       pluginId: node.type ?? (node.data as { pluginId?: string })?.pluginId ?? '',
     },
     uiConfig: { position: node.position },

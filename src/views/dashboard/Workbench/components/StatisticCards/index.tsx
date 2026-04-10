@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, Col, Row } from 'antd';
 import React, { memo, useMemo } from 'react';
 import type { StatisticData } from '../../mockData';
-import styles from './StatisticCards.module.scss';
+import styles from './StatisticCards.module.css';
 
 // 模拟获取统计数据的API
 const fetchStatisticsData = async (): Promise<StatisticData[]> => {

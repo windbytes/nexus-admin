@@ -1,9 +1,9 @@
+import { RestOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { Button, type InputRef, Space } from 'antd';
 import { isEqual } from 'lodash-es';
 import type { Key } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Recycle } from '@/components/icons';
 import DragModal from '@/components/modal/DragModal';
 import ProTable from '@/components/ProTable';
 import type { UserModel } from '@/services/system/user/type';
@@ -128,7 +128,7 @@ const RecycleModal: React.FC<RecycleModalProps> = ({ open, onCancel, onOk }) => 
       onCancel={onCancel}
       title={
         <div className="flex items-center gap-3">
-          <Recycle className="block! text-green-500!" />
+          <RestOutlined className="block! text-green-500!" />
           回收站
         </div>
       }

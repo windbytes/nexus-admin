@@ -1,7 +1,7 @@
-import echarts from '@/config/echartsConfig';
 import { Card, Col, Empty, Row, theme } from 'antd';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
+import echarts from '@/config/echartsConfig';
 
 interface EndpointChartsProps {
   /** 按类型统计 */

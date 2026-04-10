@@ -1,10 +1,10 @@
 import { EditOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { useDebounceFn } from 'ahooks';
 import { Tag as AntdTag, App, Input } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import useDebounceFn from '@/hooks/useDebounceFn';
 import { tagService } from '@/services/engine';
 import classNames from '@/utils/classnames';
 import type { Tag } from './constant';

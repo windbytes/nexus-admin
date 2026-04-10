@@ -4,7 +4,6 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["unplugin-icons/types/react"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */

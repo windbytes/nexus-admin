@@ -18,7 +18,7 @@ import { type TabItem, useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
 import { getIcon } from '@/utils/optimized-icons';
 import { findMenuByPath } from '@/utils/utils';
-import './tabBar.scss';
+import './tabBar.css';
 
 /**
  * 优化后的 ActivityTabBar

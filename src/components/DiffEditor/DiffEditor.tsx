@@ -1,8 +1,8 @@
-import { forwardRef, useImperativeHandle, useRef, useCallback, useEffect, useState } from 'react';
-import type { editor } from 'monaco-editor';
 import { DiffEditor } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { DiffEditorProps, DiffEditorRef, DiffStatistics } from './types';
-import './index.scss';
+import './index.css';
 
 /**
  * 差异编辑器组件

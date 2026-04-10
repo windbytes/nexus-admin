@@ -1,9 +1,9 @@
-import { frameworkService } from '@/services/framework/frameworkApi';
-import { driverService } from '@/services/resource/database/driverApi';
 import { InboxOutlined } from '@ant-design/icons';
 import { App, Progress, Upload, type UploadFile, type UploadProps } from 'antd';
-import CryptoJS from 'crypto-js';
-import { memo, useCallback, useImperativeHandle, useRef, useState, type Ref } from 'react';
+import { memo, type Ref, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import SparkMD5 from 'spark-md5';
+import { frameworkService } from '@/services/framework/frameworkApi';
+import { driverService } from '@/services/resource/database/driverApi';
 
 const { Dragger } = Upload;
 
@@ -52,8 +52,7 @@ const ChunkedUpload = memo(
         const reader = new FileReader();
         reader.onload = (e) => {
           const arrayBuffer = e.target?.result as ArrayBuffer;
-          const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
-          const hash = CryptoJS.MD5(wordArray).toString();
+          const hash = SparkMD5.ArrayBuffer.hash(arrayBuffer);
           resolve(hash);
         };
         reader.onerror = reject;

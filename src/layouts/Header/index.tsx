@@ -15,8 +15,8 @@ import LanguageSwitch from './component/LanguageSwitch';
 import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
 import UserDropdown from './component/UserDropdown';
-import '@/layouts/LeftMenu/leftMenu.scss';
-import './header.scss';
+import '@/layouts/LeftMenu/leftMenu.css';
+import './header.css';
 import useGlobalUIStore from '@/stores/globalUIStore';
 
 const Setting = lazy(() => import('./component/Setting'));

@@ -1,7 +1,7 @@
 import { Switch } from 'antd';
 import type { ReactNode } from 'react';
 import { type Category, getPreferenceValue, type SettingKey, usePreferencesStore } from '@/stores/store';
-import './switchItem.scss';
+import './switchItem.css';
 import { useShallow } from 'zustand/shallow';
 import classNames from '@/utils/classnames';
 

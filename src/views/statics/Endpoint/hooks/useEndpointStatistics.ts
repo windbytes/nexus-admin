@@ -1,5 +1,5 @@
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 import { useMemo } from 'react';
+import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
 
 interface StatisticsData {
   total: number;

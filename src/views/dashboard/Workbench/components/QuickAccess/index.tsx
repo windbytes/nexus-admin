@@ -9,7 +9,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import type { QuickAccessItem } from '../../mockData';
-import styles from './QuickAccess.module.scss';
+import styles from './QuickAccess.module.css';
 
 // 定义每个功能的主题色配置
 const getQuickAccessConfig = (index: number) => {

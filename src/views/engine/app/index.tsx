@@ -1,6 +1,5 @@
-import { AppstoreOutlined, DownOutlined, SearchOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DownOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useDebounceFn } from 'ahooks';
 import {
   App as AntdApp,
   Button,
@@ -20,14 +19,14 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TagManagementModal from '@/components/base/tag-management';
 import TagFilter from '@/components/base/tag-management/TagFilter.tsx';
-import { BubbleLoading } from '@/components/icons';
+import useDebounceFn from '@/hooks/useDebounceFn';
 import { usePermission } from '@/hooks/usePermission';
 import type { AppQuery, EngineApp } from '@/services/engine/app/types';
 import { useTagStore } from '@/stores/useTagStore.ts';
 import AppCard from './AppCard';
 import { AppCardModalProvider, useAppCardModals } from './hooks/useAppCardModals';
 import CreateAppCard from './NewAppCard';
-import './apps.scss';
+import './apps.css';
 import { appCategoryService, appService } from '@/services/engine';
 import { getIcon } from '@/utils/optimized-icons';
 
@@ -308,7 +307,7 @@ const Apps: React.FC = () => {
         <div className="flex-1 min-h-[320px] overflow-x-hidden overflow-y-auto grid content-start grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 2k:grid-cols-6 gap-4 pt-2 grow relative">
           {isFetching ? (
             <div className="col-span-full flex items-center justify-center py-12">
-              <Spin indicator={<BubbleLoading width={48} />} />
+              <Spin indicator={<LoadingOutlined width={48} />} />
             </div>
           ) : (
             <>

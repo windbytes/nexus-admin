@@ -9,7 +9,7 @@ import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { RouteItem } from '@/types/route';
 import { getIcon } from '@/utils/optimized-icons';
 import { getMenuKey, type MenuCaches, matchPathname } from '@/utils/utils';
-import '../header.scss';
+import '../header.css';
 
 type BreadcrumbItem = NonNullable<BreadcrumbProps['items']>[number];
 

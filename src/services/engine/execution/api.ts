@@ -4,13 +4,7 @@
  */
 import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
-import type {
-  FlowExecution,
-  NodeExecution,
-  DeadLetter,
-  ExecutionPageParams,
-  DeadLetterPageParams,
-} from './types';
+import type { DeadLetter, DeadLetterPageParams, ExecutionPageParams, FlowExecution, NodeExecution } from './types';
 
 const ExecutionsApi = {
   list: '/engine/executions',
@@ -39,11 +33,7 @@ export const executionService = {
     );
   },
 
-  async listNodeExecutions(
-    executionId: string,
-    from: string,
-    to: string
-  ): Promise<NodeExecution[]> {
+  async listNodeExecutions(executionId: string, from: string, to: string): Promise<NodeExecution[]> {
     const res = await HttpRequest.get<NodeExecution[]>(
       { url: ExecutionsApi.nodes(executionId), params: { from, to } },
       { successMessageMode: 'none' }

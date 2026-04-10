@@ -1,5 +1,5 @@
-import { useSize } from 'ahooks';
 import { useRef } from 'react';
+import useSize from './useSize';
 
 /**
  * 计算表格滚动配置项的hooks

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { CodeEditor } from './index';
 
 // 简单的测试组件

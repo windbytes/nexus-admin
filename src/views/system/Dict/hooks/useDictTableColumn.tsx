@@ -1,7 +1,6 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
+import { DeleteOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { App, Button, Space, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DeleteDismiss24Filled } from '@/components/icons';
 import type { DictModel } from '@/services/system/dict/type.d';
 import { DICT_TYPE_OPTIONS } from '../constants';
 import { useDictActions } from './useDictAction';
@@ -85,7 +84,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
             size="small"
             danger
             disabled={!canDelete}
-            icon={<DeleteDismiss24Filled className="text-sm! align-middle" />}
+            icon={<DeleteOutlined className="text-sm! align-middle" />}
             onClick={() => {
               if (!canDelete) {
                 return;

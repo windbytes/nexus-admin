@@ -1,9 +1,8 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-
-import webSocketClient from '@/utils/webscoketClient';
 import DragModal from '@/components/modal/DragModal';
-
+import webSocketClient from '@/utils/webscoketClient';
+import './console.module.css';
 /**
  * 弹窗监控台
  * @returns

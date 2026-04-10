@@ -1,20 +1,20 @@
-import React from 'react';
 import {
-  FileTextOutlined,
-  PlayCircleOutlined,
-  ExclamationCircleOutlined,
-  RiseOutlined,
-  PlusOutlined,
-  BookOutlined,
-  MonitorOutlined,
-  SettingOutlined,
-  FileSearchOutlined,
   BellOutlined,
+  BookOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  WarningOutlined,
+  ExclamationCircleOutlined,
+  FileSearchOutlined,
+  FileTextOutlined,
   InfoCircleOutlined,
+  MonitorOutlined,
+  PlayCircleOutlined,
+  PlusOutlined,
+  RiseOutlined,
+  SettingOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
+import React from 'react';
 
 export interface StatisticData {
   title: string;

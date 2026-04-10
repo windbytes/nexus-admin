@@ -1,9 +1,9 @@
+import { LoadingOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Layout, Menu, type MenuProps, Spin, theme } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-import { BubbleLoading } from '@/components/icons';
 import CollapseSwitch from '@/layouts/Header/component/CollapseSwitch';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { searchRoute } from '@/utils/utils';
@@ -139,7 +139,7 @@ const DoubleColumnMenu = () => {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Spin indicator={<BubbleLoading width={24} />} spinning />
+        <Spin indicator={<LoadingOutlined width={24} />} spinning />
       </div>
     );
   }

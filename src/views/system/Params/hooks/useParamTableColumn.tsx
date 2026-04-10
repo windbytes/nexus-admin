@@ -119,21 +119,10 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       fixed: 'end',
       render: (_: any, record: SysParam) => (
         <>
-          <Button
-            size="small"
-            type="link"
-            disabled={!canEdit}
-            onClick={() => onEdit(record)}
-          >
+          <Button size="small" type="link" disabled={!canEdit} onClick={() => onEdit(record)}>
             {t('common.operation.edit')}
           </Button>
-          <Button
-            size="small"
-            type="link"
-            danger
-            disabled={!canDelete}
-            onClick={() => onDelete(record)}
-          >
+          <Button size="small" type="link" danger disabled={!canDelete} onClick={() => onDelete(record)}>
             {t('common.operation.delete')}
           </Button>
         </>

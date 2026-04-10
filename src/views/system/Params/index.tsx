@@ -12,7 +12,7 @@ import { PAGINATION_CONFIG } from './config';
 import { useParamActions } from './hooks/useParamActions';
 import { useParamModals } from './hooks/useParamModals';
 import type { ParamSearchParams } from './types';
-import './styles/params.module.scss';
+import './styles/params.module.css';
 import { useParamTableColumns } from './hooks/useParamTableColumn';
 
 /**

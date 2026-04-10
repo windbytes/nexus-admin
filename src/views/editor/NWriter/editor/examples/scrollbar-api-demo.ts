@@ -168,21 +168,21 @@ checkScrollChange();
 
 /**
  * 未来可以在 Orion 中添加以下公共 API：
- * 
+ *
  * 1. 暴露 scrollbar 的 getter
  *    get scrollbar(): Scrollbar {
  *      return this._scrollbar;
  *    }
- * 
+ *
  * 2. 添加滚动事件回调
  *    onScroll(callback: (scrollTop: number, scrollLeft: number) => void): void
- * 
+ *
  * 3. 添加便捷方法
  *    scrollTo(scrollTop: number, scrollLeft?: number): void
  *    scrollBy(deltaY: number, deltaX?: number): void
  *    scrollToTop(): void
  *    scrollToBottom(): void
- * 
+ *
  * 4. 获取滚动信息
  *    getScrollInfo(): {
  *      scrollTop: number;
@@ -195,13 +195,13 @@ checkScrollChange();
  */
 
 export {
-  getCurrentScroll,
-  setScroll,
-  getScrollRange,
   checkScrollbars,
   getAvailableArea,
-  scrollToTop,
+  getCurrentScroll,
+  getScrollRange,
+  scrollBy,
   scrollToBottom,
   scrollToPosition,
-  scrollBy,
+  scrollToTop,
+  setScroll,
 };

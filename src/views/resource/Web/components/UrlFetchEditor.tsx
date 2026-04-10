@@ -1,9 +1,9 @@
-import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
 import { LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { App, Button, Form, Input, Space } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { webServiceApi } from '@/services/resource/webservice/webServiceApi';
 
 interface UrlFetchEditorProps {
   disabled: boolean;

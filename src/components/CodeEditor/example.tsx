@@ -1,6 +1,7 @@
-import React, { useRef, useState, useId } from 'react';
-import { Button, Select, Switch, Space, Card, Row, Col, InputNumber, Input } from 'antd';
-import type { CodeEditorRef, SupportedLanguage, EditorTheme } from './index';
+import { Button, Card, Col, Input, InputNumber, Row, Select, Space, Switch } from 'antd';
+import type React from 'react';
+import { useId, useRef, useState } from 'react';
+import type { CodeEditorRef, EditorTheme, SupportedLanguage } from './index';
 import CodeEditor from './index';
 
 const { Option } = Select;
@@ -213,7 +214,7 @@ done`,
   };
 
   const handleGoToLine = () => {
-    const lineNumber = parseInt(prompt('请输入行号:') || '1');
+    const lineNumber = Number.parseInt(prompt('请输入行号:') || '1');
     if (!isNaN(lineNumber)) {
       editorRef.current?.goToLine(lineNumber);
     }

@@ -17,10 +17,7 @@ const App: React.FC = () => {
       title="404"
       subTitle="抱歉，您访问的页面不存在。（可能正在开发中，敬请期待）"
       extra={
-        <Button
-          type="primary"
-          onClick={() => navigate({ to: homePath || fallbackHome })}
-        >
+        <Button type="primary" onClick={() => navigate({ to: homePath || fallbackHome })}>
           回到首页
         </Button>
       }

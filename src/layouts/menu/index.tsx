@@ -1,10 +1,9 @@
-import { EllipsisOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
-import { BubbleLoading } from '@/components/icons';
 import { buildMenuItems, type MenuItem, resolveMenuSelection } from '@/layouts/LeftMenu/component/menu-utils';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { searchRoute } from '@/utils/utils';
@@ -91,7 +90,7 @@ const LayoutMenu: React.FC<LayoutMenuProps> = ({ className, mode = 'horizontal',
   if (loading) {
     return (
       <div className={`flex items-center justify-center ${className ?? ''}`}>
-        <Spin indicator={<BubbleLoading width={24} />} spinning />
+        <Spin indicator={<LoadingOutlined width={24} />} spinning />
       </div>
     );
   }

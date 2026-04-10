@@ -84,8 +84,8 @@ export class OrionEditor {
   }
 }
 
+export { Scrollbar } from './controls/Scrollbar';
 // 导出核心类型供外部使用
 export { DirtyManager } from './core/DirtyManager';
-export { Rect } from './core/Rect';
-export { Scrollbar } from './controls/Scrollbar';
 export type { Orion } from './core/Orion';
+export { Rect } from './core/Rect';

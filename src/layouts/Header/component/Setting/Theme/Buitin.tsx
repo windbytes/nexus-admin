@@ -1,12 +1,12 @@
+import { UserAddOutlined } from '@ant-design/icons';
 import { ColorPicker } from 'antd';
 import type { Color } from 'antd/es/color-picker';
-import { UserAddOutlined } from '@ant-design/icons';
 import clsx from 'clsx';
 import { BUILTIN_THEME_PRESETS } from '@/enums/constants';
-import './theme.scss';
-import { usePreferencesStore } from '@/stores/store';
-import { useShallow } from 'zustand/shallow';
+import './theme.css';
 import { useCallback } from 'react';
+import { useShallow } from 'zustand/shallow';
+import { usePreferencesStore } from '@/stores/store';
 
 /**
  * 内置主题

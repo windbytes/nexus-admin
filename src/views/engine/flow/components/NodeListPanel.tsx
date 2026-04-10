@@ -4,14 +4,14 @@
  * 用于「添加节点」与「更改节点」的 submenu 内容
  */
 import { SearchOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
 import { Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { pluginService } from '@/services/engine/plugin/api';
+import type { MarketListingVO } from '@/services/engine/plugin/types';
 import { CATEGORY_LABELS, CATEGORY_ORDER } from '../constants';
 import { getNodePlugin } from '../plugin/registry';
 import type { WorkflowNodePlugin } from '../plugin/types';
-import { pluginService } from '@/services/engine/plugin/api';
-import type { MarketListingVO } from '@/services/engine/plugin/types';
 
 const { Text } = Typography;
 
@@ -42,12 +42,15 @@ function NodeItem({ plugin, onAdd }: { plugin: WorkflowNodePlugin; onAdd: () => 
       }}
       className="workflow-node-list-item"
     >
-      {typeof plugin.meta.icon === 'string' && (plugin.meta.icon.startsWith('http') || plugin.meta.icon.startsWith('/')) ? (
+      {typeof plugin.meta.icon === 'string' &&
+      (plugin.meta.icon.startsWith('http') || plugin.meta.icon.startsWith('/')) ? (
         <img src={plugin.meta.icon} alt={plugin.meta.name} style={{ width: 24, height: 24, objectFit: 'contain' }} />
       ) : typeof plugin.meta.icon === 'string' ? (
         <span style={{ fontSize: 12, width: 24, textAlign: 'center' }}>{plugin.meta.name.slice(0, 1)}</span>
       ) : (
-        <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{plugin.meta.icon}</span>
+        <span style={{ width: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {plugin.meta.icon}
+        </span>
       )}
       <Text>{plugin.meta.name}</Text>
     </button>
@@ -94,7 +97,9 @@ export const NodeListPanel: React.FC<NodeListPanelProps> = ({ onAddNode }) => {
         return null;
       }
       const c = category.toUpperCase();
-      return c === 'TRIGGER' || c === 'PROCESSOR' || c === 'CONNECTOR' || c === 'CONTROL' ? (c as keyof typeof empty) : null;
+      return c === 'TRIGGER' || c === 'PROCESSOR' || c === 'CONNECTOR' || c === 'CONTROL'
+        ? (c as keyof typeof empty)
+        : null;
     };
 
     return listings.reduce((acc, listing: MarketListingVO) => {

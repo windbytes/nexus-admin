@@ -94,4 +94,4 @@ const usePreferencesStore = create<PreferencesStore>()(
   )
 );
 
-export { useMenuStore, usePreferencesStore, getPreferenceValue };
+export { getPreferenceValue, useMenuStore, usePreferencesStore };

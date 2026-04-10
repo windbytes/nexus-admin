@@ -1,11 +1,11 @@
 import { CheckOutlined, DownOutlined, SearchOutlined, TagOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { useDebounceFn } from 'ahooks';
 import { Button, Dropdown, Input, Space } from 'antd';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Tag } from '@/components/base/tag-management/constant';
+import useDebounceFn from '@/hooks/useDebounceFn';
 import { tagService } from '@/services/engine';
 
 type TagFilterProps = {

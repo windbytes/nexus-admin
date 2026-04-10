@@ -1,6 +1,6 @@
 import { THEME_PRESET } from '@/enums/constants';
 import { usePreferencesStore } from '@/stores/store';
-import './theme.scss';
+import './theme.css';
 import clsx from 'clsx';
 import { useShallow } from 'zustand/shallow';
 import SwitchItem from '../SwitchItem';

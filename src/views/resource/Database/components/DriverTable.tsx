@@ -4,7 +4,7 @@ import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { DatabaseDriver } from '@/services/resource/database/driverApi';
-import '@/styles/table.full.scss';
+import '@/styles/table.full.css';
 interface DriverTableProps {
   data: DatabaseDriver[];
   loading: boolean;

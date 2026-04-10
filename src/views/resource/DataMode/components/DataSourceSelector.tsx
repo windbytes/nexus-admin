@@ -1,7 +1,7 @@
+import { CloudUploadOutlined, DatabaseOutlined, FileTextOutlined } from '@ant-design/icons';
 import type React from 'react';
 import { memo } from 'react';
-import { DatabaseOutlined, FileTextOutlined, CloudUploadOutlined } from '@ant-design/icons';
-import './DataSourceSelector.scss';
+import './DataSourceSelector.css';
 
 export type DataSourceType = 'database' | 'json' | 'file';
 

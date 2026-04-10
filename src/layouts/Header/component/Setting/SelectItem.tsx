@@ -1,6 +1,6 @@
 import { Select } from 'antd';
 import type { BasicOptions } from '@/types/global';
-import './switchItem.scss';
+import './switchItem.css';
 import { useShallow } from 'zustand/shallow';
 import { changeLanguage } from '@/locales/i18next-config';
 import { type Category, getPreferenceValue, type SettingKey, usePreferencesStore } from '@/stores/store';

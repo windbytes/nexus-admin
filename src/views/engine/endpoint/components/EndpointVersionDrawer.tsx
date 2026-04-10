@@ -3,7 +3,7 @@ import { Button, Drawer, Empty, Modal, message, Space, Spin, Tag, Typography } f
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import type { Endpoint } from '@/services/engine/endpoint/types';
-import styles from './EndpointVersionDrawer.module.scss';
+import styles from './EndpointVersionDrawer.module.css';
 
 const { Text, Paragraph } = Typography;
 

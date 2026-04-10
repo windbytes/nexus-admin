@@ -11,7 +11,7 @@ import type { EngineApp } from '@/services/engine/app/types';
 import clsx from '@/utils/classnames';
 import AppCardOperations from './AppCardOperations';
 import { useAppCardModalActions } from './hooks/useAppCardModals';
-import './apps.scss';
+import './apps.css';
 import { getIcon } from '@/utils/optimized-icons';
 
 /**

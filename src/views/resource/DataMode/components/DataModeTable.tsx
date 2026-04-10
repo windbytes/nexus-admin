@@ -1,4 +1,3 @@
-import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import {
   CloudUploadOutlined,
   DatabaseOutlined,
@@ -12,6 +11,7 @@ import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 
 interface DataModeTableProps {
   data: JsonDataMode[];

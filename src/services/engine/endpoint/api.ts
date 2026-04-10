@@ -118,10 +118,7 @@ export const endpointService = {
    * @param config 配置对象
    * @returns 校验结果（valid、errors）
    */
-  async validateConfig(
-    endpointType: string,
-    config: Record<string, unknown>
-  ): Promise<EndpointValidateResult> {
+  async validateConfig(endpointType: string, config: Record<string, unknown>): Promise<EndpointValidateResult> {
     return HttpRequest.post<EndpointValidateResult>({
       url: EndpointsApi.validate,
       data: { endpointType, config },
@@ -215,10 +212,7 @@ export const endpointConfigService = {
    * @param id 配置 ID
    */
   async getById(id: string): Promise<EndpointTypeConfig | null> {
-    return HttpRequest.get<EndpointTypeConfig>(
-      { url: EndpointConfigsApi.getById(id) },
-      { successMessageMode: 'none' }
-    );
+    return HttpRequest.get<EndpointTypeConfig>({ url: EndpointConfigsApi.getById(id) }, { successMessageMode: 'none' });
   },
 
   /**

@@ -10,7 +10,7 @@ import SearchResults from './components/SearchResults';
 import Footer from './footer';
 import { useSearch } from './hooks/useSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
-import './searchMenuModal.scss';
+import './searchMenuModal.css';
 import { useShallow } from 'zustand/shallow';
 import useGlobalUIStore from '@/stores/globalUIStore';
 import classNames from '@/utils/classnames';

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
-import { LanguagesSupported } from './language';
 import { initReactI18next } from 'react-i18next';
 import { usePreferencesStore } from '@/stores/store'; // 假设存在一个获取偏好设置的函数
+import { LanguagesSupported } from './language';
 
 /**
  * 加载语言资源

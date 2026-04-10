@@ -2,7 +2,7 @@ import type { OnChange, OnMount, OnValidate } from '@monaco-editor/react';
 import { Editor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import './index.scss';
+import './index.css';
 import type { CodeEditorProps, CodeEditorRef } from './types';
 
 /**

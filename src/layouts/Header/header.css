@@ -1,0 +1,42 @@
+.header-container {
+  .header-main-row {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    padding: 0 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .toolbox {
+    margin-left: auto;
+  }
+}
+
+.my-spin {
+  animation: myRotate 4s linear infinite;
+  /* 2s 即速度，可改 */
+}
+
+.syndra-breadcrumb {
+  .ant-breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@keyframes myRotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+//
+响应式设计
+@media (max-width: 768px) {
+  .header-container {
+    .header-main-row {
+      padding: 0 16px;
+    }
+  }
+}

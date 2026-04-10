@@ -1,4 +1,4 @@
-import '@/styles/global.scss';
+import '@/styles/global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntdApp, ConfigProvider } from 'antd';
 import 'antd/dist/antd.css';

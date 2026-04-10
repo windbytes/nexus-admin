@@ -1,0 +1,102 @@
+.code-editor-container {
+  position: relative;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  overflow: hidden;
+
+  /* 编辑器主题适配 */
+  &.dark-theme {
+    border-color: #434343;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .monaco-editor {
+      font-size: 12px !important;
+    }
+  }
+
+  /* 自定义滚动条样式 */
+  .monaco-editor {
+    .scrollbar {
+      &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+    }
+  }
+
+  /* 占位符样式 */
+  .placeholder-text {
+    color: #999;
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  /* 错误提示样式 */
+  .error-marker {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff4d4f;
+  }
+
+  /* 警告提示样式 */
+  .warning-marker {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #faad14;
+  }
+
+  /* 只读状态样式 */
+  &.readonly {
+    background-color: #fafafa;
+
+    .monaco-editor {
+      background-color: #fafafa;
+    }
+  }
+
+  /* 焦点状态 */
+  &:focus-within {
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  /* 禁用状态 */
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    .monaco-editor {
+      pointer-events: none;
+    }
+  }
+}
+
+/* 暗色主题适配 */
+[data-theme="dark"] .code-editor-container {
+  border-color: #434343;
+  background-color: #1f1f1f;
+
+  .monaco-editor {
+    background-color: #1f1f1f;
+  }
+}
+
+/* 高对比度主题适配 */
+[data-theme="hc"] .code-editor-container {
+  border-color: #fff;
+  border-width: 2px;
+}
