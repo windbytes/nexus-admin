@@ -44,10 +44,15 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       dataIndex: 'dictType',
       key: 'dictType',
       width: 100,
+      align: 'center',
       render: (type: string) => {
         const opt = DICT_TYPE_OPTIONS.find((o) => o.value === type);
         const color = type === 'MANUAL' ? 'blue' : type === 'SQL' ? 'green' : 'orange';
-        return <Tag color={color}>{opt?.label ?? type}</Tag>;
+        return (
+          <Tag variant="solid" color={color}>
+            {opt?.label ?? type}
+          </Tag>
+        );
       },
     },
     {
@@ -60,15 +65,25 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       title: '启用',
       dataIndex: 'enabled',
       key: 'enabled',
-      width: 72,
-      render: (v: boolean) => (v ? '是' : '否'),
+      width: 88,
+      align: 'center',
+      render: (v: boolean) => (
+        <Tag variant="solid" color={v ? 'success' : 'default'}>
+          {v ? '是' : '否'}
+        </Tag>
+      ),
     },
     {
       title: '缓存',
       dataIndex: 'cacheEnabled',
       key: 'cacheEnabled',
-      width: 72,
-      render: (v: boolean) => (v ? '是' : '否'),
+      width: 88,
+      align: 'center',
+      render: (v: boolean) => (
+        <Tag variant="solid" color={v ? 'processing' : 'default'}>
+          {v ? '是' : '否'}
+        </Tag>
+      ),
     },
     {
       title: '操作',
