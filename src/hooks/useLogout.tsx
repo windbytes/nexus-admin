@@ -1,8 +1,8 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import { App } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import { commonService } from '@/services/common';
 import { useTabStore } from '@/stores/tabStore';
@@ -47,7 +47,7 @@ export const useLogout = () => {
         queryClient.removeQueries({ queryKey: ['user-roles'] });
         userLogout();
         document.title = 'syndra';
-        navigate({ to: '/login', replace: true });
+        navigate('/login', { replace: true });
       },
     });
   };

@@ -1,8 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps, Spin } from 'antd';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
@@ -62,7 +62,7 @@ const MenuComponent = () => {
 
   // 菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
-    navigate({ to: key, replace: true });
+    navigate(key, { replace: true });
   }, []);
 
   // 菜单展开状态改变

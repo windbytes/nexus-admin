@@ -1,7 +1,7 @@
-import { useNavigate } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 const GH_CODE_KEY = 'syndra_github_oauth_code';
 
@@ -16,14 +16,14 @@ const GitHubOAuthCallback: React.FC = () => {
     const err = params.get('error');
     if (err) {
       sessionStorage.removeItem(GH_CODE_KEY);
-      navigate({ to: '/login', replace: true });
+      navigate('/login', { replace: true });
       return;
     }
     const code = params.get('code');
     if (code) {
       sessionStorage.setItem(GH_CODE_KEY, code);
     }
-    navigate({ to: '/login', replace: true });
+    navigate('/login', { replace: true });
   }, [navigate]);
 
   return (

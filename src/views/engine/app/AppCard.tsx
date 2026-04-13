@@ -1,8 +1,8 @@
 import { EllipsisOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { Tag as AntdTag, Card } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import type { Tag } from '@/components/base/tag-management/constant';
 import TagSelector from '@/components/base/tag-management/selector';
 import CustomPopover from '@/components/popover';
@@ -64,7 +64,7 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate({ to: `/engine/${id}/flow`, params: { appId: id } });
+    navigate(`/engine/${id}/flow`);
   };
 
   return (

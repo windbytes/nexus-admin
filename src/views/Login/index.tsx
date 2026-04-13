@@ -9,7 +9,6 @@ import {
   WechatOutlined,
 } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import {
   Button,
   Checkbox,
@@ -27,6 +26,7 @@ import {
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import logo from '@/assets/icon/web/icon-512.png';
 import filing from '@/assets/images/filing.png';
 import RoleSelector from '@/components/RoleSelector';
@@ -220,7 +220,7 @@ const Login: React.FC = () => {
         description: t('login.welcome'),
       });
 
-      navigate({ to: homePath });
+      navigate(homePath);
     } catch (error) {
       console.error('角色选择失败:', error);
       antdUtils.message?.error('角色选择失败');
@@ -560,7 +560,7 @@ const Login: React.FC = () => {
                       type="button"
                       role="tab"
                       aria-selected={activeMode === 'password'}
-                      className={`${styles['login-title-tab']} ${activeMode === 'password' ? styles.active : ''}`}
+                      className={`${styles['login-title-tab']} ${activeMode === 'password' ? styles['active'] : ''}`}
                       onClick={() => selectLoginMode('password')}
                     >
                       {t('login.login')}
@@ -569,7 +569,7 @@ const Login: React.FC = () => {
                       type="button"
                       role="tab"
                       aria-selected={activeMode === 'phone'}
-                      className={`${styles['login-title-tab']} ${activeMode === 'phone' ? styles.active : ''}`}
+                      className={`${styles['login-title-tab']} ${activeMode === 'phone' ? styles['active'] : ''}`}
                       onClick={() => selectLoginMode('phone')}
                     >
                       {t('login.phoneLoginTab')}

@@ -1,60 +1,68 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { createRouter, type RegisteredRouter, RouterProvider } from '@tanstack/react-router';
 import { Spin } from 'antd';
-import { useEffect, useState } from 'react';
-import { ErrorFallback } from '@/layouts/Content/ErrorBoundary';
+import { useEffect, useRef, useState } from 'react';
+import { createBrowserRouter, type RouteObject, RouterProvider } from 'react-router';
 import { useMenuStore } from '@/stores/store';
-import { authenticatedRoute, baseRoutes, rootRoute } from './routes';
+import { createBaseRoutes } from './routes';
 import { routeTreeManager } from './routeTree';
 
-/**
- * 创建路由树
- * 组合静态路由和动态路由
- */
-function createRouteTree(dynamicRoutes: any[] = []) {
-  // 将动态路由添加到认证路由下
-  const authenticatedWithChildren = authenticatedRoute.addChildren(dynamicRoutes);
-
-  // 创建完整的路由树
-  const routeTree = rootRoute.addChildren([authenticatedWithChildren, ...baseRoutes]);
-
-  return routeTree;
+function buildRouter(menus: import('@/types/route').RouteItem[]) {
+  let dynamicRoutes: RouteObject[] = [];
+  if (menus && menus.length > 0) {
+    dynamicRoutes = routeTreeManager.generateRoutes(menus);
+  }
+  return createBrowserRouter(createBaseRoutes(dynamicRoutes));
 }
 
 /**
  * 路由组件
- * 根据菜单数据动态生成路由
+ * 根据菜单数据动态生成路由，使用 React Router 的 createBrowserRouter + RouterProvider
+ *
+ * 关键设计：
+ * - 使用 useRef 持有 router 实例，避免每次渲染都重建整棵路由树
+ * - 仅当 menus 引用真正变化时才 dispose 旧实例并创建新实例
+ * - 首次同步创建 router，避免首帧闪烁 Loading
  */
 export function Router() {
   const { menus } = useMenuStore();
-  const [routerInstance, setRouterInstance] = useState<RegisteredRouter>();
 
-  // 当菜单变化时，重新生成路由
+  const routerRef = useRef<ReturnType<typeof createBrowserRouter> | null>(null);
+  const menusRef = useRef(menus);
+
+  // 同步初始化：首次渲染时就创建 router，避免 useEffect 导致的首帧空白
+  if (routerRef.current === null) {
+    routerRef.current = buildRouter(menus);
+    menusRef.current = menus;
+  }
+
+  // 用 state 仅作为触发重渲染的信号
+  const [, forceUpdate] = useState(0);
+
   useEffect(() => {
-    // 生成动态路由（如果有菜单数据）
-    let dynamicRoutes: any[] = [];
-
-    if (menus && menus.length > 0) {
-      dynamicRoutes = routeTreeManager.generateRoutes(menus);
+    // menus 引用未变化，跳过重建
+    if (menus === menusRef.current) {
+      return;
     }
 
-    // 创建路由树（即使没有动态路由，也要创建基础路由）
-    const routeTree = createRouteTree(dynamicRoutes);
+    menusRef.current = menus;
 
-    // 创建路由实例
-    const router = createRouter({
-      routeTree,
-      defaultPreload: 'intent', // 预加载策略
-      defaultPreloadDelay: 100, // 预加载延迟
-      // 添加默认的错误处理
-      defaultErrorComponent: ({ error, reset }) => <ErrorFallback error={error} resetBoundary={reset} />,
-    });
+    const oldRouter = routerRef.current;
+    routerRef.current = buildRouter(menus);
+    forceUpdate((n) => n + 1);
 
-    setRouterInstance(router);
+    return () => {
+      oldRouter?.dispose();
+    };
   }, [menus]);
 
-  // 如果路由还未初始化，显示加载状态
-  if (!routerInstance) {
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      routerRef.current?.dispose();
+    };
+  }, []);
+
+  if (!routerRef.current) {
     return (
       <div className="h-full flex items-center justify-center min-h-[400px]">
         <Spin indicator={<LoadingOutlined width={48} />} size="large" fullscreen />
@@ -62,5 +70,5 @@ export function Router() {
     );
   }
 
-  return <RouterProvider router={routerInstance} />;
+  return <RouterProvider router={routerRef.current} />;
 }

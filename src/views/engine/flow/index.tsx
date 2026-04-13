@@ -1,10 +1,10 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useParams } from 'react-router';
 import { pluginService } from '@/services/engine/plugin/api';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
@@ -26,7 +26,7 @@ registerBuiltinNodePlugins();
  * 流程编排页：基于 appId 拉取节点/边配置与运行状态，解析 flowId 后用于草稿/发布/版本/路由接口
  */
 const Workflow: React.FC = () => {
-  const { appId } = useParams({ strict: false });
+  const { appId } = useParams();
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
   const { flowId, isLoading: flowIdLoading } = useFlowId(appId);
   const loadDocument = useWorkflowStore((s) => s.loadDocument);

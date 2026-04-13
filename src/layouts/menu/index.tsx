@@ -1,8 +1,8 @@
 import { EllipsisOutlined, LoadingOutlined } from '@ant-design/icons';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import { buildMenuItems, type MenuItem, resolveMenuSelection } from '@/layouts/LeftMenu/component/menu-utils';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
@@ -53,7 +53,7 @@ const LayoutMenu: React.FC<LayoutMenuProps> = ({ className, mode = 'horizontal',
   })();
 
   const onMenuClick: MenuProps['onClick'] = ({ key }) => {
-    navigate({ to: key, replace: true });
+    navigate(key, { replace: true });
   };
 
   const menuProps: MenuProps = {

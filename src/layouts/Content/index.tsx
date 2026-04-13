@@ -1,7 +1,7 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Layout, Spin } from 'antd';
-import { memo, type ReactNode, Suspense, useMemo } from 'react';
+import { Layout } from 'antd';
+import { memo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { Outlet } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import KeepAlive from '@/components/KeepAlive';
 import { usePreferencesStore } from '@/stores/store';
@@ -9,31 +9,15 @@ import { ErrorFallback } from './ErrorBoundary';
 
 /**
  * 中间主内容区域
- * TanStack Router 版本
- * 性能优化：
- * 1. 使用 memo 避免不必要的重渲染
- * 2. ErrorBoundary 使用 pathname 作为 key，确保路由切换时重置错误状态
- * 3. 使用更明显的加载指示器（Spin 替代 Skeleton）
- * 4. 添加全屏加载样式，提升用户体验
+ *
+ * tabbar 开启时，使用 KeepAlive（内部通过 useOutlet() 获取路由元素进行缓存）；
+ * tabbar 关闭时，直接渲染 <Outlet />。
  */
-interface ContentProps {
-  children?: ReactNode;
-}
-
-const Content = memo(({ children }: ContentProps) => {
-  const tabbarEnabled = usePreferencesStore(
+const Content = memo(() => {
+  const { tabbarEnable } = usePreferencesStore(
     useShallow((state) => ({
       tabbarEnable: state.preferences.tabbar.enable,
     }))
-  );
-
-  const loadingFallback = useMemo(
-    () => (
-      <div className="h-full flex items-center justify-center min-h-[400px]">
-        <Spin indicator={<LoadingOutlined width={48} />} size="large" />
-      </div>
-    ),
-    []
   );
 
   return (
@@ -42,7 +26,7 @@ const Content = memo(({ children }: ContentProps) => {
       style={{ overscrollBehavior: 'contain' }}
     >
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense fallback={loadingFallback}>{tabbarEnabled ? <KeepAlive>{children}</KeepAlive> : children}</Suspense>
+        {tabbarEnable ? <KeepAlive /> : <Outlet />}
       </ErrorBoundary>
     </Layout.Content>
   );

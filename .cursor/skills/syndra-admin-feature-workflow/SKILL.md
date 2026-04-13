@@ -17,7 +17,7 @@ description: 在 syndra-admin 中实现或修改功能页面、服务层与路�
 3. **数据获取**：列表/详情用 **TanStack Query**（`useQuery` / `useMutation`），缓存 key 包含业务主键与查询参数摘要。
 4. **页面结构**：在 `src/views/` 下按领域建目录：`index.tsx`、 `hooks/`、`components/`、`constants.ts` 等与现有一致。
 5. **权限**：沿用项目内权限 hook / 常量模式（参考同模块其它页面）。
-6. **路由**：在 TanStack Router 路由树中注册，保持 lazy 与布局嵌套与现有约定一致。
+6. **路由**：在 React Router 路由树中注册（RouterProvider 模式），保持 lazy 与布局嵌套与现有约定一致。
 
 ## 自检
 

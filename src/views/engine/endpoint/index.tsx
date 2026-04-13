@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from '@tanstack/react-router';
 import { Spin } from 'antd';
 import type React from 'react';
 import { type Key, lazy, Suspense, useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import ProTable from '@/components/ProTable';
 import { endpointService } from '@/services/engine/endpoint/api';
 import type { Endpoint as EndpointRow } from '@/services/engine/endpoint/types';

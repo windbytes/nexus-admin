@@ -1,8 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Layout, Menu, type MenuProps, Spin, theme } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import CollapseSwitch from '@/layouts/Header/component/CollapseSwitch';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
@@ -68,15 +68,15 @@ const DoubleColumnMenu = () => {
     }
   }, [firstLevelKey]);
 
-  // 左列：仅一级，不展示子菜单
+  // 左列：仅一级，不展示子菜单（剥离 children 避免渲染子菜单）
   const firstLevelItems: MenuItem[] = useMemo(
     () =>
-      menuList.map((item: MenuItem) => ({
-        key: item.key,
-        icon: item.icon,
-        label: item.label,
-        type: item.type,
-      })),
+      menuList
+        .filter((item): item is NonNullable<MenuItem> => item != null)
+        .map((item) => {
+          const { children: _, ...rest } = item as unknown as Record<string, unknown>;
+          return rest as unknown as MenuItem;
+        }),
     [menuList]
   );
 
@@ -85,15 +85,17 @@ const DoubleColumnMenu = () => {
     if (!selectedFirstKey) {
       return [];
     }
-    const first = menuList.find((m) => m?.key === selectedFirstKey);
-    const children = (first?.children as MenuItem[] | undefined) ?? [];
-    return children;
+    const first = menuList.find((m) => m != null && 'key' in m && m.key === selectedFirstKey);
+    if (first != null && 'children' in first && Array.isArray(first.children)) {
+      return first.children as MenuItem[];
+    }
+    return [];
   }, [menuList, selectedFirstKey]);
 
   const hasChildren = useCallback(
     (key: string) => {
-      const item = menuList.find((m) => m?.key === key);
-      return Array.isArray(item?.children) && item.children.length > 0;
+      const item = menuList.find((m) => m != null && 'key' in m && m.key === key);
+      return item != null && 'children' in item && Array.isArray(item.children) && item.children.length > 0;
     },
     [menuList]
   );
@@ -103,7 +105,7 @@ const DoubleColumnMenu = () => {
       if (hasChildren(key)) {
         setSelectedFirstKey(key);
       } else {
-        navigate({ to: key, replace: true });
+        navigate(key, { replace: true });
       }
     },
     [hasChildren, navigate]
@@ -111,7 +113,7 @@ const DoubleColumnMenu = () => {
 
   const onRightClick: MenuProps['onClick'] = useCallback(
     ({ key }: { key: string }) => {
-      navigate({ to: key, replace: true });
+      navigate(key, { replace: true });
     },
     [navigate]
   );

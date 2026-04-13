@@ -1,6 +1,6 @@
-import { useNavigate } from '@tanstack/react-router';
 import { Button, Result } from 'antd';
 import type React from 'react';
+import { useNavigate } from 'react-router';
 import { useMenuStore } from '@/stores/store';
 import { useUserStore } from '@/stores/userStore';
 import { getFirstMenuPath } from '@/utils/utils';
@@ -17,7 +17,7 @@ const App: React.FC = () => {
       title="404"
       subTitle="抱歉，您访问的页面不存在。（可能正在开发中，敬请期待）"
       extra={
-        <Button type="primary" onClick={() => navigate({ to: homePath || fallbackHome })}>
+        <Button type="primary" onClick={() => navigate(homePath || fallbackHome)}>
           回到首页
         </Button>
       }
