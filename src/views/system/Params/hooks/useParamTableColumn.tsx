@@ -65,14 +65,23 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       key: 'category',
       align: 'center',
       width: 100,
-      render: (value: string) => <Tag color="blue">{getCategoryLabel(value)}</Tag>,
+      render: (value: string) => (
+        <Tag variant="solid" color="blue">
+          {getCategoryLabel(value)}
+        </Tag>
+      ),
     },
     {
       title: '数据类型',
       dataIndex: 'dataType',
       key: 'dataType',
       width: 120,
-      render: (value: string) => <Tag color="green">{getDataTypeLabel(value)}</Tag>,
+      align: 'center',
+      render: (value: string) => (
+        <Tag variant="solid" color="green">
+          {getDataTypeLabel(value)}
+        </Tag>
+      ),
     },
     {
       title: '必填',
