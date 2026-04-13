@@ -1,6 +1,7 @@
-import { CopyOutlined, DeleteOutlined, DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { MenuModel } from '@/services/system/menu/type';
 import { addIcon } from '@/utils/optimized-icons';
 import { MENU_TYPE } from '../constants';
@@ -38,7 +39,11 @@ export const useMenuTableColumns = (props: UseMenuTableColumnProps) => {
       [MENU_TYPE.PERMISSION_BUTTON]: { label: '权限按钮', color: 'purple' },
     };
     const typeInfo = typeMap[menuType] || { label: '未知', color: 'default' };
-    return <Tag color={typeInfo.color}>{typeInfo.label}</Tag>;
+    return (
+      <Tag variant="solid" color={typeInfo.color}>
+        {typeInfo.label}
+      </Tag>
+    );
   };
 
   // 复制菜单
@@ -199,15 +204,16 @@ export const useMenuTableColumns = (props: UseMenuTableColumnProps) => {
     },
     {
       title: '操作',
-      width: 120,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
       render: (_, record: MenuModel) => (
-        <>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
           <Button
             size="small"
             type="link"
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
             classNames={{ content: 'text-(--ant-color-primary)' }}
             onClick={() => openModal('edit', record)}
             disabled={!canEditMenu}
@@ -219,13 +225,12 @@ export const useMenuTableColumns = (props: UseMenuTableColumnProps) => {
               size="small"
               type="link"
               classNames={{ content: 'text-(--ant-color-primary)' }}
-              icon={<DownOutlined className="text-(--ant-color-primary)!" />}
-              iconPlacement="end"
+              icon={<MoreOutlined className="text-(--ant-color-primary)!" />}
             >
               {t('common.operation.more')}
             </Button>
           </Dropdown>
-        </>
+        </div>
       ),
     },
   ];

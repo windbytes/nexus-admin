@@ -1,6 +1,7 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { App, Button, Switch } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { PageButtonModel } from '@/services/system/pageButton/type';
 import type { ButtonModalType } from '../types';
 import { useButtonActions } from './useButtonActions';
@@ -52,12 +53,18 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
     {
       title: '操作',
       key: 'action',
-      width: 120,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       align: 'center',
       fixed: 'right',
       render: (_: unknown, record: PageButtonModel) => (
-        <>
-          <Button type="link" size="small" disabled={actionsDisabled} onClick={() => openModal('edit', record)}>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
+          <Button
+            type="link"
+            size="small"
+            disabled={actionsDisabled}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            onClick={() => openModal('edit', record)}
+          >
             编辑
           </Button>
           <Button
@@ -65,6 +72,7 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
             size="small"
             danger
             disabled={actionsDisabled}
+            icon={<DeleteOutlined />}
             onClick={() => {
               modal.confirm({
                 title: '删除按钮',
@@ -77,7 +85,7 @@ export const useButtonTableColumns = (props: UseButtonTableColumnsProps) => {
           >
             删除
           </Button>
-        </>
+        </div>
       ),
     },
   ];

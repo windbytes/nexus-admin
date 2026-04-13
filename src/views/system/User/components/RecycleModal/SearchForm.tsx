@@ -1,6 +1,7 @@
 import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, type InputRef } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
 import type { UserSearchParams } from '../../types';
 
 /**
@@ -38,7 +39,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, usernameRef, loading 
       }}
     >
       <Card>
-        <Form form={form} onFinish={onSearch} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        <Form
+          form={form}
+          onFinish={onSearch}
+          labelCol={SEARCH_FORM_GRID_LABEL_COL}
+          wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <Form.Item name="username" label="用户名" colon={false}>
               <Input placeholder="请输入用户名" autoFocus allowClear autoComplete="off" ref={usernameRef} />

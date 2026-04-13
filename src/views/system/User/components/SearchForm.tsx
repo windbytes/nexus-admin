@@ -2,6 +2,7 @@ import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-des
 import { Button, Card, ConfigProvider, DatePicker, Form, Input, Select } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
 import type { UserSearchParams } from '../types';
 
 const { RangePicker } = DatePicker;
@@ -140,7 +141,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading }) => {
       }}
     >
       <Card className="mb-4">
-        <Form form={form} onFinish={onSearch} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form
+          form={form}
+          onFinish={onSearch}
+          labelCol={SEARCH_FORM_GRID_LABEL_COL}
+          wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
+        >
           <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 ${showAdvanced ? 'mb-4' : ''}`}>
             {/* 渲染所有字段 */}
             {allFields.map((field) => (

@@ -2,6 +2,7 @@ import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
 import type { DataModeSearchParams } from '@/services/resource/datamode/dataModeApi';
 import { DATA_MODE_CATEGORIES } from '@/services/resource/datamode/dataModeApi';
 
@@ -56,6 +57,8 @@ const DataModeSearchForm: React.FC<DataModeSearchFormProps> = memo(({ onSearch, 
             dataSource: undefined,
             status: undefined,
           }}
+          labelCol={SEARCH_FORM_GRID_LABEL_COL}
+          wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <Form.Item name="name" label="模式名称" colon={false} className="mb-0">

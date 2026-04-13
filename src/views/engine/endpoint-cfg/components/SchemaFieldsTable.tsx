@@ -13,6 +13,7 @@ import {
 import { Button, Form, Input, Popconfirm, Select, Skeleton, Space, Table, type TableProps, Tooltip } from 'antd';
 import type { Ref } from 'react';
 import { lazy, Suspense, useMemo } from 'react';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { SchemaField } from '@/services/engine';
 import { COMPONENT_TYPE_OPTIONS, MODE_OPTIONS } from '@/services/engine';
 import { useSchemaFieldsEditor } from '../hooks/useSchemaFieldsEditor';
@@ -280,7 +281,7 @@ const SchemaFieldsTableComponent: React.FC<SchemaFieldsTableProps> = ({
       },
       {
         title: '操作',
-        width: 120,
+        width: TABLE_ACTION_COLUMN_WIDTH,
         align: 'center',
         fixed: 'right',
         render: (_: unknown, record: SchemaField, index: number) => {
@@ -288,7 +289,7 @@ const SchemaFieldsTableComponent: React.FC<SchemaFieldsTableProps> = ({
 
           if (editable) {
             return (
-              <Space size="small">
+              <Space size="small" wrap={false}>
                 <Button type="link" size="small" icon={<SaveOutlined />} onClick={() => saveRow(record.id || '')}>
                   保存
                 </Button>
@@ -300,7 +301,7 @@ const SchemaFieldsTableComponent: React.FC<SchemaFieldsTableProps> = ({
           }
 
           return (
-            <Space size="small">
+            <Space size="small" wrap={false}>
               <Tooltip title="编辑">
                 <Button
                   type="link"

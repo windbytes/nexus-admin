@@ -2,17 +2,18 @@ import {
   ApiOutlined,
   CopyOutlined,
   DeleteOutlined,
-  DownOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   ExportOutlined,
   FileTextOutlined,
   HistoryOutlined,
   LinkOutlined,
+  MoreOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import { ENDPOINT_TYPE_OPTIONS, type Endpoint, type EndpointSelectOption } from '@/services/engine/endpoint/types';
 import { useEndpointActions } from '../../hooks/useEndpointActions';
 import type { DrawerType, ModalType } from '../../hooks/useEndpointModals';
@@ -261,21 +262,21 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       title: '操作',
       key: 'action',
       align: 'center',
-      width: 140,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       fixed: 'right',
       render: (_, record: Endpoint) => (
-        <>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
           {canEditEndpoint && (
             <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openModal('edit', record)}>
               {t('common.operation.edit')}
             </Button>
           )}
           <Dropdown menu={{ items: moreActionItems(record) ?? [] }} placement="bottom" trigger={['hover']}>
-            <Button type="link" size="small" icon={<DownOutlined />} iconPlacement="end">
+            <Button type="link" size="small" icon={<MoreOutlined />}>
               {t('common.operation.more')}
             </Button>
           </Dropdown>
-        </>
+        </div>
       ),
     },
   ];

@@ -2,6 +2,7 @@ import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Form, Input, Row, Select, Space } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
 import type { WebServiceSearchParams } from '@/services/resource/webservice/webServiceApi';
 import { WEB_SERVICE_CATEGORIES } from '@/services/resource/webservice/webServiceApi';
 
@@ -52,7 +53,13 @@ const WebServiceSearchForm: React.FC<WebServiceSearchFormProps> = memo(({ onSear
 
   return (
     <Card>
-      <Form form={form} layout="horizontal" labelCol={{ span: 6 }} onFinish={handleSearch}>
+      <Form
+        form={form}
+        layout="horizontal"
+        labelCol={SEARCH_FORM_GRID_LABEL_COL}
+        wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
+        onFinish={handleSearch}
+      >
         <Row gutter={16}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Form.Item name="name" label="服务名称" className="mb-0">

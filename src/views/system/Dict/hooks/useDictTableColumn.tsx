@@ -1,6 +1,7 @@
-import { DeleteOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Space, type TableProps, Tag } from 'antd';
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { App, Button, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { DictModel } from '@/services/system/dict/type.d';
 import { DICT_TYPE_OPTIONS } from '../constants';
 import { useDictActions } from './useDictAction';
@@ -72,11 +73,18 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
     {
       title: '操作',
       key: 'action',
-      width: 120,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_: unknown, record: DictModel) => (
-        <Space size="small">
-          <Button type="link" size="small" disabled={!canEdit} onClick={() => canEdit && openModal('edit', record)}>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
+          <Button
+            type="link"
+            size="small"
+            disabled={!canEdit}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            onClick={() => canEdit && openModal('edit', record)}
+          >
             {t('common.operation.edit')}
           </Button>
           <Button
@@ -84,7 +92,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
             size="small"
             danger
             disabled={!canDelete}
-            icon={<DeleteOutlined className="text-sm! align-middle" />}
+            icon={<DeleteOutlined />}
             onClick={() => {
               if (!canDelete) {
                 return;
@@ -100,7 +108,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
           >
             {t('common.operation.delete')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];

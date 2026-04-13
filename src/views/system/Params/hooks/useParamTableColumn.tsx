@@ -1,6 +1,8 @@
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import { Button, Switch, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { SysParam } from '@/services/system/params';
 import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
 import { useParamPermissions } from './useParamPermissions';
@@ -114,18 +116,31 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
     {
       title: '操作',
       key: 'action',
-      width: 140,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       align: 'center',
       fixed: 'end',
-      render: (_: any, record: SysParam) => (
-        <>
-          <Button size="small" type="link" disabled={!canEdit} onClick={() => onEdit(record)}>
+      render: (_: unknown, record: SysParam) => (
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
+          <Button
+            size="small"
+            type="link"
+            disabled={!canEdit}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            onClick={() => onEdit(record)}
+          >
             {t('common.operation.edit')}
           </Button>
-          <Button size="small" type="link" danger disabled={!canDelete} onClick={() => onDelete(record)}>
+          <Button
+            size="small"
+            type="link"
+            danger
+            disabled={!canDelete}
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(record)}
+          >
             {t('common.operation.delete')}
           </Button>
-        </>
+        </div>
       ),
     },
   ];

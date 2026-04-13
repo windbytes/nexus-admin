@@ -1,13 +1,15 @@
 import {
   CopyOutlined,
   DeleteOutlined,
-  DownOutlined,
+  EditOutlined,
   ExclamationCircleFilled,
+  MoreOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { MyIcon } from '@/components/MyIcon';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { RoleModel } from '@/services/system/role/type';
 import { useUserStore } from '@/stores/userStore';
 import { useRoleActions } from './useRoleAction';
@@ -248,7 +250,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
     },
     {
       title: '操作',
-      width: 90,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
@@ -257,11 +259,12 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
           return null;
         }
         return (
-          <>
+          <div className={TABLE_ACTION_CELL_CLASSNAME}>
             <Button
               size="small"
               type="link"
               disabled={!canEditRole}
+              icon={<EditOutlined className="text-(--ant-color-primary)!" />}
               classNames={{ content: 'text-(--ant-color-primary)' }}
               onClick={() => openModal('edit', record)}
             >
@@ -272,13 +275,12 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
                 size="small"
                 type="link"
                 classNames={{ content: 'text-(--ant-color-primary)' }}
-                icon={<DownOutlined className="text-(--ant-color-primary)!" />}
-                iconPlacement="end"
+                icon={<MoreOutlined className="text-(--ant-color-primary)!" />}
               >
                 {t('common.operation.more')}
               </Button>
             </Dropdown>
-          </>
+          </div>
         );
       },
     },

@@ -2,9 +2,11 @@
  * 版本历史弹窗：展示版本列表（分页），支持回滚
  * 使用 flow API：flowVersionService.listVersions(flowId) 返回 Page<FlowVersionDTO>
  */
+import { RollbackOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Modal, message, Table } from 'antd';
 import { useCallback, useState } from 'react';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import { flowVersionService } from '@/services/engine/flow/api';
 import type { FlowVersionDTO } from '@/services/engine/flow/types';
 
@@ -97,9 +99,16 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, 
           },
           {
             title: '操作',
-            width: 80,
+            width: TABLE_ACTION_COLUMN_WIDTH,
+            align: 'center',
             render: (_, record) => (
-              <Button type="link" size="small" loading={loading} onClick={() => handleRollback(record.version)}>
+              <Button
+                type="link"
+                size="small"
+                icon={<RollbackOutlined />}
+                loading={loading}
+                onClick={() => handleRollback(record.version)}
+              >
                 回滚
               </Button>
             ),

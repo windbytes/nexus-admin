@@ -1,6 +1,7 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { App, Button, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { PermissionModel } from '@/services/system/permission/type';
 import { resourceTypeMap } from '../constants';
 import { usePermissionActions } from './usePermissionActions';
@@ -134,25 +135,33 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
     },
     {
       title: '操作',
-      width: 120,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
       fixed: 'right',
       align: 'center',
       render: (_, record: PermissionModel) => (
-        <>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
           <Button
             size="small"
             type="link"
             disabled={!canEdit}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
             classNames={{ content: 'text-(--ant-color-primary)' }}
             onClick={() => openModal('edit', record)}
           >
             {t('common.operation.edit')}
           </Button>
-          <Button size="small" type="link" disabled={!canDelete} danger onClick={() => handleDelete(record)}>
+          <Button
+            size="small"
+            type="link"
+            disabled={!canDelete}
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+          >
             {t('common.operation.delete')}
           </Button>
-        </>
+        </div>
       ),
     },
   ];
