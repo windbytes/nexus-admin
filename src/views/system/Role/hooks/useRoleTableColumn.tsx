@@ -16,10 +16,22 @@ import { useRoleActions } from './useRoleAction';
 import type { ModalType } from './useRoleModal';
 import { useRolePermissions } from './useRolePermissions';
 
+/** 由列表行生成「复制为新增」的表单草稿（无 id，名称追加「复制」） */
+function buildRoleCopyDraft(record: RoleModel): Partial<RoleModel> {
+  const baseName = record.roleName ?? '';
+  return {
+    roleCode: `${record.roleCode}-copy`,
+    roleName: `${baseName}-复制`,
+    roleType: record.roleType,
+    status: record.status,
+    remark: record.remark,
+  };
+}
+
 interface UseRoleTableColumnProps {
   // 当前操作行的数据
   currentRow: Partial<RoleModel> | null;
-  openModal: (name: ModalType, record?: RoleModel) => void;
+  openModal: (name: ModalType, record?: Partial<RoleModel>) => void;
   // 成功的回调
   onSuccess?: () => void;
 }
@@ -30,7 +42,8 @@ interface UseRoleTableColumnProps {
 export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
-  const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } = useRolePermissions();
+  const { canAddRole, canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } =
+    useRolePermissions();
   // 授权资源、授权权限共用同一权限点
   const canAssignResource = canAssignPermission;
   const { t } = useTranslation();
@@ -110,11 +123,16 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
         key: 'copy',
         label: '复制',
         icon: <CopyOutlined className="text-sm! block text-(--ant-blue-4)" />,
+        disabled: !canAddRole,
         onClick: () => {
-          modal.warning({
-            title: '功能暂未实现',
-            content: '复制功能暂未实现',
-          });
+          if (!canAddRole) {
+            modal.error({
+              title: '权限不足',
+              content: '您没有新增角色的权限，无法复制为新增。',
+            });
+            return;
+          }
+          openModal('add', buildRoleCopyDraft(record));
         },
       },
       {

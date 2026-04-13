@@ -18,10 +18,10 @@ export const useRoleModals = () => {
   // 窗口名称
   const [modal, setModal] = useState<ModalType>(null);
   // 当前操作的角色数据
-  const [current, setCurrent] = useState<RoleModel | null>(null);
+  const [current, setCurrent] = useState<Partial<RoleModel> | null>(null);
 
   // 打开弹窗
-  const openModal = (name: ModalType, record?: RoleModel) => {
+  const openModal = (name: ModalType, record?: Partial<RoleModel>) => {
     setModal(name);
     setCurrent(record || null);
   };

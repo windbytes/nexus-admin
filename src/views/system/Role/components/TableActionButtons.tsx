@@ -19,7 +19,7 @@ interface TableActionButtonsProps {
   handleBatchDelete: () => void;
   refetch: () => void;
   selectedRows: Key[];
-  openModal: (name: ModalType, record?: RoleModel) => void;
+  openModal: (name: ModalType, record?: Partial<RoleModel>) => void;
 }
 
 // 表格操作按钮

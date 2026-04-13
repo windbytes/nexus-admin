@@ -29,7 +29,7 @@ export const useTableColumns = () => {
       align: 'center',
       render: (value: number) => {
         return (
-          <Tag color={value === 1 ? 'blue' : value === 2 ? 'green' : 'orange'}>
+          <Tag variant="solid" color={value === 1 ? 'blue' : value === 2 ? 'green' : 'orange'}>
             {value === 1 ? '按钮' : value === 2 ? '接口' : '其他'}
           </Tag>
         );
@@ -41,7 +41,11 @@ export const useTableColumns = () => {
       key: 'status',
       width: 80,
       align: 'center',
-      render: (value: boolean) => <Tag color={value ? 'success' : 'error'}>{value ? '启用' : '停用'}</Tag>,
+      render: (value: boolean) => (
+        <Tag variant="solid" color={value ? 'success' : 'error'}>
+          {value ? '启用' : '停用'}
+        </Tag>
+      ),
     },
     {
       title: '描述',
