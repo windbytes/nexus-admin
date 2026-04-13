@@ -1,6 +1,5 @@
 import { ManOutlined, UndoOutlined, WomanOutlined } from '@ant-design/icons';
 import { Button, type TableProps } from 'antd';
-import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { UserModel } from '@/services/system/user/type';
 
 /**
@@ -27,6 +26,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
       key: 'username',
       width: 100,
       align: 'left',
+      fixed: 'left',
     },
     {
       dataIndex: 'realName',
@@ -91,7 +91,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
     },
     {
       title: '操作',
-      width: TABLE_ACTION_COLUMN_WIDTH,
+      width: 120,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',

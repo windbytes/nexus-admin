@@ -1,4 +1,5 @@
 import type { CardProps, TableProps } from 'antd';
+import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import type { ColumnType } from 'antd/es/table';
 import type { ReactNode } from 'react';
 
@@ -15,11 +16,6 @@ export interface ProColumnType<T = unknown> extends Omit<ColumnType<T>, 'childre
   /** 子列 */
   children?: ProColumnType<T>[];
 }
-
-/**
- * 表格密度
- */
-export type TableDensity = 'large' | 'middle' | 'small';
 
 /**
  * 列固定位置
@@ -96,9 +92,9 @@ export interface ToolbarProps {
   /** 刷新回调 */
   onRefresh?: () => void;
   /** 当前密度 */
-  density?: TableDensity;
+  density?: SizeType;
   /** 密度变化回调 */
-  onDensityChange?: (density: TableDensity) => void;
+  onDensityChange?: (density: SizeType) => void;
   /** 是否显示列设置 */
   showColumnSetting?: boolean;
   /** 列配置 */

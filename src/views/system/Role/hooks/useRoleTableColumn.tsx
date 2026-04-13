@@ -218,9 +218,17 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       align: 'center',
       render(value) {
         if (!value) {
-          return <Tag color="green">{value}</Tag>;
+          return (
+            <Tag variant="solid" color="green">
+              {value}
+            </Tag>
+          );
         }
-        return <Tag color="red">{value}</Tag>;
+        return (
+          <Tag variant="solid" color="red">
+            {value}
+          </Tag>
+        );
       },
     },
     {
@@ -231,9 +239,17 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       key: 'isBuiltin',
       render(value) {
         if (!value) {
-          return <Tag color="green">否</Tag>;
+          return (
+            <Tag variant="solid" color="green">
+              否
+            </Tag>
+          );
         }
-        return <Tag color="red">是</Tag>;
+        return (
+          <Tag variant="solid" color="red">
+            是
+          </Tag>
+        );
       },
     },
     {

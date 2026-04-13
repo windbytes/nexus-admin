@@ -12,6 +12,7 @@ classNames={{
 }
 
 /* 2. 穿透 Antd 内部的 Spin 和 Container 层级 */
+.full-height-table .ant-spin,
 .full-height-table .ant-spin-nested-loading,
 .full-height-table .ant-spin-container {
   height: 100%;

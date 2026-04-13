@@ -133,6 +133,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       key: 'username',
       width: 140,
       align: 'left',
+      fixed: 'left',
     },
     {
       dataIndex: 'realName',
@@ -169,7 +170,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       dataIndex: 'birthday',
       title: '生日',
       key: 'birthday',
-      width: 120,
+      width: 160,
       align: 'center',
       render: (text: string) => {
         if (text) {
@@ -214,7 +215,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       title: '创建日期',
       dataIndex: 'createTime',
       key: 'createTime',
-      width: 120,
+      width: 160,
       align: 'center',
       sorter: (a: UserModel, b: UserModel) => a.createTime.localeCompare(b.createTime),
     },
