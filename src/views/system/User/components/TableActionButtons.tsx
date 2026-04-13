@@ -150,6 +150,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
       label: '批量删除',
       icon: <DeleteOutlined className="text-sm! block! text-(--ant-color-error)" />,
       disabled: selectedRows.length === 0 || !canDeleteUser,
+      danger: true,
       onClick: () => {
         if (!canDeleteUser) {
           modal.error({
