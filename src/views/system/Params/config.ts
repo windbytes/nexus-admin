@@ -27,8 +27,8 @@ export const TABLE_COLUMNS_CONFIG = {
   showActions: true,
   // 是否显示状态列
   showStatus: true,
-  // 是否显示创建时间列
-  showCreateTime: true,
+  // 是否显示更新时间列
+  showUpdateTime: true,
 };
 
 // 搜索配置

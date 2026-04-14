@@ -89,7 +89,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       title: '操作',
       key: 'action',
       width: TABLE_ACTION_COLUMN_WIDTH,
-      fixed: 'right',
+      fixed: 'end',
       align: 'center',
       render: (_: unknown, record: DictModel) => (
         <div className={TABLE_ACTION_CELL_CLASSNAME}>
@@ -98,6 +98,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
             size="small"
             disabled={!canEdit}
             icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            classNames={{ content: 'text-(--ant-color-primary)' }}
             onClick={() => canEdit && openModal('edit', record)}
           >
             {t('common.operation.edit')}

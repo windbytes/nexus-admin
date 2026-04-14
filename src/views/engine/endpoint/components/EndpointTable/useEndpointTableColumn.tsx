@@ -263,7 +263,7 @@ export const useEndpointTableColumns = (props: UseEndpointTableColumnProps) => {
       key: 'action',
       align: 'center',
       width: TABLE_ACTION_COLUMN_WIDTH,
-      fixed: 'right',
+      fixed: 'end',
       render: (_, record: Endpoint) => (
         <div className={TABLE_ACTION_CELL_CLASSNAME}>
           {canEditEndpoint && (

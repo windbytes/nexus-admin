@@ -53,9 +53,18 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       ellipsis: true,
     },
     {
-      title: '参数内容',
+      title: '参数值',
       dataIndex: 'value',
       key: 'value',
+      width: 220,
+      ellipsis: true,
+      render: (value: string) => value || '-',
+    },
+    {
+      title: '默认值',
+      dataIndex: 'defaultValue',
+      key: 'defaultValue',
+      width: 220,
       ellipsis: true,
       render: (value: string) => value || '-',
     },
@@ -110,9 +119,9 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
         ),
     },
     {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
       align: 'center',
       width: 180,
       render: (value: string) => {

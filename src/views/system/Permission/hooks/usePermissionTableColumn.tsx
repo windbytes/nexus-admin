@@ -137,7 +137,7 @@ export const usePermissionTableColumns = (props: UsePermissionTableColumnProps) 
       title: '操作',
       width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
-      fixed: 'right',
+      fixed: 'end',
       align: 'center',
       render: (_, record: PermissionModel) => (
         <div className={TABLE_ACTION_CELL_CLASSNAME}>
