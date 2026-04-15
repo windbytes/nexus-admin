@@ -2,6 +2,7 @@ import { Layout, Skeleton, Watermark } from 'antd';
 import { lazy, Suspense } from 'react';
 import { Navigate, type RouteObject } from 'react-router';
 import { useShallow } from 'zustand/shallow';
+import Console from '@/components/Console';
 import HotKeyProvider from '@/components/HotKeyProvider';
 import RouteLoadingBar from '@/components/RouteLoadingBar';
 import { usePreferencesStore } from '@/stores/store';
@@ -15,7 +16,9 @@ const ServerErrorComponent = lazy(() => import('@/views/error/500'));
 
 const Header = lazy(() => import('@/layouts/Header'));
 const LeftMenu = lazy(() => import('@/layouts/LeftMenu'));
+
 import Content from '@/layouts/Content/index';
+
 const Footer = lazy(() => import('@/layouts/Footer'));
 const ScreenLock = lazy(() => import('@/components/ScreenLock'));
 
@@ -68,6 +71,8 @@ function AuthenticatedLayout() {
           <ScreenLock />
         </Suspense>
       )}
+
+      <Console />
     </HotKeyProvider>
   );
 }

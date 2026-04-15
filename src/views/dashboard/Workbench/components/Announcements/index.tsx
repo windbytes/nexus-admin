@@ -1,56 +1,45 @@
 import { useQuery } from '@tanstack/react-query';
 import { Tag } from 'antd';
+import dayjs from 'dayjs';
 import type React from 'react';
-import type { Announcement } from '../../mockData';
-
-// 模拟获取公告数据的API
-const fetchAnnouncementsData = async (): Promise<Announcement[]> => {
-  // 模拟API延迟
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  return [
-    {
-      id: '1',
-      type: 'activity',
-      title: '流程管理最新优惠活动',
-      time: '2小时前',
-    },
-    {
-      id: '2',
-      type: 'message',
-      title: '新增流程尚未通过审核',
-      time: '4小时前',
-    },
-    {
-      id: '3',
-      type: 'notification',
-      title: '当前产品试用期即将截止',
-      time: '6小时前',
-    },
-    {
-      id: '4',
-      type: 'notification',
-      title: '1月新系统升级计划通知',
-      time: '1天前',
-    },
-  ];
-};
+import { useEffect, useMemo, useState } from 'react';
+import { type AnnouncementItem, announcementService } from '@/services/system/announcement';
+import webSocketClient, { type AnnouncementMessagePayload } from '@/utils/webscoketClient';
 
 export const Announcements: React.FC = () => {
+  const [liveAnnouncements, setLiveAnnouncements] = useState<AnnouncementItem[]>([]);
+
+  useEffect(() => {
+    const handleAnnouncement = (event: { payload: AnnouncementMessagePayload }) => {
+      setLiveAnnouncements((prev) => mergeAnnouncements([event.payload], prev));
+    };
+    webSocketClient.on('announcement', handleAnnouncement);
+    return () => {
+      webSocketClient.off('announcement', handleAnnouncement);
+    };
+  }, []);
+
   const { data: announcements, isFetching } = useQuery({
     queryKey: ['announcementsData'],
-    queryFn: fetchAnnouncementsData,
+    queryFn: () => announcementService.list(4),
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 
+  const mergedAnnouncements = useMemo(
+    () => mergeAnnouncements(liveAnnouncements, announcements || []).slice(0, 4),
+    [announcements, liveAnnouncements]
+  );
+
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'activity':
+      case 'success':
         return 'blue';
-      case 'message':
+      case 'info':
         return 'green';
-      case 'notification':
+      case 'warning':
         return 'orange';
+      case 'error':
+        return 'red';
       default:
         return 'default';
     }
@@ -58,12 +47,14 @@ export const Announcements: React.FC = () => {
 
   const getTypeText = (type: string) => {
     switch (type) {
-      case 'activity':
-        return '活动';
-      case 'message':
-        return '消息';
-      case 'notification':
+      case 'success':
+        return '成功';
+      case 'info':
+        return '公告';
+      case 'warning':
         return '通知';
+      case 'error':
+        return '紧急';
       default:
         return '其他';
     }
@@ -81,23 +72,23 @@ export const Announcements: React.FC = () => {
     );
   }
 
-  if (!announcements || announcements.length === 0) {
+  if (!mergedAnnouncements || mergedAnnouncements.length === 0) {
     return <div className="text-center py-8 text-gray-500">暂无公告数据</div>;
   }
 
   return (
     <div className="space-y-3">
-      {announcements.map((item) => (
+      {mergedAnnouncements.map((item) => (
         <div
           key={item.id}
           className="flex items-start justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200"
         >
           <div className="flex-1">
             <div className="flex items-center mb-1">
-              <Tag color={getTypeColor(item.type)} className="mr-2">
-                {getTypeText(item.type)}
+              <Tag color={getTypeColor(item.level)} className="mr-2">
+                {getTypeText(item.level)}
               </Tag>
-              <span className="text-xs text-gray-400">{item.time}</span>
+              <span className="text-xs text-gray-400">{dayjs(item.publishedAt).format('MM-DD HH:mm')}</span>
             </div>
             <div className="text-sm text-gray-700">{item.title}</div>
           </div>
@@ -106,3 +97,11 @@ export const Announcements: React.FC = () => {
     </div>
   );
 };
+
+function mergeAnnouncements(primary: AnnouncementItem[], secondary: AnnouncementItem[]) {
+  const announcementMap = new Map<string, AnnouncementItem>();
+  for (const item of [...primary, ...secondary]) {
+    announcementMap.set(item.id, item);
+  }
+  return Array.from(announcementMap.values()).sort((left, right) => right.publishedAt - left.publishedAt);
+}

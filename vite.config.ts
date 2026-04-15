@@ -2,7 +2,7 @@ import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { compression } from 'vite-plugin-compression2';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
@@ -11,6 +11,9 @@ const buildId = Math.random().toString(36).slice(2, 8);
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+  const env = loadEnv(mode, process.cwd(), '');
+  const devServerPort = Number(env.VITE_DEV_SERVER_PORT || '8000');
+  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9193';
 
   return {
     plugins: [
@@ -109,11 +112,11 @@ export default defineConfig(({ mode }) => {
     },
     // 服务器配置以及代理
     server: {
-      port: 8000,
+      port: devServerPort,
       host: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:9193',
+          target: apiProxyTarget,
           changeOrigin: true,
           ws: true,
           rewrite: (pathName) => pathName.replace(/^\/api/, ''),

@@ -1,162 +1,289 @@
-/**
- * @description: 封装websocket客户端
- * @author: wonderland
- * @date : 2025-03-08 11:20
- * @version: v1.0
- */
+export type WebSocketConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'authenticated' | 'error';
+
+export interface WebSocketEnvelope<T = unknown> {
+  type: string;
+  payload: T;
+  timestamp: number;
+}
+
+export interface SqlMessagePayload {
+  sql: string;
+  elapsedMs: number;
+  elapsedText: string;
+  operatorId?: string;
+  operatorName?: string;
+  queryParams?: string;
+}
+
+export interface ParamMessagePayload {
+  action: 'create' | 'update' | 'delete';
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  categoryName: string;
+  value?: string;
+  status: boolean;
+  operatorId?: string;
+  operatorName?: string;
+  updatedAt: number;
+}
+
+export interface AnnouncementMessagePayload {
+  id: string;
+  title: string;
+  content: string;
+  level: 'info' | 'success' | 'warning' | 'error';
+  publishedBy: string;
+  publishedById: string;
+  publishedAt: number;
+}
+
+export interface AckPayload {
+  kind: 'auth' | 'subscribe' | 'pong';
+  userId?: string;
+  sqlEnabled?: boolean;
+  paramEnabled?: boolean;
+}
+
+export interface ErrorPayload {
+  message: string;
+}
+
+export interface MonitorPreferences {
+  sqlEnabled: boolean;
+  paramEnabled: boolean;
+}
+
+type WebSocketEventMap = {
+  open: Event;
+  close: CloseEvent;
+  error: Event;
+  status: WebSocketConnectionStatus;
+  ack: WebSocketEnvelope<AckPayload>;
+  serverError: WebSocketEnvelope<ErrorPayload>;
+  sql: WebSocketEnvelope<SqlMessagePayload>;
+  param: WebSocketEnvelope<ParamMessagePayload>;
+  announcement: WebSocketEnvelope<AnnouncementMessagePayload>;
+};
+
+type WebSocketEventKey = keyof WebSocketEventMap;
+type WebSocketListener<K extends WebSocketEventKey> = (event: WebSocketEventMap[K]) => void;
+
+const WS_URL = import.meta.env.VITE_WS_URL;
+
 class WebSocketClient {
-  private socket: WebSocket;
+  private socket: WebSocket | null = null;
+  private reconnectInterval = 3000;
+  private maxReconnectAttempts = 5;
+  private reconnectAttempts = 0;
+  private reconnectTimer: number | null = null;
+  private pingInterval: number | null = null;
+  private readonly heartbeatInterval = 30000;
+  private readonly listeners = new Map<WebSocketEventKey, Set<(event: unknown) => void>>();
+  private connectionStatus: WebSocketConnectionStatus = 'disconnected';
+  private authToken = '';
+  private manuallyClosed = false;
+  private authenticated = false;
+  private monitorPreferences: MonitorPreferences = {
+    sqlEnabled: false,
+    paramEnabled: false,
+  };
 
-  // 重连间隔时间（毫秒）
-  private reconnectInterval: number = 3000;
-  // 最大重连次数
-  private maxReconnectAttempts: number = 5;
-  // 当前重连次数
-  private reconnectAttempts: number = 0;
-
-  // ping间隔
-  private pingInterval: any;
-
-  // 心跳间隔时间（毫秒）
-  private heartbeatInterval: number = 30000;
-  // 心跳超时时间（毫秒）
-  private heartbeatTimeout: any;
-
-  // 事件监听
-  private listeners: { [event: string]: ((event: any) => void)[] } = {};
-
-  constructor(private url: string) {
-    this.socket = new WebSocket(this.url);
-    this.initWebSocket();
+  public connect(token: string) {
+    if (!token) {
+      return;
+    }
+    this.authToken = token;
+    this.manuallyClosed = false;
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+    this.createSocket();
   }
 
-  private initWebSocket() {
-    this.setupEventHandlers();
-    this.setupHeartbeat();
+  public disconnect() {
+    this.manuallyClosed = true;
+    this.authenticated = false;
+    this.clearReconnectTimer();
+    this.stopHeartbeat();
+    const currentSocket = this.socket;
+    this.socket = null;
+    if (currentSocket && currentSocket.readyState !== WebSocket.CLOSED) {
+      currentSocket.close();
+    }
+    this.setStatus('disconnected');
   }
 
-  /**
-   * 设置事件监听
-   */
-  private setupEventHandlers() {
-    // 监听socket打开
-    this.socket.addEventListener('open', () => {
-      console.log('WebSocket连接已打开');
+  public setMonitorPreferences(preferences: Partial<MonitorPreferences>) {
+    this.monitorPreferences = {
+      ...this.monitorPreferences,
+      ...preferences,
+    };
+    this.sendSubscription();
+  }
+
+  public getMonitorPreferences() {
+    return this.monitorPreferences;
+  }
+
+  public getStatus() {
+    return this.connectionStatus;
+  }
+
+  public on<K extends WebSocketEventKey>(event: K, callback: WebSocketListener<K>) {
+    const listeners = this.listeners.get(event) ?? new Set();
+    listeners.add(callback as (event: unknown) => void);
+    this.listeners.set(event, listeners);
+  }
+
+  public off<K extends WebSocketEventKey>(event: K, callback: WebSocketListener<K>) {
+    const listeners = this.listeners.get(event);
+    listeners?.delete(callback as (event: unknown) => void);
+  }
+
+  private createSocket() {
+    this.clearReconnectTimer();
+    this.stopHeartbeat();
+    this.authenticated = false;
+    this.setStatus('connecting');
+    const socket = new WebSocket(WS_URL);
+    this.socket = socket;
+    socket.addEventListener('open', (event) => {
       this.reconnectAttempts = 0;
-      this.emit('open');
+      this.setStatus('connected');
+      this.emit('open', event);
+      this.sendEnvelope('auth', {
+        token: `Bearer ${this.authToken}`,
+      });
     });
-
-    // 监听socket接收到消息
-    this.socket.addEventListener('message', (event) => {
-      console.log(`接收到消息: ${event.data}`);
-      const data = JSON.parse(event.data);
-      // 根据不同的消息类型触发不同的事件
-      this.emit(data.type, data);
+    socket.addEventListener('message', (event) => {
+      const envelope = this.parseEnvelope(event.data);
+      if (!envelope) {
+        return;
+      }
+      switch (envelope.type) {
+        case 'ack': {
+          const ackEnvelope = envelope as WebSocketEnvelope<AckPayload>;
+          if (ackEnvelope.payload.kind === 'auth') {
+            this.authenticated = true;
+            this.setStatus('authenticated');
+            this.sendSubscription();
+          }
+          this.emit('ack', ackEnvelope);
+          break;
+        }
+        case 'error':
+          this.emit('serverError', envelope as WebSocketEnvelope<ErrorPayload>);
+          this.setStatus('error');
+          break;
+        case 'sql':
+          this.emit('sql', envelope as WebSocketEnvelope<SqlMessagePayload>);
+          break;
+        case 'param':
+          this.emit('param', envelope as WebSocketEnvelope<ParamMessagePayload>);
+          break;
+        case 'announcement':
+          this.emit('announcement', envelope as WebSocketEnvelope<AnnouncementMessagePayload>);
+          break;
+        default:
+          break;
+      }
     });
-
-    // 监听socket关闭
-    this.socket.addEventListener('close', (event) => {
-      console.log(`WebSocket连接已关闭，代码: ${event.code}，原因: ${event.reason}`);
+    socket.addEventListener('close', (event) => {
+      this.stopHeartbeat();
+      this.authenticated = false;
       this.emit('close', event);
-      this.reconnect();
+      if (this.manuallyClosed) {
+        this.setStatus('disconnected');
+        return;
+      }
+      this.scheduleReconnect();
     });
-
-    // 监听socket错误
-    this.socket.addEventListener('error', (event) => {
-      console.error(`WebSocket连接发生错误: ${event}`);
+    socket.addEventListener('error', (event) => {
       this.emit('error', event);
-      this.reconnect();
+      this.setStatus('error');
     });
   }
 
-  /**
-   * 设置心跳监测
-   */
-  private setupHeartbeat() {
-    this.pingInterval = setInterval(() => {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify({ type: 'ping' }));
-        this.heartbeatTimeout = setTimeout(() => {
-          console.log('心跳超时，尝试重连');
-          this.socket.close();
-        }, this.heartbeatInterval * 2);
-      }
+  private parseEnvelope(data: string) {
+    try {
+      return JSON.parse(data) as WebSocketEnvelope;
+    } catch (error) {
+      console.error('解析 WebSocket 消息失败', error);
+      return null;
+    }
+  }
+
+  private sendSubscription() {
+    if (!this.authenticated || this.socket?.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    this.sendEnvelope('subscribe', this.monitorPreferences);
+    this.startHeartbeat();
+  }
+
+  private sendEnvelope(type: string, payload: object) {
+    if (this.socket?.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    this.socket.send(
+      JSON.stringify({
+        type,
+        payload,
+      })
+    );
+  }
+
+  private scheduleReconnect() {
+    if (!this.authToken || this.reconnectAttempts >= this.maxReconnectAttempts) {
+      this.setStatus('disconnected');
+      return;
+    }
+    this.reconnectAttempts += 1;
+    const reconnectDelay = this.reconnectInterval * this.reconnectAttempts;
+    this.reconnectTimer = window.setTimeout(() => {
+      this.createSocket();
+    }, reconnectDelay);
+  }
+
+  private startHeartbeat() {
+    this.stopHeartbeat();
+    this.pingInterval = window.setInterval(() => {
+      this.sendEnvelope('ping', {});
     }, this.heartbeatInterval);
   }
 
-  /**
-   * 重连
-   */
-  private reconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      console.log('尝试重新连接 WebSocket，第', this.reconnectAttempts, '次');
-      setTimeout(() => {
-        this.initWebSocket();
-      }, this.reconnectInterval * this.reconnectAttempts);
-    } else {
-      console.error('达到最大重连次数，停止重连');
+  private stopHeartbeat() {
+    if (this.pingInterval !== null) {
+      window.clearInterval(this.pingInterval);
+      this.pingInterval = null;
     }
   }
 
-  /**
-   * 发送消息
-   * @param message
-   */
-  public sendMessage(message: string) {
-    if (this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(message);
-    } else {
-      console.error('WebSocket 连接未开启，无法发送消息');
+  private clearReconnectTimer() {
+    if (this.reconnectTimer !== null) {
+      window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
   }
 
-  /**
-   * 监听事件
-   * @param event
-   * @param callback
-   */
-  public on(event: string, callback: (event: any) => void) {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
+  private emit<K extends WebSocketEventKey>(event: K, data: WebSocketEventMap[K]) {
+    const listeners = this.listeners.get(event);
+    if (!listeners) {
+      return;
     }
-    this.listeners[event].push(callback);
-  }
-  /**
-   * 移除事件监听
-   * @param event
-   * @param callback
-   */
-  public off(event: string, callback: (event: any) => void) {
-    if (this.listeners[event]) {
-      this.listeners[event] = this.listeners[event].filter((listener) => listener !== callback);
+    for (const listener of listeners) {
+      listener(data);
     }
   }
 
-  /**
-   * 触发事件
-   * @param event
-   * @param data
-   */
-  private emit(event: string, data?: any) {
-    if (this.listeners[event]) {
-      // 遍历事件回调函数并执行
-      for (const callback of this.listeners[event]) {
-        callback(data);
-      }
-    }
-  }
-
-  /**
-   * 关闭连接
-   */
-  public close() {
-    this.socket.close();
-    clearInterval(this.pingInterval);
-    clearTimeout(this.heartbeatTimeout);
+  private setStatus(status: WebSocketConnectionStatus) {
+    this.connectionStatus = status;
+    this.emit('status', status);
   }
 }
 
-// 导出单例
-const webSocketClient = new WebSocketClient('ws://localhost:8080/ws');
+const webSocketClient = new WebSocketClient();
+
 export default webSocketClient;
