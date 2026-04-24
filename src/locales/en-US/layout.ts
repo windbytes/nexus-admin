@@ -5,6 +5,8 @@ const translation = {
     logout: 'quit',
     fullScreen: 'Full Screen',
     language: 'Language',
+    themeToDark: 'Switch to dark mode',
+    themeToLight: 'Switch to light mode',
     userDropdown: {
       doc: 'Docs',
       profile: 'Profile',

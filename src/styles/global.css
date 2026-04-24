@@ -116,7 +116,7 @@ code {
 }
 
 .layout-header-row {
-  background-color: #fff;
+  background-color: var(--ant-color-bg-container, #fff);
   padding: 16px 32px 0;
 }
 
@@ -142,4 +142,12 @@ code {
 ::-webkit-scrollbar-thumb {
   border-radius: 4px;
   background: #d3d0d0;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #4a4a52;
+}
+
+html[data-theme='dark'] {
+  scrollbar-color: #4a4a52 transparent;
 }

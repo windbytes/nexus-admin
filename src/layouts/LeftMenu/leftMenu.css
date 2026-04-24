@@ -2,7 +2,7 @@
   overflow: hidden;
   position: relative;
   transition: width 0.2s cubic-bezier(0.34, 0.69, 0.1, 1);
-  border-right: 1px solid #00000012;
+  border-right: 1px solid var(--ant-color-split, #00000012);
 
   .ant-layout-sider-children {
     display: flex;
@@ -36,7 +36,7 @@
   flex-direction: column;
   flex: 0 0 auto;
   width: 56px;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid var(--ant-color-border-secondary, rgba(0, 0, 0, 0.06));
   overflow-x: hidden;
   overflow-y: auto;
 

@@ -1,7 +1,7 @@
 .tab-bar {
   width: 100%;
   padding: 6px 16px 0;
-  background-color: #fff;
+  background-color: var(--ant-color-bg-container, #fff);
   display: flex;
   align-items: flex-end;
 
@@ -34,10 +34,10 @@
 
       /* 悬停效果 */
       &:hover {
-        background-color: rgba(0, 0, 0, 0.02) !important;
+        background-color: var(--ant-color-fill-secondary, rgba(0, 0, 0, 0.02)) !important;
 
         .ant-tabs-tab-btn {
-          color: #333;
+          color: var(--ant-color-text, #333);
         }
       }
 
@@ -113,11 +113,11 @@
     margin-bottom: 6px;
 
     .ant-btn {
-      color: #666;
+      color: var(--ant-color-text-secondary, #666);
 
       &:hover {
         color: var(--ant-color-primary);
-        background: rgba(22, 119, 255, 0.1);
+        background: var(--ant-color-primary-bg);
       }
     }
   }

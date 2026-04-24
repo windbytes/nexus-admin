@@ -14,6 +14,7 @@ import HeaderMenu from './component/HeaderMenu';
 import LanguageSwitch from './component/LanguageSwitch';
 import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
+import ThemeToggle from './component/ThemeToggle';
 import UserDropdown from './component/UserDropdown';
 import '@/layouts/LeftMenu/leftMenu.css';
 import './header.css';
@@ -61,7 +62,8 @@ const Header = () => {
     }))
   );
 
-  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
+  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification, themeToggle } =
+    widgetConfig;
   const { t } = useTranslation();
 
   /**
@@ -125,6 +127,8 @@ const Header = () => {
                   onClick={() => setSettingMenuModalOpen(true)}
                 />
               </Tooltip>
+              {/* 明暗主题 */}
+              {themeToggle && <ThemeToggle />}
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
               {/* 全屏 */}
