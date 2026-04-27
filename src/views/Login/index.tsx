@@ -1,4 +1,5 @@
 import {
+  ApartmentOutlined,
   ApiOutlined,
   GithubOutlined,
   LockOutlined,
@@ -10,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AutoComplete,
   Button,
   Checkbox,
   Col,
@@ -32,7 +34,13 @@ import filing from '@/assets/images/filing.png';
 import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
-import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/services/login/loginApi';
+import {
+  type LoginParams,
+  type LoginResponse,
+  type LoginTenantOption,
+  loginService,
+  type UserRole,
+} from '@/services/login/loginApi';
 import type { RoleModel } from '@/services/system/role/type';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
@@ -45,6 +53,10 @@ const { Text } = Typography;
 
 const REMEMBERED_USERNAME_KEY = 'syndra_login_remembered_username';
 const GH_CODE_KEY = 'syndra_github_oauth_code';
+const REMEMBERED_TENANT_KEY = 'syndra_login_remembered_tenant_id';
+const RECENT_TENANTS_KEY = 'syndra_login_recent_tenants';
+const GH_TENANT_KEY = 'syndra_github_oauth_tenant_id';
+const MAX_RECENT_TENANTS = 8;
 
 type UiLoginMode = 'password' | 'phone' | 'wechat' | 'github';
 
@@ -93,8 +105,14 @@ const Login: React.FC = () => {
   const [appQrAnimKey, setAppQrAnimKey] = useState(0);
   const [smsCooldown, setSmsCooldown] = useState(0);
   const [wechatAuthorizeUrl, setWechatAuthorizeUrl] = useState<string | null>(null);
+  const [recentTenants, setRecentTenants] = useState<string[]>([]);
+  const [tenantOptions, setTenantOptions] = useState<LoginTenantOption[]>([]);
+  const [tenantLoading, setTenantLoading] = useState(false);
   const wechatPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const githubOAuthLoginRunnerRef = useRef<(code: string) => Promise<void>>(() => Promise.resolve());
+  const tenantQuerySeq = useRef(0);
+  const usernameWatch = Form.useWatch('username', form);
+  const phoneWatch = Form.useWatch('phone', form);
 
   const { data, refetch } = useQuery<{ key: string; code: string }>({
     queryKey: ['getCode'],
@@ -109,13 +127,64 @@ const Login: React.FC = () => {
   useEffect(() => {
     try {
       const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+      const savedTenantId = localStorage.getItem(REMEMBERED_TENANT_KEY);
+      const initialValues: { username?: string; remember?: boolean; tenantId?: string; rememberTenant?: boolean } = {};
       if (savedUsername?.trim()) {
-        form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+        initialValues.username = savedUsername.trim();
+        initialValues.remember = true;
+      }
+      if (savedTenantId?.trim()) {
+        initialValues.tenantId = savedTenantId.trim();
+        initialValues.rememberTenant = true;
+      } else if (userStore.tenantId) {
+        initialValues.tenantId = userStore.tenantId;
+      }
+      const recentTenantRaw = localStorage.getItem(RECENT_TENANTS_KEY);
+      if (recentTenantRaw) {
+        const parsed = JSON.parse(recentTenantRaw) as unknown;
+        if (Array.isArray(parsed)) {
+          setRecentTenants(parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0));
+        }
+      }
+      if (Object.keys(initialValues).length > 0) {
+        form.setFieldsValue(initialValues);
       }
     } catch {
       // ignore
     }
-  }, [form]);
+  }, [form, userStore.tenantId]);
+
+  useEffect(() => {
+    const account = String(activeMode === 'phone' ? phoneWatch || '' : usernameWatch || '').trim();
+    if (!account) {
+      setTenantOptions([]);
+      return;
+    }
+    const current = ++tenantQuerySeq.current;
+    const timer = window.setTimeout(async () => {
+      try {
+        setTenantLoading(true);
+        const loginMethod = activeMode === 'phone' ? 'PHONE_SMS' : 'PASSWORD';
+        const tenants = await loginService.queryLoginTenants(account, loginMethod);
+        if (current !== tenantQuerySeq.current) {
+          return;
+        }
+        setTenantOptions(tenants || []);
+        if (tenants?.length === 1 && tenants[0]?.tenantId) {
+          form.setFieldValue('tenantId', String(tenants[0].tenantId));
+        }
+      } catch {
+        if (current === tenantQuerySeq.current) {
+          setTenantOptions([]);
+        }
+      } finally {
+        if (current === tenantQuerySeq.current) {
+          setTenantLoading(false);
+        }
+      }
+    }, 260);
+    return () => window.clearTimeout(timer);
+  }, [activeMode, usernameWatch, phoneWatch, form]);
 
   useEffect(() => {
     return () => {
@@ -161,7 +230,13 @@ const Login: React.FC = () => {
         currentLoginData.accessToken,
         selectedRole.roleCode
       );
-      userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, accessToken);
+      userStore.login(
+        currentLoginData.username,
+        selectedRole.id,
+        selectedRole.roleCode,
+        accessToken,
+        currentLoginData.tenantId || userStore.tenantId || ''
+      );
       userStore.setRoleId(roleId);
       const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
@@ -229,13 +304,43 @@ const Login: React.FC = () => {
     }
   };
 
-  async function processLoginSuccess(loginResponse: LoginResponse, rememberedUsername?: string, remember?: boolean) {
+  function updateRecentTenants(tenantId: string) {
+    const normalized = tenantId.trim();
+    if (!normalized) {
+      return;
+    }
+    setRecentTenants((prev) => {
+      const next = [normalized, ...prev.filter((item) => item !== normalized)].slice(0, MAX_RECENT_TENANTS);
+      localStorage.setItem(RECENT_TENANTS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  async function processLoginSuccess(
+    loginResponse: LoginResponse,
+    rememberedUsername?: string,
+    remember?: boolean,
+    submittedTenantId?: string,
+    rememberTenant?: boolean
+  ) {
+    const resolvedTenantId = (loginResponse.tenantId || submittedTenantId || '').trim();
     if (remember !== undefined) {
       if (remember && rememberedUsername?.trim()) {
         localStorage.setItem(REMEMBERED_USERNAME_KEY, rememberedUsername.trim());
       } else if (!remember) {
         localStorage.removeItem(REMEMBERED_USERNAME_KEY);
       }
+    }
+    if (rememberTenant !== undefined) {
+      if (rememberTenant && resolvedTenantId) {
+        localStorage.setItem(REMEMBERED_TENANT_KEY, resolvedTenantId);
+      } else if (!rememberTenant) {
+        localStorage.removeItem(REMEMBERED_TENANT_KEY);
+      }
+    }
+    if (resolvedTenantId) {
+      userStore.setTenantId(resolvedTenantId);
+      updateRecentTenants(resolvedTenantId);
     }
 
     loginData.current = loginResponse;
@@ -265,7 +370,7 @@ const Login: React.FC = () => {
     code: number,
     loginResponse: LoginResponse | undefined,
     message: string,
-    rememberOpts?: { remember?: boolean; username?: string }
+    rememberOpts?: { remember?: boolean; username?: string; tenantId?: string; rememberTenant?: boolean }
   ) {
     switch (code) {
       case HttpCodeEnum.RC107:
@@ -292,7 +397,13 @@ const Login: React.FC = () => {
         break;
       case HttpCodeEnum.SUCCESS:
         if (loginResponse) {
-          await processLoginSuccess(loginResponse, rememberOpts?.username, rememberOpts?.remember);
+          await processLoginSuccess(
+            loginResponse,
+            rememberOpts?.username,
+            rememberOpts?.remember,
+            rememberOpts?.tenantId,
+            rememberOpts?.rememberTenant
+          );
         }
         break;
       default:
@@ -323,11 +434,18 @@ const Login: React.FC = () => {
         message,
       } = await loginService.login({
         loginMethod: 'GITHUB',
+        tenantId: sessionStorage.getItem(GH_TENANT_KEY) || form.getFieldValue('tenantId') || '',
         oauthCode: code,
         oauthRedirectUri: githubRedirectUri(),
       });
-      await handleLoginApiResult(httpCode, loginResponse as LoginResponse, message);
+      await handleLoginApiResult(httpCode, loginResponse as LoginResponse, message, {
+        username: form.getFieldValue('username'),
+        remember: form.getFieldValue('remember'),
+        tenantId: form.getFieldValue('tenantId'),
+        rememberTenant: form.getFieldValue('rememberTenant') ?? true,
+      });
     } finally {
+      sessionStorage.removeItem(GH_TENANT_KEY);
       setLoading(false);
     }
   };
@@ -339,6 +457,10 @@ const Login: React.FC = () => {
         return;
       }
       sessionStorage.removeItem(GH_CODE_KEY);
+      const oauthTenant = sessionStorage.getItem(GH_TENANT_KEY);
+      if (oauthTenant) {
+        form.setFieldValue('tenantId', oauthTenant);
+      }
       setActiveMode('github');
       void githubOAuthLoginRunnerRef.current(code);
     } catch {
@@ -355,24 +477,34 @@ const Login: React.FC = () => {
         message,
       } = await loginService.login({
         loginMethod: 'WECHAT_QR',
+        tenantId: form.getFieldValue('tenantId') || '',
         wechatCode,
       });
-      await handleLoginApiResult(code, loginResponse as LoginResponse, message);
+      await handleLoginApiResult(code, loginResponse as LoginResponse, message, {
+        remember: form.getFieldValue('remember'),
+        tenantId: form.getFieldValue('tenantId'),
+        rememberTenant: form.getFieldValue('rememberTenant') ?? true,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const startWeChatQr = async () => {
+    const tenantId = String(form.getFieldValue('tenantId') || '').trim();
+    if (!tenantId) {
+      antdUtils.message?.warning(t('login.enterTenantId'));
+      return;
+    }
     try {
-      const { ticket, authorizeUrl } = await loginService.startWeChatQr();
+      const { ticket, authorizeUrl } = await loginService.startWeChatQr(tenantId);
       setWechatAuthorizeUrl(authorizeUrl);
       if (wechatPollRef.current) {
         clearInterval(wechatPollRef.current);
       }
       wechatPollRef.current = setInterval(async () => {
         try {
-          const poll = await loginService.pollWeChatQr(ticket);
+          const poll = await loginService.pollWeChatQr(ticket, tenantId);
           if (poll.status === 'DONE' && poll.wechatCode) {
             if (wechatPollRef.current) {
               clearInterval(wechatPollRef.current);
@@ -402,6 +534,12 @@ const Login: React.FC = () => {
       antdUtils.message?.warning(t('login.githubNotConfigured'));
       return;
     }
+    const tenantId = String(form.getFieldValue('tenantId') || '').trim();
+    if (!tenantId) {
+      antdUtils.message?.warning(t('login.enterTenantId'));
+      return;
+    }
+    sessionStorage.setItem(GH_TENANT_KEY, tenantId);
     const redirect = encodeURIComponent(githubRedirectUri());
     const url = `https://github.com/login/oauth/authorize?client_id=${id}&redirect_uri=${redirect}&scope=read:user`;
     window.location.assign(url);
@@ -410,9 +548,14 @@ const Login: React.FC = () => {
   const sendSms = async () => {
     try {
       const { phone: phoneRaw } = await form.validateFields(['phone']);
+      const tenantId = String(form.getFieldValue('tenantId') || '').trim();
+      if (!tenantId) {
+        antdUtils.message?.warning(t('login.enterTenantId'));
+        return;
+      }
       const phone = String(phoneRaw ?? '').trim();
       try {
-        await loginService.sendLoginSms(phone);
+        await loginService.sendLoginSms(phone, tenantId);
         antdUtils.message?.success(t('login.smsSent'));
         setSmsCooldown(60);
       } catch (e: unknown) {
@@ -434,6 +577,8 @@ const Login: React.FC = () => {
         await handleLoginApiResult(code, loginResponse as LoginResponse, message, {
           remember: values.remember,
           username: values.username,
+          tenantId: values.tenantId,
+          rememberTenant: values.rememberTenant,
         });
       } else if (activeMode === 'phone') {
         const {
@@ -442,10 +587,15 @@ const Login: React.FC = () => {
           message,
         } = await loginService.login({
           loginMethod: 'PHONE_SMS',
+          tenantId: values.tenantId,
           phone: values.phone,
           smsCode: values.smsCode,
         });
-        await handleLoginApiResult(code, loginResponse as LoginResponse, message);
+        await handleLoginApiResult(code, loginResponse as LoginResponse, message, {
+          remember: values.remember,
+          tenantId: values.tenantId,
+          rememberTenant: values.rememberTenant,
+        });
       }
     } finally {
       setLoading(false);
@@ -463,8 +613,18 @@ const Login: React.FC = () => {
     if (mode === 'password') {
       try {
         const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+        const savedTenantId = localStorage.getItem(REMEMBERED_TENANT_KEY);
+        const passwordModeValues: { username?: string; remember?: boolean; tenantId?: string; rememberTenant?: boolean } = {};
         if (savedUsername?.trim()) {
-          form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+          passwordModeValues.username = savedUsername.trim();
+          passwordModeValues.remember = true;
+        }
+        if (savedTenantId?.trim()) {
+          passwordModeValues.tenantId = savedTenantId.trim();
+          passwordModeValues.rememberTenant = true;
+        }
+        if (Object.keys(passwordModeValues).length > 0) {
+          form.setFieldsValue(passwordModeValues);
         }
       } catch {
         // ignore
@@ -587,6 +747,31 @@ const Login: React.FC = () => {
                     style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0 }}
                   >
                     <div className={styles['login-form-body']}>
+                      <Form.Item
+                        name="tenantId"
+                        rules={[{ required: true, whitespace: true, message: t('login.enterTenantId') }]}
+                        className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                      >
+                        <AutoComplete
+                          options={buildTenantAutoCompleteOptions(tenantOptions, recentTenants)}
+                          notFoundContent={tenantLoading ? t('login.tenantLoading') : undefined}
+                          filterOption={(inputValue, option) =>
+                            String(option?.value || '')
+                              .toLowerCase()
+                              .includes(inputValue.toLowerCase())
+                          }
+                        >
+                          <Input size="large" allowClear placeholder={t('login.tenantId')} prefix={<ApartmentOutlined />} />
+                        </AutoComplete>
+                      </Form.Item>
+                      <Form.Item
+                        name="rememberTenant"
+                        valuePropName="checked"
+                        initialValue={true}
+                        className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                      >
+                        <Checkbox>{t('login.rememberTenant')}</Checkbox>
+                      </Form.Item>
                       {activeMode === 'password' && (
                         <>
                           <Form.Item
@@ -850,4 +1035,22 @@ function findMenuByRoute(menus: unknown[]): unknown | null {
     }
   }
   return null;
+}
+
+function buildTenantAutoCompleteOptions(tenantOptions: LoginTenantOption[], recentTenants: string[]) {
+  const merged = new Map<string, string>();
+  for (const tenant of tenantOptions || []) {
+    const tenantId = String(tenant.tenantId || '').trim();
+    if (!tenantId) {
+      continue;
+    }
+    const label = `${tenant.tenantName || tenant.tenantCode || 'Tenant'} (${tenantId})`;
+    merged.set(tenantId, label);
+  }
+  for (const tenantId of recentTenants || []) {
+    if (!merged.has(tenantId)) {
+      merged.set(tenantId, tenantId);
+    }
+  }
+  return Array.from(merged.entries()).map(([value, label]) => ({ value, label }));
 }

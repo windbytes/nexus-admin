@@ -16,13 +16,16 @@ interface UserState {
   roleCode: string;
   // 用户角色列表
   userRoles: RoleModel[];
-  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string) => void;
+  // 当前租户ID
+  tenantId: string;
+  login: (loginUser: string, roleId: string, roleCode: string, accessToken: string, tenantId: string) => void;
   clear(): void;
   logout: () => void;
   setAccessToken: (token: string) => void;
   setHomePath: (homePath: string) => void;
   setRoleId: (roleId: string) => void;
   setUserRoles: (roles: RoleModel[]) => void;
+  setTenantId: (tenantId: string) => void;
   switchRole: (roleId: string) => void;
 }
 
@@ -40,8 +43,9 @@ export const useUserStore = create<UserState>()(
       email: '',
       currentRoleId: '',
       userRoles: [],
-      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '') =>
-        set({ loginUser, isLogin: true, roleId, roleCode, accessToken }),
+      tenantId: '',
+      login: (loginUser = '', roleId = '', roleCode = '', accessToken = '', tenantId = '') =>
+        set({ loginUser, isLogin: true, roleId, roleCode, accessToken, tenantId }),
       clear: () =>
         set({
           loginUser: '',
@@ -50,6 +54,7 @@ export const useUserStore = create<UserState>()(
           roleId: '',
           roleCode: '',
           userRoles: [],
+          tenantId: '',
         }),
       logout: () =>
         set({
@@ -59,11 +64,13 @@ export const useUserStore = create<UserState>()(
           roleId: '',
           roleCode: '',
           userRoles: [],
+          tenantId: '',
         }),
       setAccessToken: (token: string) => set({ accessToken: token }),
       setHomePath: (homePath: string) => set({ homePath }),
       setRoleId: (roleId: string) => set({ roleId: roleId }),
       setUserRoles: (roles: RoleModel[]) => set({ userRoles: roles }),
+      setTenantId: (tenantId: string) => set({ tenantId }),
       switchRole: (roleId: string) => {
         set((state) => {
           const newRole = state.userRoles.find((role) => role.id === roleId);

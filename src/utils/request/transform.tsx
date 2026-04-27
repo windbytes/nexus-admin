@@ -49,6 +49,13 @@ function addSubscriber(subscriber: RefreshSubscriber) {
 // 防止多个401请求同时弹出多个认证失败弹窗
 let hasShownAuthModal = false;
 
+function shouldInjectTenant(url?: string): boolean {
+  if (!url) {
+    return false;
+  }
+  return url.includes('/system/');
+}
+
 export interface CreateAxiosOptions extends AxiosRequestConfig {
   authenticationScheme?: string;
   transform?: AxiosTransform;
@@ -243,6 +250,12 @@ export const transform: AxiosTransform = {
     config.headers['X-Encrypted'] = cpt;
     // 添加访问令牌
     const accessToken = useUserStore.getState().accessToken;
+    const tenantId = useUserStore.getState().tenantId;
+    if (tenantId && shouldInjectTenant(config.url)) {
+      const params =
+        config.params && typeof config.params === 'object' && !Array.isArray(config.params) ? config.params : {};
+      config.params = { ...params, tenantId };
+    }
     config.headers.Authorization = options.authenticationScheme
       ? `${options.authenticationScheme} ${accessToken}`
       : accessToken;
@@ -284,8 +297,8 @@ export const transform: AxiosTransform = {
     // 处理下载请求（responseType为blob）的错误响应
     // 当后端返回错误时，全局异常拦截器会返回 JSON 格式的错误信息
     if (config.responseType === 'blob' && res.data instanceof Blob) {
-      const contentType = res.headers['content-type'] || '';
-      const contentDisposition = res.headers['content-disposition'] || '';
+      const contentType = String(res.headers['content-type'] || '');
+      const contentDisposition = String(res.headers['content-disposition'] || '');
 
       // 判断是否为错误响应：Content-Type 是 JSON 且没有 Content-Disposition
       // 正常文件下载会有 Content-Disposition 头
