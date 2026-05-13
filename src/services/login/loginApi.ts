@@ -9,7 +9,6 @@ export type LoginMethodType = 'PASSWORD' | 'PHONE_SMS' | 'GITHUB' | 'WECHAT_QR';
  */
 export interface LoginParams {
   loginMethod?: LoginMethodType;
-  tenantId?: string;
   username?: string;
   password?: string;
   roleCode?: string;
@@ -21,7 +20,6 @@ export interface LoginParams {
   oauthRedirectUri?: string;
   wechatCode?: string;
   remember?: boolean;
-  rememberTenant?: boolean;
 }
 
 /**
@@ -54,8 +52,6 @@ export interface LoginResponse {
   accessToken: string;
   /** 首页路径 */
   homePath?: string;
-  /** 租户ID */
-  tenantId?: string;
   /** 用户角色列表 */
   userRoles: UserRole[];
 }
@@ -71,15 +67,8 @@ export interface WeChatPollData {
   wechatCode?: string;
 }
 
-export interface LoginTenantOption {
-  tenantId: string;
-  tenantCode?: string;
-  tenantName?: string;
-}
-
 const LoginApi = {
   login: '/auth/login',
-  queryTenants: '/auth/tenants',
   confirmRole: '/auth/confirm-role',
   getCode: '/sys/framework/captcha',
   smsSend: '/auth/sms/send',
@@ -89,33 +78,22 @@ const LoginApi = {
 
 interface ILoginService {
   login(params: LoginParams): Promise<Response>;
-  queryLoginTenants(account: string, loginMethod?: LoginMethodType): Promise<LoginTenantOption[]>;
   confirmRole(loginToken: string, roleCode: string): Promise<{ accessToken: string; permissions: string[] }>;
   getCaptcha(): Promise<{ key: string; code: string }>;
-  sendLoginSms(phone: string, tenantId?: string): Promise<void>;
-  startWeChatQr(tenantId?: string): Promise<WeChatQrStartData>;
-  pollWeChatQr(ticket: string, tenantId?: string): Promise<WeChatPollData>;
+  sendLoginSms(phone: string): Promise<void>;
+  startWeChatQr(): Promise<WeChatQrStartData>;
+  pollWeChatQr(ticket: string): Promise<WeChatPollData>;
 }
 
 export const loginService: ILoginService = {
   login(params: LoginParams): Promise<Response> {
-    const { remember: _remember, rememberTenant: _rememberTenant, ...data } = params;
+    const { remember: _remember, ...data } = params;
     return HttpRequest.post<Response>(
       {
         url: LoginApi.login,
         data,
       },
       { isTransformResponse: false }
-    );
-  },
-
-  async queryLoginTenants(account: string, loginMethod?: LoginMethodType): Promise<LoginTenantOption[]> {
-    return HttpRequest.get<LoginTenantOption[]>(
-      {
-        url: LoginApi.queryTenants,
-        params: { account, loginMethod },
-      },
-      { successMessageMode: 'none', errorMessageMode: 'none' }
     );
   },
 
@@ -142,31 +120,30 @@ export const loginService: ILoginService = {
     return { key, code };
   },
 
-  async sendLoginSms(phone: string, tenantId?: string): Promise<void> {
+  async sendLoginSms(phone: string): Promise<void> {
     await HttpRequest.post(
       {
         url: LoginApi.smsSend,
-        data: { phone, tenantId },
+        data: { phone },
       },
       { successMessageMode: 'none' }
     );
   },
 
-  async startWeChatQr(tenantId?: string): Promise<WeChatQrStartData> {
+  async startWeChatQr(): Promise<WeChatQrStartData> {
     return HttpRequest.get<WeChatQrStartData>(
       {
         url: LoginApi.wechatQr,
-        params: { tenantId },
       },
       { successMessageMode: 'none' }
     );
   },
 
-  async pollWeChatQr(ticket: string, tenantId?: string): Promise<WeChatPollData> {
+  async pollWeChatQr(ticket: string): Promise<WeChatPollData> {
     return HttpRequest.get<WeChatPollData>(
       {
         url: LoginApi.wechatPoll,
-        params: { ticket, tenantId },
+        params: { ticket },
       },
       { successMessageMode: 'none' }
     );
