@@ -1,8 +1,8 @@
-import { CloseOutlined } from '@ant-design/icons';
-import { App, Button, Empty, Segmented, Space, Switch, Tag, Typography } from 'antd';
+import { CloseOutlined, CopyOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { App, Button, Card, Empty, Segmented, Space, Switch, Tag, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { DraggableData, DraggableEvent } from 'react-draggable';
 import Draggable from 'react-draggable';
@@ -16,12 +16,25 @@ import webSocketClient, {
 
 type MonitorMessageType = 'sql' | 'param' | 'announcement';
 
+interface SqlLogPayload {
+  sql: string;
+  queryParams?: string;
+  elapsedMs: number;
+  elapsedText: string;
+}
+
 interface ConsoleLogItem {
   id: string;
   type: MonitorMessageType;
-  title: string;
-  description: string;
   timestamp: number;
+  /** 复制按钮写入剪贴板的内容（SQL 卡片为纯 SQL 语句） */
+  copyText: string;
+  /** type === 'sql' 时的结构化展示 */
+  sqlPayload?: SqlLogPayload;
+  /** 非 SQL：卡片正文 */
+  plainBody?: string;
+  /** 非 SQL：标题下可选摘要（如参数名） */
+  summary?: string;
 }
 
 interface PanelPersist {
@@ -76,6 +89,108 @@ function readInitialPanel(): PanelPersist {
   };
 }
 
+function getMessageTagColor(type: MonitorMessageType) {
+  switch (type) {
+    case 'sql':
+      return 'blue';
+    case 'param':
+      return 'purple';
+    case 'announcement':
+      return 'gold';
+    default:
+      return 'default';
+  }
+}
+
+function getMessageTagText(type: MonitorMessageType) {
+  switch (type) {
+    case 'sql':
+      return 'SQL';
+    case 'param':
+      return '参数';
+    case 'announcement':
+      return '公告';
+    default:
+      return '消息';
+  }
+}
+
+interface MonitorLogCardsProps {
+  items: ConsoleLogItem[];
+  onCopy: (text: string) => void | Promise<void>;
+}
+
+const MonitorLogCards = memo(function MonitorLogCards({ items, onCopy }: MonitorLogCardsProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item) => (
+        <Card
+          key={item.id}
+          size="small"
+          className="min-w-0 shadow-sm"
+          styles={{
+            body: { paddingTop: 10 },
+          }}
+          title={
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5">
+                <Tag color={getMessageTagColor(item.type)} className="m-0">
+                  {getMessageTagText(item.type)}
+                </Tag>
+                <Typography.Text type="secondary" className="text-xs">
+                  {dayjs(item.timestamp).format('YYYY-MM-DD HH:mm:ss')}
+                </Typography.Text>
+                {item.type === 'sql' && item.sqlPayload ? (
+                  <Typography.Text type="danger" className="text-xs font-medium">
+                    耗时 {item.sqlPayload.elapsedText}
+                  </Typography.Text>
+                ) : null}
+              </div>
+              <Tooltip title="复制本卡片内容">
+                <Button
+                  type="text"
+                  size="small"
+                  className="shrink-0 text-gray-500"
+                  icon={<CopyOutlined />}
+                  aria-label="复制"
+                  onClick={() => void onCopy(item.copyText)}
+                />
+              </Tooltip>
+            </div>
+          }
+        >
+          {item.type === 'sql' && item.sqlPayload ? (
+            <div className="w-full min-w-0 space-y-2">
+              <pre className="sql-code-card m-0 box-border w-full max-w-full min-w-0 overflow-x-hidden whitespace-pre-wrap break-all rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-3 font-mono text-[12px] leading-relaxed text-[#1677ff]">
+                {item.sqlPayload.sql}
+              </pre>
+              <div className="w-full min-w-0">
+                <Typography.Text type="secondary" className="mb-1 block text-xs">
+                  参数
+                </Typography.Text>
+                <pre className="sql-code-card m-0 box-border w-full max-w-full min-w-0 overflow-x-hidden whitespace-pre-wrap break-all rounded-md border border-dashed border-[#d0d7de] bg-[#fafbfc] p-2 font-mono text-[11px] leading-relaxed text-[#1677ff]">
+                  {item.sqlPayload.queryParams?.trim() ? item.sqlPayload.queryParams : '无'}
+                </pre>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {item.summary ? (
+                <Typography.Text strong className="mb-2 block text-sm">
+                  {item.summary}
+                </Typography.Text>
+              ) : null}
+              <pre className="sql-code-card m-0 overflow-x-auto whitespace-pre-wrap rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-3 font-mono text-[12px] leading-relaxed text-[#24292f]">
+                {item.plainBody}
+              </pre>
+            </div>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+});
+
 /**
  * 浮动监控台：fixed 层叠，不挤占页面布局；可拖拽、可缩放；仅 Esc 或关闭按钮关闭（路由切换保持打开状态通过 sessionStorage 恢复）。
  */
@@ -93,24 +208,47 @@ const Console: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | MonitorMessageType>('all');
   const [connectionStatus, setConnectionStatus] = useState<WebSocketConnectionStatus>(webSocketClient.getStatus());
   const [logs, setLogs] = useState<ConsoleLogItem[]>([]);
+  /** 关闭后不再追加新日志，并通知后端关闭 SQL/参数推送（不清空已有列表） */
+  const [receivingLogs, setReceivingLogs] = useState(true);
+  const receivingLogsRef = useRef(receivingLogs);
+  receivingLogsRef.current = receivingLogs;
 
-  const [dragBounds, setDragBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
   const dragNodeRef = useRef<HTMLDivElement>(null);
+  const [dragBounds, setDragBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
   /** 供 WebSocket status 回调读取最新开关，避免重连后仍用陈旧闭包 */
-  const monitorPrefsRef = useRef({ open, sqlEnabled, paramEnabled });
-  monitorPrefsRef.current = { open, sqlEnabled, paramEnabled };
+  const monitorPrefsRef = useRef({ open, sqlEnabled, paramEnabled, receivingLogs });
+  monitorPrefsRef.current = { open, sqlEnabled, paramEnabled, receivingLogs };
+
+  const defaultDragPosition = useMemo(() => ({ x: panelX, y: panelY }), [panelX, panelY]);
 
   const appendLog = useCallback((item: Omit<ConsoleLogItem, 'id'>) => {
-    setLogs((prev) =>
-      [
-        {
-          ...item,
-          id: `${item.type}-${item.timestamp}-${crypto.randomUUID()}`,
-        },
-        ...prev,
-      ].slice(0, MAX_LOG_ITEMS)
-    );
+    if (!receivingLogsRef.current) {
+      return;
+    }
+    startTransition(() => {
+      setLogs((prev) =>
+        [
+          {
+            ...item,
+            id: `${item.type}-${item.timestamp}-${crypto.randomUUID()}`,
+          },
+          ...prev,
+        ].slice(0, MAX_LOG_ITEMS)
+      );
+    });
   }, []);
+
+  const copyToClipboard = useCallback(
+    async (text: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        message.success('已复制到剪贴板');
+      } catch {
+        message.error('复制失败');
+      }
+    },
+    [message]
+  );
 
   useEffect(() => {
     if (!MONITOR_CONSOLE_ENABLED) {
@@ -152,34 +290,44 @@ const Console: React.FC = () => {
       if (status === 'authenticated') {
         const p = monitorPrefsRef.current;
         webSocketClient.setMonitorPreferences({
-          sqlEnabled: p.open && p.sqlEnabled,
-          paramEnabled: p.open && p.paramEnabled,
+          sqlEnabled: p.open && p.receivingLogs && p.sqlEnabled,
+          paramEnabled: p.open && p.receivingLogs && p.paramEnabled,
         });
       }
     };
     const handleSqlMessage = (event: { payload: SqlMessagePayload; timestamp: number }) => {
+      const { payload, timestamp } = event;
       appendLog({
         type: 'sql',
-        title: 'SQL 执行',
-        description: `${event.payload.sql}\n参数: ${event.payload.queryParams || '无'}\n耗时: ${event.payload.elapsedText}`,
-        timestamp: event.timestamp,
+        timestamp,
+        copyText: payload.sql,
+        sqlPayload: {
+          sql: payload.sql,
+          queryParams: payload.queryParams,
+          elapsedMs: payload.elapsedMs,
+          elapsedText: payload.elapsedText,
+        },
       });
     };
     const handleParamMessage = (event: { payload: ParamMessagePayload; timestamp: number }) => {
       const actionText = getParamActionText(event.payload.action);
+      const body = `编码: ${event.payload.code}\n分类: ${event.payload.categoryName}\n值: ${event.payload.value || '-'}\n操作人: ${event.payload.operatorName || '-'}`;
       appendLog({
         type: 'param',
-        title: `参数${actionText}: ${event.payload.name}`,
-        description: `编码: ${event.payload.code}\n分类: ${event.payload.categoryName}\n值: ${event.payload.value || '-'}\n操作人: ${event.payload.operatorName || '-'}`,
         timestamp: event.timestamp,
+        copyText: body,
+        summary: `${actionText}: ${event.payload.name}`,
+        plainBody: body,
       });
     };
     const handleAnnouncementMessage = (event: { payload: AnnouncementMessagePayload; timestamp: number }) => {
+      const body = `${event.payload.content}\n发布人: ${event.payload.publishedBy || '-'}`;
       appendLog({
         type: 'announcement',
-        title: event.payload.title,
-        description: `${event.payload.content}\n发布人: ${event.payload.publishedBy || '-'}`,
         timestamp: event.timestamp,
+        copyText: body,
+        summary: event.payload.title,
+        plainBody: body,
       });
     };
     const handleServerError = (event: { payload: { message: string } }) => {
@@ -225,10 +373,10 @@ const Console: React.FC = () => {
       return;
     }
     webSocketClient.setMonitorPreferences({
-      sqlEnabled: open && sqlEnabled,
-      paramEnabled: open && paramEnabled,
+      sqlEnabled: open && receivingLogs && sqlEnabled,
+      paramEnabled: open && receivingLogs && paramEnabled,
     });
-  }, [open, sqlEnabled, paramEnabled]);
+  }, [open, receivingLogs, sqlEnabled, paramEnabled]);
 
   const filteredLogs = useMemo(() => {
     if (filterType === 'all') {
@@ -291,9 +439,9 @@ const Console: React.FC = () => {
           nodeRef={dragNodeRef}
           bounds={dragBounds}
           cancel=".monitor-console-no-drag"
-          position={{ x: panelX, y: panelY }}
+          defaultPosition={defaultDragPosition}
           onStart={onDragStart}
-          onDrag={(_e, data) => {
+          onStop={(_e, data) => {
             setPanelX(data.x);
             setPanelY(data.y);
           }}
@@ -328,9 +476,27 @@ const Console: React.FC = () => {
                   <Tag color={getStatusColor(connectionStatus)}>连接: {getStatusText(connectionStatus)}</Tag>
                   <Tag color="processing">公告始终接收</Tag>
                 </Space>
-                <Button size="small" onClick={() => setLogs([])}>
-                  清空
-                </Button>
+                <Space size={8}>
+                  <Tooltip
+                    title={
+                      receivingLogs
+                        ? '停止追加日志，并通知后端关闭 SQL/参数推送'
+                        : '恢复追加日志，并按下方开关通知后端是否推送'
+                    }
+                  >
+                    <Button
+                      size="small"
+                      type={receivingLogs ? 'primary' : 'default'}
+                      icon={receivingLogs ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                      onClick={() => setReceivingLogs((v) => !v)}
+                    >
+                      {receivingLogs ? '关闭监控' : '开启监控'}
+                    </Button>
+                  </Tooltip>
+                  <Button size="small" onClick={() => setLogs([])}>
+                    清空
+                  </Button>
+                </Space>
               </div>
 
               <div className="rounded-md border border-gray-200 p-2">
@@ -365,26 +531,7 @@ const Console: React.FC = () => {
                     <Empty description="暂无实时消息" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {filteredLogs.map((item) => (
-                      <div key={item.id} className="rounded-md border border-gray-100 bg-gray-50 p-2">
-                        <div className="mb-1 flex items-center justify-between gap-2">
-                          <Space size={8}>
-                            <Tag color={getMessageTagColor(item.type)}>{getMessageTagText(item.type)}</Tag>
-                            <Typography.Text strong className="text-sm">
-                              {item.title}
-                            </Typography.Text>
-                          </Space>
-                          <Typography.Text type="secondary" className="text-xs">
-                            {dayjs(item.timestamp).format('HH:mm:ss')}
-                          </Typography.Text>
-                        </div>
-                        <Typography.Paragraph className="mb-0! text-xs whitespace-pre-wrap text-gray-700">
-                          {item.description}
-                        </Typography.Paragraph>
-                      </div>
-                    ))}
-                  </div>
+                  <MonitorLogCards items={filteredLogs} onCopy={copyToClipboard} />
                 )}
               </div>
             </div>
@@ -431,32 +578,6 @@ function getStatusText(status: WebSocketConnectionStatus) {
       return '异常';
     default:
       return '未连接';
-  }
-}
-
-function getMessageTagColor(type: MonitorMessageType) {
-  switch (type) {
-    case 'sql':
-      return 'blue';
-    case 'param':
-      return 'purple';
-    case 'announcement':
-      return 'gold';
-    default:
-      return 'default';
-  }
-}
-
-function getMessageTagText(type: MonitorMessageType) {
-  switch (type) {
-    case 'sql':
-      return 'SQL';
-    case 'param':
-      return '参数';
-    case 'announcement':
-      return '公告';
-    default:
-      return '消息';
   }
 }
 

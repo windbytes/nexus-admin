@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const devServerPort = Number(env.VITE_DEV_SERVER_PORT || '8000');
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9527';
+  /** Netty WebSocket 与 Spring 不同端口；路径无 /api 前缀，需在代理中剥离 */
+  const wsProxyTarget = env.VITE_WS_PROXY_TARGET || 'http://localhost:8891';
 
   return {
     plugins: [
@@ -115,10 +117,16 @@ export default defineConfig(({ mode }) => {
       port: devServerPort,
       host: true,
       proxy: {
+        // 须写在 `/api` 之前：浏览器仍用 `/api/ws/...` 与 REST 同源，此处转发到 Netty 并去掉 `/api`
+        '/api/ws': {
+          target: wsProxyTarget,
+          changeOrigin: true,
+          ws: true,
+          rewrite: (p) => p.replace(/^\/api/, '') || '/',
+        },
         '/api': {
           target: apiProxyTarget,
           changeOrigin: true,
-          ws: true,
         },
       },
     },

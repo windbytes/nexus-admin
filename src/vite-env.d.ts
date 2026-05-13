@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_WS_URL: string;
   /** 本地开发 API 代理目标地址 */
   readonly VITE_API_PROXY_TARGET?: string;
+  /** 本地开发 Netty WebSocket 代理目标（与后端 websocket.netty.port 一致） */
+  readonly VITE_WS_PROXY_TARGET?: string;
   /** 本地开发服务器端口 */
   readonly VITE_DEV_SERVER_PORT?: string;
   /** 是否启用全局实时监控台 */
