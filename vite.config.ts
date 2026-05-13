@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const env = loadEnv(mode, process.cwd(), '');
   const devServerPort = Number(env.VITE_DEV_SERVER_PORT || '8000');
-  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9193';
+  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9527';
 
   return {
     plugins: [
@@ -119,7 +119,6 @@ export default defineConfig(({ mode }) => {
           target: apiProxyTarget,
           changeOrigin: true,
           ws: true,
-          rewrite: (pathName) => pathName.replace(/^\/api/, ''),
         },
       },
     },

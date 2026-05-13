@@ -1,3 +1,6 @@
+import { commonService } from '@/services/common';
+import { useUserStore } from '@/stores/userStore';
+
 export type WebSocketConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'authenticated' | 'error';
 
 export interface WebSocketEnvelope<T = unknown> {
@@ -47,6 +50,8 @@ export interface AckPayload {
 }
 
 export interface ErrorPayload {
+  code?: number;
+  success?: boolean;
   message: string;
 }
 
@@ -70,7 +75,17 @@ type WebSocketEventMap = {
 type WebSocketEventKey = keyof WebSocketEventMap;
 type WebSocketListener<K extends WebSocketEventKey> = (event: WebSocketEventMap[K]) => void;
 
-const WS_URL = import.meta.env.VITE_WS_URL;
+function resolveWebSocketUrl(): string {
+  const configuredUrl = import.meta.env.VITE_WS_URL?.trim();
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/api/ws/syndra`;
+  }
+  return 'ws://localhost:8891/ws/syndra';
+}
 
 class WebSocketClient {
   private socket: WebSocket | null = null;
@@ -85,6 +100,7 @@ class WebSocketClient {
   private authToken = '';
   private manuallyClosed = false;
   private authenticated = false;
+  private refreshInProgress = false;
   private monitorPreferences: MonitorPreferences = {
     sqlEnabled: false,
     paramEnabled: false,
@@ -147,7 +163,7 @@ class WebSocketClient {
     this.stopHeartbeat();
     this.authenticated = false;
     this.setStatus('connecting');
-    const socket = new WebSocket(WS_URL);
+    const socket = new WebSocket(resolveWebSocketUrl());
     this.socket = socket;
     socket.addEventListener('open', (event) => {
       this.reconnectAttempts = 0;
@@ -176,6 +192,9 @@ class WebSocketClient {
         case 'error':
           this.emit('serverError', envelope as WebSocketEnvelope<ErrorPayload>);
           this.setStatus('error');
+          // accessToken 无效/过期时，服务端会主动断开连接；
+          // 这里尝试 refreshToken 获取新 token 并触发重连。
+          void this.tryRefreshTokenAndReconnect((envelope as WebSocketEnvelope<ErrorPayload>).payload);
           break;
         case 'sql':
           this.emit('sql', envelope as WebSocketEnvelope<SqlMessagePayload>);
@@ -191,10 +210,15 @@ class WebSocketClient {
       }
     });
     socket.addEventListener('close', (event) => {
+      // 1) disconnect() 已把 this.socket 置空：旧连接的 close 不应再走重连逻辑。
+      // 2) token 刷新等场景下已建立新 socket 时，忽略旧 socket 晚到的 close，避免误触发 scheduleReconnect。
+      if (this.socket === null || event.target !== this.socket) {
+        return;
+      }
       this.stopHeartbeat();
       this.authenticated = false;
       this.emit('close', event);
-      if (this.manuallyClosed) {
+      if (this.manuallyClosed || this.refreshInProgress) {
         this.setStatus('disconnected');
         return;
       }
@@ -204,6 +228,37 @@ class WebSocketClient {
       this.emit('error', event);
       this.setStatus('error');
     });
+  }
+
+  private async tryRefreshTokenAndReconnect(errorPayload?: ErrorPayload) {
+    if (this.manuallyClosed) {
+      return;
+    }
+    // 只依赖状态码，不依赖错误文案关键词（更稳）。
+    // 后端约定：token 无效/过期 -> code=401
+    if (!errorPayload || errorPayload.code !== 401) {
+      return;
+    }
+    if (this.refreshInProgress) {
+      return;
+    }
+
+    this.refreshInProgress = true;
+    try {
+      const newToken = await commonService.refreshToken();
+      // 立即更新 token 并重建连接，减少等待重连次数。
+      this.authToken = newToken;
+      useUserStore.getState().setAccessToken(newToken);
+
+      this.reconnectAttempts = 0;
+      this.clearReconnectTimer();
+      this.createSocket();
+    } catch {
+      // refresh 失败时，HTTP 层拦截器会处理 logout/跳转登录。
+      // 这里避免无限重连即可。
+    } finally {
+      this.refreshInProgress = false;
+    }
   }
 
   private parseEnvelope(data: string) {
