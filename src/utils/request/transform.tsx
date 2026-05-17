@@ -289,7 +289,7 @@ export const transform: AxiosTransform = {
 
       // 判断是否为错误响应：Content-Type 是 JSON 且没有 Content-Disposition
       // 正常文件下载会有 Content-Disposition 头
-      const isErrorResponse = contentType.includes('application/json') && !contentDisposition;
+      const isErrorResponse = (contentType as string).includes('application/json') && !contentDisposition;
 
       if (isErrorResponse) {
         try {
