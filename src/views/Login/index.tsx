@@ -1,13 +1,34 @@
-import { LockOutlined, SecurityScanOutlined, SwapOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  GithubOutlined,
+  LockOutlined,
+  LoginOutlined,
+  MobileOutlined,
+  SecurityScanOutlined,
+  UserOutlined,
+  WechatOutlined,
+} from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
-import { Button, Checkbox, Col, Form, Image, Input, Modal, Row, Typography } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Col,
+  Divider,
+  Form,
+  Image,
+  Input,
+  type InputRef,
+  Modal,
+  QRCode,
+  Row,
+  Typography,
+} from 'antd';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import logo from '@/assets/icon/web/icon-512.png';
 import filing from '@/assets/images/filing.png';
-// 一些公用的API需要提取出来到api目录下(后续进行更改)
 import RoleSelector from '@/components/RoleSelector';
 import { HttpCodeEnum } from '@/enums/httpEnum';
 import { commonService } from '@/services/common';
@@ -17,12 +38,33 @@ import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
 import { antdUtils } from '@/utils/antdUtil';
+import { copyrightYearRangeFrom } from '@/utils/copyrightDisplay';
 import styles from './login.module.css';
 
 const { Text } = Typography;
 
-/** 本地存储「记住我」用户名的 key */
-const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
+const REMEMBERED_USERNAME_KEY = 'syndra_login_remembered_username';
+const GH_CODE_KEY = 'syndra_github_oauth_code';
+
+type UiLoginMode = 'password' | 'phone' | 'wechat' | 'github';
+
+function githubRedirectUri(): string {
+  return (
+    import.meta.env.VITE_GITHUB_OAUTH_REDIRECT_URI ||
+    `${typeof window !== 'undefined' ? window.location.origin : ''}/login/github-callback`
+  );
+}
+
+function githubClientId(): string {
+  return import.meta.env.VITE_GITHUB_OAUTH_CLIENT_ID || '';
+}
+
+/** WeChat 品牌绿、GitHub 品牌黑（浅底图标按钮） */
+const WECHAT_BRAND_COLOR = '#07C160';
+const GITHUB_BRAND_COLOR = '#181717';
+
+/** 右侧「App 扫码」示意二维码内容，可替换为实际跳转或深链 */
+const APP_SCAN_LOGIN_QR_VALUE = 'https://syndra.example.com/app-login';
 
 /**
  * 登录模块
@@ -31,6 +73,7 @@ const REMEMBERED_USERNAME_KEY = 'nexus_login_remembered_username';
 const Login: React.FC = () => {
   const [form] = Form.useForm();
   const inputRef = useRef(null);
+  const phoneInputRef = useRef<InputRef>(null);
   const navigate = useNavigate();
   const { setMenus, setButtonPermissions } = useMenuStore();
   const userStore = useUserStore();
@@ -39,27 +82,30 @@ const Login: React.FC = () => {
   const { updatePreferences } = usePreferencesStore();
   const queryClient = useQueryClient();
 
-  // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
-  // 角色选择相关状态
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const loginData = useRef<LoginResponse | null>(null);
-  // 动画状态
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  // 验证码
-  const { data, refetch } = useQuery<{ key: string; code: any }>({
+  const [activeMode, setActiveMode] = useState<UiLoginMode>('password');
+  const [showAppQrPanel, setShowAppQrPanel] = useState(false);
+  const [appQrAnimKey, setAppQrAnimKey] = useState(0);
+  const [smsCooldown, setSmsCooldown] = useState(0);
+  const [wechatAuthorizeUrl, setWechatAuthorizeUrl] = useState<string | null>(null);
+  const wechatPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const githubOAuthLoginRunnerRef = useRef<(code: string) => Promise<void>>(() => Promise.resolve());
+
+  const { data, refetch } = useQuery<{ key: string; code: string }>({
     queryKey: ['getCode'],
     queryFn: loginService.getCaptcha,
+    enabled: activeMode === 'password',
   });
 
-  // 页面加载时启动动画
   useEffect(() => {
     setIsAnimating(true);
   }, []);
 
-  // 页面加载时：若本地存在已记住的用户名，回填并勾选「记住我」
   useEffect(() => {
     try {
       const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
@@ -67,15 +113,35 @@ const Login: React.FC = () => {
         form.setFieldsValue({ username: savedUsername.trim(), remember: true });
       }
     } catch {
-      // 忽略本地存储不可用等情况
+      // ignore
     }
   }, [form]);
 
-  /**
-   * 处理角色选择
-   */
+  useEffect(() => {
+    return () => {
+      if (wechatPollRef.current) {
+        clearInterval(wechatPollRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (smsCooldown <= 0) {
+      return;
+    }
+    const timer = setTimeout(() => setSmsCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [smsCooldown]);
+
+  useEffect(() => {
+    if (activeMode !== 'phone') {
+      return;
+    }
+    const timer = window.setTimeout(() => phoneInputRef.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [activeMode]);
+
   const handleRoleSelect = async (roleId: string, roleData?: UserRole[], loginResponseData?: LoginResponse) => {
-    // 使用传入的loginResponseData或当前状态中的loginData
     const currentLoginData = loginResponseData || loginData.current;
     if (!currentLoginData) {
       return;
@@ -84,10 +150,8 @@ const Login: React.FC = () => {
     try {
       setLoading(true);
 
-      // 使用传入的角色数据或当前状态中的角色数据
       const rolesToUse = roleData || userRoles;
 
-      // 查找选中的角色
       const selectedRole = rolesToUse.find((role) => role.id === roleId);
       if (!selectedRole) {
         antdUtils.message?.error('选择的角色不存在');
@@ -97,10 +161,8 @@ const Login: React.FC = () => {
         currentLoginData.accessToken,
         selectedRole.roleCode
       );
-      // 更新用户存储
       userStore.login(currentLoginData.username, selectedRole.id, selectedRole.roleCode, accessToken);
       userStore.setRoleId(roleId);
-      // 将UserRole转换为RoleModel格式
       const roleModels: RoleModel[] = rolesToUse.map((role) => ({
         id: role.id,
         roleCode: role.roleCode,
@@ -111,24 +173,26 @@ const Login: React.FC = () => {
       }));
       userStore.setUserRoles(roleModels);
 
-      // 清空缓存
       resetTabs();
 
-      // 获取角色对应的菜单
       const menu = await commonService.getMenuListByRoleId(roleId);
       setMenus(menu);
       queryClient.setQueryData(['menuData', roleId], menu);
-      // 获取角色配置的权限点（按钮权限）
       const buttonPermissions = permissions;
       setButtonPermissions(buttonPermissions);
       queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
-      // 确定首页路径
       let homePath = currentLoginData.homePath;
       if (!homePath) {
-        const firstRoute = findMenuByRoute(menu);
-        if (firstRoute) {
-          homePath = (firstRoute as any).path;
-        } else {
+        const firstRoute = findMenuByRoute(menu as unknown[]);
+        if (firstRoute && typeof firstRoute === 'object') {
+          const fr = firstRoute as { path?: unknown; route?: unknown };
+          if (typeof fr.path === 'string') {
+            homePath = fr.path;
+          } else if (typeof fr.route === 'string') {
+            homePath = fr.route;
+          }
+        }
+        if (!homePath) {
           antdUtils.notification?.error({
             title: t('login.loginFail'),
             description: '没有配置默认首页地址，也没有菜单，请联系管理员！',
@@ -147,10 +211,8 @@ const Login: React.FC = () => {
 
       userStore.setHomePath(homePath);
 
-      // 关闭角色选择弹窗
       setShowRoleSelector(false);
 
-      // 直接解锁屏幕
       updatePreferences('widget', 'lockScreenStatus', false);
 
       antdUtils.notification?.success({
@@ -158,8 +220,7 @@ const Login: React.FC = () => {
         description: t('login.welcome'),
       });
 
-      // 跳转到首页
-      navigate({ to: homePath });
+      navigate(homePath);
     } catch (error) {
       console.error('角色选择失败:', error);
       antdUtils.message?.error('角色选择失败');
@@ -168,128 +229,262 @@ const Login: React.FC = () => {
     }
   };
 
-  /**
-   * 登录表单提交
-   * @param values 提交表单的数据
-   */
-  const submit = async (values: LoginParams) => {
-    // 加入验证码校验key
-    values.captchaKey = data?.key || '';
+  async function processLoginSuccess(loginResponse: LoginResponse, rememberedUsername?: string, remember?: boolean) {
+    if (remember !== undefined) {
+      if (remember && rememberedUsername?.trim()) {
+        localStorage.setItem(REMEMBERED_USERNAME_KEY, rememberedUsername.trim());
+      } else if (!remember) {
+        localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+      }
+    }
+
+    loginData.current = loginResponse;
+
+    if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
+      antdUtils.modal?.error({
+        title: '登录失败',
+        content: '您的账户没有分配任何角色，请联系管理员配置角色权限！',
+        onOk: () => {
+          refetch();
+        },
+      });
+      return;
+    }
+    if (loginResponse.userRoles.length === 1) {
+      const [role] = loginResponse.userRoles;
+      if (role) {
+        await handleRoleSelect(role.id, loginResponse.userRoles, loginResponse);
+      }
+    } else {
+      setUserRoles(loginResponse.userRoles);
+      setShowRoleSelector(true);
+    }
+  }
+
+  async function handleLoginApiResult(
+    code: number,
+    loginResponse: LoginResponse | undefined,
+    message: string,
+    rememberOpts?: { remember?: boolean; username?: string }
+  ) {
+    switch (code) {
+      case HttpCodeEnum.RC107:
+      case HttpCodeEnum.RC102:
+        form.setFields([{ name: 'username', errors: [message] }]);
+        form.getFieldInstance('username')?.focus();
+        refetch();
+        break;
+      case HttpCodeEnum.RC108:
+        form.setFields([{ name: 'password', errors: [message] }]);
+        form.getFieldInstance('password')?.focus();
+        refetch();
+        break;
+      case HttpCodeEnum.RC300:
+      case HttpCodeEnum.RC301:
+        form.setFields([{ name: 'captchaCode', errors: [message] }]);
+        form.getFieldInstance('captchaCode')?.focus();
+        refetch();
+        break;
+      case HttpCodeEnum.RC111:
+        antdUtils.message?.error({
+          content: <p>{message}</p>,
+        });
+        break;
+      case HttpCodeEnum.SUCCESS:
+        if (loginResponse) {
+          await processLoginSuccess(loginResponse, rememberOpts?.username, rememberOpts?.remember);
+        }
+        break;
+      default:
+        antdUtils.modal?.error({
+          title: t('login.loginFail'),
+          content: (
+            <>
+              <p>
+                {t('common.errorMsg.statusCode')}:{code}
+              </p>
+              <p>
+                {t('common.errorMsg.reason')}:{message}
+              </p>
+            </>
+          ),
+        });
+        refetch();
+        break;
+    }
+  }
+
+  githubOAuthLoginRunnerRef.current = async (code: string) => {
     setLoading(true);
-
     try {
-      const { code, data: loginResponse, message } = await loginService.login(values);
+      const {
+        code: httpCode,
+        data: loginResponse,
+        message,
+      } = await loginService.login({
+        loginMethod: 'GITHUB',
+        oauthCode: code,
+        oauthRedirectUri: githubRedirectUri(),
+      });
+      await handleLoginApiResult(httpCode, loginResponse as LoginResponse, message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // 根据code判定登录状态（和枚举的状态码进行判定） 只会存在几种情况，用户名不存在，用户名或密码错误，用户名冻结，验证码错误或者过期
-      // case中使用{}包裹的目的是为了保证变量做用于仅限于case块
-      switch (code) {
-        // 用户名不存在或禁用
-        case HttpCodeEnum.RC107:
-        case HttpCodeEnum.RC102:
-          form.setFields([{ name: 'username', errors: [message] }]);
-          form.getFieldInstance('username').focus();
-          // 刷新验证码
-          refetch();
-          break;
-        // 密码输入错误
-        case HttpCodeEnum.RC108:
-          form.setFields([{ name: 'password', errors: [message] }]);
-          form.getFieldInstance('password').focus();
-          // 刷新验证码
-          refetch();
-          break;
-        // 验证码错误或过期
-        case HttpCodeEnum.RC300:
-        case HttpCodeEnum.RC301:
-          form.setFields([{ name: 'captchaCode', errors: [message] }]);
-          form.getFieldInstance('captchaCode').focus();
-          // 刷新验证码
-          refetch();
-          break;
-        // 登录失败次数过多
-        case HttpCodeEnum.RC111:
-          antdUtils.message?.error({
-            content: <p>{message}</p>,
-          });
-          break;
-        // 登录成功
-        case HttpCodeEnum.SUCCESS:
-          {
-            // 根据「记住我」勾选状态，写入或清除本地用户名
-            if (values.remember) {
-              localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username);
-            } else {
-              localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+  useEffect(() => {
+    try {
+      const code = sessionStorage.getItem(GH_CODE_KEY);
+      if (!code) {
+        return;
+      }
+      sessionStorage.removeItem(GH_CODE_KEY);
+      setActiveMode('github');
+      void githubOAuthLoginRunnerRef.current(code);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const completeWechatLogin = async (wechatCode: string) => {
+    setLoading(true);
+    try {
+      const {
+        code,
+        data: loginResponse,
+        message,
+      } = await loginService.login({
+        loginMethod: 'WECHAT_QR',
+        wechatCode,
+      });
+      await handleLoginApiResult(code, loginResponse as LoginResponse, message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startWeChatQr = async () => {
+    try {
+      const { ticket, authorizeUrl } = await loginService.startWeChatQr();
+      setWechatAuthorizeUrl(authorizeUrl);
+      if (wechatPollRef.current) {
+        clearInterval(wechatPollRef.current);
+      }
+      wechatPollRef.current = setInterval(async () => {
+        try {
+          const poll = await loginService.pollWeChatQr(ticket);
+          if (poll.status === 'DONE' && poll.wechatCode) {
+            if (wechatPollRef.current) {
+              clearInterval(wechatPollRef.current);
+              wechatPollRef.current = null;
             }
-
-            // 保存登录数据
-            loginData.current = loginResponse;
-
-            // 检查角色信息
-            if (!loginResponse.userRoles || loginResponse.userRoles.length === 0) {
-              // 没有角色信息，提示错误
-              antdUtils.modal?.error({
-                title: '登录失败',
-                content: '您的账户没有分配任何角色，请联系管理员配置角色权限！',
-                onOk: () => {
-                  // 刷新验证码
-                  refetch();
-                },
-              });
-              return;
-            } else if (loginResponse.userRoles.length === 1) {
-              // 单角色情况，直接登录
-              const role = loginResponse.userRoles[0];
-              await handleRoleSelect(role.id, loginResponse.userRoles, loginResponse);
-            } else {
-              // 多角色情况，显示角色选择界面
-              setUserRoles(loginResponse.userRoles);
-              setShowRoleSelector(true);
+            await completeWechatLogin(poll.wechatCode);
+          } else if (poll.status === 'EXPIRED') {
+            if (wechatPollRef.current) {
+              clearInterval(wechatPollRef.current);
+              wechatPollRef.current = null;
             }
+            antdUtils.message?.warning(t('login.wechatSessionExpired'));
           }
-          break;
-        default:
-          // 默认按登录失败处理
-          antdUtils.modal?.error({
-            title: t('login.loginFail'),
-            content: (
-              <>
-                <p>
-                  {t('common.errorMsg.statusCode')}:{code}
-                </p>
-                <p>
-                  {t('common.errorMsg.reason')}:{message}
-                </p>
-              </>
-            ),
-          });
-          // 刷新验证码
-          refetch();
-          break;
+        } catch {
+          // 轮询失败时保持静默，下一轮重试
+        }
+      }, 2000);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : t('login.wechatQrUnavailable');
+      antdUtils.message?.error(msg);
+    }
+  };
+
+  const redirectGithub = () => {
+    const id = githubClientId();
+    if (!id) {
+      antdUtils.message?.warning(t('login.githubNotConfigured'));
+      return;
+    }
+    const redirect = encodeURIComponent(githubRedirectUri());
+    const url = `https://github.com/login/oauth/authorize?client_id=${id}&redirect_uri=${redirect}&scope=read:user`;
+    window.location.assign(url);
+  };
+
+  const sendSms = async () => {
+    try {
+      const { phone: phoneRaw } = await form.validateFields(['phone']);
+      const phone = String(phoneRaw ?? '').trim();
+      try {
+        await loginService.sendLoginSms(phone);
+        antdUtils.message?.success(t('login.smsSent'));
+        setSmsCooldown(60);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : t('login.smsSendFail');
+        antdUtils.message?.error(msg);
+      }
+    } catch {
+      /* validateFields 失败时由 Form.Item 展示校验信息 */
+    }
+  };
+
+  const submit = async (values: LoginParams) => {
+    setLoading(true);
+    try {
+      if (activeMode === 'password') {
+        values.captchaKey = data?.key || '';
+        values.loginMethod = 'PASSWORD';
+        const { code, data: loginResponse, message } = await loginService.login(values);
+        await handleLoginApiResult(code, loginResponse as LoginResponse, message, {
+          remember: values.remember,
+          username: values.username,
+        });
+      } else if (activeMode === 'phone') {
+        const {
+          code,
+          data: loginResponse,
+          message,
+        } = await loginService.login({
+          loginMethod: 'PHONE_SMS',
+          phone: values.phone,
+          smsCode: values.smsCode,
+        });
+        await handleLoginApiResult(code, loginResponse as LoginResponse, message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * 刷新验证码
-   */
-  const refreshCaptcha = () => {
-    refetch();
+  const setMode = (mode: UiLoginMode) => {
+    setActiveMode(mode);
+    form.resetFields();
+    setWechatAuthorizeUrl(null);
+    if (wechatPollRef.current) {
+      clearInterval(wechatPollRef.current);
+      wechatPollRef.current = null;
+    }
+    if (mode === 'password') {
+      try {
+        const savedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY);
+        if (savedUsername?.trim()) {
+          form.setFieldsValue({ username: savedUsername.trim(), remember: true });
+        }
+      } catch {
+        // ignore
+      }
+    }
   };
 
-  /**
-   * 切换到另一个登录界面
-   */
-  const switchLoginStyle = () => {
-    navigate({ to: '/login2' });
+  const selectLoginMode = (mode: UiLoginMode) => {
+    setShowAppQrPanel(false);
+    setMode(mode);
+  };
+
+  const openAppQrPanel = () => {
+    setAppQrAnimKey((k) => k + 1);
+    setShowAppQrPanel(true);
   };
 
   return (
     <div className={`w-full h-full flex flex-col ${isAnimating ? styles['login-page-animated'] : ''}`}>
-      {/* 标题 */}
-      <div className="h-20 flex items-center justify-between px-40">
+      <div className="h-20 flex items-center justify-start px-40">
         <div className="flex items-center">
           <img
             className={`login-icon my-0 ${isAnimating ? styles['login-icon-animated'] : ''}`}
@@ -310,18 +505,9 @@ const Login: React.FC = () => {
             {t('common.app.name')}
           </span>
         </div>
-        {/* 切换登录样式按钮 */}
-        <Button
-          type="text"
-          icon={<SwapOutlined />}
-          onClick={switchLoginStyle}
-          className={styles['switch-btn-traditional'] || ''}
-          title="切换到现代登录界面"
-        />
       </div>
       <div className={styles['login-container']}>
         <div className={`${styles['login-box']} ${isAnimating ? styles['login-box-animated'] : ''}`}>
-          {/* 左边图案和标题 */}
           <div className={styles['login-left']}>
             <div className="title mt-18">
               <p className="text-[24px] m-0 mb-2">
@@ -329,98 +515,295 @@ const Login: React.FC = () => {
                   style={{
                     fontFamily: 'Arial, sans-serif',
                     fontWeight: 700,
-                    fontSize: '28px',
+                    fontSize: '30px',
                     fontStyle: 'italic',
+                    color: 'rgba(0, 0, 0, 0.92)',
                     textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   {t('login.description')}
                 </span>
               </p>
-              <p className="text-[14px] mt-3 italic">FLEX AND STRONG</p>
+              <p className="text-[15px] mt-3 italic text-black/80">{t('login.heroTagline')}</p>
+              <p className={styles['login-hero-intro']}>{t('login.heroIntro')}</p>
             </div>
           </div>
-          {/* 右边登陆表单 */}
           <div className={styles['login-form']}>
-            <div className="login-title">
-              <p className="text-[28px] text-center m-0">
-                <span className="font-bold">{t('login.login')}</span>
-              </p>
-            </div>
-            <div className={`form ${isAnimating ? styles['form-animated'] : ''}`} style={{ marginTop: '40px' }}>
-              <Form form={form} name="login" labelCol={{ span: 5 }} size="large" autoComplete="off" onFinish={submit}>
-                <Form.Item
-                  name="username"
-                  rules={[{ required: true, message: t('login.enterUsername') }]}
-                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                >
-                  <Input
+            {showAppQrPanel ? (
+              <button
+                type="button"
+                className={styles['login-form-corner-back']}
+                onClick={() => setShowAppQrPanel(false)}
+                aria-label={t('login.cornerBackForm')}
+              >
+                <LoginOutlined />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles['login-form-corner-reveal']}
+                onClick={openAppQrPanel}
+                aria-label={t('login.cornerRevealQr')}
+              >
+                <span className={styles['login-form-corner__qr-wrap']} aria-hidden>
+                  <span className={styles['login-form-corner__qr']}>
+                    <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={128} bordered={false} />
+                  </span>
+                </span>
+              </button>
+            )}
+            {!showAppQrPanel ? (
+              <>
+                <div className={styles['login-form-header']}>
+                  <div className={styles['login-title-tabs']} role="tablist" aria-label={t('login.title')}>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeMode === 'password'}
+                      className={`${styles['login-title-tab']} ${activeMode === 'password' ? styles['active'] : ''}`}
+                      onClick={() => selectLoginMode('password')}
+                    >
+                      {t('login.login')}
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeMode === 'phone'}
+                      className={`${styles['login-title-tab']} ${activeMode === 'phone' ? styles['active'] : ''}`}
+                      onClick={() => selectLoginMode('phone')}
+                    >
+                      {t('login.phoneLoginTab')}
+                    </button>
+                  </div>
+                </div>
+                <div className={`${styles['login-form-main']} ${isAnimating ? styles['form-animated'] : ''}`}>
+                  <Form
+                    form={form}
+                    name="login"
+                    labelCol={{ span: 5 }}
                     size="large"
-                    ref={inputRef}
-                    autoFocus
                     autoComplete="off"
-                    allowClear
-                    placeholder={`${t('login.username')}:nexus`}
-                    prefix={<UserOutlined />}
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="password"
-                  rules={[{ required: true, message: t('login.enterPassword') }]}
-                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                >
-                  <Input.Password
-                    size="large"
-                    allowClear
-                    autoComplete="off"
-                    placeholder={`${t('login.password')}:123456`}
-                    prefix={<LockOutlined />}
-                  />
-                </Form.Item>
-                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
-                  <Row gutter={8}>
-                    <Col span={18}>
-                      <Form.Item
-                        name="captchaCode"
-                        noStyle
-                        rules={[{ required: true, message: t('login.enterCaptcha') }]}
-                      >
-                        <Input
-                          size="large"
-                          allowClear
-                          placeholder={t('login.enterCaptcha')}
-                          prefix={<SecurityScanOutlined />}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                      <Button size="large" onClick={refreshCaptcha} className="w-full bg-[#f0f0f0] p-0.5!">
-                        <Image src={data?.code} preview={false} width="100%" height="100%" />
-                      </Button>
-                    </Col>
-                  </Row>
-                </Form.Item>
-                {/* 记住密码 */}
-                <Form.Item
-                  name="remember"
-                  valuePropName="checked"
-                  className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                >
-                  <Checkbox>{t('login.remember')}</Checkbox>
-                </Form.Item>
-                <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
-                  <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
-                    {t('login.login')}
-                  </Button>
-                </Form.Item>
-              </Form>
-            </div>
+                    onFinish={submit}
+                    style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0 }}
+                  >
+                    <div className={styles['login-form-body']}>
+                      {activeMode === 'password' && (
+                        <>
+                          <Form.Item
+                            name="username"
+                            rules={[{ required: true, message: t('login.enterUsername') }]}
+                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                          >
+                            <Input
+                              size="large"
+                              ref={inputRef}
+                              autoFocus
+                              autoComplete="off"
+                              allowClear
+                              placeholder={`${t('login.username')}:syndra`}
+                              prefix={<UserOutlined />}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            name="password"
+                            rules={[{ required: true, message: t('login.enterPassword') }]}
+                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                          >
+                            <Input.Password
+                              size="large"
+                              allowClear
+                              autoComplete="off"
+                              placeholder={`${t('login.password')}:123456`}
+                              prefix={<LockOutlined />}
+                            />
+                          </Form.Item>
+                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                            <Row gutter={8}>
+                              <Col span={18}>
+                                <Form.Item
+                                  name="captchaCode"
+                                  noStyle
+                                  rules={[{ required: true, message: t('login.enterCaptcha') }]}
+                                >
+                                  <Input
+                                    size="large"
+                                    allowClear
+                                    placeholder={t('login.enterCaptcha')}
+                                    prefix={<SecurityScanOutlined />}
+                                  />
+                                </Form.Item>
+                              </Col>
+                              <Col span={6}>
+                                <Button size="large" onClick={() => refetch()} className="w-full bg-[#f0f0f0] p-0.5!">
+                                  <Image src={data?.code} preview={false} width="100%" height="100%" />
+                                </Button>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                          <Form.Item
+                            name="remember"
+                            valuePropName="checked"
+                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                          >
+                            <Checkbox>{t('login.remember')}</Checkbox>
+                          </Form.Item>
+                        </>
+                      )}
+
+                      {activeMode === 'phone' && (
+                        <>
+                          <Form.Item
+                            name="phone"
+                            rules={[
+                              { required: true, whitespace: true, message: t('login.enterPhone') },
+                              { pattern: /^1\d{10}$/, message: t('login.phoneInvalid') },
+                            ]}
+                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                          >
+                            <Input
+                              ref={phoneInputRef}
+                              size="large"
+                              allowClear
+                              placeholder={t('login.phone')}
+                              prefix={<MobileOutlined />}
+                            />
+                          </Form.Item>
+                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                            <Row gutter={8}>
+                              <Col span={16}>
+                                <Form.Item
+                                  name="smsCode"
+                                  noStyle
+                                  rules={[{ required: true, message: t('login.enterSmsCode') }]}
+                                >
+                                  <Input size="large" allowClear placeholder={t('login.smsCode')} />
+                                </Form.Item>
+                              </Col>
+                              <Col span={8}>
+                                <Button
+                                  size="large"
+                                  className="w-full"
+                                  disabled={smsCooldown > 0}
+                                  onClick={() => void sendSms()}
+                                >
+                                  {smsCooldown > 0 ? `${smsCooldown}s` : t('login.sendSms')}
+                                </Button>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </>
+                      )}
+
+                      {activeMode === 'wechat' && (
+                        <div className="text-center py-4">
+                          <p className="text-gray-600 mb-4">{t('login.wechatScanHint')}</p>
+                          {wechatAuthorizeUrl ? (
+                            <div className="flex flex-col items-center gap-4">
+                              <QRCode value={wechatAuthorizeUrl} size={180} />
+                              <Text type="secondary">{t('login.wechatPolling')}</Text>
+                            </div>
+                          ) : (
+                            <Button type="primary" size="large" onClick={() => void startWeChatQr()}>
+                              {t('login.wechatStartQr')}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
+                      {activeMode === 'github' && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-600 mb-6">{t('login.githubHint')}</p>
+                          <Button type="primary" size="large" icon={<GithubOutlined />} onClick={redirectGithub}>
+                            {t('login.githubButton')}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles['login-form-footer']}>
+                      <div className={styles['login-form-submit-slot']}>
+                        {(activeMode === 'password' || activeMode === 'phone') && (
+                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                            <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
+                              {t('login.login')}
+                            </Button>
+                          </Form.Item>
+                        )}
+                      </div>
+
+                      <Divider className={styles['login-other-divider']} plain>
+                        {t('login.otherLoginMethods')}
+                      </Divider>
+
+                      <div className={styles['login-method-icons']}>
+                        <button
+                          type="button"
+                          className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
+                          title={t('login.modeWechat')}
+                          aria-label={t('login.modeWechat')}
+                          onClick={() => selectLoginMode('wechat')}
+                        >
+                          <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
+                          title={t('login.modeGithub')}
+                          aria-label={t('login.modeGithub')}
+                          onClick={() => selectLoginMode('github')}
+                        >
+                          <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
+                        </button>
+                      </div>
+                    </div>
+                  </Form>
+                </div>
+              </>
+            ) : (
+              <div key={appQrAnimKey} className={`${styles['login-app-qr-layout']} ${styles['login-app-qr-enter']}`}>
+                <div className={styles['login-app-qr-center']}>
+                  <div className={styles['login-app-qr-frame']}>
+                    <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={220} errorLevel="H" />
+                    <span className={styles['login-app-qr-icon']} aria-hidden>
+                      <ApiOutlined />
+                    </span>
+                  </div>
+                  <Text type="secondary" className="mt-3 text-center max-w-[280px]">
+                    {t('login.appQrHint')}
+                  </Text>
+                </div>
+                <Divider className={styles['login-other-divider']} plain>
+                  {t('login.otherLoginMethods')}
+                </Divider>
+                <div className={styles['login-method-icons']}>
+                  <button
+                    type="button"
+                    className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
+                    title={t('login.modeWechat')}
+                    aria-label={t('login.modeWechat')}
+                    onClick={() => selectLoginMode('wechat')}
+                  >
+                    <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
+                    title={t('login.modeGithub')}
+                    aria-label={t('login.modeGithub')}
+                    onClick={() => selectLoginMode('github')}
+                  >
+                    <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      {/* 底部版权信息 */}
       <div className={styles['login-footer']}>
-        <Text className={styles['copyright'] || ''}>Copyright@2025 499475142@qq.com All Rights Reserved</Text>
+        <Text className={styles['copyright'] || ''}>
+          Copyright@{copyrightYearRangeFrom()} 499475142@qq.com All Rights Reserved
+        </Text>
         <div className={styles['filing-info']}>
           <a
             target="_blank"
@@ -437,7 +820,6 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* 角色选择弹窗 */}
       <Modal
         title="选择角色"
         open={showRoleSelector}
@@ -454,21 +836,16 @@ const Login: React.FC = () => {
 };
 export default Login;
 
-/**
- * 递归查找菜单(返回第一个匹配的菜单)
- * @param menus 菜单数组
- * @param key 要查找的菜单的 key
- * @returns 找到的菜单对象或 null
- */
-function findMenuByRoute(menus: any[]): any | null {
+function findMenuByRoute(menus: unknown[]): unknown | null {
   for (const menu of menus) {
-    if (menu.route) {
-      return menu; // 找到匹配的菜单项
+    if (menu && typeof menu === 'object' && 'route' in menu && (menu as { route?: unknown }).route) {
+      return menu;
     }
-    if (menu.children) {
-      const found = findMenuByRoute(menu.children);
+    if (menu && typeof menu === 'object' && 'children' in menu) {
+      const children = (menu as { children: unknown[] }).children;
+      const found = findMenuByRoute(children);
       if (found) {
-        return found; // 递归查找子菜单
+        return found;
       }
     }
   }

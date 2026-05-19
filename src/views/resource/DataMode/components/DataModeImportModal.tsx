@@ -1,10 +1,10 @@
-import DragModal from '@/components/modal/DragModal';
-import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { App, Form, Input, Tabs, Upload, type UploadFile } from 'antd';
 import type React from 'react';
 import { useCallback, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
+import { dataModeService } from '@/services/resource/datamode/dataModeApi';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;

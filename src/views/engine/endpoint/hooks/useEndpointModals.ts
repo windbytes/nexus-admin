@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Endpoint } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 
 export type ModalType = 'add' | 'edit' | 'view' | 'clone' | 'callChainTrace' | null;
 

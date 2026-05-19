@@ -1,8 +1,14 @@
-import { DeleteOutlined, DownloadOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  DownOutlined,
+  ExportOutlined,
+  ImportOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
 
 import type React from 'react';
-import { FolderExport, FolderImport } from '@/components/icons';
 import type { SysParam } from '@/services/system/params';
 import type { ModalType } from '../hooks/useParamModals';
 import { useParamPermissions } from '../hooks/useParamPermissions';
@@ -55,33 +61,21 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          disabled={!canAdd}
-          onClick={() => openModal('add')}
-        >
+        <Button type="primary" icon={<PlusOutlined />} disabled={!canAdd} onClick={() => openModal('add')}>
           新增
         </Button>
         <Upload accept=".xlsx,.xls,.csv" showUploadList={false} beforeUpload={handleFileUpload}>
-          <Button icon={<FolderImport className="block!" />} disabled={!canImport}>
+          <Button icon={<ImportOutlined className="block!" />} disabled={!canImport}>
             导入
           </Button>
         </Upload>
 
         <Space.Compact>
-          <Button
-            disabled={selectedRows.length === 0 || !canExport}
-            icon={<FolderExport className="block!" />}
-          >
+          <Button disabled={selectedRows.length === 0 || !canExport} icon={<ExportOutlined className="block!" />}>
             导出
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
-          <Dropdown
-            disabled={selectedRows.length === 0 || !canExport}
-            menu={{ items: exportItems }}
-            placement="bottom"
-          >
+          <Dropdown disabled={selectedRows.length === 0 || !canExport} menu={{ items: exportItems }} placement="bottom">
             <Button icon={<DownOutlined />} />
           </Dropdown>
         </Space.Compact>

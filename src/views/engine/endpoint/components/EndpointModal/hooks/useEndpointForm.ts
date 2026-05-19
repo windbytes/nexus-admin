@@ -1,7 +1,7 @@
 import { App, Form } from 'antd';
 import type { FormInstance } from 'antd/lib';
 import { useCallback, useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 import type { UseEndpointFormReturn } from '../types';
 
 /**
@@ -10,7 +10,7 @@ import type { UseEndpointFormReturn } from '../types';
  */
 export const useEndpointForm = (
   open: boolean,
-  initialValues: Partial<EndpointModel> | undefined,
+  initialValues: Partial<Endpoint> | undefined,
   form: FormInstance,
   onOk: (values: any) => void
 ): UseEndpointFormReturn => {

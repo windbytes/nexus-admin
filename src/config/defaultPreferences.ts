@@ -77,10 +77,10 @@ export const defaultPreferences: Preferences = {
   },
   tabbar: {
     draggable: true,
-    enable: false,
+    enable: true,
     height: 38,
-    keepAlive: true,
-    persist: true,
+    keepAlive: false,
+    persist: false,
     showIcon: true,
     showMaximize: true,
     showMore: true,

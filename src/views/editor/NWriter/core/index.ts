@@ -6,9 +6,9 @@
  * - EditorProvider: 根提供者（状态 + 弹窗 + 插件安装）
  */
 
+export { EditorProvider, useEditorContext, useEditorContextOptional } from './EditorProvider';
 export * from './editorContext';
 export * from './eventBus';
 export * from './extension';
 export * from './plugin';
 export * from './toolbar';
-export { EditorProvider, useEditorContext, useEditorContextOptional } from './EditorProvider';

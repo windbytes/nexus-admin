@@ -1,4 +1,5 @@
 import { appTemplateCategoryService, appTemplateService } from '@/services/engine';
+import type { AppTemplate as ApiAppTemplate } from '@/services/engine/app/types';
 import type { AppTemplate, TemplateCategory, TemplateFilterOption, TemplateSearchParams } from './types';
 
 /** 推荐分类的固定 id */
@@ -44,29 +45,16 @@ export const templateService = {
     pageNum: number;
     pageSize: number;
   }> {
-    const categoryId =
-      params.category && params.category !== RECOMMENDED_ID ? Number(params.category) : undefined;
+    const categoryId = params.category && params.category !== RECOMMENDED_ID ? String(params.category) : undefined;
     const pageNum = params.pageNum ?? 1;
     const pageSize = params.pageSize ?? 20;
-    const list = await appTemplateService.list(categoryId, pageNum, pageSize);
+    const list = await appTemplateService.list({ categoryId, pageNum, pageSize });
     return {
       list: list.map(mapApiTemplateToLocal),
       total: list.length,
       pageNum,
       pageSize,
     };
-  },
-
-  /**
-   * 根据分类获取模板
-   */
-  async getTemplatesByCategory(categoryId: string): Promise<AppTemplate[]> {
-    if (categoryId === RECOMMENDED_ID) {
-      const list = await appTemplateService.list(undefined, 1, 20);
-      return list.map(mapApiTemplateToLocal);
-    }
-    const list = await appTemplateService.list(Number(categoryId), 1, 100);
-    return list.map(mapApiTemplateToLocal);
   },
 
   /**
@@ -77,18 +65,10 @@ export const templateService = {
   },
 };
 
-function mapApiTemplateToLocal(t: {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  iconBg?: string;
-  categoryId?: string;
-  type: number;
-  usageCount?: number;
-  createTime?: string;
-  updateTime?: string;
-}): AppTemplate {
+/** 列表接口可能携带扩展字段，与引擎 types 解耦 */
+type ApiTemplateRow = ApiAppTemplate & { createTime?: string; updateTime?: string };
+
+function mapApiTemplateToLocal(t: ApiTemplateRow): AppTemplate {
   return {
     id: String(t.id),
     name: t.name,

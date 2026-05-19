@@ -1,10 +1,10 @@
+import { HttpRequest } from '@/utils/request';
+import type { MarketListingVO, NodeCategory, PluginDefinition, PluginVersion } from './types';
+
 /**
  * Engine 插件管理 API
  * 路径与后端 /engine/plugins 一致
  */
-import { HttpRequest } from '@/utils/request';
-import type { PluginDefinition, PluginVersion, NodeCategory, MarketListingVO } from './types';
-
 const PluginsApi = {
   registryGrouped: '/engine/plugins/registry/grouped',
   registry: '/engine/plugins/registry',
@@ -60,9 +60,9 @@ export const pluginService = {
     });
   },
 
-  async listAvailable(tenantId: string, pluginType?: string): Promise<MarketListingVO[]> {
+  async listAvailable(pluginType?: string): Promise<MarketListingVO[]> {
     const res = await HttpRequest.get<MarketListingVO[]>(
-      { url: PluginsApi.available, params: { tenantId, pluginType } },
+      { url: PluginsApi.available, params: { pluginType } },
       { successMessageMode: 'none' }
     );
     return res ?? [];

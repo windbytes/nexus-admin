@@ -250,5 +250,5 @@ export interface AddUserModalProps {
   roleId: string;
   // 点击确定(选中的数量)
   onOk: (params: number) => void;
-  onCancel: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCancel: () => void;
 }

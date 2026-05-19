@@ -3,7 +3,6 @@ import { message, Tooltip } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import screenfull from 'screenfull';
 
 /**
  * 全屏展示组件
@@ -11,22 +10,24 @@ import screenfull from 'screenfull';
  */
 const FullScreen: React.FC = () => {
   const { t } = useTranslation();
-  /**
-   * 全屏展示
-   */
-  const [fullScreen, setFullScreen] = useState<boolean>(screenfull.isFullscreen);
+  const [fullScreen, setFullScreen] = useState<boolean>(!!document.fullscreenElement);
+
   useEffect(() => {
-    screenfull.on('change', () => {
-      setFullScreen(screenfull.isFullscreen);
-      return () => screenfull.off('change', () => {});
-    });
+    const onChange = () => setFullScreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
   const handleFullScreen = () => {
-    if (!screenfull.isEnabled) {
-      message.warning('当前您的浏览器不支持全屏 ❌');
+    if (!document.fullscreenEnabled) {
+      message.warning('当前您的浏览器不支持全屏');
+      return;
     }
-    screenfull.toggle();
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import { DownOutlined, RedoOutlined, SearchOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, Select } from 'antd';
 import type React from 'react';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
 import type { SysParamSearchParams } from '@/services/system/params';
 import { CATEGORY_OPTIONS } from '@/services/system/params';
 
@@ -108,9 +109,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading = false, onTo
   // 操作按钮组件
   const ActionButtons = ({ className = '' }: { className?: string }) => (
     <div className={`flex gap-3 justify-end ${className}`}>
-      <Button type="link" icon={expanded ? <UpOutlined /> : <DownOutlined />} onClick={handleToggleExpand}>
-        {expanded ? '收起' : '展开'}
-      </Button>
       <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
         重置
       </Button>
@@ -123,6 +121,18 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading = false, onTo
         className="bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600"
       >
         搜索
+      </Button>
+      <Button
+        type="link"
+        onClick={handleToggleExpand}
+        classNames={{ content: 'text-(--ant-color-primary) flex items-center gap-1' }}
+      >
+        {expanded ? (
+          <UpOutlined className="text-(--ant-color-primary)!" />
+        ) : (
+          <DownOutlined className="text-(--ant-color-primary)!" />
+        )}
+        {expanded ? '收起' : '展开'}
       </Button>
     </div>
   );
@@ -145,7 +155,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, loading = false, onTo
             code: '',
             category: '',
           }}
-          labelCol={{ span: 4 }}
+          labelCol={SEARCH_FORM_GRID_LABEL_COL}
+          wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
         >
           <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 ${expanded ? 'mb-4' : ''}`}>
             {/* 渲染所有字段 */}

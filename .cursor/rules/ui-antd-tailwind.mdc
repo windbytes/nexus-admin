@@ -1,0 +1,14 @@
+---
+description: Ant Design 6、Tailwind 4 与可访问性
+globs: "**/*.{tsx,css,scss}"
+alwaysApply: false
+---
+
+# UI / 样式
+
+- **组件库**：**Ant Design v6**（`antd`）；优先使用官方布局、表单、表格、Modal 等，保持后台一致视觉与交互。
+- **样式**：**Tailwind CSS v4** + 必要时 CSS；类名合并可用 `tailwind-merge`、`clsx`（与现有一致）。
+- **图标**：`@ant-design/icons`、**unplugin-icons**（Iconify）；优先本地化图标配置，避免无端增大包体。
+- **国际化**：`i18next` / `react-i18next`；用户可见字符串走词条，勿硬编码中文（除非产品明确要求仅中文）。
+- **a11y**：Biome a11y 规则已部分开启；交互组件需键盘可操作、合理 `aria-*`；勿用 div 冒充 button。
+- **图表 / 编辑器**：ECharts、Monaco、**@xyflow/react** 等按现有模块模式扩展，注意懒加载与大包体拆分。

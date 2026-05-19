@@ -1,8 +1,8 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { Button, Empty, Input, type InputRef, Modal } from 'antd';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useMenuStore } from '@/stores/store';
 import { getShortcutLabel } from '@/utils/utils';
 import SearchHistory from './components/SearchHistory';
@@ -10,7 +10,7 @@ import SearchResults from './components/SearchResults';
 import Footer from './footer';
 import { useSearch } from './hooks/useSearch';
 import { useSearchHistory } from './hooks/useSearchHistory';
-import './searchMenuModal.scss';
+import './searchMenuModal.css';
 import { useShallow } from 'zustand/shallow';
 import useGlobalUIStore from '@/stores/globalUIStore';
 import classNames from '@/utils/classnames';
@@ -76,7 +76,7 @@ const SearchMenuModal: React.FC = () => {
       path: item.path,
       timestamp: Date.now(),
     });
-    navigate({ to: item.path });
+    navigate(item.path);
     setSearchMenuModalOpen(false);
     setSearchValue('');
     setSelectedIndex(0);

@@ -1,0 +1,153 @@
+*,
+:after,
+:before {
+  box-sizing: border-box;
+}
+
+.ant-statistic-content-value {
+  font-size: 20px;
+  color: #e56033;
+}
+
+/* 拖拽改变列宽的样式 */
+.react-resizable {
+  position: relative;
+}
+
+.react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  padding: 0 3px 3px 0;
+}
+
+.react-resizable-handle-sw {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+  transform: rotate(90deg);
+}
+
+.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  cursor: col-resize;
+}
+
+.react-resizable-handle-nw {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+  transform: rotate(180deg);
+}
+
+.react-resizable-handle-ne {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+  transform: rotate(270deg);
+}
+
+.react-resizable-handle-w,
+.react-resizable-handle-e {
+  top: 50%;
+  margin-top: -10px;
+  cursor: ew-resize;
+}
+
+.react-resizable-handle-w {
+  left: 0;
+  transform: rotate(135deg);
+}
+
+.react-resizable-handle-e {
+  right: 0;
+  transform: rotate(315deg);
+}
+
+.react-resizable-handle-n,
+.react-resizable-handle-s {
+  left: 50%;
+  margin-left: -10px;
+  cursor: ns-resize;
+}
+
+.react-resizable-handle-n {
+  top: 0;
+  transform: rotate(225deg);
+}
+
+.react-resizable-handle-s {
+  bottom: 0;
+  transform: rotate(45deg);
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+#root,
+body,
+html {
+  height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.layout-operation-bar {
+  padding-left: 32px;
+  padding-right: 32px;
+  margin-bottom: 12px;
+}
+
+.integration-layout-content {
+  padding-left: 32px;
+  padding-right: 32px;
+  flex: 1 1;
+}
+
+.layout-header-row {
+  background-color: var(--ant-color-bg-container, #fff);
+  padding: 16px 32px 0;
+}
+
+/* 修改Tag组件的默认右边距 */
+.ant-tag {
+  margin-inline-end: 0;
+}
+
+/* 修改滚动条 */
+* {
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  /* height: 6px; */
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: #d3d0d0;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #4a4a52;
+}
+
+html[data-theme='dark'] {
+  scrollbar-color: #4a4a52 transparent;
+}

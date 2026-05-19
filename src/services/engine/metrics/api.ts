@@ -3,7 +3,7 @@
  * 路径与后端 /engine/metrics 一致
  */
 import { HttpRequest } from '@/utils/request';
-import type { MetricsFlowAgg, MetricsNodeAgg, FlowMetricsParams, NodeMetricsParams } from './types';
+import type { FlowMetricsParams, MetricsFlowAgg, MetricsNodeAgg, NodeMetricsParams } from './types';
 
 const MetricsApi = {
   flow: '/engine/metrics/flow',

@@ -1,9 +1,9 @@
-import { useMemo, memo } from 'react';
 import type React from 'react';
+import { memo, useMemo } from 'react';
 import type { RoleModel } from '@/services/system/role/type';
 import BaseRoleSelector from './BaseRoleSelector';
-import RoleSelectorBar from './RoleSelectorBar';
 import MultipleRoleSelector from './MultipleRoleSelector';
+import RoleSelectorBar from './RoleSelectorBar';
 import type { UniversalRoleSelectorProps } from './types';
 
 /**

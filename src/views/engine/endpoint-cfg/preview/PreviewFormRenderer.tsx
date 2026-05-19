@@ -1,9 +1,14 @@
-import type { EndpointTypeConfig, SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { AppstoreAddOutlined } from '@ant-design/icons';
-import type { FormInstance } from 'antd';
+import type { FormInstance, InputNumberProps } from 'antd';
 import { Divider, Form, InputNumber, Switch } from 'antd';
 import React, { memo, useState } from 'react';
+import type { EndpointTypeConfig, SchemaField } from '@/services/engine';
 import PreviewFormField from './PreviewFormField';
+
+/** 预览区内数字框占满控件列，避免 antd 默认 controlWidth=90px 过窄 */
+const previewInputNumberStyles = {
+  root: { width: '100%', maxWidth: '100%' },
+} satisfies NonNullable<InputNumberProps['styles']>;
 
 interface PreviewFormRendererProps {
   /** 表单实例 */
@@ -59,7 +64,9 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
     if (mode) {
       filtered = fields.filter((field) => {
         // 如果字段没有指定 mode，则在所有模式下都显示
-        if (!field.mode) return true;
+        if (!field.mode) {
+          return true;
+        }
         // 检查字段的 mode 是否匹配当前模式
         return field.mode.includes(mode);
       });
@@ -90,8 +97,8 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
       layout="horizontal"
       initialValues={mergedInitialValues}
       onValuesChange={handleValuesChange}
-      labelCol={{ span: 3 }}
-      wrapperCol={{ span: 19 }}
+      labelCol={{ flex: '0 0 120px' }}
+      wrapperCol={{ flex: '1 1 auto', style: { minWidth: 0 } }}
       autoComplete="off"
     >
       {sortedFields.map((field: SchemaField) => (
@@ -100,14 +107,24 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
       {/* 如果端点配置支持重试，这里需要添加重试相关的配置 */}
       {supportRetry && (
         <>
-          <Divider orientation="left">重试策略</Divider>
+          <Divider orientation="horizontal" titlePlacement="left">
+            重试策略
+          </Divider>
           <Form.Item
             name="maximumRedeliveries"
             label="重试次数"
             tooltip="最大重试次数"
             rules={[{ required: true, message: '请输入重试次数' }]}
           >
-            <InputNumber className="w-full" placeholder="请输入重试次数" min={1} max={10} step={1} addonAfter="次" />
+            <InputNumber
+              className="w-full min-w-0"
+              placeholder="请输入重试次数"
+              min={1}
+              max={10}
+              step={1}
+              suffix="次"
+              styles={previewInputNumberStyles}
+            />
           </Form.Item>
           <Form.Item
             name="redeliveryDelay"
@@ -116,12 +133,13 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
             rules={[{ required: true, message: '请输入初始延迟' }]}
           >
             <InputNumber
-              className="w-full"
+              className="w-full min-w-0"
               placeholder="请输入初始延迟"
               min={50}
               max={10000}
               step={1000}
-              addonAfter="ms"
+              suffix="ms"
+              styles={previewInputNumberStyles}
             />
           </Form.Item>
           <Form.Item name="useExponentialBackoff" label="启用指数退避" valuePropName="checked">
@@ -135,12 +153,13 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
           >
             <InputNumber
               disabled={!useExponentialBackoff}
-              className="w-full"
+              className="w-full min-w-0"
               placeholder="请输入退避倍数"
               min={1}
               max={10}
               step={1}
-              addonAfter="倍"
+              suffix="倍"
+              styles={previewInputNumberStyles}
             />
           </Form.Item>
           <Form.Item
@@ -150,12 +169,13 @@ const PreviewFormRenderer: React.FC<PreviewFormRendererProps> = ({ form, config,
             rules={[{ required: true, message: '请输入最大延迟' }]}
           >
             <InputNumber
-              className="w-full"
+              className="w-full min-w-0"
               placeholder="请输入最大延迟"
               min={50}
               max={60000}
               step={1000}
-              addonAfter="ms"
+              suffix="ms"
+              styles={previewInputNumberStyles}
             />
           </Form.Item>
         </>

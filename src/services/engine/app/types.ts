@@ -3,6 +3,7 @@
  * 与后端 entity/app 及 controller 对齐
  */
 
+import type { Tag } from '@/components/base/tag-management/constant';
 import type { PageQueryParams } from '@/types/global';
 
 /** 集成引擎应用（t_engine_app） */
@@ -34,17 +35,6 @@ export interface EngineApp {
 }
 
 export type AppIconType = 'image' | 'emoji';
-
-/** 标签（t_tag） */
-export interface Tag {
-  id: string;
-  name: string;
-  type: string;
-  createBy?: string;
-  createTime?: string;
-  updateBy?: string;
-  updateTime?: string;
-}
 
 export interface AppModalState {
   // 打开新增项目弹窗

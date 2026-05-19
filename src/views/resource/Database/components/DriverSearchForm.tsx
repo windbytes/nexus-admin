@@ -1,8 +1,9 @@
-import type { DriverSearchParams } from '@/services/resource/database/driverApi';
 import { RedoOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { SEARCH_FORM_GRID_LABEL_COL, SEARCH_FORM_GRID_WRAPPER_COL } from '@/constants/formLayout';
+import type { DriverSearchParams } from '@/services/resource/database/driverApi';
 
 interface DriverSearchFormProps {
   onSearch: (values: Omit<DriverSearchParams, 'pageNum' | 'pageSize'>) => void;
@@ -61,6 +62,8 @@ const DriverSearchForm: React.FC<DriverSearchFormProps> = memo(({ onSearch, load
             databaseType: undefined,
             status: undefined,
           }}
+          labelCol={SEARCH_FORM_GRID_LABEL_COL}
+          wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <Form.Item name="name" label="驱动名称" colon={false} className="mb-0">

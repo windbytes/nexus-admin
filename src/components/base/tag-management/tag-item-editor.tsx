@@ -1,25 +1,22 @@
-import { App, Tag as AntdTag, Input } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useDebounceFn } from 'ahooks';
+import { useQueryClient } from '@tanstack/react-query';
+import { Tag as AntdTag, App, Input } from 'antd';
 import type React from 'react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import useDebounceFn from '@/hooks/useDebounceFn';
 import { tagService } from '@/services/engine';
-import { tagsService } from '@/services/common/tags/tagsApi';
 import classNames from '@/utils/classnames';
 import type { Tag } from './constant';
-import { useQueryClient } from '@tanstack/react-query';
 
 type TagItemEditorProps = {
-  tag: Tag & { binding_count?: number };
-  /** 应用标签使用 engine tagService */
-  tagServiceType?: 'engine' | 'common';
+  tag: Tag;
 };
 
 /**
  * 标签项编辑
  */
-const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag, tagServiceType = 'common' }) => {
+const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -38,11 +35,7 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag, tagServiceType = 'co
     }
     setPending(true);
     try {
-      if (tagServiceType === 'engine') {
-        await tagService.updateTag(tagID, { name: newName });
-      } else {
-        await tagsService.updateTag({ id: tagID, name: newName });
-      }
+      await tagService.updateTag(tagID, { name: newName });
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
       setIsEditing(false);
       notification.success({ title: t('common.updateSuccess') });
@@ -64,11 +57,7 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag, tagServiceType = 'co
     }
     setPending(true);
     try {
-      if (tagServiceType === 'engine') {
-        await tagService.deleteTag(tagID);
-      } else {
-        await tagsService.deleteTag(tagID);
-      }
+      await tagService.deleteTag(tagID);
       queryClient.invalidateQueries({ queryKey: ['tag_management_list'] });
       notification.success({ title: t('common.deleteSuccess') });
     } catch (err: unknown) {
@@ -102,44 +91,38 @@ const TagItemEditor: React.FC<TagItemEditorProps> = ({ tag, tagServiceType = 'co
   );
 
   return (
-    <>
-      <div
-        className={classNames(
-          'flex shrink-0 items-center gap-0.5 rounded-lg border border-solid border-gray-200 py-1 pl-2 pr-1 text-sm leading-5 text-gray-500'
-        )}
-      >
-        {!isEditing && (
-          <AntdTag
-            closable
-            onClose={() => {
-              if (tag.binding_count != null && tag.binding_count > 0) {
-                confirmDelete();
-              } else {
-                handleRemove();
-              }
-            }}
-          >
-            {tag.name} {tag.binding_count != null ? tag.binding_count : ''}
-            <EditOutlined onClick={() => setIsEditing(true)} />
-          </AntdTag>
-        )}
-        {isEditing && (
-          <Input
-            autoFocus
-            value={name}
-            size="small"
-            type="text"
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => {
-              editTag(tag.id, name);
-            }}
-            onPressEnter={() => {
-              editTag(tag.id, name);
-            }}
-          />
-        )}
-      </div>
-    </>
+    <div
+      className={classNames(
+        'flex shrink-0 items-center gap-0.5 rounded-lg border border-solid border-gray-200 py-1 pl-2 pr-1 text-sm leading-5 text-gray-500'
+      )}
+    >
+      {!isEditing && (
+        <AntdTag
+          closable
+          onClose={() => {
+            confirmDelete();
+          }}
+        >
+          {tag.name}
+          <EditOutlined onClick={() => setIsEditing(true)} />
+        </AntdTag>
+      )}
+      {isEditing && (
+        <Input
+          autoFocus
+          value={name}
+          size="small"
+          type="text"
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => {
+            editTag(tag.id, name);
+          }}
+          onPressEnter={() => {
+            editTag(tag.id, name);
+          }}
+        />
+      )}
+    </div>
   );
 };
 export default TagItemEditor;

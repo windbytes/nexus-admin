@@ -7,7 +7,7 @@ import type { LayoutType } from '@/types/app';
 import DoubleColumnMenu from './component/DoubleColumnMenu';
 import MenuComponent from './component/MenuComponent';
 import SystemLogo from './component/SystemLogo';
-import './leftMenu.scss';
+import './leftMenu.css';
 
 /** 使用双列菜单的布局类型（左列一级、右列子菜单） */
 const DOUBLE_COLUMN_LAYOUTS: LayoutType[] = ['sidebar-mixed-nav', 'header-mixed-nav'];
@@ -45,7 +45,7 @@ const LeftMenu: React.FC = () => {
 
   return (
     <Layout.Sider
-      className={`nexus-layout-sider shrink-0 ${isDoubleColumn ? 'nexus-layout-sider-double' : ''}`}
+      className={`syndra-layout-sider shrink-0 ${isDoubleColumn ? 'syndra-layout-sider-double' : ''}`}
       trigger={null}
       collapsedWidth={isDoubleColumn ? 56 : 64}
       style={{ backgroundColor: finalMode === 'dark' ? 'var(--ant-layout-sider-bg)' : colorBgContainer }}

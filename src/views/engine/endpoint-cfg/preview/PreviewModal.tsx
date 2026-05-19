@@ -1,9 +1,17 @@
-import DragModal from '@/components/modal/DragModal';
-import type { EndpointTypeConfig } from '@/services/integrated/endpointConfig/endpointConfigApi';
 import { CloseOutlined, CodeOutlined, EyeOutlined, FileTextOutlined, SaveOutlined } from '@ant-design/icons';
 import { App, Badge, Button, Divider, Empty, Form, Modal, Space, Tabs } from 'antd';
 import React, { memo, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
+import type { EndpointTypeConfig } from '@/services/engine';
 import PreviewFormRenderer from './PreviewFormRenderer';
+
+function getFirstPreviewTabKey(supportMode: string[] | undefined): string {
+  const first = supportMode?.[0];
+  if (first !== undefined && first !== '') {
+    return first;
+  }
+  return 'default';
+}
 
 interface PreviewModalProps {
   /** 是否显示 */
@@ -23,7 +31,7 @@ interface PreviewModalProps {
 const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClose }) => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState<string>('IN');
+  const [activeTab, setActiveTab] = useState<string>(() => getFirstPreviewTabKey(config?.supportMode));
   const [viewMode, setViewMode] = useState<'form' | 'json'>('form');
 
   /**
@@ -68,7 +76,9 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    * 渲染配置的 JSON 视图
    */
   const renderJsonView = () => {
-    if (!config) return null;
+    if (!config) {
+      return null;
+    }
 
     return (
       <div className="json-view-container">
@@ -97,7 +107,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
           </div>
         </div>
 
-        <Divider orientation="left" className="text-sm">
+        <Divider orientation="horizontal" className="text-sm">
           完整配置 JSON
         </Divider>
 
@@ -112,7 +122,9 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    * 根据模式获取对应的字段数量
    */
   const getFieldCountByMode = (mode: string) => {
-    if (!config?.schemaFields) return 0;
+    if (!config?.schemaFields) {
+      return 0;
+    }
     return config.schemaFields.filter((field) => !field.mode || field.mode.includes(mode)).length;
   };
 
@@ -151,7 +163,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
    */
   const handleModalClose = () => {
     form.resetFields();
-    setActiveTab('IN');
+    setActiveTab(getFirstPreviewTabKey(config?.supportMode));
     setViewMode('form');
     onClose();
   };
@@ -262,6 +274,7 @@ const PreviewModal: React.FC<PreviewModalProps> = memo(({ visible, config, onClo
                 onChange={setActiveTab}
                 items={tabItems}
                 size="large"
+                destroyOnHidden
                 tabBarStyle={{
                   marginBottom: 24,
                 }}

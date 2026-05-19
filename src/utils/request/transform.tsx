@@ -46,6 +46,9 @@ function addSubscriber(subscriber: RefreshSubscriber) {
   refreshSubscribers.push(subscriber);
 }
 
+// 防止多个401请求同时弹出多个认证失败弹窗
+let hasShownAuthModal = false;
+
 export interface CreateAxiosOptions extends AxiosRequestConfig {
   authenticationScheme?: string;
   transform?: AxiosTransform;
@@ -286,7 +289,7 @@ export const transform: AxiosTransform = {
 
       // 判断是否为错误响应：Content-Type 是 JSON 且没有 Content-Disposition
       // 正常文件下载会有 Content-Disposition 头
-      const isErrorResponse = contentType.includes('application/json') && !contentDisposition;
+      const isErrorResponse = (contentType as string).includes('application/json') && !contentDisposition;
 
       if (isErrorResponse) {
         try {
@@ -366,32 +369,28 @@ export const transform: AxiosTransform = {
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          // 调用刷新token的接口
           const newToken = await commonService.refreshToken();
-          // 更新用户状态中的token
           userStore.setAccessToken(newToken);
-          // 执行等待的请求
-          onTokenRefreshed();
-          // 重新发起原始请求(这里需要注意一点的是，内部的url可能是有前缀的，所以需要把前缀去掉)
           if (config.url?.startsWith('/api')) {
             config.url = config.url.slice(4);
           }
-          // 使用 isReturnNativeResponse: true 确保能够正确处理响应（包括 blob 响应）
           const retryOptions = { ...requestOptions, isReturnNativeResponse: true };
           const response = await HttpRequest.request({ ...config }, retryOptions);
+          // 重试后仍然返回401，说明认证彻底失败
+          // 构造携带响应信息的错误对象，交由 responseInterceptorsCatch 统一弹窗处理
+          const retryData = (response as AxiosResponse)?.data;
+          if (retryData?.code === HttpCodeEnum.RC401) {
+            const authError: any = new Error(retryData.message || t('login.loginValid'));
+            authError.response = { data: retryData };
+            authError.status = HttpCodeEnum.RC401;
+            onTokenRefreshFailed(authError);
+            return Promise.reject(authError);
+          }
+          // 重试成功，通知所有等待中的请求继续执行
+          onTokenRefreshed();
           return response;
         } catch (refreshError) {
           onTokenRefreshFailed(refreshError);
-          // 刷新 token 失败，跳转登录页
-          antdUtils.modal?.confirm({
-            title: t('login.loginValid'),
-            content: t('login.retryLogin'),
-            onOk() {
-              userStore.logout();
-              window.location.href = '/login';
-            },
-            okText: t('common.operation.confirm'),
-          });
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
@@ -432,19 +431,40 @@ export const transform: AxiosTransform = {
     const { code: responseCode, message: responseMessage } = result;
 
     const { code, message } = error || {};
+
+    // 统一处理401认证失败：弹出错误提示，点击确认后清空登录信息并跳转登录页
+    // 此处同时覆盖：responseInterceptors 中重试仍401抛出的错误 和 HTTP 状态码401的情况
+    if (status === 401 || responseCode === HttpCodeEnum.RC401) {
+      if (!hasShownAuthModal) {
+        hasShownAuthModal = true;
+        const userStore = useUserStore.getState();
+        antdUtils.modal?.error({
+          title: t('login.loginValid'),
+          content: responseMessage || message || t('login.retryLogin'),
+          okText: t('common.operation.confirm'),
+          onOk() {
+            hasShownAuthModal = false;
+            userStore.logout();
+            window.location.href = '/login';
+          },
+        });
+      }
+      return Promise.reject(error);
+    }
+
     let errMessage: string | React.ReactNode = '';
     if ((status === 404 || responseCode === HttpCodeEnum.RC404) && (responseMessage || message)) {
       errMessage = (
         <>
           <div>错误信息：{responseMessage || message}</div>
-          <div>请求路径：{error.config.url}</div>
+          <div>请求路径：{error.config?.url}</div>
         </>
       );
-    } else if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
+    } else if (code === 'ECONNABORTED' && message?.indexOf('timeout') !== -1) {
       errMessage = t('common.errorMsg.requestTimeout');
     } else if (err?.includes('Network Error')) {
       errMessage = t('common.errorMsg.networkException');
-    } else if (responseCode !== HttpCodeEnum.RC401 && (responseMessage || message)) {
+    } else if (responseMessage || message) {
       errMessage = responseMessage || message;
     }
 

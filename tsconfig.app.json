@@ -4,7 +4,6 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["unplugin-icons/types/react"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -16,11 +15,9 @@
     "strictPropertyInitialization": false,
     "noEmit": true,
     "jsx": "react-jsx",
-    // 在新版的vscode中需要，因为新版vscode中内置的ts版本为7 "ignoreDeprecations": "6.0",
-    // "ignoreDeprecations": "6.0",
-    "baseUrl": ".", // 项目根目录
+    "rootDir": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     /* Linting - 更严格的类型检查 */
     "strict": true,
@@ -45,5 +42,5 @@
     "noStrictGenericChecks": false,
     "useUnknownInCatchVariables": true
   },
-  "include": ["src", "public/font"]
+  "include": ["./src", "./public/font"]
 }

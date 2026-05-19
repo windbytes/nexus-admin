@@ -111,22 +111,22 @@ document.addEventListener('keydown', (e) => {
 
 /**
  * 未来可以添加的滚动条交互功能：
- * 
+ *
  * 1. 滑块拖拽：
  *    - 监听 mousedown 在滑块上
  *    - 监听 mousemove 计算新滚动位置
  *    - 监听 mouseup 结束拖拽
- * 
+ *
  * 2. 滑轨点击：
  *    - 监听 mousedown 在滑轨上
  *    - 计算点击位置对应的滚动位置
  *    - 调用 setScrollTop 跳转
- * 
+ *
  * 3. 滑块悬停效果：
  *    - 监听 mousemove 判断是否在滑块上
  *    - 改变滑块颜色
  *    - 重绘滚动条层
- * 
+ *
  * 4. 平滑滚动：
  *    - 使用 requestAnimationFrame 实现缓动
  *    - 从当前位置逐步滚动到目标位置
@@ -173,7 +173,7 @@ function smoothScrollTo(targetScrollTop: number, duration: number = 300) {
 
 // 缓动函数
 function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 }
 
-export { scrollTo, scrollToTop, scrollToBottom, smoothScrollTo };
+export { scrollTo, scrollToBottom, scrollToTop, smoothScrollTo };

@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router';
 import { Image } from 'antd';
+import { Link } from 'react-router';
 import logo from '@/assets/icon/web/icon-192.png';
 import { usePreferencesStore } from '@/stores/store';
 
@@ -20,7 +20,7 @@ const SystemLogo = ({ variant = 'full' }: SystemLogoProps) => {
     return (
       <div className="system-logo-name-only flex items-center toolbox">
         <span className="system-name" style={{ color: colorPrimary }}>
-          Nexus
+          Syndra
         </span>
       </div>
     );
@@ -38,7 +38,7 @@ const SystemLogo = ({ variant = 'full' }: SystemLogoProps) => {
             </div>
             {variant !== 'iconOnly' && (
               <span className="system-name" style={{ color: colorPrimary }}>
-                Nexus
+                Syndra
               </span>
             )}
           </div>

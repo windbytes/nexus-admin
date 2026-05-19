@@ -232,7 +232,7 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
  * @param name 图表名
  */
 export const getIcon = (name: string | undefined | null) => {
-  if (name && name.indexOf('nexus') > -1) {
+  if (name && name.indexOf('syndra') > -1) {
     return <MyIcon type={`${name}`} />;
   }
   return addIcon(name);

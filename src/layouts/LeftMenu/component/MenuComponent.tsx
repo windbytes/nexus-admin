@@ -1,9 +1,9 @@
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Menu, type MenuProps, Spin } from 'antd';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
-import { BubbleLoading } from '@/components/icons';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import type { MenuCaches } from '@/utils/utils';
 import { searchRoute } from '@/utils/utils';
@@ -62,7 +62,7 @@ const MenuComponent = () => {
 
   // 菜单点击
   const clickMenu: MenuProps['onClick'] = useCallback(({ key }: { key: string }) => {
-    navigate({ to: key, replace: true });
+    navigate(key, { replace: true });
   }, []);
 
   // 菜单展开状态改变
@@ -97,7 +97,7 @@ const MenuComponent = () => {
     if (route && Object.keys(route).length && dynamicTitle) {
       const title = route.meta?.title;
       if (title) {
-        document.title = `Nexus - ${t(title)}`;
+        document.title = `Syndra - ${t(title)}`;
       }
     }
   }, [pathname, menus, dynamicTitle]);
@@ -141,7 +141,7 @@ const MenuComponent = () => {
   return (
     <>
       {loading ? (
-        <Spin indicator={<BubbleLoading width={24} />} spinning />
+        <Spin indicator={<LoadingOutlined width={24} />} spinning />
       ) : (
         <Menu
           className="side-menu"

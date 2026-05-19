@@ -1,16 +1,18 @@
 import { EllipsisOutlined } from '@ant-design/icons';
-import { useNavigate } from '@tanstack/react-router';
 import { Tag as AntdTag, Card } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
+import { useNavigate } from 'react-router';
+import type { Tag } from '@/components/base/tag-management/constant';
 import TagSelector from '@/components/base/tag-management/selector';
 import CustomPopover from '@/components/popover';
 import { usePermission } from '@/hooks/usePermission';
-import type { EngineApp, Tag } from '@/services/engine/app/types';
+import type { EngineApp } from '@/services/engine/app/types';
 import clsx from '@/utils/classnames';
 import AppCardOperations from './AppCardOperations';
 import { useAppCardModalActions } from './hooks/useAppCardModals';
-import './apps.scss';
+import './apps.css';
+import { getIcon } from '@/utils/optimized-icons';
 
 /**
  * 应用
@@ -23,8 +25,33 @@ const STATUS_MAP: Record<number, { text: string; color?: string; borderColor: st
   3: { text: '部分异常', color: 'warning', borderColor: '#faad14' },
 };
 
+/** 应用卡片图标背景色板（未配置 iconBg 时按 id 稳定映射到其中一色，视觉上近似随机、且不随重渲染跳动） */
+const APP_ICON_BG_COLORS = [
+  '#1677ff',
+  '#52c41a',
+  '#fa8c16',
+  '#722ed1',
+  '#13c2c2',
+  '#eb2f96',
+  '#faad14',
+  '#ff4d4f',
+] as const;
+
+function getAppIconBackgroundColor(appId: string, iconBg: string | null): string {
+  const custom = iconBg?.trim();
+  if (custom) {
+    return custom;
+  }
+  let h = 0;
+  for (let i = 0; i < appId.length; i++) {
+    h = (Math.imul(31, h) + appId.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(h) % APP_ICON_BG_COLORS.length;
+  return APP_ICON_BG_COLORS[idx] ?? APP_ICON_BG_COLORS[0];
+}
+
 const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
-  const { id, name, status = 0, remark = '', updateUser, updateTime } = app;
+  const { id, name, status = 0, remark = '', updateUser, updateTime, icon, iconBg } = app;
   const statusInfo = STATUS_MAP[status] ?? STATUS_MAP[0];
   const navigate = useNavigate();
   const [tags, setTags] = useState<Tag[]>(app.tags ?? []);
@@ -37,7 +64,7 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
   const redirectWorkflow = (e: React.MouseEvent) => {
     e.preventDefault();
     // 跳转到流程编排界面
-    navigate({ to: `/integrated/app/${id}/workflow`, params: { appId: id } });
+    navigate(`/engine/${id}/flow`);
   };
 
   return (
@@ -64,7 +91,12 @@ const AppCardInner: React.FC<AppCardProps> = ({ app, onRefresh }) => {
 
       <div className="flex h-[66px] shrink-0 grow-0 items-center gap-3 px-[14px] pb-3 pt-[14px]">
         {/* icon */}
-        <div className="relative shrink-0">icon</div>
+        <div
+          className="relative shrink-0 p-2 text-white text-2xl w-10 h-10 rounded-md flex items-center justify-center"
+          style={{ backgroundColor: getAppIconBackgroundColor(id, iconBg) }}
+        >
+          {getIcon(icon)}
+        </div>
         {/* 应用名称与副信息 */}
         <div className="w-0 grow min-w-0 pr-16">
           <div className="flex items-center text-sm font-semibold leading-5 text-[#354052]">

@@ -1,6 +1,6 @@
 import { Divider } from 'antd';
 import type React from 'react';
-import type { SchemaField } from '@/services/integrated/endpointConfig/endpointConfigApi';
+import type { SchemaField } from '@/services/engine/endpoint/types';
 import SchemaFormFieldRenderer from '../../SchemaFormFieldRenderer';
 
 interface ConfigInfoFormProps {

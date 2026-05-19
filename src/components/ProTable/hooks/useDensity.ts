@@ -1,13 +1,13 @@
-import { useState, useCallback } from 'react';
-import type { TableDensity } from '../types';
+import type { SizeType } from 'antd/es/config-provider/SizeContext';
+import { useCallback, useState } from 'react';
 
 /**
  * 表格密度管理 Hook
  */
-export function useDensity(defaultDensity: TableDensity = 'middle') {
-  const [density, setDensity] = useState<TableDensity>(defaultDensity);
+export function useDensity(defaultDensity: SizeType = 'middle') {
+  const [density, setDensity] = useState<SizeType>(defaultDensity);
 
-  const changeDensity = useCallback((newDensity: TableDensity) => {
+  const changeDensity = useCallback((newDensity: SizeType) => {
     setDensity(newDensity);
   }, []);
 

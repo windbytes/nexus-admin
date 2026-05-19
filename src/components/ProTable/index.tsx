@@ -4,8 +4,8 @@ import { Toolbar } from './components/Toolbar';
 import { useColumnSettings } from './hooks/useColumnSettings';
 import { useDensity } from './hooks/useDensity';
 import type { ProTableProps } from './types';
-import './ProTable.scss';
-import '@/styles/table.full.scss';
+import './ProTable.css';
+import '@/styles/table.full.css';
 import useTableScroll from '@/hooks/useTableScroll';
 
 /**

@@ -38,13 +38,13 @@ jobs:
           echo "${{ secrets.ALIYUN_PRIVATE_KEY }}" | tr -d '\r' > private_key.pem
           chmod 600 private_key.pem
           # 清空目标目录
-          ssh -i private_key.pem $USERNAME@$HOST "rm -rf /work/nexus/*"
+          ssh -i private_key.pem $USERNAME@$HOST "rm -rf /home/syndra/web/*"
           # 压缩并上传 当使用 -C dist 时，这里 -C dist . 表示只压缩 dist 文件夹内部的文件，并没有外层 dist 目录
           # tar -zcvf dist.tar.gz -C dist . 表示压缩 dist 文件夹内部的文件，并没有外层 dist 目录
           tar -zcvf dist.tar.gz dist
-          scp -i private_key.pem -C -r dist.tar.gz $USERNAME@$HOST:/work/nexus
+          scp -i private_key.pem -C -r dist.tar.gz $USERNAME@$HOST:/home/syndra/web
           # 解压并替换目标目录 --strip-components=1  表示解压后删除第一层目录（dist）
-          ssh -i private_key.pem $USERNAME@$HOST "tar -zxvf /work/nexus/dist.tar.gz --strip-components=1 -C /work/nexus"
-          ssh -i private_key.pem $USERNAME@$HOST "rm -rf /work/nexus/dist.tar.gz"
+          ssh -i private_key.pem $USERNAME@$HOST "tar -zxvf /home/syndra/web/dist.tar.gz --strip-components=1 -C /home/syndra/web"
+          ssh -i private_key.pem $USERNAME@$HOST "rm -rf /home/syndra/web/dist.tar.gz"
           ssh -i private_key.pem $USERNAME@$HOST "sudo systemctl reload nginx"
           rm private_key.pem

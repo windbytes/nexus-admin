@@ -1,8 +1,17 @@
-import { DownOutlined, ExclamationCircleFilled, ManOutlined, WomanOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleFilled,
+  HistoryOutlined,
+  KeyOutlined,
+  ManOutlined,
+  MoreOutlined,
+  WomanOutlined,
+} from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DeleteDismiss24Filled, History48Regular, PasswordReset48Regular } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { UserModel } from '@/services/system/user/type';
 import { useUserActions } from './useUserAction';
 import type { ModalType } from './useUserModals';
@@ -33,7 +42,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'updatePwd',
         label: '修改密码',
-        icon: <PasswordReset48Regular className="text-sm! block text-orange-300" />,
+        icon: <KeyOutlined className="text-sm! block text-orange-300" />,
         disabled: !canUpdatePassword,
         onClick: () => {
           if (!canUpdatePassword) {
@@ -49,7 +58,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'assignRole',
         label: '分配角色',
-        icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
         disabled: !canAssignRole,
         onClick: () => {
           if (!canAssignRole) {
@@ -65,7 +74,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'operation',
         label: '操作记录',
-        icon: <History48Regular className="text-sm! block" />,
+        icon: <HistoryOutlined className="text-sm! block" />,
         disabled: !canViewActionLog,
         onClick: () => {
           if (!canViewActionLog) {
@@ -81,7 +90,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
+        icon: <DeleteOutlined className="text-sm! block text-(--ant-color-error)!" />,
         disabled: !canDeleteUser,
         onClick: () => {
           if (!canDeleteUser) {
@@ -124,6 +133,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       key: 'username',
       width: 140,
       align: 'left',
+      fixed: 'left',
     },
     {
       dataIndex: 'realName',
@@ -160,7 +170,7 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       dataIndex: 'birthday',
       title: '生日',
       key: 'birthday',
-      width: 120,
+      width: 160,
       align: 'center',
       render: (text: string) => {
         if (text) {
@@ -205,21 +215,22 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
       title: '创建日期',
       dataIndex: 'createTime',
       key: 'createTime',
-      width: 120,
+      width: 160,
       align: 'center',
       sorter: (a: UserModel, b: UserModel) => a.createTime.localeCompare(b.createTime),
     },
     {
       title: '操作',
-      width: 90,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
       render: (_, record: UserModel) => (
-        <>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
           <Button
             size="small"
             type="link"
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
             classNames={{ content: 'text-(--ant-color-primary)' }}
             onClick={() => openModal('edit', record)}
           >
@@ -230,13 +241,12 @@ export const useUserTableColumns = (props: UseUserTableColumnProps) => {
               size="small"
               type="link"
               classNames={{ content: 'text-(--ant-color-primary)' }}
-              icon={<DownOutlined className="text-(--ant-color-primary)!" />}
-              iconPlacement="end"
+              icon={<MoreOutlined className="text-(--ant-color-primary)!" />}
             >
               {t('common.operation.more')}
             </Button>
           </Dropdown>
-        </>
+        </div>
       ),
     },
   ];

@@ -1,11 +1,10 @@
-import { MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
+import { LoadingOutlined, MessageOutlined, NotificationOutlined, ReconciliationOutlined } from '@ant-design/icons';
 import { Button, Card, Spin, Tabs, type TabsProps } from 'antd';
 import { groupBy } from 'lodash-es';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { BubbleLoading } from '@/components/icons';
 import MessageList, { type MessageListType } from './MessageList';
-import styles from './message-box.module.scss';
+import styles from './message-box.module.css';
 
 /**
  * 通知模块
@@ -114,7 +113,7 @@ const Notify: React.FC = () => {
         body: 'h-full p-3',
       }}
     >
-      <Spin spinning={loading} indicator={<BubbleLoading width={24} />} className="block">
+      <Spin spinning={loading} indicator={<LoadingOutlined width={24} />} className="block">
         <Tabs
           items={tabList}
           defaultActiveKey="message"

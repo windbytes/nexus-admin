@@ -62,6 +62,7 @@ const Role: React.FC = () => {
   // 通用成功回调
   const handleSuccess = () => {
     setSelectedRowKeys([]);
+    closeModal();
     refetch();
   };
 

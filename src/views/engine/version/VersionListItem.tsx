@@ -1,14 +1,14 @@
-import type React from 'react';
-import { memo, useCallback } from 'react';
-import { Card, Row, Col, Tag, Typography, Button, Space, theme } from 'antd';
 import {
-  EyeOutlined,
-  EditOutlined,
   CloudUploadOutlined,
   DeleteOutlined,
-  SwapOutlined,
   DownloadOutlined,
+  EditOutlined,
+  EyeOutlined,
+  SwapOutlined,
 } from '@ant-design/icons';
+import { Button, Card, Col, Row, Space, Tag, Typography, theme } from 'antd';
+import type React from 'react';
+import { memo, useCallback } from 'react';
 import type { WorkflowVersion } from '@/services/integrated/version/model';
 import { VersionStatus, VersionType } from '@/services/integrated/version/model';
 
@@ -112,7 +112,7 @@ const VersionListItem: React.FC<VersionListItemProps> = memo(
       const k = 1024;
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+      return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
     }, []);
 
     // 渲染操作按钮

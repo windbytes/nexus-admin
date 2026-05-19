@@ -1,6 +1,6 @@
 import { Card, Divider, Drawer, Typography } from 'antd';
 import type React from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 import BasicInfoCard from './components/BasicInfoCard';
 import ConfigInfoCard from './components/ConfigInfoCard';
 import SystemInfoCard from './components/SystemInfoCard';
@@ -12,7 +12,7 @@ interface EndpointDetailDrawerProps {
   /** 是否显示 */
   open: boolean;
   /** 端点信息 */
-  endpoint: EndpointModel | null;
+  endpoint: Endpoint | null;
   /** 关闭回调 */
   onClose: () => void;
 }

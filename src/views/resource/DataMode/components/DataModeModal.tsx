@@ -1,9 +1,9 @@
 import { InboxOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import { App, Button, Form, Input, type InputRef, Select, Space, Switch, Upload } from 'antd';
 import type React from 'react';
 import { memo, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router';
 import { CodeEditor } from '@/components/CodeEditor';
 import DragModal from '@/components/modal/DragModal';
 import type { DataModeFormData, JsonDataMode } from '@/services/resource/datamode/dataModeApi';
@@ -404,8 +404,7 @@ const DataModeModal: React.FC<DataModeModalProps> = memo(
                               <Button
                                 type="link"
                                 onClick={() => {
-                                  navigate({
-                                    to: '/integrated/endpoint',
+                                  navigate('/integrated/endpoint', {
                                     state: { type: 'database', action: 'create' },
                                   });
                                 }}

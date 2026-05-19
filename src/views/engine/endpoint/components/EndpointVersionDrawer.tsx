@@ -2,8 +2,8 @@ import { CheckCircleOutlined, ExclamationCircleOutlined, RollbackOutlined } from
 import { Button, Drawer, Empty, Modal, message, Space, Spin, Tag, Typography } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
-import styles from './EndpointVersionDrawer.module.scss';
+import type { Endpoint } from '@/services/engine/endpoint/types';
+import styles from './EndpointVersionDrawer.module.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -21,11 +21,11 @@ interface EndpointVersionDrawerProps {
   /** 是否显示 */
   open: boolean;
   /** 端点信息 */
-  endpoint: EndpointModel | null;
+  endpoint: Endpoint | null;
   /** 关闭回调 */
   onClose: () => void;
   /** 恢复版本回调 */
-  onRestore?: (endpoint: EndpointModel, version: VersionRecord) => Promise<void>;
+  onRestore?: (endpoint: Endpoint, version: VersionRecord) => Promise<void>;
 }
 
 /**

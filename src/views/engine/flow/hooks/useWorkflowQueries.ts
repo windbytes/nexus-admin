@@ -1,81 +1,114 @@
+/**
+ * 流程编排数据查询：基于 flowId 的草稿配置与路由运行状态
+ * 全部使用 flow API，不再依赖 workflow 服务
+ */
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { workflowService } from '@/services/integrated/workflow/workflowApi';
-import type { WorkflowConfigResponse } from '@/services/integrated/workflow/type';
+import { flowVersionService, mapRouteStatusToRunStatus } from '@/services/engine/flow/api';
+import type {
+  FlowDraftEdge,
+  FlowDraftNode,
+  FlowDraftPayload,
+  FlowRunStatusResponse,
+} from '@/services/engine/flow/types';
 import { useWorkflowStore } from '../store/workflowStore';
-import type { WorkflowDocument } from '../types';
+import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from '../types';
 
 export const workflowQueryKeys = {
   all: ['workflow'] as const,
-  config: (appId: string) => [...workflowQueryKeys.all, 'config', appId] as const,
-  runStatus: (appId: string) => [...workflowQueryKeys.all, 'runStatus', appId] as const,
+  /** 草稿配置（画布初始数据） */
+  config: (flowId: string) => [...workflowQueryKeys.all, 'config', flowId] as const,
+  /** 路由运行状态 */
+  runStatus: (flowId: string) => [...workflowQueryKeys.all, 'runStatus', flowId] as const,
 };
 
 /**
- * 根据 appId 查询流程配置（节点、边、节点属性配置）
- * 启用条件：appId 存在
+ * 将 GET draft 返回的 FlowDraftPayload 转为画布 WorkflowDocument（nodeKey→id, sourceNodeKey/targetNodeKey→source/target）
  */
-export function useWorkflowConfigQuery(appId: string | undefined) {
-  return useQuery({
-    queryKey: workflowQueryKeys.config(appId ?? ''),
-    queryFn: () => {
-      if (!appId) {
-        throw new Error('appId is required');
-      }
-      return workflowService.getWorkflowConfig(appId);
-    },
-    enabled: !!appId,
+function draftToWorkflowDocument(draft: FlowDraftPayload, flowId?: string): WorkflowDocument {
+  const nodes: WorkflowNode[] = (draft.nodes ?? []).map((n: FlowDraftNode) => {
+    const uiConfig = (n.uiConfig ?? {}) as { position?: { x: number; y: number } };
+    return {
+      id: n.nodeKey,
+      type: n.pluginId,
+      position: uiConfig?.position ?? { x: 0, y: 0 },
+      data: {
+        ...(n.config ?? {}),
+        title: n.name,
+        description: n.description,
+        pluginId: n.pluginId,
+      },
+    } as WorkflowNode;
   });
-}
-
-/**
- * 根据 appId 查询流程运行状态
- * 可选轮询（如 5s）用于运行中状态刷新
- */
-export function useWorkflowRunStatusQuery(appId: string | undefined) {
-  return useQuery({
-    queryKey: workflowQueryKeys.runStatus(appId ?? ''),
-    queryFn: () => {
-      if (!appId) {
-        throw new Error('appId is required');
-      }
-      return workflowService.getWorkflowRunStatus(appId);
-    },
-    enabled: !!appId,
-  });
-}
-
-/** 将后端配置转为 WorkflowDocument，供 loadDocument 使用 */
-function toWorkflowDocument(res: WorkflowConfigResponse, appId?: string): WorkflowDocument {
+  const edges: WorkflowEdge[] = (draft.edges ?? []).map((e: FlowDraftEdge, idx: number) => ({
+    id: e.id ?? `e-${e.sourceNodeKey}-${e.targetNodeKey}-${idx}`,
+    source: e.sourceNodeKey,
+    target: e.targetNodeKey,
+    data: e.conditionExpr ? { conditionExpr: e.conditionExpr } : undefined,
+  }));
   return {
-    version: res.version ?? 1,
-    nodes: res.nodes as WorkflowDocument['nodes'],
-    edges: res.edges as WorkflowDocument['edges'],
-    meta: res.meta ?? (appId ? { appId, updatedAt: new Date().toISOString() } : undefined),
+    version: 1,
+    nodes,
+    edges,
+    meta: flowId ? { appId: flowId, updatedAt: new Date().toISOString() } : undefined,
   };
 }
 
 /**
- * 同步流程配置查询结果到 store：当接口返回数据时写入 loadDocument
- * 仅在初次加载或 appId 变化时同步，避免覆盖用户未保存的本地编辑
+ * 根据 flowId 查询草稿配置（用于加载画布）
+ * 启用条件：flowId 存在
  */
-export function useWorkflowConfigSync(appId: string | undefined) {
-  const { data, isSuccess } = useWorkflowConfigQuery(appId);
+export function useWorkflowConfigQuery(flowId: string | undefined) {
+  return useQuery({
+    queryKey: workflowQueryKeys.config(flowId ?? ''),
+    queryFn: async () => {
+      if (!flowId) {
+        throw new Error('flowId is required');
+      }
+      return flowVersionService.getDraft(flowId);
+    },
+    enabled: !!flowId,
+  });
+}
+
+/**
+ * 根据 flowId 查询路由运行状态，并映射为 UI 展示类型
+ */
+export function useWorkflowRunStatusQuery(flowId: string | undefined) {
+  return useQuery({
+    queryKey: workflowQueryKeys.runStatus(flowId ?? ''),
+    queryFn: async (): Promise<FlowRunStatusResponse | null> => {
+      if (!flowId) {
+        throw new Error('flowId is required');
+      }
+      const dto = await flowVersionService.getRouteStatus(flowId);
+      return mapRouteStatusToRunStatus(dto);
+    },
+    enabled: !!flowId,
+  });
+}
+
+/**
+ * 同步草稿配置到 store：当 getDraft 成功后将结果转为 WorkflowDocument 并 loadDocument
+ * 依赖 flowId；仅在初次加载或 flowId 变化时同步
+ */
+export function useWorkflowConfigSync(flowId: string | undefined) {
+  const { data, isSuccess } = useWorkflowConfigQuery(flowId);
   const loadDocument = useWorkflowStore((s) => s.loadDocument);
   const hasSyncedRef = useRef(false);
 
   useEffect(() => {
-    if (!appId || !isSuccess || !data) {
+    if (!flowId || !isSuccess || !data) {
       return;
     }
-    const doc = toWorkflowDocument(data, appId);
+    const doc = draftToWorkflowDocument(data, flowId);
     loadDocument(doc);
     hasSyncedRef.current = true;
-  }, [appId, isSuccess, data, loadDocument]);
+  }, [flowId, isSuccess, data, loadDocument]);
 
   useEffect(() => {
-    if (!appId) {
+    if (!flowId) {
       hasSyncedRef.current = false;
     }
-  }, [appId]);
+  }, [flowId]);
 }

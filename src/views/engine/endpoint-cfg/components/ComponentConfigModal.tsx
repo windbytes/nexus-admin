@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
 import { SettingOutlined } from '@ant-design/icons';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import DragModal from '@/components/modal/DragModal';
 import {
+  type ComponentConfigProps,
+  DatePickerConfig,
   InputConfig,
   InputNumberConfig,
-  SelectConfig,
-  DatePickerConfig,
-  TextAreaConfig,
-  RadioConfig,
-  SwitchConfig,
   JSONConfig,
-  type ComponentConfigProps,
+  RadioConfig,
+  SelectConfig,
+  SwitchConfig,
+  TextAreaConfig,
 } from '../component-configs';
-import DragModal from '@/components/modal/DragModal';
 
 interface ComponentConfigModalProps {
   /** 是否显示弹窗 */
@@ -63,7 +64,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
         return <SelectConfig {...configProps} />;
       case 'DatePicker':
         return <DatePickerConfig {...configProps} />;
-      case 'TextArea':
+      case 'Textarea':
         return <TextAreaConfig {...configProps} />;
       case 'Radio':
         return <RadioConfig {...configProps} />;
@@ -90,7 +91,7 @@ const ComponentConfigModal: React.FC<ComponentConfigModalProps> = ({
       InputNumber: '数字输入框',
       Select: '下拉选择',
       DatePicker: '日期选择器',
-      TextArea: '文本域',
+      Textarea: '文本域',
       Radio: '单选框',
       Switch: '开关',
       JSON: 'JSON编辑器',

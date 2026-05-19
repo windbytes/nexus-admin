@@ -1,9 +1,9 @@
+import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { App as AntdApp, Spin } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { BubbleLoading } from '@/components/icons';
 import { Router } from '@/router';
 import { commonService } from '@/services/common';
 import { useMenuStore } from '@/stores/store';
@@ -73,7 +73,7 @@ const App: React.FC = () => {
   return (
     <>
       {isFetching || isFetchingButtonPermissions ? (
-        <Spin indicator={<BubbleLoading width={48} />} size="large" fullscreen />
+        <Spin indicator={<LoadingOutlined width={48} />} size="large" fullscreen />
       ) : (
         <Router />
       )}

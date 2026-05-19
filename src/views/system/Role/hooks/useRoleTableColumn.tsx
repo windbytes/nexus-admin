@@ -1,18 +1,37 @@
-import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleFilled,
+  MoreOutlined,
+  UserAddOutlined,
+} from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Copy16Regular, DeleteDismiss24Filled, UserPlus } from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { RoleModel } from '@/services/system/role/type';
 import { useUserStore } from '@/stores/userStore';
 import { useRoleActions } from './useRoleAction';
 import type { ModalType } from './useRoleModal';
 import { useRolePermissions } from './useRolePermissions';
 
+/** 由列表行生成「复制为新增」的表单草稿（无 id，名称追加「复制」） */
+function buildRoleCopyDraft(record: RoleModel): Partial<RoleModel> {
+  const baseName = record.roleName ?? '';
+  return {
+    roleCode: `${record.roleCode}-copy`,
+    roleName: `${baseName}-复制`,
+    roleType: record.roleType,
+    status: record.status,
+    remark: record.remark,
+  };
+}
+
 interface UseRoleTableColumnProps {
   // 当前操作行的数据
   currentRow: Partial<RoleModel> | null;
-  openModal: (name: ModalType, record?: RoleModel) => void;
+  openModal: (name: ModalType, record?: Partial<RoleModel>) => void;
   // 成功的回调
   onSuccess?: () => void;
 }
@@ -23,7 +42,8 @@ interface UseRoleTableColumnProps {
 export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
-  const { canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } = useRolePermissions();
+  const { canAddRole, canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } =
+    useRolePermissions();
   // 授权资源、授权权限共用同一权限点
   const canAssignResource = canAssignPermission;
   const { t } = useTranslation();
@@ -38,7 +58,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignUser',
         label: '授权用户',
-        icon: <UserPlus className="text-sm! block" />,
+        icon: <UserAddOutlined className="text-sm! block" />,
         disabled: !canAssignUser,
         onClick: () => {
           if (!canAssignUser) {
@@ -54,7 +74,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignMenu',
         label: '授权菜单',
-        icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
         disabled: !canAssignMenu,
         onClick: () => {
           if (!canAssignMenu) {
@@ -70,7 +90,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignResource',
         label: '授权资源',
-        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
         disabled: !canAssignResource,
         onClick: () => {
           if (!canAssignResource) {
@@ -86,7 +106,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'assignPermission',
         label: '授权权限',
-        icon: <MyIcon type="nexus-permission-assign" className="text-sm! block" />,
+        icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
         disabled: !canAssignPermission,
         onClick: () => {
           if (!canAssignPermission) {
@@ -102,18 +122,23 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       {
         key: 'copy',
         label: '复制',
-        icon: <Copy16Regular className="text-sm! block text-(--ant-blue-4)" />,
+        icon: <CopyOutlined className="text-sm! block text-(--ant-blue-4)" />,
+        disabled: !canAddRole,
         onClick: () => {
-          modal.warning({
-            title: '功能暂未实现',
-            content: '复制功能暂未实现',
-          });
+          if (!canAddRole) {
+            modal.error({
+              title: '权限不足',
+              content: '您没有新增角色的权限，无法复制为新增。',
+            });
+            return;
+          }
+          openModal('add', buildRoleCopyDraft(record));
         },
       },
       {
         key: 'delete',
         label: t('common.operation.delete'),
-        icon: <DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />,
+        icon: <DeleteOutlined className="text-sm! block text-(--ant-color-error)!" />,
         disabled: !canDeleteRole,
         onClick: () => {
           if (!canDeleteRole) {
@@ -211,9 +236,17 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       align: 'center',
       render(value) {
         if (!value) {
-          return <Tag color="green">{value}</Tag>;
+          return (
+            <Tag variant="solid" color="green">
+              {value}
+            </Tag>
+          );
         }
-        return <Tag color="red">{value}</Tag>;
+        return (
+          <Tag variant="solid" color="red">
+            {value}
+          </Tag>
+        );
       },
     },
     {
@@ -224,9 +257,17 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
       key: 'isBuiltin',
       render(value) {
         if (!value) {
-          return <Tag color="green">否</Tag>;
+          return (
+            <Tag variant="solid" color="green">
+              否
+            </Tag>
+          );
         }
-        return <Tag color="red">是</Tag>;
+        return (
+          <Tag variant="solid" color="red">
+            是
+          </Tag>
+        );
       },
     },
     {
@@ -243,7 +284,7 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
     },
     {
       title: '操作',
-      width: 90,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
@@ -252,11 +293,12 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
           return null;
         }
         return (
-          <>
+          <div className={TABLE_ACTION_CELL_CLASSNAME}>
             <Button
               size="small"
               type="link"
               disabled={!canEditRole}
+              icon={<EditOutlined className="text-(--ant-color-primary)!" />}
               classNames={{ content: 'text-(--ant-color-primary)' }}
               onClick={() => openModal('edit', record)}
             >
@@ -267,13 +309,12 @@ export const useRoleTableColumns = (props: UseRoleTableColumnProps) => {
                 size="small"
                 type="link"
                 classNames={{ content: 'text-(--ant-color-primary)' }}
-                icon={<DownOutlined className="text-(--ant-color-primary)!" />}
-                iconPlacement="end"
+                icon={<MoreOutlined className="text-(--ant-color-primary)!" />}
               >
                 {t('common.operation.more')}
               </Button>
             </Dropdown>
-          </>
+          </div>
         );
       },
     },

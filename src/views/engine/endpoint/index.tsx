@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from '@tanstack/react-router';
-import { Card, Divider, Spin } from 'antd';
+import { Spin } from 'antd';
 import type React from 'react';
-import { lazy, Suspense, useEffect, useState } from 'react';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
-import { endpointService } from '@/services/integrated/endpoint/endpointApi';
-import EndpointTable from './components/EndpointTable';
+import { type Key, lazy, Suspense, useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
+import ProTable from '@/components/ProTable';
+import { endpointService } from '@/services/engine/endpoint/api';
+import type { Endpoint as EndpointRow } from '@/services/engine/endpoint/types';
+import { useEndpointTableColumns } from './components/EndpointTable/useEndpointTableColumn';
 import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
 import { useEndpointActions } from './hooks/useEndpointActions';
@@ -79,7 +80,7 @@ const Endpoint: React.FC = () => {
   };
 
   // 端点操作hook
-  const { deleteEndpoint, batchDeleteEndpoint, handleModalSave, isLoading } = useEndpointActions({
+  const { batchDeleteEndpoint, handleModalSave, isLoading } = useEndpointActions({
     currentRow: current,
     onSuccess: handleSuccess,
   });
@@ -116,7 +117,7 @@ const Endpoint: React.FC = () => {
   };
 
   // 处理行选择变化
-  const handleSelectionChange = (keys: React.Key[], _rows: EndpointModel[]) => {
+  const handleSelectionChange = (keys: Key[], _rows: EndpointRow[]) => {
     setSelectedRowKeys(keys as string[]);
   };
 
@@ -128,7 +129,19 @@ const Endpoint: React.FC = () => {
     batchDeleteEndpoint(ids);
   };
 
-  // 表格加载状态
+  // 打开详情
+  const handleOpenDetail = (record: EndpointRow) => {
+    openDrawer('detail', record);
+  };
+
+  // 表格列定义
+  const columns = useEndpointTableColumns({
+    currentRow: current,
+    onSuccess: handleSuccess,
+    openModal,
+    openDrawer,
+  });
+
   const tableLoading = isFetching || isLoading;
 
   return (
@@ -137,41 +150,50 @@ const Endpoint: React.FC = () => {
         {/* 端点搜索栏 */}
         <SearchForm onSearch={handleSearch} loading={isFetching} />
         {/* 端点数据表格 */}
-        <Card
-          className="grow min-h-0 flex flex-col"
-          classNames={{ body: 'flex grow' }}
-          title={
-            <div className="flex items-center">
-              <h2>端点列表</h2>
-              <Divider orientation="vertical" />
-              <span className="text-sm! text-gray-500">{`已选 ${selectedRowKeys.length} 项`}</span>
-              <Divider orientation="vertical" />
-              <TableActionButtons
-                handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
-                refetch={refetch}
-                selectedRows={selectedRowKeys}
-                openModal={openModal}
-              />
-            </div>
+        <ProTable<EndpointRow>
+          title="端点列表"
+          columns={columns}
+          dataSource={result?.records || []}
+          loading={tableLoading}
+          rowKey="id"
+          actionButtons={
+            <TableActionButtons
+              handleBatchDelete={() => handleBatchDelete(selectedRowKeys)}
+              refetch={refetch}
+              selectedRows={selectedRowKeys}
+              openModal={openModal}
+            />
           }
-        >
-          <EndpointTable
-            datasource={result?.records || []}
-            loading={tableLoading}
-            pagination={{
-              pageNum: searchParams.pageNum,
-              pageSize: searchParams.pageSize,
-              total: total,
-            }}
-            selectedRowKeys={selectedRowKeys}
-            currentRow={current}
-            onSelectionChange={handleSelectionChange}
-            onPageChange={handlePageChange}
-            onSuccess={handleSuccess}
-            openModal={openModal}
-            openDrawer={openDrawer}
-          />
-        </Card>
+          onRefresh={refetch}
+          rowSelection={{
+            type: 'checkbox' as const,
+            selectedRowKeys,
+            onChange: handleSelectionChange,
+          }}
+          pagination={{
+            current: searchParams.pageNum ?? 1,
+            pageSize: searchParams.pageSize ?? 20,
+            total: total ?? 0,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total: number, range: [number, number]) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+            hideOnSinglePage: false,
+            onChange: handlePageChange,
+          }}
+          rowClassName={(record: EndpointRow) => (!record.status ? 'opacity-60 bg-gray-50' : '')}
+          onRow={(record: EndpointRow) => ({
+            onDoubleClick: () => handleOpenDetail(record),
+          })}
+          bordered
+          cardClassNames={{
+            root: 'grow min-h-0 flex flex-col',
+            body: 'flex grow',
+            table: {
+              container: 'grow min-h-0 min-w-0',
+              root: 'full-height-table',
+            },
+          }}
+        />
       </div>
       {/* 新增/编辑/查看/克隆弹窗 */}
       <Suspense fallback={<Spin />}>

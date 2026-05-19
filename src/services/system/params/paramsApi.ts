@@ -19,7 +19,7 @@ const SysParamAction = {
   /**
    * 根据编码查询系统参数
    */
-  getParamByCode: '/system/param/getParamByCode',
+  getParamByCode: '/system/param/get',
 
   /**
    * 新增系统参数
@@ -205,8 +205,8 @@ export const sysParamService: ISysParamService = {
    */
   async updateParam(id: number, data: SysParamFormData): Promise<boolean> {
     const response = await HttpRequest.put<boolean>({
-      url: `${SysParamAction.updateParam}/${id}`,
-      data,
+      url: SysParamAction.updateParam,
+      data: { ...data, id },
     });
     return response;
   },
@@ -231,7 +231,7 @@ export const sysParamService: ISysParamService = {
   async batchDeleteParams(ids: number[]): Promise<boolean> {
     const response = await HttpRequest.delete<boolean>({
       url: SysParamAction.batchDeleteParams,
-      data: { ids },
+      data: ids,
     });
     return response;
   },
@@ -274,14 +274,14 @@ export const sysParamService: ISysParamService = {
   async exportParams(options: ExportOptions): Promise<Blob> {
     const { type, selectedIds, searchParams } = options;
 
-    let params: any = {};
+    let params: Record<string, unknown> = {};
 
     if (type === 'selected' && selectedIds && selectedIds.length > 0) {
       // 导出选中的参数
       params = { ids: selectedIds };
     } else {
       // 导出全部或按搜索条件导出
-      params = searchParams || {};
+      params = searchParams ? { ...searchParams } : {};
     }
 
     const response = await HttpRequest.postDownload<Blob>(

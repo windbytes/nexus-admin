@@ -1,6 +1,6 @@
-import { Dropdown, Button } from 'antd';
 import { ColumnHeightOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { Button, Dropdown } from 'antd';
 import type { TableDensity } from '../types';
 
 export interface DensitySettingProps {

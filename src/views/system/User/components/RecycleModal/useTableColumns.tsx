@@ -1,4 +1,4 @@
-import { ManOutlined, WomanOutlined } from '@ant-design/icons';
+import { ManOutlined, UndoOutlined, WomanOutlined } from '@ant-design/icons';
 import { Button, type TableProps } from 'antd';
 import type { UserModel } from '@/services/system/user/type';
 
@@ -26,6 +26,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
       key: 'username',
       width: 100,
       align: 'left',
+      fixed: 'left',
     },
     {
       dataIndex: 'realName',
@@ -90,7 +91,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
     },
     {
       title: '操作',
-      width: 100,
+      width: 120,
       dataIndex: 'action',
       fixed: 'end',
       align: 'center',
@@ -98,6 +99,7 @@ export const useTableColumns = ({ onRestore }: UseTableColumnsProps) => {
         <Button
           size="small"
           type="link"
+          icon={<UndoOutlined className="text-(--ant-color-primary)!" />}
           classNames={{ content: 'text-(--ant-color-primary)' }}
           onClick={() => onRestore(record.id)}
         >

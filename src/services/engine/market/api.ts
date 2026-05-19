@@ -5,12 +5,12 @@
 import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/utils/request';
 import type {
-  MarketPluginListing,
-  MarketPluginInstallation,
-  MarketPluginReview,
-  MarketListingVO,
-  MarketSearchParams,
   MarketInstallRequest,
+  MarketListingVO,
+  MarketPluginInstallation,
+  MarketPluginListing,
+  MarketPluginReview,
+  MarketSearchParams,
 } from './types';
 
 const MarketApi = {
@@ -36,10 +36,7 @@ export const marketService = {
   },
 
   async getDetail(listingId: string): Promise<MarketListingVO> {
-    return HttpRequest.get<MarketListingVO>(
-      { url: MarketApi.pluginById(listingId) },
-      { successMessageMode: 'none' }
-    );
+    return HttpRequest.get<MarketListingVO>({ url: MarketApi.pluginById(listingId) }, { successMessageMode: 'none' });
   },
 
   async publish(listing: Partial<MarketPluginListing>): Promise<MarketPluginListing> {

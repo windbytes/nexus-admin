@@ -1,5 +1,5 @@
+import { Alert, Divider, Form, InputNumber, Radio, Switch } from 'antd';
 import React from 'react';
-import { Form, Switch, Radio, InputNumber, Alert, Divider } from 'antd';
 import type { ComponentConfigProps } from './index';
 
 /**
@@ -74,7 +74,7 @@ const JSONConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =>
 
             return (
               <>
-                <Divider orientation="left" plain>
+                <Divider orientation="horizontal" titlePlacement="left" plain>
                   {editorMode === 'form' ? '表单模式配置' : '编辑器模式配置'}
                 </Divider>
 
@@ -170,7 +170,7 @@ const JSONConfig: React.FC<ComponentConfigProps> = ({ value = {}, onChange }) =>
                 )}
 
                 {/* 通用配置 */}
-                <Divider orientation="left" plain>
+                <Divider orientation="horizontal" titlePlacement="left" plain>
                   通用配置
                 </Divider>
 

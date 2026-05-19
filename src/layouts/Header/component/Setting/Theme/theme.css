@@ -1,0 +1,14 @@
+.outline-box {
+  padding: 0.25rem;
+  outline-width: 1px;
+  outline-style: solid;
+  outline-color: rgb(228, 228, 231);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.outline-box-active {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: rgb(0, 107, 230);
+}

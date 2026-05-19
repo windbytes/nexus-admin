@@ -1,7 +1,7 @@
+import { DeleteOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Space, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
-import { Button, Space, Tooltip } from 'antd';
-import { PlusOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 
 interface WebServiceTableActionsProps {
   onAdd: () => void;

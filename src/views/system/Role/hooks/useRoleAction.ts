@@ -109,7 +109,8 @@ export const useRoleActions = ({ currentRow, onSuccess }: UseRoleActionsProps) =
     if (currentRow?.id) {
       updateRoleMutation.mutate(values);
     } else {
-      createRoleMutation.mutate(values);
+      const { id: _omitId, ...payload } = values;
+      createRoleMutation.mutate(payload);
     }
   };
 

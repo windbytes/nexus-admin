@@ -1,5 +1,7 @@
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { ApiModel } from '@/services/system/api/type';
 import { getMethodColor } from '../constants';
 
@@ -46,18 +48,31 @@ export function useApiTableColumn(options: UseApiTableColumnOptions): ColumnsTyp
     {
       title: '操作',
       key: 'action',
-      width: 120,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       align: 'center',
       fixed: 'right',
       render: (_: unknown, record: ApiModel) => (
-        <>
-          <Button type="link" size="small" disabled={actionsDisabled} onClick={() => onEdit(record)}>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
+          <Button
+            type="link"
+            size="small"
+            disabled={actionsDisabled}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            onClick={() => onEdit(record)}
+          >
             编辑
           </Button>
-          <Button type="link" size="small" danger disabled={actionsDisabled} onClick={() => onDelete(record)}>
+          <Button
+            type="link"
+            size="small"
+            danger
+            disabled={actionsDisabled}
+            icon={<DeleteOutlined />}
+            onClick={() => onDelete(record)}
+          >
             删除
           </Button>
-        </>
+        </div>
       ),
     },
   ];

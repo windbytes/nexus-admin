@@ -1,0 +1,15 @@
+.switch-item,
+.select-item,
+.number-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0;
+  padding: 10px 8px;
+  border-radius: 6px;
+  width: 100%;
+
+  &:hover {
+    background-color: rgb(244, 244, 245);
+  }
+}

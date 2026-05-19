@@ -1,13 +1,13 @@
 import { Table, type TableProps } from 'antd';
 import type { Key } from 'react';
 import useTableScroll from '@/hooks/useTableScroll';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 import type { DrawerType, ModalType } from '../../hooks/useEndpointModals';
 import { useEndpointTableColumns } from './useEndpointTableColumn';
 
 interface EndpointTableProps {
   // 数据源
-  datasource: EndpointModel[];
+  datasource: Endpoint[];
   // 加载状态
   loading: boolean;
   // 分页信息
@@ -19,15 +19,15 @@ interface EndpointTableProps {
   // 选中行
   selectedRowKeys: React.Key[];
   // 当前操作的行数据
-  currentRow: Partial<EndpointModel> | null;
+  currentRow: Partial<Endpoint> | null;
   // 选中行变化
-  onSelectionChange: (keys: Key[], rows: EndpointModel[]) => void;
+  onSelectionChange: (keys: Key[], rows: Endpoint[]) => void;
   // 分页变化
   onPageChange: (page: number, pageSize?: number) => void;
   // 打开弹窗
-  openModal: (name: ModalType, record?: EndpointModel) => void;
+  openModal: (name: ModalType, record?: Endpoint) => void;
   // 打开抽屉
-  openDrawer: (name: DrawerType, record?: EndpointModel) => void;
+  openDrawer: (name: DrawerType, record?: Endpoint) => void;
   // 操作成功的回调
   onSuccess?: () => void;
 }
@@ -59,7 +59,7 @@ const EndpointTable: React.FC<EndpointTableProps> = (props) => {
   });
 
   // 行选择配置
-  const rowSelection: TableProps<EndpointModel>['rowSelection'] = {
+  const rowSelection: TableProps<Endpoint>['rowSelection'] = {
     type: 'checkbox' as const,
     selectedRowKeys,
     onChange: onSelectionChange,
@@ -68,7 +68,7 @@ const EndpointTable: React.FC<EndpointTableProps> = (props) => {
   /**
    * 打开详情
    */
-  const handleOpenDetail = (record: EndpointModel) => {
+  const handleOpenDetail = (record: Endpoint) => {
     openDrawer('detail', record);
   };
 
@@ -93,8 +93,8 @@ const EndpointTable: React.FC<EndpointTableProps> = (props) => {
         rowSelection={rowSelection}
         scroll={{ x: '100%', y: scrollConfig.y }}
         rowKey="id"
-        rowClassName={(record: EndpointModel) => (!record.status ? 'opacity-60 bg-gray-50' : '')}
-        onRow={(record: EndpointModel) => ({
+        rowClassName={(record: Endpoint) => (!record.status ? 'opacity-60 bg-gray-50' : '')}
+        onRow={(record: Endpoint) => ({
           onDoubleClick: () => handleOpenDetail(record),
         })}
         classNames={{

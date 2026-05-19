@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { App } from 'antd';
 import type React from 'react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import DragModal from '@/components/modal/DragModal';
 import CategorySidebar from './components/CategorySidebar';
 import TemplateGrid from './components/TemplateGrid';
@@ -20,6 +20,10 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
   onTemplateCreateSuccess,
 }) => {
   const { message } = App.useApp();
+
+  /**
+   * 从模板创建应用
+   */
   const createFromTemplateMutation = useMutation({
     mutationFn: ({ templateId, appName }: { templateId: string; appName?: string }) =>
       templateService.createAppFromTemplate(templateId, appName),
@@ -54,28 +58,14 @@ const AppTemplates: React.FC<AppsTemplateModelProps> = ({
     enabled: open,
   });
 
-  const { data: searchResult, isFetching: searchLoading } = useQuery({
-    queryKey: ['template_search', searchParams],
+  /** 分类、关键词、类型筛选均写入 searchParams，仅此一次请求 */
+  const { data: searchResult, isFetching: isLoading } = useQuery({
+    queryKey: ['template_list', searchParams],
     queryFn: () => templateService.searchTemplates(searchParams),
-    enabled: open && !!searchParams,
+    enabled: open,
   });
 
-  const { data: categoryTemplates = [], isFetching: categoryLoading } = useQuery({
-    queryKey: ['template_category', selectedCategory],
-    queryFn: () => templateService.getTemplatesByCategory(selectedCategory),
-    enabled: open && selectedCategory !== 'recommended',
-  });
-
-  // 当前显示的模板
-  const currentTemplates = useMemo(() => {
-    if (selectedCategory === 'recommended' || searchKeyword || selectedTypes.length > 0) {
-      return searchResult?.list || [];
-    }
-    return categoryTemplates;
-  }, [selectedCategory, searchResult?.list, categoryTemplates, searchKeyword, selectedTypes]);
-
-  // 当前加载状态
-  const isLoading = searchLoading || categoryLoading;
+  const currentTemplates = searchResult?.list ?? [];
 
   // 处理分类选择
   const handleCategorySelect = useCallback((categoryId: string) => {

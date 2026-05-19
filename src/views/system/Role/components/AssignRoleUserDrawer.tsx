@@ -30,7 +30,6 @@ import {
 } from 'antd';
 import { isEqual } from 'lodash-es';
 import { memo, useEffect, useRef, useState } from 'react';
-import { DeleteDismiss24Filled } from '@/components/icons';
 import { roleService } from '@/services/system/role/roleApi';
 import type { UserSearchParams } from '@/services/system/role/type';
 import type { UserModel } from '@/services/system/user/type';
@@ -159,10 +158,7 @@ const AssignRoleUserDrawer: React.FC<AssignRoleUserDrawerProps> = ({ open, roleI
             icon={<WarningOutlined style={{ color: colorError }} />}
           >
             <Tooltip title="移除用户">
-              <Button
-                type="text"
-                icon={<DeleteDismiss24Filled className="text-sm! block text-(--ant-color-error)!" />}
-              />
+              <Button type="text" icon={<DeleteOutlined className="text-sm! block text-(--ant-color-error)!" />} />
             </Tooltip>
           </Popconfirm>
         );

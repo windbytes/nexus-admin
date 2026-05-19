@@ -236,10 +236,11 @@ const DictInfoModal: React.FC<DictInfoModalProps> = ({ open, action, dictInfo, o
       <Form
         form={form}
         disabled={isView}
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 18 }}
+        labelCol={{ span: 3 }}
+        wrapperCol={{ span: 21 }}
         initialValues={{ enabled: true, cacheEnabled: true }}
       >
+        <Divider titlePlacement="left">基础属性</Divider>
         <BasicInfoForm disabled={isView} />
         {dictType === 'MANUAL' && (
           <>

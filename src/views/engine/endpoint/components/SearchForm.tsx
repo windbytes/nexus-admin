@@ -3,7 +3,8 @@ import { Button, Card, ConfigProvider, Form, Input, Select, Space } from 'antd';
 import type React from 'react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/integrated/endpoint/endpointApi';
+import { SEARCH_FORM_FLEX_LABEL_COL, SEARCH_FORM_FLEX_WRAPPER_COL } from '@/constants/formLayout';
+import { ENDPOINT_CATEGORIES, ENDPOINT_TYPE_OPTIONS } from '@/services/engine/endpoint/types';
 import type { EndpointSearchParams } from '../types';
 
 interface SearchFormProps {
@@ -74,8 +75,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
               label="端点名称"
               colon={false}
               className="mb-0"
-              labelCol={{ flex: '0 0 80px' }}
-              wrapperCol={{ flex: '1' }}
+              labelCol={SEARCH_FORM_FLEX_LABEL_COL}
+              wrapperCol={SEARCH_FORM_FLEX_WRAPPER_COL}
             >
               <Input allowClear autoComplete="off" placeholder="请输入端点名称" />
             </Form.Item>
@@ -85,8 +86,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
               label="端点编码"
               colon={false}
               className="mb-0"
-              labelCol={{ flex: '0 0 80px' }}
-              wrapperCol={{ flex: '1' }}
+              labelCol={SEARCH_FORM_FLEX_LABEL_COL}
+              wrapperCol={SEARCH_FORM_FLEX_WRAPPER_COL}
             >
               <Input allowClear autoComplete="off" placeholder="请输入端点编码" />
             </Form.Item>
@@ -96,8 +97,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
               label="端点类型"
               colon={false}
               className="mb-0"
-              labelCol={{ flex: '0 0 80px' }}
-              wrapperCol={{ flex: '1' }}
+              labelCol={SEARCH_FORM_FLEX_LABEL_COL}
+              wrapperCol={SEARCH_FORM_FLEX_WRAPPER_COL}
             >
               <Select allowClear placeholder="请选择端点类型" options={ENDPOINT_TYPE_OPTIONS} />
             </Form.Item>
@@ -129,8 +130,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
                 label="端点分类"
                 colon={false}
                 className="mb-0"
-                labelCol={{ flex: '0 0 80px' }}
-                wrapperCol={{ flex: '1' }}
+                labelCol={SEARCH_FORM_FLEX_LABEL_COL}
+                wrapperCol={SEARCH_FORM_FLEX_WRAPPER_COL}
               >
                 <Select allowClear placeholder="请选择端点分类" options={ENDPOINT_CATEGORIES} />
               </Form.Item>
@@ -140,8 +141,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({ onSearch, loading = false 
                 label="状态"
                 colon={false}
                 className="mb-0"
-                labelCol={{ flex: '0 0 80px' }}
-                wrapperCol={{ flex: '1' }}
+                labelCol={SEARCH_FORM_FLEX_LABEL_COL}
+                wrapperCol={SEARCH_FORM_FLEX_WRAPPER_COL}
               >
                 <Select
                   allowClear

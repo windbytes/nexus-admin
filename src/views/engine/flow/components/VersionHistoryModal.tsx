@@ -1,55 +1,69 @@
 /**
- * 版本历史弹窗：展示版本列表，支持回滚
+ * 版本历史弹窗：展示版本列表（分页），支持回滚
+ * 使用 flow API：flowVersionService.listVersions(flowId) 返回 Page<FlowVersionDTO>
  */
+import { RollbackOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, message, Modal, Table } from 'antd';
+import { Button, Modal, message, Table } from 'antd';
 import { useCallback, useState } from 'react';
-import { workflowService } from '@/services/integrated/workflow/workflowApi';
-import type { FlowVersionDTO } from '@/services/integrated/workflow/type';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
+import { flowVersionService } from '@/services/engine/flow/api';
+import type { FlowVersionDTO } from '@/services/engine/flow/types';
 
 interface VersionHistoryModalProps {
   open: boolean;
   onClose: () => void;
-  appId: string;
+  /** 流程定义 ID（用于版本列表与回滚接口） */
+  flowId: string;
 }
 
-export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, onClose, appId }) => {
+const PAGE_SIZE = 20;
+
+export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, onClose, flowId }) => {
   const [loading, setLoading] = useState(false);
   const [versions, setVersions] = useState<FlowVersionDTO[]>([]);
   const [loadingList, setLoadingList] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const loadVersions = useCallback(async () => {
-    if (!appId) {
-      return;
-    }
-    setLoadingList(true);
-    try {
-      const list = await workflowService.listVersions(appId, 1, 50);
-      setVersions(list);
-    } finally {
-      setLoadingList(false);
-    }
-  }, [appId]);
+  const loadVersions = useCallback(
+    async (pageNum: number = 1) => {
+      if (!flowId) {
+        return;
+      }
+      setLoadingList(true);
+      try {
+        const result = await flowVersionService.listVersions(flowId, pageNum, PAGE_SIZE);
+        setVersions(result.records ?? []);
+        setTotal(result.totalRow ?? 0);
+        setPage(pageNum);
+      } finally {
+        setLoadingList(false);
+      }
+    },
+    [flowId]
+  );
 
   const handleRollback = useCallback(
-    async (versionNo: number) => {
-      if (!appId) {
+    async (version: number) => {
+      if (!flowId) {
         return;
       }
       setLoading(true);
       try {
-        await workflowService.rollback(appId, versionNo);
+        await flowVersionService.rollback(flowId, version);
         message.success('回滚成功');
         onClose();
-        void queryClient.invalidateQueries({ queryKey: ['workflow-config', appId] });
+        void queryClient.invalidateQueries({ queryKey: ['workflow'] });
+        void loadVersions(1);
       } catch {
         message.error('回滚失败');
       } finally {
         setLoading(false);
       }
     },
-    [appId, onClose, queryClient]
+    [flowId, onClose, queryClient, loadVersions]
   );
 
   return (
@@ -59,19 +73,24 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, 
       onCancel={onClose}
       footer={null}
       width={640}
-      afterOpenChange={(visible) => visible && void loadVersions()}
+      afterOpenChange={(visible) => visible && void loadVersions(1)}
     >
       <Table<FlowVersionDTO>
         size="small"
         loading={loadingList}
         dataSource={versions}
-        rowKey="versionNo"
-        pagination={false}
+        rowKey="version"
+        pagination={{
+          current: page,
+          pageSize: PAGE_SIZE,
+          total,
+          showSizeChanger: false,
+          onChange: (p) => void loadVersions(p),
+        }}
         columns={[
-          { title: '版本号', dataIndex: 'versionNo', width: 80 },
+          { title: '版本号', dataIndex: 'version', width: 80 },
           { title: '标签', dataIndex: 'versionTag', ellipsis: true },
-          { title: '节点数', dataIndex: 'nodeCount', width: 80 },
-          { title: '状态', dataIndex: 'status', width: 80 },
+          { title: '状态', dataIndex: 'status', width: 100 },
           {
             title: '发布时间',
             dataIndex: 'publishedTime',
@@ -80,13 +99,15 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ open, 
           },
           {
             title: '操作',
-            width: 80,
+            width: TABLE_ACTION_COLUMN_WIDTH,
+            align: 'center',
             render: (_, record) => (
               <Button
                 type="link"
                 size="small"
+                icon={<RollbackOutlined />}
                 loading={loading}
-                onClick={() => handleRollback(record.versionNo)}
+                onClick={() => handleRollback(record.version)}
               >
                 回滚
               </Button>

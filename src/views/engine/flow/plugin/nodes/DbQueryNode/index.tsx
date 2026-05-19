@@ -1,5 +1,6 @@
-import { Handle, Position } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 import { Form, Input } from 'antd';
+import { FlowHandle } from '../../../components/FlowHandle';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
 const DbQueryNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
@@ -15,10 +16,10 @@ const DbQueryNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, 
         boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
       }}
     >
-      <Handle type="target" position={Position.Left} id={`${id}-target`} />
+      <FlowHandle type="target" position={Position.Left} id={`${id}-target`} />
       <div style={{ fontSize: 11, color: '#999', marginBottom: 2 }}>连接器</div>
       <div style={{ fontSize: 13, fontWeight: 500, color: '#333' }}>{title}</div>
-      <Handle type="source" position={Position.Right} id={`${id}-source`} />
+      <FlowHandle type="source" position={Position.Right} id={`${id}-source`} />
     </div>
   );
 };
@@ -59,6 +60,7 @@ export const dbQueryNodePlugin: WorkflowNodePlugin = {
     version: '1.0.0',
     description: '执行 SQL 查询或写入',
     endpointCategory: 'CONNECTOR',
+    runnable: true,
   },
   defaultNodeData: {
     pluginId: 'DB_QUERY',

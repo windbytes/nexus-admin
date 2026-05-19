@@ -121,9 +121,12 @@ const ColumnMappingEditableTable: React.FC<ColumnMappingEditableTableProps> = ({
                     {
                       title: '操作',
                       width: 56,
+                      align: 'center',
                       fixed: 'right' as const,
                       render: (_: unknown, field: FormListFieldData) => (
-                        <Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(field.name)} />
+                        <div className="flex justify-center">
+                          <Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(field.name)} />
+                        </div>
                       ),
                     },
                   ]),

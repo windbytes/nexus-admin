@@ -1,6 +1,8 @@
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import { Button, Switch, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { SysParam } from '@/services/system/params';
 import { CATEGORY_OPTIONS, DATA_TYPE_OPTIONS } from '@/services/system/params';
 import { useParamPermissions } from './useParamPermissions';
@@ -51,9 +53,18 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       ellipsis: true,
     },
     {
-      title: '参数内容',
+      title: '参数值',
       dataIndex: 'value',
       key: 'value',
+      width: 220,
+      ellipsis: true,
+      render: (value: string) => value || '-',
+    },
+    {
+      title: '默认值',
+      dataIndex: 'defaultValue',
+      key: 'defaultValue',
+      width: 220,
       ellipsis: true,
       render: (value: string) => value || '-',
     },
@@ -63,14 +74,23 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
       key: 'category',
       align: 'center',
       width: 100,
-      render: (value: string) => <Tag color="blue">{getCategoryLabel(value)}</Tag>,
+      render: (value: string) => (
+        <Tag variant="solid" color="blue">
+          {getCategoryLabel(value)}
+        </Tag>
+      ),
     },
     {
       title: '数据类型',
       dataIndex: 'dataType',
       key: 'dataType',
       width: 120,
-      render: (value: string) => <Tag color="green">{getDataTypeLabel(value)}</Tag>,
+      align: 'center',
+      render: (value: string) => (
+        <Tag variant="solid" color="green">
+          {getDataTypeLabel(value)}
+        </Tag>
+      ),
     },
     {
       title: '必填',
@@ -99,9 +119,9 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
         ),
     },
     {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
       align: 'center',
       width: 180,
       render: (value: string) => {
@@ -114,15 +134,16 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
     {
       title: '操作',
       key: 'action',
-      width: 140,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       align: 'center',
       fixed: 'end',
-      render: (_: any, record: SysParam) => (
-        <>
+      render: (_: unknown, record: SysParam) => (
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
           <Button
             size="small"
             type="link"
             disabled={!canEdit}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
             onClick={() => onEdit(record)}
           >
             {t('common.operation.edit')}
@@ -132,11 +153,12 @@ export const useParamTableColumns = (props: UseParamTableColumnProps) => {
             type="link"
             danger
             disabled={!canDelete}
+            icon={<DeleteOutlined />}
             onClick={() => onDelete(record)}
           >
             {t('common.operation.delete')}
           </Button>
-        </>
+        </div>
       ),
     },
   ];

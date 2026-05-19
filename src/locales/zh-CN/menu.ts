@@ -81,7 +81,7 @@ const menu = {
     template: '消息模板',
   },
   editor: {
-    main: '编辑器',
+    main: '文档中心',
     nwriter: '编辑器',
   },
   apps: {

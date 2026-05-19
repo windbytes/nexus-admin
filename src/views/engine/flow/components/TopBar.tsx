@@ -1,7 +1,3 @@
-/**
- * 流程编排顶部栏
- * 自动保存状态、appId、运行状态、撤销/重做、预览/搜索/检查清单/发布/刷新
- */
 import {
   CheckOutlined,
   CloudUploadOutlined,
@@ -12,7 +8,7 @@ import {
   UndoOutlined,
 } from '@ant-design/icons';
 import { Badge, Button, Space, Tag, Tooltip, Typography } from 'antd';
-import type { WorkflowRunStatusResponse } from '@/services/integrated/workflow/type';
+import type { FlowRunStatusResponse } from '@/services/engine/flow/types';
 import { useWorkflowStore } from '../store/workflowStore';
 
 const { Text } = Typography;
@@ -24,8 +20,8 @@ interface TopBarProps {
   onPublish?: () => void;
   onOpenVersionHistory?: () => void;
   checklistCount?: number;
-  /** 流程运行状态（由 useWorkflowRunStatusQuery 提供） */
-  runStatus?: WorkflowRunStatusResponse | null;
+  /** 流程运行状态（由 useWorkflowRunStatusQuery 提供，已从 RouteStatusDTO 映射） */
+  runStatus?: FlowRunStatusResponse | null;
 }
 
 const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
@@ -35,6 +31,10 @@ const RUN_STATUS_MAP: Record<string, { color: string; text: string }> = {
   failed: { color: 'error', text: '失败' },
 };
 
+/**
+ * 流程编排顶部栏
+ * 自动保存状态、appId、运行状态、撤销/重做、预览/搜索/检查清单/发布/刷新
+ */
 export const TopBar: React.FC<TopBarProps> = ({
   appId,
   onPreview,
@@ -74,18 +74,21 @@ export const TopBar: React.FC<TopBarProps> = ({
       </Space>
 
       <Space size="small">
-        <Button type="text" icon={<UndoOutlined />} disabled={!canUndo()} onClick={undo} title="撤销" />
-        <Button type="text" icon={<SearchOutlined />} onClick={onPreview} title="预览" />
-        <Badge count={checklistCount} size="small" offset={[-2, 2]}>
-          <Button type="text" icon={<CheckOutlined />} title="检查清单" />
-        </Badge>
+        <Space.Compact block>
+          <Button icon={<UndoOutlined />} disabled={!canUndo()} onClick={undo} title="撤销" />
+          <Button icon={<SearchOutlined />} onClick={onPreview} title="预览" />
+          <Badge count={checklistCount}>
+            <Button icon={<CheckOutlined />} title="检查清单" />
+          </Badge>
+        </Space.Compact>
+
         <Button onClick={onSave}>保存</Button>
         <Button type="primary" icon={<CloudUploadOutlined />} onClick={onPublish}>
           发布
         </Button>
-        <Button type="text" icon={<HistoryOutlined />} onClick={onOpenVersionHistory} title="版本历史" />
-        <Button type="text" icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
-        <Button type="text" icon={<ReloadOutlined />} title="刷新" />
+        <Button icon={<HistoryOutlined />} onClick={onOpenVersionHistory} title="版本历史" />
+        <Button icon={<RedoOutlined />} disabled={!canRedo()} onClick={redo} title="重做" />
+        <Button icon={<ReloadOutlined />} title="刷新" />
       </Space>
     </div>
   );

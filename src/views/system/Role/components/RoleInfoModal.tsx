@@ -24,14 +24,12 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({ open, onOk, onCancel, rol
     if (!open) {
       return;
     }
+    // 先重置再写入，避免从编辑切到新增/复制时残留 id 等字段
+    form.resetFields();
     if (roleInfo) {
-      // 填充表单数据
       form.setFieldsValue(roleInfo);
-    } else {
-      // 清空表单数据，表示新增
-      form.resetFields();
     }
-  }, [roleInfo, open]);
+  }, [roleInfo, open, form]);
 
   /**
    * 弹窗打开关闭的回调（打开后默认聚焦到编码输入框）
@@ -54,8 +52,8 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({ open, onOk, onCancel, rol
     if (!value) {
       return Promise.resolve();
     }
-    // 如果角色编码没有进行修改，则不需要做唯一性校验
-    if (roleInfo && roleInfo.roleCode === value) {
+    // 仅编辑且编码未改时跳过校验；新增/复制时源编码仍存在库中，必须校验
+    if (action === 'edit' && roleInfo && roleInfo.roleCode === value) {
       return Promise.resolve();
     }
     const res = await roleService.checkRoleCodeExist(value);
@@ -99,7 +97,7 @@ const RoleInfoModal: React.FC<RoleInfoModalProps> = ({ open, onOk, onCancel, rol
       onCancel={handleCancel}
       afterOpenChange={handleAfterOpenChange}
     >
-      <Form form={form} labelCol={{ span: 3 }} initialValues={{ status: true }} disabled={action === 'view'}>
+      <Form form={form} labelCol={{ span: 4 }} initialValues={{ status: true }} disabled={action === 'view'}>
         <Form.Item name="id" hidden>
           <Input disabled />
         </Form.Item>

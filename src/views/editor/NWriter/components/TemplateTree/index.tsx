@@ -13,17 +13,10 @@ interface TemplateTreeProps {
   className?: string;
 }
 
-const TemplateTree: React.FC<TemplateTreeProps> = ({
-  treeData,
-  selectedKeys = [],
-  onSelect,
-  className = '',
-}) => {
+const TemplateTree: React.FC<TemplateTreeProps> = ({ treeData, selectedKeys = [], onSelect, className = '' }) => {
   return (
     <div className={`flex h-full flex-col overflow-hidden ${className}`}>
-      <div className="border-b border-gray-200 px-3 py-2 text-sm font-medium text-gray-700">
-        病历模板
-      </div>
+      <div className="border-b border-gray-200 px-3 py-2 text-sm font-medium text-gray-700">病历模板</div>
       <div className="flex-1 overflow-auto p-2">
         <Tree
           showLine

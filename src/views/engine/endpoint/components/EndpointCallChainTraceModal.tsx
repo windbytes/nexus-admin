@@ -1,12 +1,12 @@
 import { Button } from 'antd';
 import type React from 'react';
 import DragModal from '@/components/modal/DragModal';
-import type { EndpointModel } from '@/services/integrated/endpoint/endpointApi';
+import type { Endpoint } from '@/services/engine/endpoint/types';
 
 interface EndpointCallChainTraceModalProps {
   open: boolean;
   /** 端点信息 */
-  endpoint: EndpointModel | null;
+  endpoint: Endpoint | null;
   /** 关闭回调 */
   onClose: () => void;
 }

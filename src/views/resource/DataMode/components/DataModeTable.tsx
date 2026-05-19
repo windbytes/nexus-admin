@@ -1,4 +1,3 @@
-import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 import {
   CloudUploadOutlined,
   DatabaseOutlined,
@@ -12,6 +11,8 @@ import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
+import type { JsonDataMode } from '@/services/resource/datamode/dataModeApi';
 
 interface DataModeTableProps {
   data: JsonDataMode[];
@@ -179,7 +180,9 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         width: 200,
         ellipsis: true,
         render: (tags: string[]) => {
-          if (!tags || tags.length === 0) return '-';
+          if (!tags || tags.length === 0) {
+            return '-';
+          }
           return (
             <Space size="small" wrap>
               {tags.slice(0, 2).map((tag, index) => (
@@ -214,7 +217,9 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         width: 180,
         align: 'center',
         render: (value: string) => {
-          if (!value) return '-';
+          if (!value) {
+            return '-';
+          }
           return value;
         },
       },
@@ -225,7 +230,9 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
         width: 180,
         align: 'center',
         render: (value: string) => {
-          if (!value) return '-';
+          if (!value) {
+            return '-';
+          }
           return value;
         },
       },
@@ -246,11 +253,11 @@ const DataModeTable: React.FC<DataModeTableProps> = memo(
       {
         title: '操作',
         key: 'action',
-        width: 200,
+        width: TABLE_ACTION_COLUMN_WIDTH,
         align: 'center',
         fixed: 'right',
-        render: (_: any, record: JsonDataMode) => (
-          <Space size="small">
+        render: (_: unknown, record: JsonDataMode) => (
+          <Space size="small" wrap={false}>
             <Tooltip title="查看">
               <Button
                 type="text"

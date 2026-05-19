@@ -1,6 +1,6 @@
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Button, Col, Form, Input, Radio, Row, Switch } from 'antd';
 import React, { useState } from 'react';
-import { Form, Input, Switch, Button, Radio, Row, Col, App } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ComponentConfigProps } from './index';
 
 /**

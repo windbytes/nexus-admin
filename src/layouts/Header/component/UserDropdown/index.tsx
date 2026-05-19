@@ -9,11 +9,11 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import { App, Avatar, Dropdown, type MenuProps, message } from 'antd';
 import type React from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import avatar from '@/assets/images/avatar.png';
 import { useLogout } from '@/hooks/useLogout';
@@ -274,9 +274,9 @@ const UserDropdown: React.FC = () => {
             // 清理用户信息
             userStore.clear();
             // 修改回document.title
-            document.title = 'nexus';
+            document.title = 'syndra';
             // 跳转登录界面
-            navigate({ to: '/login', replace: true });
+            navigate('/login', { replace: true });
           },
         });
       },

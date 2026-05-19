@@ -16,7 +16,7 @@ import {
 } from './components';
 import ProjectDescription from './components/ProjectDescription';
 import { mockWorkbenchData } from './mockData';
-import './Workbench.module.scss';
+import './Workbench.module.css';
 
 /**
  * 工作台

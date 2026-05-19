@@ -13,7 +13,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button, Checkbox, Dropdown } from 'antd';
 import { useState } from 'react';
 import type { ColumnFixed, ColumnSetting } from '../types';
-import './ColumnSetting.scss';
+import './ColumnSetting.css';
 
 export interface ColumnSettingComponentProps {
   columns: ColumnSetting[];

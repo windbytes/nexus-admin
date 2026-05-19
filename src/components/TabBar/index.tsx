@@ -8,17 +8,17 @@ import {
   PushpinOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Button, Dropdown, type MenuProps, Tabs, type TabsProps } from 'antd';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import { useMenuStore } from '@/stores/store';
 import { type TabItem, useTabStore } from '@/stores/tabStore';
 import { useUserStore } from '@/stores/userStore';
 import { getIcon } from '@/utils/optimized-icons';
 import { findMenuByPath } from '@/utils/utils';
-import './tabBar.scss';
+import './tabBar.css';
 
 /**
  * 优化后的 ActivityTabBar
@@ -30,8 +30,7 @@ import './tabBar.scss';
 const TabBar: React.FC = memo(() => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  // 仅订阅 pathname，避免不必要的重新渲染
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
 
   // 1. 使用扁平化路由映射 (O(1) 查找
   const { caches, menus } = useMenuStore(
@@ -113,7 +112,7 @@ const TabBar: React.FC = memo(() => {
         tabState.setTabs(newTabs, pathname);
       } else if (!isHome) {
         // 如果找不到路由定义，回退到首页
-        navigate({ to: homePath, replace: true });
+        navigate(homePath, { replace: true });
       }
       return;
     }
@@ -155,7 +154,7 @@ const TabBar: React.FC = memo(() => {
   const handleTabClick = useCallback(
     (key: string) => {
       if (key !== pathname) {
-        navigate({ to: key });
+        navigate(key);
       }
     },
     [pathname, navigate]
@@ -167,7 +166,7 @@ const TabBar: React.FC = memo(() => {
         const nextKey = tabState.removeTab(targetKey);
         // 只有当关闭的是当前激活的 tab 时才跳转
         if (targetKey === tabState.activeKey && nextKey) {
-          navigate({ to: nextKey, replace: true });
+          navigate(nextKey, { replace: true });
         }
       }
     },
@@ -224,7 +223,7 @@ const TabBar: React.FC = memo(() => {
 
       // 统一处理导航
       if (nextActiveKey && nextActiveKey !== activeKey && nextActiveKey !== pathname) {
-        navigate({ to: nextActiveKey, replace: true });
+        navigate(nextActiveKey, { replace: true });
       }
     },
     [tabState, homePath, pathname, navigate]

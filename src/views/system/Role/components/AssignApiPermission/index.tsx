@@ -30,7 +30,11 @@ const columns: ColumnsType<PermissionModel> = [
     key: 'status',
     width: 80,
     align: 'center',
-    render: (status: boolean) => <Tag color={status ? 'success' : 'error'}>{status ? '启用' : '停用'}</Tag>,
+    render: (status: boolean) => (
+      <Tag variant="solid" color={status ? 'success' : 'error'}>
+        {status ? '启用' : '停用'}
+      </Tag>
+    ),
   },
 ];
 

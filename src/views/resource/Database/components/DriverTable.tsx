@@ -2,9 +2,10 @@ import { DatabaseOutlined, DeleteOutlined, DownloadOutlined, EditOutlined } from
 import type { TablePaginationConfig, TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { DatabaseDriver } from '@/services/resource/database/driverApi';
-import '@/styles/table.full.scss';
+import '@/styles/table.full.css';
 interface DriverTableProps {
   data: DatabaseDriver[];
   loading: boolean;
@@ -180,11 +181,11 @@ const DriverTable: React.FC<DriverTableProps> = ({
     {
       title: '操作',
       key: 'action',
-      width: 140,
+      width: TABLE_ACTION_COLUMN_WIDTH,
       align: 'center',
       fixed: 'right',
       render: (_: string, record: DatabaseDriver) => (
-        <Space size="small">
+        <Space size="small" wrap={false}>
           <Tooltip title="编辑">
             <Button
               type="text"

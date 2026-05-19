@@ -73,10 +73,13 @@ const SourceConfigManual: React.FC<SourceConfigManualProps> = ({ disabled }) => 
               {
                 title: '顺序',
                 width: 80,
+                align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
-                  <Form.Item name={[field.name, 'orderIndex']} style={{ marginBottom: 0 }}>
-                    <InputNumber min={0} size="small" className="w-full" disabled={disabled} />
-                  </Form.Item>
+                  <div className="flex justify-center">
+                    <Form.Item name={[field.name, 'orderIndex']} style={{ marginBottom: 0 }}>
+                      <InputNumber min={0} disabled={disabled} />
+                    </Form.Item>
+                  </div>
                 ),
               },
               {
@@ -84,9 +87,11 @@ const SourceConfigManual: React.FC<SourceConfigManualProps> = ({ disabled }) => 
                 width: 64,
                 align: 'center',
                 render: (_: unknown, field: FormListFieldData) => (
-                  <Form.Item name={[field.name, 'enabled']} valuePropName="checked" style={{ marginBottom: 0 }}>
-                    <Switch size="small" disabled={disabled} />
-                  </Form.Item>
+                  <div className="flex justify-center">
+                    <Form.Item name={[field.name, 'enabled']} valuePropName="checked" style={{ marginBottom: 0 }}>
+                      <Switch size="small" disabled={disabled} />
+                    </Form.Item>
+                  </div>
                 ),
               },
               ...(disabled
@@ -95,15 +100,18 @@ const SourceConfigManual: React.FC<SourceConfigManualProps> = ({ disabled }) => 
                     {
                       title: '操作',
                       width: 56,
+                      align: 'center',
                       fixed: 'right' as const,
                       render: (_: unknown, field: FormListFieldData) => (
-                        <Button
-                          type="link"
-                          size="small"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => remove(field.name)}
-                        />
+                        <div className="flex justify-center">
+                          <Button
+                            type="link"
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => remove(field.name)}
+                          />
+                        </div>
                       ),
                     },
                   ]),

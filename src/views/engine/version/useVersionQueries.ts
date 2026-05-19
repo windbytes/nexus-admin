@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { versionsService } from '@/services/integrated/version/api';
 import type {
   CreateVersionParams,
-  VersionListParams,
   PublishVersionParams,
   VersionCompareParams,
+  VersionListParams,
 } from '@/services/integrated/version/model';
 
 // 查询键常量

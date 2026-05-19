@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { SearchHistoryItem } from '../types';
 
 const STORAGE_KEY = 'searchMenuHistory';

@@ -1,19 +1,20 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  EditOutlined,
+  ExportOutlined,
+  FileExcelOutlined,
+  FilePdfOutlined,
+  FileTextOutlined,
+  ImportOutlined,
+  KeyOutlined,
+  PlusOutlined,
+  RestOutlined,
+} from '@ant-design/icons';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
 import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ColumnEdit24Regular,
-  CsvOutline,
-  DeleteDismiss24Filled,
-  FileTypeExcel,
-  FolderExport,
-  FolderImport,
-  PdfIcon,
-  Recycle,
-  ResetPasswordIcon,
-  Status24Regular,
-} from '@/components/icons';
 import { MyIcon } from '@/components/MyIcon';
 import type { UserModel } from '@/services/system/user/type';
 import type { ModalType } from '../hooks/useUserModals';
@@ -51,7 +52,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'csv',
       label: '导出为CSV',
-      icon: <CsvOutline className="text-sm! block! text-orange-400" />,
+      icon: <FileTextOutlined className="text-sm! block! text-orange-400" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -62,7 +63,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'excel',
       label: '导出为Excel',
-      icon: <FileTypeExcel className="text-sm! block!" />,
+      icon: <FileExcelOutlined className="text-sm! block!" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -73,7 +74,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'pdf',
       label: '导出为PDF',
-      icon: <PdfIcon className="text-sm! block" />,
+      icon: <FilePdfOutlined className="text-sm! block" />,
       onClick: () => {
         modal.error({
           title: '功能暂未开放',
@@ -88,7 +89,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'assignRole',
       label: '批量分配角色',
-      icon: <MyIcon type="nexus-assigned" className="text-sm! block" />,
+      icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
       disabled: selectedRows.length === 0 || !canBatchAssignRole,
       onClick: () => {
         if (!canBatchAssignRole) {
@@ -107,7 +108,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'updateStatus',
       label: '批量更新状态',
-      icon: <Status24Regular className="text-sm! block" />,
+      icon: <CheckCircleOutlined className="text-sm! block" />,
       onClick: () => {
         if (!canUpdateStatus) {
           modal.error({
@@ -125,7 +126,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'resetPassword',
       label: '批量重置密码',
-      icon: <ResetPasswordIcon className="text-sm! block!" />,
+      icon: <KeyOutlined className="text-sm! block!" />,
       disabled: selectedRows.length === 0 || !canBatchResetPassword,
       onClick: () => {
         if (!canBatchResetPassword) {
@@ -147,8 +148,9 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'delete',
       label: '批量删除',
-      icon: <DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)" />,
+      icon: <DeleteOutlined className="text-sm! block! text-(--ant-color-error)" />,
       disabled: selectedRows.length === 0 || !canDeleteUser,
+      danger: true,
       onClick: () => {
         if (!canDeleteUser) {
           modal.error({
@@ -166,12 +168,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       {/* 左侧主要操作按钮 */}
       <Space size="middle">
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          disabled={!canAdd}
-          onClick={() => openModal('add')}
-        >
+        <Button type="primary" icon={<PlusOutlined />} disabled={!canAdd} onClick={() => openModal('add')}>
           {t('common.operation.add')}
         </Button>
         <Upload
@@ -190,16 +187,13 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             }
           }}
         >
-          <Button icon={<FolderImport className="block!" />} disabled={!canBatchImport}>
+          <Button icon={<ImportOutlined className="block!" />} disabled={!canBatchImport}>
             {t('common.operation.import')}
           </Button>
         </Upload>
 
         <Space.Compact>
-          <Button
-            disabled={selectedRows.length === 0 || !canBatchExport}
-            icon={<FolderExport className="block!" />}
-          >
+          <Button disabled={selectedRows.length === 0 || !canBatchExport} icon={<ExportOutlined className="block!" />}>
             {t('common.operation.export')}
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
@@ -214,7 +208,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>
-          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="block!" />}>
+          <Button disabled={selectedRows.length === 0} icon={<EditOutlined className="block!" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
@@ -225,7 +219,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
 
         {/* 回收站按钮 - 移到左边 */}
         <Button
-          icon={<Recycle className="block! text-green-500!" />}
+          icon={<RestOutlined className="block! text-green-500!" />}
           disabled={!canRecover}
           onClick={() => openModal('recycle')}
         >

@@ -1,8 +1,8 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 import { App } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
 import { commonService } from '@/services/common';
 import { useTabStore } from '@/stores/tabStore';
@@ -37,20 +37,17 @@ export const useLogout = () => {
       icon: <ExclamationCircleOutlined />,
       content: t('login.confirmLogout'),
       onOk: async () => {
-        // 清除后端的信息
-        const res = await commonService.logout();
-        if (res) {
-          // 清空所有tab
-          resetTabs();
-          // 清理角色相关的缓存
-          queryClient.removeQueries({ queryKey: ['user-roles'] });
-          // 清理用户信息
-          userLogout();
-          // 修改回document.title
-          document.title = 'nexus';
-          // 退出到登录页面
-          navigate({ to: '/login', replace: true });
+        try {
+          // 统一包装体成功时 data 常为 null，不能依赖 truthy 判断
+          await commonService.logout();
+        } catch {
+          // 服务端登出失败时仍清理本地状态，避免无法离开已失效会话
         }
+        resetTabs();
+        queryClient.removeQueries({ queryKey: ['user-roles'] });
+        userLogout();
+        document.title = 'syndra';
+        navigate('/login', { replace: true });
       },
     });
   };

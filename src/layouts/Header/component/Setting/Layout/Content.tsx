@@ -1,6 +1,6 @@
 import ContentCompact from '../icons/ContentCompact';
 import HeaderNav from '../icons/HeaderNav';
-import './layout.scss';
+import './layout.css';
 
 /**
  * 预设内容布局

@@ -1,9 +1,9 @@
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Layout, Menu, type MenuProps, Spin, theme } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { useShallow } from 'zustand/shallow';
-import { BubbleLoading } from '@/components/icons';
 import CollapseSwitch from '@/layouts/Header/component/CollapseSwitch';
 import { useMenuStore, usePreferencesStore } from '@/stores/store';
 import { searchRoute } from '@/utils/utils';
@@ -68,15 +68,15 @@ const DoubleColumnMenu = () => {
     }
   }, [firstLevelKey]);
 
-  // 左列：仅一级，不展示子菜单
+  // 左列：仅一级，不展示子菜单（剥离 children 避免渲染子菜单）
   const firstLevelItems: MenuItem[] = useMemo(
     () =>
-      menuList.map((item: MenuItem) => ({
-        key: item.key,
-        icon: item.icon,
-        label: item.label,
-        type: item.type,
-      })),
+      menuList
+        .filter((item): item is NonNullable<MenuItem> => item != null)
+        .map((item) => {
+          const { children: _, ...rest } = item as unknown as Record<string, unknown>;
+          return rest as unknown as MenuItem;
+        }),
     [menuList]
   );
 
@@ -85,15 +85,17 @@ const DoubleColumnMenu = () => {
     if (!selectedFirstKey) {
       return [];
     }
-    const first = menuList.find((m) => m?.key === selectedFirstKey);
-    const children = (first?.children as MenuItem[] | undefined) ?? [];
-    return children;
+    const first = menuList.find((m) => m != null && 'key' in m && m.key === selectedFirstKey);
+    if (first != null && 'children' in first && Array.isArray(first.children)) {
+      return first.children as MenuItem[];
+    }
+    return [];
   }, [menuList, selectedFirstKey]);
 
   const hasChildren = useCallback(
     (key: string) => {
-      const item = menuList.find((m) => m?.key === key);
-      return Array.isArray(item?.children) && item.children.length > 0;
+      const item = menuList.find((m) => m != null && 'key' in m && m.key === key);
+      return item != null && 'children' in item && Array.isArray(item.children) && item.children.length > 0;
     },
     [menuList]
   );
@@ -103,7 +105,7 @@ const DoubleColumnMenu = () => {
       if (hasChildren(key)) {
         setSelectedFirstKey(key);
       } else {
-        navigate({ to: key, replace: true });
+        navigate(key, { replace: true });
       }
     },
     [hasChildren, navigate]
@@ -111,7 +113,7 @@ const DoubleColumnMenu = () => {
 
   const onRightClick: MenuProps['onClick'] = useCallback(
     ({ key }: { key: string }) => {
-      navigate({ to: key, replace: true });
+      navigate(key, { replace: true });
     },
     [navigate]
   );
@@ -119,7 +121,7 @@ const DoubleColumnMenu = () => {
   useEffect(() => {
     const route = searchRoute(pathname, menus);
     if (route?.meta?.title && dynamicTitle) {
-      document.title = `Nexus - ${t(route.meta.title)}`;
+      document.title = `Syndra - ${t(route.meta.title)}`;
     }
   }, [pathname, menus, dynamicTitle, t]);
 
@@ -139,7 +141,7 @@ const DoubleColumnMenu = () => {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Spin indicator={<BubbleLoading width={24} />} spinning />
+        <Spin indicator={<LoadingOutlined width={24} />} spinning />
       </div>
     );
   }
@@ -148,8 +150,8 @@ const DoubleColumnMenu = () => {
   const rightSelectedKeys = selectedPath ? [selectedPath] : [];
 
   return (
-    <div className="nexus-double-column-menu flex flex-1 min-h-0">
-      <div className="nexus-double-column-menu-left flex flex-col min-w-0 flex-1">
+    <div className="syndra-double-column-menu flex flex-1 min-h-0">
+      <div className="syndra-double-column-menu-left flex flex-col min-w-0 flex-1">
         <SystemLogo variant="iconOnly" />
         <Menu
           className="side-menu border-r border-[#00000012] flex-1 min-h-0"
@@ -164,7 +166,7 @@ const DoubleColumnMenu = () => {
       </div>
 
       <Layout.Sider
-        className="nexus-double-column-menu-right shrink-0"
+        className="syndra-double-column-menu-right shrink-0"
         collapsedWidth={collapsed ? 56 : sidebarWidth}
         width={sidebarWidth}
         theme={mode}
@@ -189,7 +191,7 @@ const DoubleColumnMenu = () => {
             items={secondLevelItems}
             onClick={onRightClick}
           />
-          <div className="nexus-double-column-menu-footer shrink-0 flex items-center justify-center border-t border-[#00000012] py-2">
+          <div className="syndra-double-column-menu-footer shrink-0 flex items-center justify-center border-t border-[#00000012] py-2">
             <CollapseSwitch />
           </div>
         </div>

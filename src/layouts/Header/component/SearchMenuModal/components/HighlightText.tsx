@@ -1,5 +1,5 @@
 import React from 'react';
-import '../searchMenuModal.scss';
+import '../searchMenuModal.css';
 
 interface Props {
   text: string;

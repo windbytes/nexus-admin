@@ -1,7 +1,7 @@
 import { Avatar, Button, Empty, Space, Tag, Typography } from 'antd';
 import type React from 'react';
 import classNames from '@/utils/classnames';
-import styles from './message-box.module.scss';
+import styles from './message-box.module.css';
 
 /**
  * 消息列表

@@ -1,9 +1,9 @@
+import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import path from 'path';
-import Icons from 'unplugin-icons/vite';
-import { defineConfig } from 'vite';
-import viteCompression from 'vite-plugin-compression';
+import { defineConfig, loadEnv } from 'vite';
+import { compression } from 'vite-plugin-compression2';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 const buildId = Math.random().toString(36).slice(2, 8);
@@ -11,30 +11,24 @@ const buildId = Math.random().toString(36).slice(2, 8);
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+  const env = loadEnv(mode, process.cwd(), '');
+  const devServerPort = Number(env.VITE_DEV_SERVER_PORT || '8000');
+  const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9527';
+  /** Netty WebSocket 与 Spring 不同端口；路径无 /api 前缀，需在代理中剥离 */
+  const wsProxyTarget = env.VITE_WS_PROXY_TARGET || 'http://localhost:8891';
 
   return {
     plugins: [
-      react({
-        // 启用 React 编译器优化
-        babel: {
-          plugins: [
-            // React 编译器插件
-            ['babel-plugin-react-compiler'],
-          ],
-        },
-      }),
+      react(),
+      babel({ presets: [reactCompilerPreset()] }),
       tailwindcss(),
-      viteCompression({
-        verbose: !isProduction,
-        disable: !isProduction,
-        threshold: 10240,
-        algorithm: 'gzip',
-        ext: '.gz',
-      }),
-      // 将iconify图标转换成react组件（本地化）
-      Icons({
-        compiler: 'jsx',
-      }),
+      // 生产环境同时生成 gzip 和 brotli 压缩文件
+      ...(isProduction
+        ? [
+            compression({ algorithms: ['gzip'], threshold: 10240 }),
+            compression({ algorithms: ['brotliCompress'], threshold: 10240 }),
+          ]
+        : []),
       // mock 插件仅开发环境启用
       ...(mode === 'development' ? [mockDevServerPlugin({ prefix: '/api' })] : []),
     ],
@@ -44,7 +38,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       // css代码分割
       cssCodeSplit: isProduction,
-      cssTarget: 'chrome80',
+      cssTarget: 'chrome90',
       // 使用 Vite 8 默认 Oxc minifier（比 Terser 更快）
       target: 'es2020',
       // 设置 chunk 大小警告限制
@@ -59,11 +53,19 @@ export default defineConfig(({ mode }) => {
               },
               {
                 name: 'lib-router',
-                test: /node_modules[\\/]@tanstack[\\/]react-router/,
+                test: /node_modules[\\/]react-router/,
+              },
+              {
+                name: 'lib-antd',
+                test: /node_modules[\\/]antd/,
+              },
+              {
+                name: 'lib-antd-icons',
+                test: /node_modules[\\/]@ant-design[\\/]icons/,
               },
               {
                 name: 'lib-utils',
-                test: /node_modules[\\/](lodash-es|dayjs|crypto-js|jsencrypt)/,
+                test: /node_modules[\\/](lodash-es|dayjs|crypto-js|jsencrypt|clsx|tailwind-merge)/,
               },
               {
                 name: 'lib-network',
@@ -74,12 +76,20 @@ export default defineConfig(({ mode }) => {
                 test: /node_modules[\\/]echarts/,
               },
               {
-                name: 'lib-antd-icons',
-                test: /node_modules[\\/]@ant-design\/icons/,
+                name: 'lib-flow',
+                test: /node_modules[\\/]@xyflow/,
               },
               {
-                name: 'lib-other',
-                test: /node_modules[\\/](classnames|@iconify-icon|i18next)/,
+                name: 'lib-monaco',
+                test: /node_modules[\\/](monaco-editor|@monaco-editor)/,
+              },
+              {
+                name: 'lib-dnd',
+                test: /node_modules[\\/]@dnd-kit/,
+              },
+              {
+                name: 'lib-i18n',
+                test: /node_modules[\\/](i18next|react-i18next)/,
               },
             ],
           },
@@ -98,40 +108,25 @@ export default defineConfig(({ mode }) => {
       },
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     },
-    // 优化依赖预构建
+    // 优化依赖预构建（仅保留首屏关键依赖，非首屏大型库由路由懒加载自然按需加载）
     optimizeDeps: {
-      include: [
-        'react',
-        'react-dom',
-        'antd',
-        'lodash-es',
-        'dayjs',
-        'axios',
-        'echarts',
-        '@ant-design/icons',
-        '@tanstack/react-query',
-        '@tanstack/react-router',
-        '@monaco-editor/react',
-      ],
-    },
-    // css预处理器
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: `@use "@/styles/variables.scss";`,
-        },
-      },
+      include: ['react', 'react-dom', 'antd', 'dayjs', 'axios', '@tanstack/react-query', 'react-router'],
     },
     // 服务器配置以及代理
     server: {
-      port: 8000,
+      port: devServerPort,
       host: true,
       proxy: {
-        '/api': {
-          target: 'http://localhost:9193',
+        // 须写在 `/api` 之前：浏览器仍用 `/api/ws/...` 与 REST 同源，此处转发到 Netty 并去掉 `/api`
+        '/api/ws': {
+          target: wsProxyTarget,
           changeOrigin: true,
           ws: true,
-          rewrite: (pathName) => pathName.replace(/^\/api/, ''),
+          rewrite: (p) => p.replace(/^\/api/, '') || '/',
+        },
+        '/api': {
+          target: apiProxyTarget,
+          changeOrigin: true,
         },
       },
     },

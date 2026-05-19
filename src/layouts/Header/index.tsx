@@ -14,9 +14,10 @@ import HeaderMenu from './component/HeaderMenu';
 import LanguageSwitch from './component/LanguageSwitch';
 import MessageBox from './component/MessageBox';
 import SearchMenuModal from './component/SearchMenuModal';
+import ThemeToggle from './component/ThemeToggle';
 import UserDropdown from './component/UserDropdown';
-import '@/layouts/LeftMenu/leftMenu.scss';
-import './header.scss';
+import '@/layouts/LeftMenu/leftMenu.css';
+import './header.css';
 import useGlobalUIStore from '@/stores/globalUIStore';
 
 const Setting = lazy(() => import('./component/Setting'));
@@ -61,14 +62,15 @@ const Header = () => {
     }))
   );
 
-  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification } = widgetConfig;
+  const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification, themeToggle } =
+    widgetConfig;
   const { t } = useTranslation();
 
   /**
    * 跳转到github - 使用 useCallback 缓存
    */
   const routeGitHub = () => {
-    window.open('https://github.com/windbytes/nexus-admin', '_blank');
+    window.open('https://github.com/windbytes/syndra-admin', '_blank');
   };
 
   /**
@@ -125,6 +127,8 @@ const Header = () => {
                   onClick={() => setSettingMenuModalOpen(true)}
                 />
               </Tooltip>
+              {/* 明暗主题 */}
+              {themeToggle && <ThemeToggle />}
               {/* 语言切换 */}
               {languageToggle && <LanguageSwitch />}
               {/* 全屏 */}

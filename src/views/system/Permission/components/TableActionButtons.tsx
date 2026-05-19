@@ -1,15 +1,16 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownOutlined,
+  EditOutlined,
+  ExportOutlined,
+  FileExcelOutlined,
+  FileTextOutlined,
+  ImportOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { App, Badge, Button, Dropdown, type MenuProps, Space, Upload } from 'antd';
 import type { Key } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ColumnEdit24Regular,
-  CsvOutline,
-  DeleteDismiss24Filled,
-  FileTypeExcel,
-  FolderExport,
-  FolderImport,
-} from '@/components/icons';
 import type { PermissionModel } from '@/services/system/permission/type';
 import type { ModalType } from '../hooks/usePermissionModals';
 import { usePermissionPermissions } from '../hooks/usePermissionPermissions';
@@ -45,7 +46,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'csv',
       label: '导出为CSV',
-      icon: <CsvOutline className="text-sm! block! text-orange-400" />,
+      icon: <FileTextOutlined className="text-sm! block! text-orange-400" />,
       onClick: () => {
         modal.info({
           title: '功能开发中',
@@ -56,7 +57,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'excel',
       label: '导出为Excel',
-      icon: <FileTypeExcel className="text-sm! block!" />,
+      icon: <FileExcelOutlined className="text-sm! block!" />,
       onClick: () => {
         modal.info({
           title: '功能开发中',
@@ -73,7 +74,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     {
       key: 'delete',
       label: '批量删除',
-      icon: <DeleteDismiss24Filled className="text-sm! block! text-(--ant-color-error)" />,
+      icon: <DeleteOutlined className="text-sm! block! text-(--ant-color-error)" />,
       disabled: selectedRows.length === 0 || !canDelete,
       onClick: () => {
         if (!canDelete) {
@@ -107,12 +108,7 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     <div className="flex grow items-center justify-between">
       <Space size="middle">
         {/* 新增按钮 */}
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          disabled={!canAdd}
-          onClick={() => openModal('add')}
-        >
+        <Button type="primary" icon={<PlusOutlined />} disabled={!canAdd} onClick={() => openModal('add')}>
           {t('common.operation.add')}
         </Button>
 
@@ -123,32 +119,25 @@ const TableActionButtons: React.FC<TableActionButtonsProps> = ({
           action="/api/system/permission/import"
           onChange={handleImportChange}
         >
-          <Button icon={<FolderImport className="block!" />} disabled={!canImport}>
+          <Button icon={<ImportOutlined className="block!" />} disabled={!canImport}>
             {t('common.operation.import')}
           </Button>
         </Upload>
 
         {/* 导出按钮 */}
         <Space.Compact>
-          <Button
-            disabled={selectedRows.length === 0 || !canExport}
-            icon={<FolderExport className="block!" />}
-          >
+          <Button disabled={selectedRows.length === 0 || !canExport} icon={<ExportOutlined className="block!" />}>
             {t('common.operation.export')}
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>
-          <Dropdown
-            disabled={selectedRows.length === 0 || !canExport}
-            menu={{ items: exportItems }}
-            placement="bottom"
-          >
+          <Dropdown disabled={selectedRows.length === 0 || !canExport} menu={{ items: exportItems }} placement="bottom">
             <Button icon={<DownOutlined />} />
           </Dropdown>
         </Space.Compact>
 
         {/* 批量操作下拉菜单 */}
         <Space.Compact>
-          <Button disabled={selectedRows.length === 0} icon={<ColumnEdit24Regular className="block!" />}>
+          <Button disabled={selectedRows.length === 0} icon={<EditOutlined className="block!" />}>
             批量操作
             {selectedRows.length > 0 && <Badge count={selectedRows.length} size="small" className="ml-1" />}
           </Button>

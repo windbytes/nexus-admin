@@ -3,9 +3,10 @@ import type { TableProps } from 'antd';
 import { Button, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import type React from 'react';
 import { memo } from 'react';
+import { TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import useTableScroll from '@/hooks/useTableScroll';
 import type { WebService } from '@/services/resource/webservice/webServiceApi';
-import '@/styles/table.full.scss';
+import '@/styles/table.full.css';
 
 interface WebServiceTableProps {
   data: WebService[];
@@ -228,11 +229,11 @@ const WebServiceTable: React.FC<WebServiceTableProps> = memo(
       {
         title: '操作',
         key: 'action',
-        width: 220,
+        width: TABLE_ACTION_COLUMN_WIDTH,
         align: 'center',
         fixed: 'right',
-        render: (_: any, record: WebService) => (
-          <Space size="small">
+        render: (_: unknown, record: WebService) => (
+          <Space size="small" wrap={false}>
             <Tooltip title="查看">
               <Button
                 type="text"

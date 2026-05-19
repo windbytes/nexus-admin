@@ -4,8 +4,8 @@
  */
 
 import type { ComponentType } from 'react';
-import type { IEditorContext } from '../editorContext/types';
 import type { ToolbarContribution } from '../../types';
+import type { IEditorContext } from '../editorContext/types';
 
 /** 插件元信息（标识、版本、依赖，用于加载与兼容性检查） */
 export interface PluginMeta {

@@ -1,20 +1,46 @@
 import { PlusOutlined, SearchOutlined, TagOutlined, TagsOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { useUnmount } from 'ahooks';
-import { App, Checkbox, Divider, Input } from 'antd';
+import { Tag as AntdTag, App, Checkbox, Divider, Input, Tooltip } from 'antd';
 import { noop } from 'lodash-es';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Tag } from '@/components/base/tag-management/constant';
 import type { HtmlContentProps } from '@/components/popover';
 import CustomPopover from '@/components/popover';
 import { tagService } from '@/services/engine';
-import { tagsService } from '@/services/common/tags/tagsApi';
-import type { Tag } from '@/services/engine';
 import { useTagStore } from '@/stores/useTagStore';
 import cn from '@/utils/classnames';
 
-const isAppTag = (type: string) => type === 'app';
+const TAG_TYPE_COLOR_PALETTE = [
+  '#2F54EB', // blue
+  '#13C2C2', // cyan
+  '#52C41A', // green
+  '#FAAD14', // gold
+  '#FA541C', // volcano
+  '#EB2F96', // magenta
+  '#722ED1', // purple
+  '#A0D911', // lime
+  '#1890FF', // geekblue-ish
+  '#F5222D', // red
+];
+
+function hashStringToIndex(input: string, modulo: number) {
+  // djb2
+  let hash = 5381;
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash * 33) ^ input.charCodeAt(i);
+  }
+  return Math.abs(hash) % modulo;
+}
+
+function getTagColorByType(type?: string) {
+  if (!type) {
+    return TAG_TYPE_COLOR_PALETTE[0];
+  }
+  const idx = hashStringToIndex(type, TAG_TYPE_COLOR_PALETTE.length);
+  return TAG_TYPE_COLOR_PALETTE[idx];
+}
 
 type TagSelectorProps = {
   // 对应的应用ID
@@ -39,13 +65,27 @@ type PanelProps = {
 const Panel: React.FC<PanelProps> = (props) => {
   const { t } = useTranslation();
   const { notification } = App.useApp();
-  const { type, targetID, value, selectedTags, onCacheUpdate, onChange } = props;
+  const { type, targetID, value, selectedTags, onCacheUpdate, onChange, onCreate } = props;
   const { tagList, setTagList, setShowTagManagementModal } = useTagStore();
 
+  const typeColor = useMemo(() => getTagColorByType(type), [type]);
+
   // 选中的标签id
-  const [selectedTagIDs, setSelectedTagIDs] = useState<string[]>([]);
+  const [selectedTagIDs, setSelectedTagIDs] = useState<string[]>(value ?? []);
   // 检索关键词
   const [keywords, setKeywords] = useState<string>('');
+
+  // 面板打开时拉取最新标签列表
+  useEffect(() => {
+    onCreate?.();
+    // 只在 mount 时拉取一次即可
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 打开面板时同步选中态（外部 value 变化时也同步）
+  useEffect(() => {
+    setSelectedTagIDs(value ?? []);
+  }, [value]);
 
   // 输入框值改变
   const handleKeywordsChange = (value: string) => {
@@ -64,25 +104,49 @@ const Panel: React.FC<PanelProps> = (props) => {
 
   // 过滤后的标签列表
   const filteredTagList = useMemo(() => {
-    return tagList.filter((tag) => tag.type === type && !value.includes(tag.id) && tag.name.includes(keywords));
-  }, [type, tagList, value, keywords]);
+    return tagList.filter(
+      (tag) => tag.type === type && !selectedTagIDs.includes(tag.id) && tag.name.includes(keywords)
+    );
+  }, [type, tagList, selectedTagIDs, keywords]);
 
   const [creating, setCreating] = useState<boolean>(false);
 
+  const resolveSelectedTags = (ids: string[]) => {
+    const dict = new Map<string, Tag>();
+    (selectedTags ?? []).forEach((tag) => {
+      if (tag?.id) {
+        dict.set(tag.id, tag);
+      }
+    });
+    tagList.forEach((tag) => {
+      if (tag?.id) {
+        dict.set(tag.id, tag);
+      }
+    });
+    return ids.map((id) => dict.get(id)).filter(Boolean) as Tag[];
+  };
+
   // 标签新建（应用标签走 engine tagService）
   const createTagMutation = useMutation({
-    mutationFn: ({ name, type }: { name: string; type: string }) =>
-      isAppTag(type) ? tagService.createTag({ name, type }) : tagsService.addTag({ name, type }),
+    mutationFn: (name: string) => tagService.createTag({ name, type }),
     // 请求前设置状态
     onMutate: () => {
       setCreating(true);
     },
     onSuccess: (data) => {
-      setCreating(true);
       setTagList([...tagList, data]);
       notification.success({
         title: t('common.tag.created'),
         description: t('common.tag.created'),
+      });
+      // 创建后自动选中并立即绑定
+      setSelectedTagIDs((prev) => {
+        const next = prev.includes(data.id) ? prev : [...prev, data.id];
+        onCacheUpdate(resolveSelectedTags(next));
+        bindTagsMutation.mutateAsync(next).finally(() => {
+          onChange?.();
+        });
+        return next;
       });
       setKeywords('');
       setCreating(false);
@@ -96,10 +160,9 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
-  // 标签绑定（应用标签走 engine tagService，bindTags(tagIds, appId)）
-  const bindTagMutation = useMutation({
-    mutationFn: (tagIDs: string[]) =>
-      isAppTag(type) ? tagService.bindTags(tagIDs, targetID) : tagsService.bindTag(tagIDs, targetID, type),
+  // 覆盖式绑定（后端 bind 会先删后插）
+  const bindTagsMutation = useMutation({
+    mutationFn: (tagIDs: string[]) => tagService.bindTags(tagIDs, targetID),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -113,10 +176,8 @@ const Panel: React.FC<PanelProps> = (props) => {
     },
   });
 
-  // 标签解绑（应用标签走 engine tagService）
   const unbindTagMutation = useMutation({
-    mutationFn: (tagID: string) =>
-      isAppTag(type) ? tagService.unbindTag(tagID, targetID) : tagsService.unbindTag(tagID, targetID, type),
+    mutationFn: (tagId: string) => tagService.unbindTag(tagId, targetID),
     onSuccess: () => {
       notification.success({
         title: t('common.actionMsg.modifiedSuccessfully'),
@@ -140,60 +201,34 @@ const Panel: React.FC<PanelProps> = (props) => {
     if (creating) {
       return;
     }
-    await createTagMutation.mutateAsync({ name: keywords, type });
+    await createTagMutation.mutateAsync(keywords);
   };
 
   /**
    * 选中标签
    */
-  const selectTag = (tag: Tag) => {
-    if (selectedTagIDs.includes(tag.id)) {
-      setSelectedTagIDs(selectedTagIDs.filter((v) => v !== tag.id));
-    } else {
-      setSelectedTagIDs([...selectedTagIDs, tag.id]);
+  const selectTag = async (tag: Tag) => {
+    const isSelected = selectedTagIDs.includes(tag.id);
+    const nextSelectedTagIDs = isSelected ? selectedTagIDs.filter((v) => v !== tag.id) : [...selectedTagIDs, tag.id];
+
+    // 乐观更新 UI
+    setSelectedTagIDs(nextSelectedTagIDs);
+    onCacheUpdate(resolveSelectedTags(nextSelectedTagIDs));
+
+    if (isSelected) {
+      await unbindTagMutation.mutateAsync(tag.id).finally(() => {
+        onChange?.();
+      });
+      return;
     }
-  };
 
-  /**
-   * 值未改变
-   */
-  const valueNotChanged = useMemo(() => {
-    return (
-      value.length === selectedTagIDs.length &&
-      value.every((v) => selectedTagIDs.includes(v)) &&
-      selectedTagIDs.every((v) => value.includes(v))
-    );
-  }, [value, selectedTagIDs]);
-
-  /**
-   * 处理值改变
-   */
-  const handleValueChange = () => {
-    const addTagIDs = selectedTagIDs.filter((v) => !!value.includes(v));
-    const removeTagIDs = value.filter((v) => !selectedTagIDs.includes(v));
-
-    const selectedTags = tagList.filter((tag) => selectedTagIDs.includes(tag.id));
-    onCacheUpdate(selectedTags);
-
-    Promise.all([
-      ...(addTagIDs.length ? [bindTagMutation.mutateAsync(addTagIDs)] : []),
-      ...(removeTagIDs.length ? removeTagIDs.map((id) => unbindTagMutation.mutateAsync(id)) : []),
-    ]).finally(() => {
-      if (onChange) {
-        onChange();
-      }
+    // bind 为覆盖式绑定：必须传全量 ids，避免覆盖掉已有绑定
+    await bindTagsMutation.mutateAsync(nextSelectedTagIDs).finally(() => {
+      onChange?.();
     });
   };
 
-  /**
-   * 组件卸载的时候（判定是否发生了改变）
-   */
-  useUnmount(() => {
-    if (valueNotChanged) {
-      return;
-    }
-    handleValueChange();
-  });
+  // 注意：缓存更新由 selectTag / createTag 主动触发，避免与外部 value 同步产生循环更新
 
   return (
     <div className="relative w-[300px] rounded-lg border-[0.5px] border-blue-100 bg-white">
@@ -234,6 +269,10 @@ const Panel: React.FC<PanelProps> = (props) => {
               onClick={() => selectTag(tag)}
             >
               <Checkbox checked={selectedTagIDs.includes(tag.id)} className="shrink-0" onChange={noop} />
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: getTagColorByType(tag.type ?? type) }}
+              />
               <div title={tag.name} className="grow truncate text-sm leading-5 text-[#354052]">
                 {tag.name}
               </div>
@@ -246,6 +285,7 @@ const Panel: React.FC<PanelProps> = (props) => {
               onClick={() => selectTag(tag)}
             >
               <Checkbox className="shrink-0" checked={selectedTagIDs.includes(tag.id)} onChange={noop} />
+              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: typeColor }} />
               <div title={tag.name} className="grow truncate text-sm leading-5 text-[#354052]">
                 {tag.name}
               </div>
@@ -291,35 +331,39 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   onChange,
 }) => {
   const { t } = useTranslation();
-  const { tagList, setTagList } = useTagStore();
+  const { setTagList } = useTagStore();
 
   /**
    * 获取标签列表
    * @returns 标签列表
    */
   const getTagList = async () => {
-    const tags = isAppTag(type) ? await tagService.listTags(type) : await tagsService.getTagsList(type);
+    const tags = await tagService.listTags(type);
     setTagList(tags);
   };
 
   /**
-   * 用于显示选中标签的内容
+   * 用于显示选中标签的内容（优先使用 selectedTags）
    */
-  const triggerContent = useMemo(() => {
-    if (selectedTags?.length) {
-      return selectedTags
-        .filter((tag) => tagList.find((t) => t.id === tag.id))
-        .map((tag) => tag.name)
-        .join(', ');
-    }
-    return '';
-  }, [selectedTags, tagList]);
+  const triggerTags = useMemo(() => {
+    const unique = new Map<string, Tag>();
+    (selectedTags ?? []).forEach((tag) => {
+      if (tag?.id) {
+        unique.set(tag.id, tag);
+      }
+    });
+    return Array.from(unique.values());
+  }, [selectedTags]);
 
   /**
    * 触发器内容
    * @returns 触发器内容
    */
   const Trigger = () => {
+    const maxVisible = 2;
+    const visibleTags = triggerTags.slice(0, maxVisible);
+    const overflow = triggerTags.length - visibleTags.length;
+
     return (
       <div
         className={cn(
@@ -327,9 +371,34 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         )}
       >
         <TagOutlined className="h-3 w-3 shrink-0" />
-        <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-normal leading-5">
-          {!triggerContent ? t('common.tag.addTag') : triggerContent}
-        </div>
+        {!triggerTags.length ? (
+          <div className="text-[#98a2b2] grow truncate text-start text-[13px] font-normal leading-5">
+            {t('common.tag.addTag')}
+          </div>
+        ) : (
+          <div className="min-w-0 grow truncate text-start">
+            <div className="flex items-center gap-1 truncate">
+              {visibleTags.map((tag) => (
+                <Tooltip key={tag.id} title={tag.name}>
+                  <AntdTag
+                    color={getTagColorByType(tag.type)}
+                    style={{
+                      maxWidth: 120,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    {tag.name}
+                  </AntdTag>
+                </Tooltip>
+              ))}
+              {overflow > 0 && <AntdTag>{`+${overflow}`}</AntdTag>}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

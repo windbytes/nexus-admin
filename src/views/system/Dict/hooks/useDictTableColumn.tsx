@@ -1,7 +1,7 @@
-import { ExclamationCircleFilled } from '@ant-design/icons';
-import { App, Button, Space, type TableProps, Tag } from 'antd';
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { App, Button, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DeleteDismiss24Filled } from '@/components/icons';
+import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/constants/table';
 import type { DictModel } from '@/services/system/dict/type.d';
 import { DICT_TYPE_OPTIONS } from '../constants';
 import { useDictActions } from './useDictAction';
@@ -44,10 +44,15 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       dataIndex: 'dictType',
       key: 'dictType',
       width: 100,
+      align: 'center',
       render: (type: string) => {
         const opt = DICT_TYPE_OPTIONS.find((o) => o.value === type);
         const color = type === 'MANUAL' ? 'blue' : type === 'SQL' ? 'green' : 'orange';
-        return <Tag color={color}>{opt?.label ?? type}</Tag>;
+        return (
+          <Tag variant="solid" color={color}>
+            {opt?.label ?? type}
+          </Tag>
+        );
       },
     },
     {
@@ -60,24 +65,42 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
       title: '启用',
       dataIndex: 'enabled',
       key: 'enabled',
-      width: 72,
-      render: (v: boolean) => (v ? '是' : '否'),
+      width: 88,
+      align: 'center',
+      render: (v: boolean) => (
+        <Tag variant="solid" color={v ? 'success' : 'default'}>
+          {v ? '是' : '否'}
+        </Tag>
+      ),
     },
     {
       title: '缓存',
       dataIndex: 'cacheEnabled',
       key: 'cacheEnabled',
-      width: 72,
-      render: (v: boolean) => (v ? '是' : '否'),
+      width: 88,
+      align: 'center',
+      render: (v: boolean) => (
+        <Tag variant="solid" color={v ? 'processing' : 'default'}>
+          {v ? '是' : '否'}
+        </Tag>
+      ),
     },
     {
       title: '操作',
       key: 'action',
-      width: 120,
-      fixed: 'right',
+      width: TABLE_ACTION_COLUMN_WIDTH,
+      fixed: 'end',
+      align: 'center',
       render: (_: unknown, record: DictModel) => (
-        <Space size="small">
-          <Button type="link" size="small" disabled={!canEdit} onClick={() => canEdit && openModal('edit', record)}>
+        <div className={TABLE_ACTION_CELL_CLASSNAME}>
+          <Button
+            type="link"
+            size="small"
+            disabled={!canEdit}
+            icon={<EditOutlined className="text-(--ant-color-primary)!" />}
+            classNames={{ content: 'text-(--ant-color-primary)' }}
+            onClick={() => canEdit && openModal('edit', record)}
+          >
             {t('common.operation.edit')}
           </Button>
           <Button
@@ -85,7 +108,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
             size="small"
             danger
             disabled={!canDelete}
-            icon={<DeleteDismiss24Filled className="text-sm! align-middle" />}
+            icon={<DeleteOutlined />}
             onClick={() => {
               if (!canDelete) {
                 return;
@@ -101,7 +124,7 @@ export const useDictTableColumns = (props: UseDictTableColumnsProps) => {
           >
             {t('common.operation.delete')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];

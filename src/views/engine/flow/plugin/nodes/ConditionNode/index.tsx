@@ -1,5 +1,6 @@
-import { Handle, Position } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 import { Form, Input } from 'antd';
+import { FlowHandle } from '../../../components/FlowHandle';
 import type { WorkflowNodeComponentProps, WorkflowNodeConfigPanelProps, WorkflowNodePlugin } from '../../types';
 
 const ConditionNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data, selected }) => {
@@ -16,11 +17,11 @@ const ConditionNodeComponent: React.FC<WorkflowNodeComponentProps> = ({ id, data
         transform: 'rotate(0deg)',
       }}
     >
-      <Handle type="target" position={Position.Left} id={`${id}-target`} />
+      <FlowHandle type="target" position={Position.Left} id={`${id}-target`} />
       <div style={{ fontSize: 11, color: '#999', marginBottom: 2 }}>控制</div>
       <div style={{ fontSize: 13, fontWeight: 500, color: '#333', textAlign: 'center' }}>{title}</div>
-      <Handle type="source" position={Position.Right} id={`${id}-source-1`} style={{ top: '30%' }} />
-      <Handle type="source" position={Position.Right} id={`${id}-source-2`} style={{ top: '70%' }} />
+      <FlowHandle type="source" position={Position.Right} id={`${id}-source-1`} style={{ top: '30%' }} />
+      <FlowHandle type="source" position={Position.Right} id={`${id}-source-2`} style={{ top: '70%' }} />
     </div>
   );
 };

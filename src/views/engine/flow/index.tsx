@@ -1,28 +1,62 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useQuery } from '@tanstack/react-query';
 import { Spin } from 'antd';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useParams } from 'react-router';
+import { pluginService } from '@/services/engine/plugin/api';
 import { LeftSidebar } from './components/LeftSidebar';
 import { PropertyPanel } from './components/PropertyPanel';
 import { TopBar } from './components/TopBar';
 import { VersionHistoryModal } from './components/VersionHistoryModal';
-import { WorkflowCanvas } from './components/WorkflowCanvas';
+import { WorkflowCanvas, type WorkflowCanvasRef } from './components/WorkflowCanvas';
+import { useFlowId } from './hooks/useFlowId';
 import { useWorkflowHandlers } from './hooks/useWorkflowHandlers';
 import { useWorkflowConfigQuery, useWorkflowConfigSync, useWorkflowRunStatusQuery } from './hooks/useWorkflowQueries';
 import { registerBuiltinNodePlugins } from './plugin/nodes';
+import { useWorkflowStore } from './store/workflowStore';
 import { buildNodeTypes } from './utils/nodeTypes';
-import './workflow.scss';
+import './workflow.css';
 
 // 模块加载时即注册内置节点插件，保证 useMemo(buildNodeTypes) 首次执行时能拿到所有插件
 registerBuiltinNodePlugins();
 
 /**
- * 流程编排页：基于 appId 拉取节点/边配置与运行状态，组装顶部栏、左侧栏、画布、属性面板
+ * 流程编排页：基于 appId 拉取节点/边配置与运行状态，解析 flowId 后用于草稿/发布/版本/路由接口
  */
 const Workflow: React.FC = () => {
+  const { appId } = useParams();
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
+  const { flowId, isLoading: flowIdLoading } = useFlowId(appId);
+  const loadDocument = useWorkflowStore((s) => s.loadDocument);
+  const emptyLoadedForAppRef = useRef<string | null>(null);
+
+  // 预加载：进入应用时先拉取该租户可用插件列表，确保「添加节点」列表与后端一致
+  useQuery({
+    queryKey: ['engine', 'plugins', 'available'],
+    queryFn: () => pluginService.listAvailable(),
+    enabled: !!appId,
+    staleTime: 60_000,
+  });
+
+  // 应用下无流程定义时加载空画布（仅一次），避免显示其他应用的残留内容或重复覆盖未保存编辑
+  useEffect(() => {
+    if (!flowIdLoading && flowId == null && appId && emptyLoadedForAppRef.current !== appId) {
+      loadDocument({
+        version: 1,
+        nodes: [],
+        edges: [],
+        meta: { appId, updatedAt: new Date().toISOString() },
+      });
+      emptyLoadedForAppRef.current = appId;
+    }
+    if (flowId != null) {
+      emptyLoadedForAppRef.current = null;
+    }
+  }, [flowIdLoading, flowId, appId, loadDocument]);
+
   const {
-    appId,
     propertyPanelOpen,
     setPropertyPanelOpen,
     checklistCount,
@@ -34,24 +68,40 @@ const Workflow: React.FC = () => {
     handlePublish,
     handleAddComment,
     handleRun,
-  } = useWorkflowHandlers();
+    handleRunNode,
+    handleReplaceNode,
+    handleCopy,
+    handleDuplicate,
+    handleDelete,
+    handlePaste,
+    hasClipboard,
+  } = useWorkflowHandlers(appId, flowId);
 
-  useWorkflowConfigSync(appId);
-  const { isLoading: configLoading } = useWorkflowConfigQuery(appId);
-  const { data: runStatus } = useWorkflowRunStatusQuery(appId);
+  useHotkeys('alt+r', handleRun, { preventDefault: true });
+  useHotkeys('ctrl+v', () => handlePaste(), { preventDefault: true });
+  useHotkeys('ctrl+c', handleCopy, { preventDefault: true });
+  useHotkeys('ctrl+d', handleDuplicate, { preventDefault: true });
+  useHotkeys('delete', handleDelete, { preventDefault: true });
+
+  useWorkflowConfigSync(flowId);
+  const { isLoading: configLoading } = useWorkflowConfigQuery(flowId);
+  const { data: runStatus } = useWorkflowRunStatusQuery(flowId);
 
   const nodeTypes = useMemo(() => buildNodeTypes(), []);
+  const drawerContainerRef = useRef<HTMLDivElement>(null);
+  const workflowCanvasRef = useRef<WorkflowCanvasRef>(null);
 
   return (
     <ReactFlowProvider>
       <div className="workflow-feature-overview workflow-layout">
-        <div className="workflow-body">
+        <div ref={drawerContainerRef} className="workflow-body">
           <LeftSidebar
             onAddNode={handleAddNode}
             onAddComment={handleAddComment}
             onRun={handleRun}
             onImportDSL={handleImportDSL}
             onExportDSL={handleExportDSL}
+            onAddNodePanelOpen={() => workflowCanvasRef.current?.closeContextMenu()}
           />
           <div className="workflow-canvas-wrap">
             <div className="workflow-top-bar-float">
@@ -65,7 +115,7 @@ const Workflow: React.FC = () => {
                 runStatus={runStatus ?? null}
               />
             </div>
-            {configLoading && (
+            {(configLoading || flowIdLoading) && (
               <div
                 style={{
                   position: 'absolute',
@@ -80,17 +130,29 @@ const Workflow: React.FC = () => {
                 <Spin size="large" description="加载流程配置..." />
               </div>
             )}
-            <WorkflowCanvas nodeTypes={nodeTypes} onOpenPropertyPanel={() => setPropertyPanelOpen(true)} />
+            <WorkflowCanvas
+              ref={workflowCanvasRef}
+              nodeTypes={nodeTypes}
+              onOpenPropertyPanel={() => setPropertyPanelOpen(true)}
+              onAddNode={handleAddNode}
+              onAddComment={handleAddComment}
+              onRun={handleRun}
+              onImportDSL={handleImportDSL}
+              onExportDSL={handleExportDSL}
+              onCopy={handleCopy}
+              onPaste={handlePaste}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onRunNode={handleRunNode}
+              onReplaceNode={handleReplaceNode}
+              hasClipboard={hasClipboard}
+            />
           </div>
-          <PropertyPanel open={propertyPanelOpen} onClose={() => setPropertyPanelOpen(false)} width={320} />
+          <PropertyPanel open={propertyPanelOpen} onClose={() => setPropertyPanelOpen(false)} width={420} />
         </div>
       </div>
-      {appId && (
-        <VersionHistoryModal
-          open={versionHistoryOpen}
-          onClose={() => setVersionHistoryOpen(false)}
-          appId={appId}
-        />
+      {flowId && (
+        <VersionHistoryModal open={versionHistoryOpen} onClose={() => setVersionHistoryOpen(false)} flowId={flowId} />
       )}
     </ReactFlowProvider>
   );

@@ -39,7 +39,7 @@ export const validationRules = {
   username: /^[a-zA-Z0-9_]{3,20}$/,
 
   // URL 验证
-  url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+  url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
 
   // 身份证号验证（中国大陆）
   idCard: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
@@ -80,27 +80,35 @@ export const validateInput = {
 export const maskSensitiveData = {
   // 手机号脱敏
   phone: (phone: string): string => {
-    if (phone.length !== 11) return phone;
+    if (phone.length !== 11) {
+      return phone;
+    }
     return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
   },
 
   // 邮箱脱敏
   email: (email: string): string => {
     const [username, domain] = email.split('@');
-    if (username!.length <= 2) return email;
+    if (username!.length <= 2) {
+      return email;
+    }
     const maskedUsername = username![0] + '*'.repeat(username!.length - 2) + username![username!.length - 1];
     return `${maskedUsername}@${domain}`;
   },
 
   // 身份证号脱敏
   idCard: (idCard: string): string => {
-    if (idCard.length !== 18) return idCard;
+    if (idCard.length !== 18) {
+      return idCard;
+    }
     return idCard.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2');
   },
 
   // 银行卡号脱敏
   bankCard: (cardNumber: string): string => {
-    if (cardNumber.length < 8) return cardNumber;
+    if (cardNumber.length < 8) {
+      return cardNumber;
+    }
     const start = cardNumber.slice(0, 4);
     const end = cardNumber.slice(-4);
     const middle = '*'.repeat(cardNumber.length - 8);
@@ -109,8 +117,12 @@ export const maskSensitiveData = {
 
   // 姓名脱敏
   name: (name: string): string => {
-    if (name.length <= 1) return name;
-    if (name.length === 2) return name[0] + '*';
+    if (name.length <= 1) {
+      return name;
+    }
+    if (name.length === 2) {
+      return `${name[0]}*`;
+    }
     return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
   },
 };
@@ -195,7 +207,9 @@ export const secureStorage = {
   getItem: <T = any>(key: string): T | null => {
     try {
       const encodedValue = localStorage.getItem(key);
-      if (!encodedValue) return null;
+      if (!encodedValue) {
+        return null;
+      }
 
       const decodedValue = secureStorage.decode(encodedValue);
       return JSON.parse(decodedValue);
