@@ -19,10 +19,10 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: yarn
+        run: bun install
 
       - name: Build project
-        run: yarn build:prod
+        run: bun run build:prod
 
       - name: Add known hosts
         run: |

@@ -2,11 +2,9 @@
 .vscode/*
 node_modules
 dist
-bun.lock
 *.DS_Store
 *.idea
 .vscode
-*.lock
 .env
 .env.local
 .env.development.local
