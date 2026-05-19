@@ -31,8 +31,7 @@
   }
 }
 
-//
-响应式设计
+/* 响应式设计 */
 @media (max-width: 768px) {
   .header-container {
     .header-main-row {
