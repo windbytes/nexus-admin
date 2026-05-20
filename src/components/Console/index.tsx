@@ -1,5 +1,6 @@
 import { CloseOutlined, CopyOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Segmented, Space, Switch, Tag, Tooltip, Typography } from 'antd';
+import crypto from 'crypto';
 import dayjs from 'dayjs';
 import type React from 'react';
 import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
