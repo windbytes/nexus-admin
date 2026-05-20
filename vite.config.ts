@@ -6,8 +6,6 @@ import { defineConfig, loadEnv } from 'vite';
 import { compression } from 'vite-plugin-compression2';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
-const buildId = Math.random().toString(36).slice(2, 8);
-
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
@@ -25,8 +23,8 @@ export default defineConfig(({ mode }) => {
       // 生产环境同时生成 gzip 和 brotli 压缩文件
       ...(isProduction
         ? [
-            compression({ algorithms: ['gzip'], threshold: 10240 }),
-            compression({ algorithms: ['brotliCompress'], threshold: 10240 }),
+            compression({ algorithms: ['gzip'], threshold: 1024 }),
+            compression({ algorithms: ['brotliCompress'], threshold: 1024 }),
           ]
         : []),
       // mock 插件仅开发环境启用
@@ -38,9 +36,9 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       // css代码分割
       cssCodeSplit: isProduction,
-      cssTarget: 'chrome90',
+      cssTarget: 'chrome100',
       // 使用 Vite 8 默认 Oxc minifier（比 Terser 更快）
-      target: 'es2020',
+      target: 'es2022',
       // 设置 chunk 大小警告限制
       chunkSizeWarningLimit: 800,
       rolldownOptions: {
@@ -58,6 +56,10 @@ export default defineConfig(({ mode }) => {
               {
                 name: 'lib-antd',
                 test: /node_modules[\\/]antd/,
+              },
+              {
+                name: 'lib-antd-deps',
+                test: /node_modules[\\/](@rc-component|@ant-design[\\/]cssinjs)/,
               },
               {
                 name: 'lib-antd-icons',
@@ -94,10 +96,10 @@ export default defineConfig(({ mode }) => {
             ],
           },
           minify: true,
-          chunkFileNames: `static/js/${buildId}-[hash].js`,
-          entryFileNames: `static/js/${buildId}-[hash].js`,
+          chunkFileNames: `static/js/[hash].js`,
+          entryFileNames: `static/js/[hash].js`,
           // 按文件类型进行拆分文件夹
-          assetFileNames: `static/[ext]/${buildId}-[hash].[ext]`,
+          assetFileNames: `static/[ext]/[hash].[ext]`,
         },
       },
     },
@@ -106,11 +108,10 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     },
     // 优化依赖预构建（仅保留首屏关键依赖，非首屏大型库由路由懒加载自然按需加载）
     optimizeDeps: {
-      include: ['react', 'react-dom', 'antd', 'dayjs', 'axios', '@tanstack/react-query', 'react-router'],
+      include: ['react', 'react-dom', 'antd', 'dayjs', 'axios', '@tanstack/react-query', 'react-router', 'zustant'],
     },
     // 服务器配置以及代理
     server: {
