@@ -7,7 +7,7 @@ import type { RouteItem } from '@/types/route';
  * @returns 懒加载的组件函数
  */
 export function lazyLoadComponent(moduleName: string) {
-  const viteModule = import.meta.glob('../**/*.tsx');
+  const viteModule = import.meta.glob('../views/**/*.tsx');
 
   let URL = '';
   if (moduleName === 'layouts') {
