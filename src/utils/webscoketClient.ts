@@ -1,4 +1,3 @@
-import { commonService } from '@/services/common';
 import { useUserStore } from '@/stores/userStore';
 
 export type WebSocketConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'authenticated' | 'error';
@@ -100,11 +99,28 @@ class WebSocketClient {
   private authToken = '';
   private manuallyClosed = false;
   private authenticated = false;
-  private refreshInProgress = false;
+  /**
+   * 是否正在等待业务侧 HTTP 拦截器完成 token 刷新。
+   * 该状态下不走普通重连逻辑，由 handleTokenUpdated 监听到 store 更新后自动触发重连。
+   */
+  private waitingForTokenRenewal = false;
+  private tokenRenewalTimeoutTimer: number | null = null;
+  /** 等待业务侧刷新 token 的最长时间（10 分钟），超时后放弃重连 */
+  private readonly maxTokenRenewalWaitMs = 10 * 60 * 1000;
   private monitorPreferences: MonitorPreferences = {
     sqlEnabled: false,
     paramEnabled: false,
   };
+
+  constructor() {
+    // 订阅 accessToken 变化：HTTP 拦截器刷新 token 后会调用 userStore.setAccessToken，
+    // 此处监听变化并在等待续期时立即重连，无需 WebSocket 层自行调用 refresh 接口。
+    useUserStore.subscribe((state, prevState) => {
+      if (state.accessToken && state.accessToken !== prevState.accessToken) {
+        this.handleTokenUpdated(state.accessToken);
+      }
+    });
+  }
 
   public connect(token: string) {
     if (!token) {
@@ -112,6 +128,9 @@ class WebSocketClient {
     }
     this.authToken = token;
     this.manuallyClosed = false;
+    // 显式调用 connect 时清除续期等待状态（如重新登录等场景）
+    this.waitingForTokenRenewal = false;
+    this.clearTokenRenewalTimer();
     if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -121,6 +140,8 @@ class WebSocketClient {
   public disconnect() {
     this.manuallyClosed = true;
     this.authenticated = false;
+    this.waitingForTokenRenewal = false;
+    this.clearTokenRenewalTimer();
     this.clearReconnectTimer();
     this.stopHeartbeat();
     const currentSocket = this.socket;
@@ -158,6 +179,38 @@ class WebSocketClient {
     listeners?.delete(callback as (event: unknown) => void);
   }
 
+  /**
+   * store 中 accessToken 发生变化时调用（由构造函数中的 subscribe 触发）。
+   * 仅在等待续期状态下才触发重连；其他情况仅更新缓存的 token。
+   */
+  private handleTokenUpdated(newToken: string) {
+    this.authToken = newToken;
+    if (!this.waitingForTokenRenewal) {
+      return;
+    }
+    this.clearTokenRenewalTimer();
+    this.waitingForTokenRenewal = false;
+    this.reconnectAttempts = 0;
+    this.createSocket();
+  }
+
+  /**
+   * 进入"等待业务侧刷新 token"状态。
+   * 在此期间不走普通重连，等 HTTP 拦截器刷新成功后由 handleTokenUpdated 重连。
+   * 超过 maxTokenRenewalWaitMs 后自动放弃，避免永久挂起。
+   */
+  private enterTokenRenewalWait() {
+    if (this.waitingForTokenRenewal) {
+      return;
+    }
+    this.waitingForTokenRenewal = true;
+    this.tokenRenewalTimeoutTimer = window.setTimeout(() => {
+      this.tokenRenewalTimeoutTimer = null;
+      this.waitingForTokenRenewal = false;
+      this.setStatus('disconnected');
+    }, this.maxTokenRenewalWaitMs);
+  }
+
   private createSocket() {
     this.clearReconnectTimer();
     this.stopHeartbeat();
@@ -189,13 +242,17 @@ class WebSocketClient {
           this.emit('ack', ackEnvelope);
           break;
         }
-        case 'error':
-          this.emit('serverError', envelope as WebSocketEnvelope<ErrorPayload>);
+        case 'error': {
+          const errorEnvelope = envelope as WebSocketEnvelope<ErrorPayload>;
+          this.emit('serverError', errorEnvelope);
           this.setStatus('error');
-          // accessToken 无效/过期时，服务端会主动断开连接；
-          // 这里尝试 refreshToken 获取新 token 并触发重连。
-          void this.tryRefreshTokenAndReconnect((envelope as WebSocketEnvelope<ErrorPayload>).payload);
+          if (errorEnvelope.payload.code === 401) {
+            // accessToken 失效：不在 WebSocket 层主动调用 refresh 接口，
+            // 等待普通业务请求触发 HTTP 拦截器完成刷新，再由 handleTokenUpdated 重连。
+            this.enterTokenRenewalWait();
+          }
           break;
+        }
         case 'sql':
           this.emit('sql', envelope as WebSocketEnvelope<SqlMessagePayload>);
           break;
@@ -211,15 +268,19 @@ class WebSocketClient {
     });
     socket.addEventListener('close', (event) => {
       // 1) disconnect() 已把 this.socket 置空：旧连接的 close 不应再走重连逻辑。
-      // 2) token 刷新等场景下已建立新 socket 时，忽略旧 socket 晚到的 close，避免误触发 scheduleReconnect。
+      // 2) handleTokenUpdated 已建立新 socket 时，忽略旧 socket 晚到的 close。
       if (this.socket === null || event.target !== this.socket) {
         return;
       }
       this.stopHeartbeat();
       this.authenticated = false;
       this.emit('close', event);
-      if (this.manuallyClosed || this.refreshInProgress) {
+      if (this.manuallyClosed) {
         this.setStatus('disconnected');
+        return;
+      }
+      if (this.waitingForTokenRenewal) {
+        // 连接因 token 失效被服务端关闭，等待 HTTP 层刷新 token 后再重连，不走普通重连
         return;
       }
       this.scheduleReconnect();
@@ -228,37 +289,6 @@ class WebSocketClient {
       this.emit('error', event);
       this.setStatus('error');
     });
-  }
-
-  private async tryRefreshTokenAndReconnect(errorPayload?: ErrorPayload) {
-    if (this.manuallyClosed) {
-      return;
-    }
-    // 只依赖状态码，不依赖错误文案关键词（更稳）。
-    // 后端约定：token 无效/过期 -> code=401
-    if (!errorPayload || errorPayload.code !== 401) {
-      return;
-    }
-    if (this.refreshInProgress) {
-      return;
-    }
-
-    this.refreshInProgress = true;
-    try {
-      const newToken = await commonService.refreshToken();
-      // 立即更新 token 并重建连接，减少等待重连次数。
-      this.authToken = newToken;
-      useUserStore.getState().setAccessToken(newToken);
-
-      this.reconnectAttempts = 0;
-      this.clearReconnectTimer();
-      this.createSocket();
-    } catch {
-      // refresh 失败时，HTTP 层拦截器会处理 logout/跳转登录。
-      // 这里避免无限重连即可。
-    } finally {
-      this.refreshInProgress = false;
-    }
   }
 
   private parseEnvelope(data: string) {
@@ -320,6 +350,13 @@ class WebSocketClient {
     if (this.reconnectTimer !== null) {
       window.clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+  }
+
+  private clearTokenRenewalTimer() {
+    if (this.tokenRenewalTimeoutTimer !== null) {
+      window.clearTimeout(this.tokenRenewalTimeoutTimer);
+      this.tokenRenewalTimeoutTimer = null;
     }
   }
 
