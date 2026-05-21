@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "syndra",
@@ -3017,12 +3018,12 @@
     ],
 
     "vite-plugin-mock-dev-server": [
-      "vite-plugin-mock-dev-server@2.2.1",
+      "vite-plugin-mock-dev-server@2.3.0",
       "",
       {
         "dependencies": {
           "@pengzhanbo/utils": "^3.7.2",
-          "ansis": "^4.2.0",
+          "ansis": "^4.3.0",
           "chokidar": "^5.0.0",
           "co-body": "^6.2.0",
           "cors": "^2.8.6",
@@ -3031,12 +3032,12 @@
           "http-status": "^2.1.0",
           "is-core-module": "^2.16.2",
           "json5": "^2.2.3",
-          "local-pkg": "^1.1.2",
+          "local-pkg": "^1.2.0",
           "mime-types": "^3.0.2",
           "path-to-regexp": "^8.4.2",
           "picomatch": "^4.0.4",
           "tinyglobby": "^0.2.16",
-          "ws": "^8.20.0"
+          "ws": "^8.20.1"
         },
         "peerDependencies": {
           "esbuild": ">=0.21.0",
@@ -3046,7 +3047,7 @@
         },
         "optionalPeers": ["esbuild", "rolldown", "zstd-codec"]
       },
-      "sha512-9ruksqDmlg77iG41iYrtBZTP8znW/wftaIqSfdbKO5ln0xYZs61UGLOJEBsP+w+KiidBPcFIyFtYxxqMWLGLEw=="
+      "sha512-6k3sObduRjwCnDx1swmHN6NMrhysapCav6h2HrtgyQZLve0h47Ho2UFdndb08VDC7u4zRmMQqII2QXFPXHjvng=="
     ],
 
     "void-elements": [
