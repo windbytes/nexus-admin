@@ -1,6 +1,5 @@
 import { CloseOutlined, CopyOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { App, Button, Card, Empty, Segmented, Space, Switch, Tag, Tooltip, Typography } from 'antd';
-import crypto from 'crypto';
 import dayjs from 'dayjs';
 import type React from 'react';
 import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -231,7 +230,7 @@ const Console: React.FC = () => {
         [
           {
             ...item,
-            id: `${item.type}-${item.timestamp}-${crypto.randomUUID()}`,
+            id: `${item.type}-${item.timestamp}-${Math.random().toString(36).substring(2, 15)}`,
           },
           ...prev,
         ].slice(0, MAX_LOG_ITEMS)
