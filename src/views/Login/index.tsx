@@ -815,7 +815,7 @@ const Login: React.FC = () => {
             <Text className={styles['filing-text'] || ''}>川公网安备51012202001944</Text>
           </a>
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" className={styles['icp-link']}>
-            <Text className={styles['icp-text'] || ''}>蜀ICP备2023022276号-2</Text>
+            <Text className={styles['icp-text'] || ''}>蜀ICP备2023022276号-3</Text>
           </a>
         </div>
       </div>
