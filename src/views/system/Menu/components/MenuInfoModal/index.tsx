@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Form, type InputRef, type RadioChangeEvent, Space, Switch } from 'antd';
+import { Button, Col, Form, type InputRef, type RadioChangeEvent, Row, Space, Switch } from 'antd';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -258,7 +258,7 @@ const MenuInfoModal: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose
         },
       }}
     >
-      <Form form={form} labelCol={{ span: 4 }} disabled={isViewMode}>
+      <Form form={form} labelCol={{ span: 8 }} disabled={isViewMode}>
         <BasicInfoForm
           menuType={menuType}
           nameRef={nameRef}
@@ -267,9 +267,13 @@ const MenuInfoModal: React.FC<MenuInfoDrawerProps> = ({ open, operation, onClose
           onMenuTypeChange={handleMenuTypeChange}
         />
         <RouteInfoForm menuType={menuType} onIconSelect={handleIconSelect} showRouteFields={showRouteFields} />
-        <Form.Item name="status" label="状态">
-          <Switch checkedChildren="正常" unCheckedChildren="停用" disabled={isViewMode} />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item name="status" label="状态">
+              <Switch checkedChildren="正常" unCheckedChildren="停用" disabled={isViewMode} />
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     </DragModal>
   );
