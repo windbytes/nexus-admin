@@ -8,4 +8,5 @@ const user = {
     'very-strong': '非常强',
   },
 };
+
 export default user;

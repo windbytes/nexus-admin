@@ -88,4 +88,5 @@ const menu = {
     add: '新增应用',
   },
 };
+
 export default menu;

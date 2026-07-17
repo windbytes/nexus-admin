@@ -197,27 +197,7 @@ public class IntegrationRoute extends RouteBuilder {
 
 ## 📁 项目结构
 
-```
-syndra-admin/
-├── src/
-│   ├── components/          # 通用组件
-│   │   ├── base/           # 基础组件
-│   │   ├── CodeEditor/     # 代码编辑器
-│   │   ├── workflow/       # 工作流组件
-│   │   └── ...
-│   ├── views/              # 页面视图
-│   │   ├── dashboard/      # 仪表板
-│   │   ├── integrated/     # 集成管理
-│   │   ├── system/         # 系统管理
-│   │   └── ...
-│   ├── services/           # API 服务
-│   ├── stores/             # 状态管理
-│   ├── utils/              # 工具函数
-│   └── types/              # 类型定义
-├── public/                 # 静态资源
-├── images/                 # 项目截图
-└── docs/                   # 文档
-```
+参考 (structure.md)
 
 ## 🛠️ 开发环境设置
 

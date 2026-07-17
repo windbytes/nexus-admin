@@ -6,7 +6,7 @@ alwaysApply: false
 
 # TypeScript / React
 
-- **栈**：React 19、Vite 8、**react-router**（v7，RouterProvider 模式）、**@tanstack/react-query**、**zustand**、**ahooks**；路由与数据请求优先用上述库而非自造轮子。
+- **栈**：React 19、Vite 8、**@tanstack/react-router**、**@tanstack/react-query**、**zustand**、**ahooks**；路由与数据请求优先用上述库而非自造轮子。
 - **类型**：导出组件 props 与公共 API 显式标注；避免滥用 `any`（Biome 对 `any` 为 warn）；`import type` 用于仅类型导入。
 - **组件**：函数组件；可复用逻辑抽到 **hooks** 或小组件；与现有 `views/**` 目录结构一致（页面、hooks、components 分层）。
 - **性能**：非关键路径用 `React.lazy` / 动态 import；列表注意 key 稳定；谨慎使用 `useEffect`，优先事件驱动与 Query 缓存。

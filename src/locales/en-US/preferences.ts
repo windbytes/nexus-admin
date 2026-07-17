@@ -14,4 +14,5 @@ const preferences = {
   fullContent: 'Full Content',
   fullContentTip: 'Only display content body, hide all menus',
 };
+
 export default preferences;

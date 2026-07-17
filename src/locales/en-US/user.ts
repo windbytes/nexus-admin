@@ -8,4 +8,5 @@ const user = {
     'very-strong': 'very strong',
   },
 };
+
 export default user;

@@ -88,4 +88,5 @@ const menu = {
     add: 'add app',
   },
 };
+
 export default menu;

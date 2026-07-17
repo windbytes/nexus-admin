@@ -3,7 +3,6 @@
  * 含：类型分段、状态筛选、创建/编辑/复制/导出等
  */
 const translation = {
-  /** 类型分段（全部 / 集成 / 接口 / 三方） */
   segment: {
     all: '全部',
     more: '更多',
@@ -12,7 +11,6 @@ const translation = {
     interface: '接口项目',
     tripartite: '三方项目',
   },
-  /** 状态筛选：下拉 placeholder 与各状态选项 */
   statusFilter: '状态',
   status: {
     all: '全部',
@@ -21,7 +19,6 @@ const translation = {
     error: '异常',
     partialError: '部分异常',
   },
-  /** 编辑弹窗中「状态」表单项 label */
   statusLabel: '状态',
   list: '应用列表',
   createBy: '我创建的',

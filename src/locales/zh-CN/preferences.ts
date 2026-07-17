@@ -14,4 +14,5 @@ const preferences = {
   fullContent: '内容全屏',
   fullContentTip: '不显示任何菜单，只显示内容主体',
 };
+
 export default preferences;

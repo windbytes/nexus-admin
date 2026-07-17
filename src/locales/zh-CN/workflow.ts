@@ -7,4 +7,5 @@ const workflow = {
     comment: '注释',
   },
 };
+
 export default workflow;

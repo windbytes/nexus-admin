@@ -4,7 +4,6 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import { compression } from 'vite-plugin-compression2';
-import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -18,7 +17,10 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      babel({ presets: [reactCompilerPreset()] }),
+      babel({
+        presets: [reactCompilerPreset()],
+        exclude: /node_modules/,
+      }),
       tailwindcss(),
       // 生产环境同时生成 gzip 和 brotli 压缩文件
       ...(isProduction
@@ -27,19 +29,13 @@ export default defineConfig(({ mode }) => {
             compression({ algorithms: ['brotliCompress'], threshold: 1024 }),
           ]
         : []),
-      // mock 插件仅开发环境启用
-      ...(mode === 'development' ? [mockDevServerPlugin({ prefix: '/api' })] : []),
     ],
-    // 配置分包
     build: {
       // 生产环境可设为 true 或 'hidden' 便于接入 Sentry 等错误追踪
       sourcemap: false,
-      // css代码分割
       cssCodeSplit: isProduction,
       cssTarget: 'chrome100',
-      // 使用 Vite 8 默认 Oxc minifier（比 Terser 更快）
-      target: 'es2022',
-      // 设置 chunk 大小警告限制
+      target: 'es2023',
       chunkSizeWarningLimit: 800,
       rolldownOptions: {
         output: {
@@ -50,8 +46,12 @@ export default defineConfig(({ mode }) => {
                 test: /node_modules[\\/](react|react-dom)/,
               },
               {
-                name: 'lib-router',
-                test: /node_modules[\\/]react-router/,
+                name: 'lib-tanstack-router',
+                test: /node_modules[\\/]@tanstack[\\/]react-router/,
+              },
+              {
+                name: 'lib-tanstack-query',
+                test: /node_modules[\\/]@tanstack[\\/]react-query/,
               },
               {
                 name: 'lib-antd',
@@ -67,7 +67,7 @@ export default defineConfig(({ mode }) => {
               },
               {
                 name: 'lib-utils',
-                test: /node_modules[\\/](lodash-es|dayjs|crypto-js|jsencrypt|clsx|tailwind-merge)/,
+                test: /node_modules[\\/](lodash-es|dayjs|crypto-js|clsx|tailwind-merge)/,
               },
               {
                 name: 'lib-network',
@@ -86,37 +86,47 @@ export default defineConfig(({ mode }) => {
                 test: /node_modules[\\/](monaco-editor|@monaco-editor)/,
               },
               {
-                name: 'lib-dnd',
-                test: /node_modules[\\/]@dnd-kit/,
-              },
-              {
                 name: 'lib-i18n',
                 test: /node_modules[\\/](i18next|react-i18next)/,
+              },
+              {
+                name: 'lib-keepalive',
+                test: /node_modules[\\/]keepalive-for-react/,
               },
             ],
           },
           minify: true,
           chunkFileNames: `static/js/[hash].js`,
           entryFileNames: `static/js/[hash].js`,
-          // 按文件类型进行拆分文件夹
           assetFileNames: `static/[ext]/[hash].[ext]`,
         },
       },
     },
-    // 配置路径别名解析
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    // 优化依赖预构建（仅保留首屏关键依赖，非首屏大型库由路由懒加载自然按需加载）
+    // 预构建首屏关键依赖；antd 按需加载不强制预构建；大型懒加载库排除以加快 dev 冷启动
     optimizeDeps: {
-      include: ['react', 'react-dom', 'antd', 'dayjs', 'axios', '@tanstack/react-query', 'react-router', 'zustand'],
+      include: [
+        'react',
+        'react-dom',
+        'axios',
+        '@tanstack/react-query',
+        '@tanstack/react-router',
+        'zustand',
+        'i18next',
+        'react-i18next',
+      ],
+      exclude: ['echarts', '@xyflow/react', '@monaco-editor/react'],
     },
-    // 服务器配置以及代理
     server: {
       port: devServerPort,
       host: true,
+      warmup: {
+        clientFiles: ['./src/main.tsx', './src/App.tsx', './src/app/router/index.tsx'],
+      },
       proxy: {
         // 须写在 `/api` 之前：浏览器仍用 `/api/ws/...` 与 REST 同源，此处转发到 Netty 并去掉 `/api`
         '/api/ws': {

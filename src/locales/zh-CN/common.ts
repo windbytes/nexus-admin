@@ -56,7 +56,6 @@ const translation = {
   deleteSuccess: '删除成功',
   deleteFailed: '删除失败：',
   placeholder: '请输入搜索内容',
-  // 标签相关
   tag: {
     placeholder: '全部标签',
     addNew: '创建新标签',
@@ -72,7 +71,6 @@ const translation = {
     created: '标签创建成功',
     failed: '标签创建失败',
   },
-  // Tab相关
   close: '关闭',
   pin: '固定',
   unpin: '取消固定',
@@ -84,4 +82,5 @@ const translation = {
   closeOtherTabs: '关闭其它',
   closeAllTabs: '关闭全部',
 };
+
 export default translation;

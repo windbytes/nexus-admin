@@ -43,4 +43,5 @@ const translation = {
   githubButton: 'Continue with GitHub',
   githubNotConfigured: 'VITE_GITHUB_OAUTH_CLIENT_ID is not set',
 };
+
 export default translation;

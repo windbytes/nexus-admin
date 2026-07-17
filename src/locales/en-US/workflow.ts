@@ -7,4 +7,5 @@ const workflow = {
     comment: 'Comment',
   },
 };
+
 export default workflow;

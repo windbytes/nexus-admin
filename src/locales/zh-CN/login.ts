@@ -43,4 +43,5 @@ const translation = {
   githubButton: '使用 GitHub 登录',
   githubNotConfigured: '未配置 VITE_GITHUB_OAUTH_CLIENT_ID',
 };
+
 export default translation;

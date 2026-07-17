@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -20,9 +20,9 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "a11y": {
-        "recommended": true,
+        "preset": "recommended",
         "useKeyWithClickEvents": "off",
         "useKeyWithMouseEvents": "off",
         "useValidAnchor": "warn",
@@ -32,12 +32,12 @@
         "noSvgWithoutTitle": "warn"
       },
       "complexity": {
-        "recommended": true,
+        "preset": "recommended",
         "noForEach": "off",
         "useArrowFunction": "error"
       },
       "correctness": {
-        "recommended": true,
+        "preset": "recommended",
         "noUnusedVariables": "warn",
         "noUnusedImports": "error",
         "noUnusedPrivateClassMembers": "warn",
@@ -46,13 +46,13 @@
         "noUnreachable": "error"
       },
       "performance": {
-        "recommended": true
+        "preset": "recommended"
       },
       "security": {
-        "recommended": true
+        "preset": "recommended"
       },
       "style": {
-        "recommended": true,
+        "preset": "recommended",
         "useConst": "error",
         "useTemplate": "error",
         "useShorthandAssign": "error",
@@ -70,7 +70,7 @@
         "useImportType": "error"
       },
       "suspicious": {
-        "recommended": true,
+        "preset": "recommended",
         "noExplicitAny": "warn",
         "noArrayIndexKey": "warn",
         "noDebugger": "error",
