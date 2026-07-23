@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_WS_PROXY_TARGET?: string;
   /** 本地开发服务器端口 */
   readonly VITE_DEV_SERVER_PORT?: string;
+  /** 开发环境是否启用 API Mock（vite-plugin-mock-dev-server） */
+  readonly VITE_USE_MOCK?: string;
   /** 是否启用全局实时监控台 */
   readonly VITE_ENABLE_MONITOR_CONSOLE?: string;
 }

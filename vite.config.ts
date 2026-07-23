@@ -4,11 +4,13 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import { compression } from 'vite-plugin-compression2';
+import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const env = loadEnv(mode, process.cwd(), '');
+  const useMock = env.VITE_USE_MOCK === 'true';
   const devServerPort = Number(env.VITE_DEV_SERVER_PORT || '8000');
   const apiProxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:9527';
   /** Netty WebSocket 与 Spring 不同端口；路径无 /api 前缀，需在代理中剥离 */
@@ -22,6 +24,18 @@ export default defineConfig(({ mode }) => {
         exclude: /node_modules/,
       }),
       tailwindcss(),
+      // 开发态 Mock：匹配到的接口返回 mock，其余仍走 server.proxy
+      // Source: https://vite-plugin-mock-dev-server.netlify.app/guide/usage
+      ...(!isProduction
+        ? [
+            mockDevServerPlugin({
+              enabled: useMock,
+              prefix: '/api',
+              dir: 'mock',
+              log: 'info',
+            }),
+          ]
+        : []),
       // 生产环境同时生成 gzip 和 brotli 压缩文件
       ...(isProduction
         ? [
