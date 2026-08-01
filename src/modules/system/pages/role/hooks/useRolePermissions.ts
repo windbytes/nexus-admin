@@ -11,7 +11,7 @@ export interface RolePermissions {
   canAddRole: boolean;
   canEditRole: boolean;
   canDeleteRole: boolean;
-  canAssignMenu: boolean;
+  /** 是否可统一授权（`system:role:assignPermission`） */
   canAssignPermission: boolean;
   canAssignUser: boolean;
   canImportRole: boolean;
@@ -24,20 +24,18 @@ export interface RolePermissions {
  * @returns 各操作权限布尔值
  */
 export function useRolePermissions(): RolePermissions {
-  const canAddRole = usePermission(['sys:role:add']);
-  const canEditRole = usePermission(['sys:role:edit']);
-  const canDeleteRole = usePermission(['sys:role:delete']);
-  const canAssignMenu = usePermission(['sys:role:assignMenu']);
-  const canAssignPermission = usePermission(['sys:role:assignPermission']);
-  const canAssignUser = usePermission(['sys:role:assignUser']);
-  const canImportRole = usePermission(['sys:role:import']);
-  const canExportRole = usePermission(['sys:role:export']);
+  const canAddRole = usePermission(['system:role:add']);
+  const canEditRole = usePermission(['system:role:edit']);
+  const canDeleteRole = usePermission(['system:role:delete']);
+  const canAssignPermission = usePermission(['system:role:assignPermission']);
+  const canAssignUser = usePermission(['system:role:assignUser']);
+  const canImportRole = usePermission(['system:role:import']);
+  const canExportRole = usePermission(['system:role:export']);
 
   return {
     canAddRole,
     canEditRole,
     canDeleteRole,
-    canAssignMenu,
     canAssignPermission,
     canAssignUser,
     canImportRole,

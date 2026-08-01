@@ -1,6 +1,6 @@
 /**
  * @file 系统管理 - 角色管理页面
- * @description 角色列表 CRUD、菜单/资源/接口授权；路由 component：`system/role`。
+ * @description 角色列表 CRUD、统一授权（菜单/按钮/接口）；路由 component：`system/role`。
  * 授权用户未完整移植（用户模块未就绪）。
  */
 
@@ -12,9 +12,7 @@ import { type Key, useEffect, useState } from 'react';
 import { roleService } from '@/modules/system/api/role';
 import type { RoleModel, RoleSearchParams } from '@/shared/api/system/role/type';
 import ProTable from '@/shared/components/pro/ProTable';
-import AssignApiPermission from './components/AssignApiPermission';
-import AssignResource from './components/AssignResource';
-import AssignRoleMenuDrawer from './components/AssignRoleMenuDrawer';
+import AssignGrantDrawer from './components/AssignGrantDrawer';
 import RoleInfoModal from './components/RoleInfoModal';
 import SearchForm from './components/SearchForm';
 import TableActionButtons from './components/TableActionButtons';
@@ -67,7 +65,7 @@ function Role() {
     refetch();
   }
 
-  const { deleteRoles, handleModalSave, assignRolePermissionsMutation } = useRoleActions({
+  const { deleteRoles, handleModalSave } = useRoleActions({
     currentRow: current,
     onSuccess: handleSuccess,
   });
@@ -132,37 +130,6 @@ function Role() {
       onOk() {
         deleteRoles(ids);
       },
-    });
-  }
-
-  function handleAssignMenu() {
-    closeModal();
-    handleSuccess();
-  }
-
-  /**
-   * 保存按钮权限时合并已有接口权限 ID，再全量 assignRolePermission。
-   *
-   * @param buttonPermissionIds - 选中的按钮权限点 ID
-   */
-  function handleAssignResourceOk(buttonPermissionIds: string[]) {
-    const roleId = current?.id ?? '';
-    roleService.getRoleApiPermissionIds(roleId).then((apiIds) => {
-      const permissionIds = [...buttonPermissionIds, ...apiIds];
-      assignRolePermissionsMutation.mutate({ roleId, permissionIds }, { onSuccess: () => closeModal() });
-    });
-  }
-
-  /**
-   * 保存接口权限时合并已有按钮权限 ID，再全量 assignRolePermission。
-   *
-   * @param apiPermissionIds - 选中的接口权限点 ID
-   */
-  function handleAssignPermissionOk(apiPermissionIds: string[]) {
-    const roleId = current?.id ?? '';
-    roleService.getRoleButtonPermissionIds(roleId).then((buttonIds) => {
-      const permissionIds = [...buttonIds, ...apiPermissionIds];
-      assignRolePermissionsMutation.mutate({ roleId, permissionIds }, { onSuccess: () => closeModal() });
     });
   }
 
@@ -238,23 +205,12 @@ function Role() {
         roleInfo={current}
         action={modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit'}
       />
-      <AssignRoleMenuDrawer
-        open={modalName === 'assignMenu'}
+      <AssignGrantDrawer
+        open={modalName === 'assignGrant'}
         roleId={current?.id || ''}
-        onOk={handleAssignMenu}
+        roleName={current?.roleName}
         onCancel={closeModal}
-      />
-      <AssignResource
-        open={modalName === 'assignResource'}
-        roleId={current?.id || ''}
-        onOk={handleAssignResourceOk}
-        onCancel={closeModal}
-      />
-      <AssignApiPermission
-        open={modalName === 'assignPermission'}
-        roleId={current?.id || ''}
-        onOk={handleAssignPermissionOk}
-        onCancel={closeModal}
+        onSaved={handleSuccess}
       />
     </>
   );

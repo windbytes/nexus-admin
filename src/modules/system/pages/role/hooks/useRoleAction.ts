@@ -3,7 +3,6 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { App } from 'antd';
 import { roleService } from '@/modules/system/api/role';
 import type { RoleModel } from '@/shared/api/system/role/type';
 
@@ -20,8 +19,6 @@ interface UseRoleActionsProps {
  * @param props - 当前行与成功回调
  */
 export function useRoleActions({ currentRow, onSuccess }: UseRoleActionsProps) {
-  const { modal, message } = App.useApp();
-
   const createRoleMutation = useMutation({
     mutationFn: (values: Partial<RoleModel>) => roleService.addRole(values),
     onSuccess,
@@ -62,36 +59,6 @@ export function useRoleActions({ currentRow, onSuccess }: UseRoleActionsProps) {
     deleteRolesMutation.mutate(ids);
   }
 
-  const assignRoleMenusMutation = useMutation({
-    mutationFn: ({ roleId, menuIds }: { roleId: string; menuIds: string[] }) =>
-      roleService.assignRoleMenu(roleId, menuIds),
-    onSuccess: () => {
-      message.success('分配菜单权限成功');
-      onSuccess?.();
-    },
-    onError: (error: Error) => {
-      modal.error({
-        title: '分配菜单权限失败',
-        content: error.message,
-      });
-    },
-  });
-
-  /** 分配角色权限点（授权资源/授权权限确定时调用，全量覆盖） */
-  const assignRolePermissionsMutation = useMutation({
-    mutationFn: ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) =>
-      roleService.assignRolePermission(roleId, permissionIds),
-    onSuccess: () => {
-      onSuccess?.();
-    },
-    onError: (error: Error) => {
-      modal.error({
-        title: '保存失败',
-        content: error.message,
-      });
-    },
-  });
-
   /**
    * @param values - 表单提交值
    */
@@ -108,7 +75,5 @@ export function useRoleActions({ currentRow, onSuccess }: UseRoleActionsProps) {
     handleModalSave,
     updateRoleStatus,
     deleteRoles,
-    assignRoleMenusMutation,
-    assignRolePermissionsMutation,
   };
 }

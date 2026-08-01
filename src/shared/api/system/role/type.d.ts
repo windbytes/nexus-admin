@@ -1,4 +1,3 @@
-import type { MenuModel } from '@/shared/api/system/menu/type';
 import type { PageQueryParams } from '@/types/global';
 
 /**
@@ -83,13 +82,35 @@ export interface RoleState {
 }
 
 /**
- * 查询返回的角色菜单权限
+ * 角色统一授权树节点类型：root-虚拟根，menu-菜单，button-按钮权限点，apiGroup-接口权限分组，api-接口权限点。
  */
-export interface RoleMenu {
-  // 菜单列表
-  menuList: MenuModel[];
-  // 选中的菜单列表
-  menuIds: string[];
+export type RoleGrantNodeType = 'root' | 'menu' | 'button' | 'apiGroup' | 'api';
+
+/**
+ * 角色统一授权树节点（菜单/按钮/接口合并树）。
+ * key 规则：菜单为 `menu:{id}`，权限点为 `perm:{id}`，虚拟根为 `root:page` / `root:api`。
+ */
+export interface RoleGrantTreeNode {
+  /** 节点 key：menu:{id} / perm:{id} / root:page / root:api */
+  key: string;
+  /** 节点标题 */
+  title: string;
+  /** 节点类型 */
+  type: RoleGrantNodeType;
+  /** 图标 */
+  icon?: string;
+  /** 子节点 */
+  children?: RoleGrantTreeNode[];
+}
+
+/**
+ * 角色统一授权树响应：合并树 + 角色已勾选 keys。
+ */
+export interface RoleGrantTreeResponse {
+  /** 授权树（页面与按钮 / 接口权限 两棵虚拟根） */
+  tree: RoleGrantTreeNode[];
+  /** 角色已授权节点 key 列表（menu:{id} / perm:{id}） */
+  checkedKeys: string[];
 }
 
 /**

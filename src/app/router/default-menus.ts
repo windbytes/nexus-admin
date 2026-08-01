@@ -43,12 +43,6 @@ export const defaultMenus: RouteItem[] = [
         meta: { title: '菜单管理', icon: 'AppstoreOutlined', requiresAuth: true },
       },
       {
-        id: 'system-button',
-        path: '/system/button',
-        component: 'system/button',
-        meta: { title: '按钮管理', icon: 'AppstoreOutlined', requiresAuth: true },
-      },
-      {
         id: 'system-api',
         path: '/system/api',
         component: 'system/api',

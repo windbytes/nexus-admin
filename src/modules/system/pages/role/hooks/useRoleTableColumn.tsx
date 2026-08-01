@@ -51,9 +51,7 @@ interface UseRoleTableColumnProps {
 export function useRoleTableColumns(props: UseRoleTableColumnProps) {
   const { modal } = App.useApp();
   const { currentRow, onSuccess, openModal } = props;
-  const { canAddRole, canDeleteRole, canAssignMenu, canAssignUser, canAssignPermission, canEditRole } =
-    useRolePermissions();
-  const canAssignResource = canAssignPermission;
+  const { canAddRole, canDeleteRole, canAssignUser, canAssignPermission, canEditRole } = useRolePermissions();
   const { t } = useTranslation();
   const { updateRoleStatus, deleteRoles } = useRoleActions({ currentRow, onSuccess });
   const { roleCode } = useUserStore();
@@ -86,51 +84,19 @@ export function useRoleTableColumns(props: UseRoleTableColumnProps) {
         },
       },
       {
-        key: 'assignMenu',
-        label: '授权菜单',
-        icon: <MyIcon type="syndra-assigned" className="text-sm! block" />,
-        disabled: !canAssignMenu,
-        onClick: () => {
-          if (!canAssignMenu) {
-            modal.error({
-              title: '权限不足',
-              content: '您没有分配菜单权限的权限，请联系管理员获取相应权限。',
-            });
-            return;
-          }
-          openModal('assignMenu', record);
-        },
-      },
-      {
-        key: 'assignResource',
-        label: '授权资源',
-        icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
-        disabled: !canAssignResource,
-        onClick: () => {
-          if (!canAssignResource) {
-            modal.error({
-              title: '权限不足',
-              content: '您没有授权资源的权限，请联系管理员获取相应权限。',
-            });
-            return;
-          }
-          openModal('assignResource', record);
-        },
-      },
-      {
-        key: 'assignPermission',
-        label: '授权权限',
+        key: 'assignGrant',
+        label: '统一授权',
         icon: <MyIcon type="syndra-permission-assign" className="text-sm! block" />,
         disabled: !canAssignPermission,
         onClick: () => {
           if (!canAssignPermission) {
             modal.error({
               title: '权限不足',
-              content: '您没有授权权限的权限，请联系管理员获取相应权限。',
+              content: '您没有授权角色的权限，请联系管理员获取相应权限。',
             });
             return;
           }
-          openModal('assignPermission', record);
+          openModal('assignGrant', record);
         },
       },
       {

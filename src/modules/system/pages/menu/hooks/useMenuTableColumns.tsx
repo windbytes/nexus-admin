@@ -1,4 +1,11 @@
-import { CopyOutlined, DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleFilled,
+  KeyOutlined,
+  MoreOutlined,
+} from '@ant-design/icons';
 import { App, Button, Dropdown, type MenuProps, Switch, type TableProps, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { MenuModel } from '@/shared/api/system/menu/type';
@@ -25,6 +32,11 @@ interface UseMenuTableColumnProps {
    * @param data - 复制后的字段
    */
   setCopiedData?: (data: Partial<MenuModel> | null) => void;
+  /**
+   * 打开某菜单的按钮配置抽屉。
+   * @param record - 目标菜单行
+   */
+  onConfigButtons?: (record: MenuModel) => void;
 }
 
 /**
@@ -35,7 +47,7 @@ interface UseMenuTableColumnProps {
  */
 export function useMenuTableColumns(props: UseMenuTableColumnProps) {
   const { modal } = App.useApp();
-  const { currentRow, onSuccess, openModal, setCopiedData } = props;
+  const { currentRow, onSuccess, openModal, setCopiedData, onConfigButtons } = props;
   const { canEditMenu, canDeleteMenu, canCopyMenu } = useMenuPermissions();
   const { t } = useTranslation();
   const { deleteMenu, updateMenuStatus } = useMenuActions({ currentRow, onSuccess });
@@ -84,6 +96,12 @@ export function useMenuTableColumns(props: UseMenuTableColumnProps) {
    */
   function moreActionItems(record: MenuModel): MenuProps['items'] {
     return [
+      {
+        key: 'buttons',
+        label: '按钮配置',
+        icon: <KeyOutlined className="text-sm! block" />,
+        onClick: () => onConfigButtons?.(record),
+      },
       {
         key: 'copy',
         label: t('common.operation.copy'),

@@ -1,9 +1,9 @@
 /**
  * @file 角色管理 API 服务
- * @description 对接后端 `/system/role/**`，供角色维护与授权抽屉使用。
+ * @description 对接后端 `/system/role/**`，供角色维护与统一授权抽屉使用。
  */
 
-import type { RoleMenu, RoleModel, RoleSearchParams } from '@/shared/api/system/role/type';
+import type { RoleGrantTreeResponse, RoleModel, RoleSearchParams } from '@/shared/api/system/role/type';
 import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/shared/utils/request';
 
@@ -13,11 +13,8 @@ const RoleApi = {
   editRole: '/system/role/editRole',
   changeStatus: '/system/role/changeStatus',
   logicDeleteBatchRoles: '/system/role/logicDeleteBatchRoles',
-  getRoleMenu: '/system/role/getRoleMenu',
-  assignRoleMenu: '/system/role/assignRoleMenu',
-  assignRolePermission: '/system/role/assignRolePermission',
-  getRoleButtonPermissionIds: '/system/role/getRoleButtonPermissionIds',
-  getRoleApiPermissionIds: '/system/role/getRoleApiPermissionIds',
+  grantTree: '/system/role/grantTree',
+  grants: '/system/role/grants',
   checkRoleCodeExist: '/system/role/checkRoleCodeExist',
 } as const;
 
@@ -35,16 +32,17 @@ interface IRoleService {
   changeStatus(params: Partial<RoleModel>): Promise<boolean>;
   /** 逻辑批量删除角色 */
   logicDeleteBatchRole(ids: string[]): Promise<boolean>;
-  /** 查询角色菜单授权数据 */
-  getRoleMenu(roleId: string): Promise<RoleMenu>;
-  /** 分配角色菜单 */
-  assignRoleMenu(roleId: string, menuIds: string[]): Promise<boolean>;
-  /** 全量覆盖分配角色权限点 */
-  assignRolePermission(roleId: string, permissionIds: string[]): Promise<boolean>;
-  /** 查询角色已配置的按钮权限点 ID（resourceType=1） */
-  getRoleButtonPermissionIds(roleId: string): Promise<string[]>;
-  /** 查询角色已配置的接口权限点 ID（resourceType=2） */
-  getRoleApiPermissionIds(roleId: string): Promise<string[]>;
+  /**
+   * 查询角色统一授权树（菜单/按钮/接口合并树 + 已勾选 keys）。
+   * @param roleId - 角色主键 ID
+   */
+  getGrantTree(roleId: string): Promise<RoleGrantTreeResponse>;
+  /**
+   * 保存角色统一授权（全量覆盖角色菜单与权限点）。
+   * @param roleId - 角色主键 ID
+   * @param checkedKeys - 勾选节点 keys（menu:{id} / perm:{id}）
+   */
+  saveGrants(roleId: string, checkedKeys: string[]): Promise<boolean>;
   /** 校验角色编码是否存在 */
   checkRoleCodeExist(roleCode: string): Promise<boolean>;
 }
@@ -76,39 +74,18 @@ export const roleService: IRoleService = {
     });
   },
 
-  getRoleMenu(roleId) {
+  getGrantTree(roleId) {
     return HttpRequest.get(
-      { url: RoleApi.getRoleMenu, params: { roleId } },
+      { url: RoleApi.grantTree, params: { roleId } },
       { successMessageMode: 'none' }
     );
   },
 
-  assignRoleMenu(roleId, menuIds) {
-    return HttpRequest.post({
-      url: RoleApi.assignRoleMenu,
-      data: { roleId, menuIds },
+  saveGrants(roleId, checkedKeys) {
+    return HttpRequest.put({
+      url: RoleApi.grants,
+      data: { roleId, checkedKeys },
     });
-  },
-
-  assignRolePermission(roleId, permissionIds) {
-    return HttpRequest.post({
-      url: RoleApi.assignRolePermission,
-      data: { roleId, permissionIds },
-    });
-  },
-
-  getRoleButtonPermissionIds(roleId) {
-    return HttpRequest.get(
-      { url: RoleApi.getRoleButtonPermissionIds, params: { roleId } },
-      { successMessageMode: 'none' }
-    );
-  },
-
-  getRoleApiPermissionIds(roleId) {
-    return HttpRequest.get(
-      { url: RoleApi.getRoleApiPermissionIds, params: { roleId } },
-      { successMessageMode: 'none' }
-    );
   },
 
   checkRoleCodeExist(roleCode) {

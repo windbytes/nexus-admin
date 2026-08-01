@@ -8,15 +8,7 @@ import type { RoleModel } from '@/shared/api/system/role/type';
 /**
  * 角色弹窗模式。
  */
-export type ModalType =
-  | 'add'
-  | 'edit'
-  | 'view'
-  | 'assignMenu'
-  | 'assignUser'
-  | 'assignResource'
-  | 'assignPermission'
-  | null;
+export type ModalType = 'add' | 'edit' | 'view' | 'assignUser' | 'assignGrant' | null;
 
 /**
  * `useRoleModals` 返回值。

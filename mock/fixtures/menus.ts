@@ -193,7 +193,6 @@ export const MOCK_MENUS: MockRouteItem[] = [
   ]),
   group('235123826202185733', '系统管理', '/system/menu', 'SettingOutlined', [
     leaf('235123826202185756', '235123826202185733', '菜单管理', '/system/menu', 'system/menu', 'MenuOutlined'),
-    leaf('235123826202185757', '235123826202185733', '按钮管理', '/system/button', 'system/button', 'AimOutlined'),
     leaf('235123826202185758', '235123826202185733', '接口管理', '/system/api', 'system/api', 'ApiOutlined'),
     leaf(
       '235123826202185759',

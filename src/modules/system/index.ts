@@ -7,6 +7,5 @@
 export { menuService } from './api/menu';
 export type { MenuExportParams, MenuImportResult, MenuListQuery } from './api/menu';
 export { roleService } from './api/role';
-export { pageButtonService } from './api/pageButton';
 export { apiService } from './api/api';
 export { permissionService } from './api/permission';

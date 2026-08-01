@@ -1,40 +1,39 @@
 /**
- * @file 系统接口表格列配置
+ * @file 系统接口注册表列配置
  */
 
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { App, Button, Tag } from 'antd';
+import { App, Button, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { ApiModel } from '@/shared/api/system/api/type';
 import { TABLE_ACTION_CELL_CLASSNAME, TABLE_ACTION_COLUMN_WIDTH } from '@/shared/constants/table';
-import { getMethodColor } from '../constants';
+import { getMethodColor, SOURCE_TAG } from '../constants';
 import { useApiPermissions } from './useApiPermissions';
 
 interface UseApiTableColumnsOptions {
   onEdit: (record: ApiModel) => void;
   onDelete: (record: ApiModel) => void;
-  /** 未选菜单时禁用操作列按钮 */
-  actionsDisabled?: boolean;
 }
 
 /**
- * 系统接口表格列配置。
+ * 系统接口注册表列配置。
  *
- * @param options - 编辑/删除回调与禁用态
+ * @param options - 编辑/删除回调
  * @returns antd Table `columns`
  */
 export function useApiTableColumns(options: UseApiTableColumnsOptions): ColumnsType<ApiModel> {
   const { modal } = App.useApp();
-  const { onEdit, onDelete, actionsDisabled = false } = options;
-  const { canUpdate, canDelete } = useApiPermissions();
+  const { onEdit, onDelete } = options;
+  const { canEdit, canDelete } = useApiPermissions();
 
   return [
-    { title: '接口名称', dataIndex: 'name', key: 'name', width: 160, ellipsis: true },
+    { title: '接口名称', dataIndex: 'apiName', key: 'apiName', width: 160, ellipsis: true },
     {
       title: '请求方法',
       dataIndex: 'method',
       key: 'method',
-      width: 100,
+      width: 90,
+      align: 'center',
       render: (method: string) => <Tag color={getMethodColor(method)}>{method ?? '-'}</Tag>,
     },
     {
@@ -45,16 +44,47 @@ export function useApiTableColumns(options: UseApiTableColumnsOptions): ColumnsT
       ellipsis: true,
       sorter: (a, b) => (a.path ?? '').localeCompare(b.path ?? ''),
     },
-    { title: '权限标识', dataIndex: 'permCode', key: 'permCode', width: 160, ellipsis: true },
-    { title: '描述', dataIndex: 'remark', key: 'remark', width: 140, ellipsis: true },
+    {
+      title: '绑定权限点',
+      dataIndex: 'permCode',
+      key: 'permCode',
+      width: 200,
+      ellipsis: true,
+      render: (_: string, record: ApiModel) =>
+        record.permCode ? (
+          <Typography.Text className="text-xs">{record.permCode}</Typography.Text>
+        ) : (
+          <Tag color="default">仅需认证</Tag>
+        ),
+    },
+    {
+      title: '来源',
+      dataIndex: 'source',
+      key: 'source',
+      width: 90,
+      align: 'center',
+      render: (source: number) => {
+        const tag = SOURCE_TAG[source] ?? { label: '未知', color: 'default' };
+        return <Tag color={tag.color}>{tag.label}</Tag>;
+      },
+    },
     {
       title: '公开',
       dataIndex: 'isPublic',
       key: 'isPublic',
       align: 'center',
       width: 70,
-      render: (v: boolean) => (v ? '是' : '否'),
+      render: (v: boolean) => (v ? <Tag color="green">白名单</Tag> : '否'),
     },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'center',
+      width: 70,
+      render: (v: boolean) => (v ? '启用' : <Typography.Text type="danger">停用</Typography.Text>),
+    },
+    { title: '描述', dataIndex: 'remark', key: 'remark', width: 140, ellipsis: true },
     {
       title: '操作',
       key: 'action',
@@ -66,10 +96,10 @@ export function useApiTableColumns(options: UseApiTableColumnsOptions): ColumnsT
           <Button
             type="link"
             size="small"
-            disabled={actionsDisabled || !canUpdate}
+            disabled={!canEdit}
             icon={<EditOutlined className="text-(--ant-color-primary)!" />}
             onClick={() => {
-              if (!canUpdate) {
+              if (!canEdit) {
                 modal.error({
                   title: '权限不足',
                   content: '您没有编辑接口的权限，请联系管理员获取相应权限。',
@@ -85,7 +115,7 @@ export function useApiTableColumns(options: UseApiTableColumnsOptions): ColumnsT
             type="link"
             size="small"
             danger
-            disabled={actionsDisabled || !canDelete}
+            disabled={!canDelete}
             icon={<DeleteOutlined />}
             onClick={() => {
               if (!canDelete) {

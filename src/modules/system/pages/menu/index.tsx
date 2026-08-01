@@ -6,6 +6,7 @@ import { type Key, useState } from 'react';
 import { menuService } from '@/modules/system/api/menu';
 import type { MenuModel } from '@/shared/api/system/menu/type';
 import ProTable from '@/shared/components/pro/ProTable';
+import MenuButtonDrawer from './components/MenuButtonDrawer';
 import MenuInfoModal from './components/MenuInfoModal';
 import SearchForm from './components/SearchForm';
 import { useMenuActions } from './hooks/useMenuActions';
@@ -35,6 +36,7 @@ function Menu() {
   } = useMenuModals();
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [searchParams, setSearchParams] = useState<MenuSearchParams>({});
+  const [buttonDrawerMenu, setButtonDrawerMenu] = useState<MenuModel | null>(null);
   const permissions = useMenuPermissions();
 
   const {
@@ -119,6 +121,7 @@ function Menu() {
     onSuccess: handleSuccess,
     openModal,
     setCopiedData,
+    onConfigButtons: setButtonDrawerMenu,
   });
 
   /**
@@ -249,6 +252,11 @@ function Menu() {
         menu={modalName === 'add' ? parentMenu || undefined : editingMenu || undefined}
         operation={modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit'}
         copiedMenuData={copiedMenuData || undefined}
+      />
+      <MenuButtonDrawer
+        open={!!buttonDrawerMenu}
+        menu={buttonDrawerMenu}
+        onClose={() => setButtonDrawerMenu(null)}
       />
     </>
   );
