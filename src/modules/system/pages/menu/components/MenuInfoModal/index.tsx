@@ -209,7 +209,7 @@ function MenuInfoModal({ open, operation, onClose, menu, copiedMenuData, onOk }:
     <DragModal
       title={isViewMode ? '查看菜单' : operation === 'edit' ? '编辑菜单' : '新增菜单'}
       open={open}
-      width={800}
+      width={1000}
       centered
       onCancel={onClose}
       afterOpenChange={handleAfterOpenChange}

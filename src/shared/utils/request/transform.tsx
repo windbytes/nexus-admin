@@ -1,13 +1,8 @@
-/**
- * axios中对数据的中转处理
- */
-/* 数据处理 */
-
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { t } from 'i18next';
 import type React from 'react';
-import { HttpCodeEnum, RequestEnum } from '@/shared/constants/httpEnum';
 import { commonService } from '@/shared/api/common';
+import { HttpCodeEnum, RequestEnum } from '@/shared/constants/httpEnum';
 import { useUserStore } from '@/shared/stores/user.store';
 import type { RequestOptions } from '@/types/axios';
 import type { Response } from '@/types/global';
@@ -253,26 +248,11 @@ export const transform: AxiosTransform = {
   },
 
   /**
-   * 请求失败后处理（如502网关错误）
+   * 请求失败后处理
    *
-   * @param error 错误信息
-   * @param options 请求配置
+   * 错误提示统一由 responseInterceptorsCatch 弹出，此处仅透传错误，避免重复弹窗
    */
   requestCatchHook: (error: Error | AxiosError) => {
-    const code = (error as AxiosError).status;
-    let errMessage = '';
-    if (code === HttpCodeEnum.RC502) {
-      errMessage = t('common.errorMsg.requestFailed');
-    } else if (code === HttpCodeEnum.RC500) {
-      errMessage = `${t('common.errorMsg.serverException')},${t('common.errorMsg.retry')}`;
-    }
-    if (errMessage) {
-      antdUtils.modal?.error({
-        title: `${t('common.errorMsg.serverException')},${t('common.errorMsg.statusCode')}(${code})`,
-        content: errMessage,
-        okText: t('common.operation.confirm'),
-      });
-    }
     return Promise.reject(error);
   },
 
@@ -455,8 +435,18 @@ export const transform: AxiosTransform = {
       return Promise.reject(error);
     }
 
-    let errMessage: string | React.ReactNode = '';
-    if ((status === 404 || responseCode === HttpCodeEnum.RC404) && (responseMessage || message)) {
+    // 请求被取消（如页面切换、重复请求拦截）属于正常行为，无需提示
+    if (code === 'ERR_CANCELED') {
+      return Promise.reject(error);
+    }
+
+    let title = t('common.errorMsg.requestFailed');
+    let errMessage: string | React.ReactNode;
+    if (typeof status === 'number' && status >= 500) {
+      // 5xx（500/502/503/504 等）服务器或网关异常：优先展示后端返回的文案，否则给用户可理解的提示
+      title = t('common.errorMsg.serverException');
+      errMessage = responseMessage || t('common.errorMsg.serverUnavailable');
+    } else if ((status === 404 || responseCode === HttpCodeEnum.RC404) && (responseMessage || message)) {
       errMessage = (
         <>
           <div>错误信息：{responseMessage || message}</div>
@@ -467,19 +457,16 @@ export const transform: AxiosTransform = {
       errMessage = t('common.errorMsg.requestTimeout');
     } else if (err?.includes('Network Error')) {
       errMessage = t('common.errorMsg.networkException');
-    } else if (responseMessage || message) {
-      errMessage = responseMessage || message;
+    } else {
+      // 优先展示后端返回的业务文案；兜底不展示 axios 英文原始错误（如 Request failed with status code 502）
+      errMessage = responseMessage || `${t('common.errorMsg.requestFailed')},${t('common.errorMsg.retry')}`;
     }
 
-    if (errMessage) {
-      antdUtils.modal?.error({
-        title: `${t('common.errorMsg.serverException')}（${t('common.errorMsg.statusCode')}：${responseCode || code}）`,
-        content: errMessage,
-        okText: t('common.operation.confirm'),
-      });
-      return Promise.reject(error);
-    }
-
+    antdUtils.modal?.error({
+      title,
+      content: errMessage,
+      okText: t('common.operation.confirm'),
+    });
     return Promise.reject(error);
   },
 };

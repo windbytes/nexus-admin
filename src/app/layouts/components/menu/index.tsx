@@ -1,10 +1,10 @@
 import { EllipsisOutlined } from '@ant-design/icons';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useShallow } from 'zustand/shallow';
-import { buildMenuItems, type MenuItem, resolveMenuSelection } from '@/app/layouts/components/LeftMenu/component/menu-utils';
+import { buildMenuItems, resolveMenuSelection } from '@/app/layouts/components/LeftMenu/component/menu-utils';
 import { useMenuStore, usePreferencesStore } from '@/shared/stores/preferences.store';
 import { searchRoute } from '@/shared/utils/utils';
 

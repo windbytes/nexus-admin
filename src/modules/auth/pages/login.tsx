@@ -86,7 +86,7 @@ function Login() {
   const [showRoleSelector, setShowRoleSelector] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const loginData = useRef<LoginResponse | null>(null);
-  const [isAnimating, setIsAnimating] = useState<boolean>(true);
+  const [isAnimating] = useState<boolean>(true);
 
   const [activeMode, setActiveMode] = useState<UiLoginMode>(() => {
     try {
@@ -546,274 +546,280 @@ function Login() {
               </div>
             </div>
             <div className={styles['login-form']}>
-            {showAppQrPanel ? (
-              <button
-                type="button"
-                className={styles['login-form-corner-back']}
-                onClick={() => setShowAppQrPanel(false)}
-                aria-label={t('login.cornerBackForm')}
-              >
-                <LoginOutlined />
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={styles['login-form-corner-reveal']}
-                onClick={openAppQrPanel}
-                aria-label={t('login.cornerRevealQr')}
-              >
-                <span className={styles['login-form-corner__qr-wrap']} aria-hidden>
-                  <span className={styles['login-form-corner__qr']}>
-                    <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={128} bordered={false} />
+              {showAppQrPanel ? (
+                <button
+                  type="button"
+                  className={styles['login-form-corner-back']}
+                  onClick={() => setShowAppQrPanel(false)}
+                  aria-label={t('login.cornerBackForm')}
+                >
+                  <LoginOutlined />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles['login-form-corner-reveal']}
+                  onClick={openAppQrPanel}
+                  aria-label={t('login.cornerRevealQr')}
+                >
+                  <span className={styles['login-form-corner__qr-wrap']} aria-hidden>
+                    <span className={styles['login-form-corner__qr']}>
+                      <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={128} bordered={false} />
+                    </span>
                   </span>
-                </span>
-              </button>
-            )}
-            {!showAppQrPanel ? (
-              <>
-                <div className={styles['login-form-header']}>
-                  <div className={styles['login-title-tabs']} role="tablist" aria-label={t('login.title')}>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={activeMode === 'password'}
-                      className={`${styles['login-title-tab']} ${activeMode === 'password' ? styles['active'] : ''}`}
-                      onClick={() => selectLoginMode('password')}
-                    >
-                      {t('login.login')}
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={activeMode === 'phone'}
-                      className={`${styles['login-title-tab']} ${activeMode === 'phone' ? styles['active'] : ''}`}
-                      onClick={() => selectLoginMode('phone')}
-                    >
-                      {t('login.phoneLoginTab')}
-                    </button>
-                  </div>
-                </div>
-                <div className={`${styles['login-form-main']} ${isAnimating ? styles['form-animated'] : ''}`}>
-                  <Form
-                    form={form}
-                    name="login"
-                    labelCol={{ span: 5 }}
-                    size="large"
-                    autoComplete="off"
-                    onFinish={submit}
-                    style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0 }}
-                  >
-                    <div className={styles['login-form-body']}>
-                      {activeMode === 'password' && (
-                        <>
-                          <Form.Item
-                            name="username"
-                            rules={[{ required: true, message: t('login.enterUsername') }]}
-                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                          >
-                            <Input
-                              size="large"
-                              ref={inputRef}
-                              autoFocus
-                              autoComplete="off"
-                              allowClear
-                              placeholder={`${t('login.username')}:syndra`}
-                              prefix={<UserOutlined />}
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            name="password"
-                            rules={[{ required: true, message: t('login.enterPassword') }]}
-                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                          >
-                            <Input.Password
-                              size="large"
-                              allowClear
-                              autoComplete="off"
-                              placeholder={`${t('login.password')}:123456`}
-                              prefix={<LockOutlined />}
-                            />
-                          </Form.Item>
-                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
-                            <Row gutter={8}>
-                              <Col span={18}>
-                                <Form.Item
-                                  name="captchaCode"
-                                  noStyle
-                                  rules={[{ required: true, message: t('login.enterCaptcha') }]}
-                                >
-                                  <Input
-                                    size="large"
-                                    allowClear
-                                    placeholder={t('login.enterCaptcha')}
-                                    prefix={<SecurityScanOutlined />}
-                                  />
-                                </Form.Item>
-                              </Col>
-                              <Col span={6}>
-                                <Button size="large" onClick={() => refetch()} className="w-full bg-[#f0f0f0] p-0.5!">
-                                  <Image src={data?.code} preview={false} width="100%" height="100%" />
-                                </Button>
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                          <Form.Item
-                            name="remember"
-                            valuePropName="checked"
-                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                          >
-                            <Checkbox>{t('login.remember')}</Checkbox>
-                          </Form.Item>
-                        </>
-                      )}
-
-                      {activeMode === 'phone' && (
-                        <>
-                          <Form.Item
-                            name="phone"
-                            rules={[
-                              { required: true, whitespace: true, message: t('login.enterPhone') },
-                              { pattern: /^1\d{10}$/, message: t('login.phoneInvalid') },
-                            ]}
-                            className={isAnimating ? styles['form-item-animated'] || '' : ''}
-                          >
-                            <Input
-                              ref={phoneInputRef}
-                              size="large"
-                              allowClear
-                              placeholder={t('login.phone')}
-                              prefix={<MobileOutlined />}
-                            />
-                          </Form.Item>
-                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
-                            <Row gutter={8}>
-                              <Col span={16}>
-                                <Form.Item
-                                  name="smsCode"
-                                  noStyle
-                                  rules={[{ required: true, message: t('login.enterSmsCode') }]}
-                                >
-                                  <Input size="large" allowClear placeholder={t('login.smsCode')} />
-                                </Form.Item>
-                              </Col>
-                              <Col span={8}>
-                                <Button
-                                  size="large"
-                                  className="w-full"
-                                  disabled={smsCooldown > 0}
-                                  onClick={() => void sendSms()}
-                                >
-                                  {smsCooldown > 0 ? `${smsCooldown}s` : t('login.sendSms')}
-                                </Button>
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </>
-                      )}
-
-                      {activeMode === 'wechat' && (
-                        <div className="text-center py-4">
-                          <p className="text-gray-600 mb-4">{t('login.wechatScanHint')}</p>
-                          {wechatAuthorizeUrl ? (
-                            <div className="flex flex-col items-center gap-4">
-                              <QRCode value={wechatAuthorizeUrl} size={180} />
-                              <Text type="secondary">{t('login.wechatPolling')}</Text>
-                            </div>
-                          ) : (
-                            <Button type="primary" size="large" onClick={() => void startWeChatQr()}>
-                              {t('login.wechatStartQr')}
-                            </Button>
-                          )}
-                        </div>
-                      )}
-
-                      {activeMode === 'github' && (
-                        <div className="text-center py-8">
-                          <p className="text-gray-600 mb-6">{t('login.githubHint')}</p>
-                          <Button type="primary" size="large" icon={<GithubOutlined />} onClick={redirectGithub}>
-                            {t('login.githubButton')}
-                          </Button>
-                        </div>
-                      )}
+                </button>
+              )}
+              {!showAppQrPanel ? (
+                <>
+                  <div className={styles['login-form-header']}>
+                    <div className={styles['login-title-tabs']} role="tablist" aria-label={t('login.title')}>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeMode === 'password'}
+                        className={`${styles['login-title-tab']} ${activeMode === 'password' ? styles['active'] : ''}`}
+                        onClick={() => selectLoginMode('password')}
+                      >
+                        {t('login.login')}
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeMode === 'phone'}
+                        className={`${styles['login-title-tab']} ${activeMode === 'phone' ? styles['active'] : ''}`}
+                        onClick={() => selectLoginMode('phone')}
+                      >
+                        {t('login.phoneLoginTab')}
+                      </button>
                     </div>
+                  </div>
+                  <div className={`${styles['login-form-main']} ${isAnimating ? styles['form-animated'] : ''}`}>
+                    <Form
+                      form={form}
+                      name="login"
+                      labelCol={{ span: 5 }}
+                      size="large"
+                      autoComplete="off"
+                      onFinish={submit}
+                      style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0 }}
+                    >
+                      <div className={styles['login-form-body']}>
+                        {activeMode === 'password' && (
+                          <>
+                            <Form.Item
+                              name="username"
+                              rules={[{ required: true, message: t('login.enterUsername') }]}
+                              className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                            >
+                              <Input
+                                size="large"
+                                ref={inputRef}
+                                autoFocus
+                                autoComplete="off"
+                                allowClear
+                                placeholder={`${t('login.username')}:syndra`}
+                                prefix={<UserOutlined />}
+                              />
+                            </Form.Item>
+                            <Form.Item
+                              name="password"
+                              rules={[{ required: true, message: t('login.enterPassword') }]}
+                              className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                            >
+                              <Input.Password
+                                size="large"
+                                allowClear
+                                autoComplete="off"
+                                placeholder={`${t('login.password')}:123456`}
+                                prefix={<LockOutlined />}
+                              />
+                            </Form.Item>
+                            <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                              <Row gutter={8}>
+                                <Col span={18}>
+                                  <Form.Item
+                                    name="captchaCode"
+                                    noStyle
+                                    rules={[{ required: true, message: t('login.enterCaptcha') }]}
+                                  >
+                                    <Input
+                                      size="large"
+                                      allowClear
+                                      placeholder={t('login.enterCaptcha')}
+                                      prefix={<SecurityScanOutlined />}
+                                    />
+                                  </Form.Item>
+                                </Col>
+                                <Col span={6}>
+                                  <Button size="large" onClick={() => refetch()} className="w-full bg-[#f0f0f0] p-0.5!">
+                                    <Image src={data?.code} preview={false} width="100%" height="100%" />
+                                  </Button>
+                                </Col>
+                              </Row>
+                            </Form.Item>
+                            <Form.Item
+                              name="remember"
+                              valuePropName="checked"
+                              className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                            >
+                              <Checkbox>{t('login.remember')}</Checkbox>
+                            </Form.Item>
+                          </>
+                        )}
 
-                    <div className={styles['login-form-footer']}>
-                      <div className={styles['login-form-submit-slot']}>
-                        {(activeMode === 'password' || activeMode === 'phone') && (
-                          <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
-                            <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
-                              {t('login.login')}
+                        {activeMode === 'phone' && (
+                          <>
+                            <Form.Item
+                              name="phone"
+                              rules={[
+                                { required: true, whitespace: true, message: t('login.enterPhone') },
+                                { pattern: /^1\d{10}$/, message: t('login.phoneInvalid') },
+                              ]}
+                              className={isAnimating ? styles['form-item-animated'] || '' : ''}
+                            >
+                              <Input
+                                ref={phoneInputRef}
+                                size="large"
+                                allowClear
+                                placeholder={t('login.phone')}
+                                prefix={<MobileOutlined />}
+                              />
+                            </Form.Item>
+                            <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                              <Row gutter={8}>
+                                <Col span={16}>
+                                  <Form.Item
+                                    name="smsCode"
+                                    noStyle
+                                    rules={[{ required: true, message: t('login.enterSmsCode') }]}
+                                  >
+                                    <Input size="large" allowClear placeholder={t('login.smsCode')} />
+                                  </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                  <Button
+                                    size="large"
+                                    className="w-full"
+                                    disabled={smsCooldown > 0}
+                                    onClick={() => void sendSms()}
+                                  >
+                                    {smsCooldown > 0 ? `${smsCooldown}s` : t('login.sendSms')}
+                                  </Button>
+                                </Col>
+                              </Row>
+                            </Form.Item>
+                          </>
+                        )}
+
+                        {activeMode === 'wechat' && (
+                          <div className="text-center py-4">
+                            <p className="text-gray-600 mb-4">{t('login.wechatScanHint')}</p>
+                            {wechatAuthorizeUrl ? (
+                              <div className="flex flex-col items-center gap-4">
+                                <QRCode value={wechatAuthorizeUrl} size={180} />
+                                <Text type="secondary">{t('login.wechatPolling')}</Text>
+                              </div>
+                            ) : (
+                              <Button type="primary" size="large" onClick={() => void startWeChatQr()}>
+                                {t('login.wechatStartQr')}
+                              </Button>
+                            )}
+                          </div>
+                        )}
+
+                        {activeMode === 'github' && (
+                          <div className="text-center py-8">
+                            <p className="text-gray-600 mb-6">{t('login.githubHint')}</p>
+                            <Button type="primary" size="large" icon={<GithubOutlined />} onClick={redirectGithub}>
+                              {t('login.githubButton')}
                             </Button>
-                          </Form.Item>
+                          </div>
                         )}
                       </div>
 
-                      <Divider className={styles['login-other-divider']} plain>
-                        {t('login.otherLoginMethods')}
-                      </Divider>
+                      <div className={styles['login-form-footer']}>
+                        <div className={styles['login-form-submit-slot']}>
+                          {(activeMode === 'password' || activeMode === 'phone') && (
+                            <Form.Item className={isAnimating ? styles['form-item-animated'] || '' : ''}>
+                              <Button
+                                loading={loading}
+                                size="large"
+                                className="w-full"
+                                type="primary"
+                                htmlType="submit"
+                              >
+                                {t('login.login')}
+                              </Button>
+                            </Form.Item>
+                          )}
+                        </div>
 
-                      <div className={styles['login-method-icons']}>
-                        <button
-                          type="button"
-                          className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
-                          title={t('login.modeWechat')}
-                          aria-label={t('login.modeWechat')}
-                          onClick={() => selectLoginMode('wechat')}
-                        >
-                          <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
-                          title={t('login.modeGithub')}
-                          aria-label={t('login.modeGithub')}
-                          onClick={() => selectLoginMode('github')}
-                        >
-                          <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
-                        </button>
+                        <Divider className={styles['login-other-divider']} plain>
+                          {t('login.otherLoginMethods')}
+                        </Divider>
+
+                        <div className={styles['login-method-icons']}>
+                          <button
+                            type="button"
+                            className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
+                            title={t('login.modeWechat')}
+                            aria-label={t('login.modeWechat')}
+                            onClick={() => selectLoginMode('wechat')}
+                          >
+                            <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
+                            title={t('login.modeGithub')}
+                            aria-label={t('login.modeGithub')}
+                            onClick={() => selectLoginMode('github')}
+                          >
+                            <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </Form>
-                </div>
-              </>
-            ) : (
-              <div key={appQrAnimKey} className={`${styles['login-app-qr-layout']} ${styles['login-app-qr-enter']}`}>
-                <div className={styles['login-app-qr-center']}>
-                  <div className={styles['login-app-qr-frame']}>
-                    <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={220} errorLevel="H" />
-                    <span className={styles['login-app-qr-icon']} aria-hidden>
-                      <ApiOutlined />
-                    </span>
+                    </Form>
                   </div>
-                  <Text type="secondary" className="mt-3 text-center max-w-[280px]">
-                    {t('login.appQrHint')}
-                  </Text>
+                </>
+              ) : (
+                <div key={appQrAnimKey} className={`${styles['login-app-qr-layout']} ${styles['login-app-qr-enter']}`}>
+                  <div className={styles['login-app-qr-center']}>
+                    <div className={styles['login-app-qr-frame']}>
+                      <QRCode value={APP_SCAN_LOGIN_QR_VALUE} size={220} errorLevel="H" />
+                      <span className={styles['login-app-qr-icon']} aria-hidden>
+                        <ApiOutlined />
+                      </span>
+                    </div>
+                    <Text type="secondary" className="mt-3 text-center max-w-[280px]">
+                      {t('login.appQrHint')}
+                    </Text>
+                  </div>
+                  <Divider className={styles['login-other-divider']} plain>
+                    {t('login.otherLoginMethods')}
+                  </Divider>
+                  <div className={styles['login-method-icons']}>
+                    <button
+                      type="button"
+                      className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
+                      title={t('login.modeWechat')}
+                      aria-label={t('login.modeWechat')}
+                      onClick={() => selectLoginMode('wechat')}
+                    >
+                      <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
+                      title={t('login.modeGithub')}
+                      aria-label={t('login.modeGithub')}
+                      onClick={() => selectLoginMode('github')}
+                    >
+                      <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
+                    </button>
+                  </div>
                 </div>
-                <Divider className={styles['login-other-divider']} plain>
-                  {t('login.otherLoginMethods')}
-                </Divider>
-                <div className={styles['login-method-icons']}>
-                  <button
-                    type="button"
-                    className={`${styles['login-method-icon-btn']} ${activeMode === 'wechat' ? styles['active'] : ''}`}
-                    title={t('login.modeWechat')}
-                    aria-label={t('login.modeWechat')}
-                    onClick={() => selectLoginMode('wechat')}
-                  >
-                    <WechatOutlined style={{ color: WECHAT_BRAND_COLOR, fontSize: 22 }} />
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles['login-method-icon-btn']} ${activeMode === 'github' ? styles['active'] : ''}`}
-                    title={t('login.modeGithub')}
-                    aria-label={t('login.modeGithub')}
-                    onClick={() => selectLoginMode('github')}
-                  >
-                    <GithubOutlined style={{ color: GITHUB_BRAND_COLOR, fontSize: 22 }} />
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
             </div>
           </div>
         </BorderBeam>

@@ -44,6 +44,7 @@ const translation = {
     forbidden: 'You do not have permission to access this resource',
     clientError: 'Client request error',
     serverError: 'Server error',
+    serverUnavailable: 'Service is temporarily unavailable, please try again later',
   },
   actionMsg: {
     modifiedSuccessfully: 'Modified successfully',

@@ -44,6 +44,7 @@ const translation = {
     forbidden: '没有权限访问该资源',
     clientError: '客户端请求错误',
     serverError: '服务器错误',
+    serverUnavailable: '服务暂时不可用，请稍后重试',
   },
   actionMsg: {
     modifiedSuccessfully: '修改成功',

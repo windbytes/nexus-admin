@@ -1,18 +1,12 @@
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Menu, type MenuProps } from 'antd';
 import { useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useShallow } from 'zustand/shallow';
 import { useMenuStore, usePreferencesStore } from '@/shared/stores/preferences.store';
 import type { MenuCaches } from '@/shared/utils/utils';
 import { searchRoute } from '@/shared/utils/utils';
-import {
-  buildMenuItems,
-  createInitialMenuState,
-  type MenuItem,
-  menuStateReducer,
-  resolveMenuSelection,
-} from './menu-utils';
+import { buildMenuItems, createInitialMenuState, menuStateReducer, resolveMenuSelection } from './menu-utils';
 
 /**
  * 菜单组件

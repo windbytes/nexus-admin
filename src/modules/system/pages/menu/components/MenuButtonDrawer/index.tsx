@@ -115,7 +115,7 @@ function MenuButtonDrawer({ open, menu, onClose }: MenuButtonDrawerProps) {
         </Space>
       }
       open={open}
-      width={720}
+      size={720}
       onClose={() => {
         message.destroy();
         onClose();
@@ -127,7 +127,12 @@ function MenuButtonDrawer({ open, menu, onClose }: MenuButtonDrawerProps) {
           <Button type="primary" icon={<PlusOutlined />} disabled={!canAdd || !menuId} onClick={openAdd}>
             新增按钮
           </Button>
-          <Button danger icon={<DeleteOutlined />} disabled={!canDelete || selectedRowKeys.length === 0} onClick={handleBatchDelete}>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            disabled={!canDelete || selectedRowKeys.length === 0}
+            onClick={handleBatchDelete}
+          >
             批量删除
           </Button>
           <Button icon={<ReloadOutlined />} onClick={refresh} loading={isFetching}>

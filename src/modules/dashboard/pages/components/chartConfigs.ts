@@ -63,7 +63,7 @@ export const getFlowTrendChartOption = (data: any): echarts.EChartsCoreOption =>
       fontSize: 12,
       formatter: (value: number) => {
         if (value >= 10000) {
-          return (value / 10000).toFixed(1) + 'w';
+          return `${(value / 10000).toFixed(1)}w`;
         }
         return value.toLocaleString();
       },
@@ -199,7 +199,7 @@ export const getFlowCategoryBarChartOption = (data: any): echarts.EChartsCoreOpt
         value: data.values[index],
         itemStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: data.colors[index] + '80' }, // 浅色
+            { offset: 0, color: `${data.colors[index]}80` }, // 浅色
             { offset: 1, color: data.colors[index] }, // 深色
           ]),
         },
@@ -309,14 +309,14 @@ export const getResponsiveChartOption = (
     return {
       ...baseOption,
       grid: {
-        ...(baseOption.grid as any),
+        ...(baseOption['grid'] as any),
         left: '5%',
         right: '5%',
         bottom: '10%',
         top: '15%',
       },
       title: {
-        ...(baseOption.title as any),
+        ...(baseOption['title'] as any),
         textStyle: {
           ...baseOption.textStyle,
           fontSize: 14,

@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { type PersistOptions, persist } from 'zustand/middleware';
 import { defaultPreferences } from '@/shared/config/defaultPreferences';
-import type { RouteItem } from '@/types/route';
 import { buildMenuCaches, type MenuCaches } from '@/shared/utils/utils';
+import type { RouteItem } from '@/types/route';
 import type { Preferences } from './preferences.types';
 
 // 定义category和key的类型
