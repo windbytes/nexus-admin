@@ -33,15 +33,15 @@ export const RecentVisits: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {recentVisits.map((item, index) => (
+      {recentVisits.map((item) => (
         <div
-          key={`recent-${item.title}-${index}`}
-          className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer"
+          key={item.link}
+          className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg transition-[colors,box-shadow] duration-300 cursor-pointer"
         >
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-blue-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="flex items-center p-4 relative">
             <div className="relative mr-4">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center group-hover:from-blue-100 group-hover:to-blue-200 transition-colors duration-300">
                 <div className="text-xl">{item.icon}</div>
               </div>
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">

@@ -22,10 +22,11 @@ const SearchResults: React.FC<Props> = ({ items, selectedIndex, onSelect }) => {
   return (
     <div className="overflow-y-auto flex-1">
       {items.map((item, index) => (
-        <div
+        <button
           key={item.id}
+          type="button"
           data-index={index}
-          className="cursor-pointer px-4 py-2 flex items-center justify-between transition-all duration-200"
+          className="w-full cursor-pointer px-4 py-2 flex items-center justify-between transition-all duration-200 border-0 bg-transparent text-left"
           style={
             index === selectedIndex
               ? {
@@ -33,10 +34,12 @@ const SearchResults: React.FC<Props> = ({ items, selectedIndex, onSelect }) => {
                   borderLeft: `2px solid ${token.colorPrimary}`,
                   borderRadius: token.borderRadius,
                   margin: '2px 8px',
+                  width: 'calc(100% - 16px)',
                 }
               : {
                   borderRadius: token.borderRadius,
                   margin: '2px 8px',
+                  width: 'calc(100% - 16px)',
                 }
           }
           onMouseEnter={(e) => {
@@ -72,7 +75,7 @@ const SearchResults: React.FC<Props> = ({ items, selectedIndex, onSelect }) => {
             {item.score && <div className="mr-2 text-xs text-gray-400">{item.score}%</div>}
             <Badge count={index + 1} size="small" />
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

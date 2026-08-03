@@ -1,8 +1,8 @@
 import { SearchOutlined } from '@ant-design/icons';
+import { useNavigate } from '@tanstack/react-router';
 import { Button, Empty, Input, type InputRef, Modal } from 'antd';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from '@tanstack/react-router';
 import { useMenuStore } from '@/shared/stores/preferences.store';
 import { getShortcutLabel } from '@/shared/utils/utils';
 import SearchHistory from './components/SearchHistory';

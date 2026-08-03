@@ -21,8 +21,9 @@ const MyTheme: React.FC = () => {
       {THEME_PRESET.map((item) => {
         return (
           <div key={item.name} className="flex items-center justify-center h-full">
-            <div
-              className="flex flex-col cursor-pointer"
+            <button
+              type="button"
+              className="flex flex-col cursor-pointer border-0 bg-transparent p-0"
               onClick={() => {
                 updatePreferences('theme', 'mode', item.name);
               }}
@@ -35,7 +36,7 @@ const MyTheme: React.FC = () => {
                 {item.icon}
               </div>
               <div className="text-center text-xs leading-4 text-gray-500 mt-2">{item.name}</div>
-            </div>
+            </button>
           </div>
         );
       })}

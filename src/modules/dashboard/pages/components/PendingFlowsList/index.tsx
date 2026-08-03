@@ -4,38 +4,38 @@ import { Avatar, Button, Table, type TableProps, Tag } from 'antd';
 import type React from 'react';
 import { fetchPendingFlowsData } from '@/modules/dashboard/api';
 
+function getPriorityColor(priority: string) {
+  switch (priority) {
+    case 'high':
+      return 'red';
+    case 'medium':
+      return 'orange';
+    case 'low':
+      return 'blue';
+    default:
+      return 'default';
+  }
+}
+
+function getPriorityText(priority: string) {
+  switch (priority) {
+    case 'high':
+      return '高';
+    case 'medium':
+      return '中';
+    case 'low':
+      return '低';
+    default:
+      return '未知';
+  }
+}
+
 export const PendingFlowsList: React.FC = () => {
   const { data: pendingFlows, isFetching } = useQuery({
     queryKey: ['pendingFlowsData'],
     queryFn: fetchPendingFlowsData,
     staleTime: 5 * 60 * 1000,
   });
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'red';
-      case 'medium':
-        return 'orange';
-      case 'low':
-        return 'blue';
-      default:
-        return 'default';
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return '高';
-      case 'medium':
-        return '中';
-      case 'low':
-        return '低';
-      default:
-        return '未知';
-    }
-  };
 
   const columns: TableProps['columns'] = [
     {

@@ -14,6 +14,103 @@ interface SearchFormProps {
   loading: boolean;
 }
 
+const BASE_FIELDS = [
+  {
+    name: 'roleCode',
+    label: '角色编码',
+    component: <Input placeholder="请输入角色编码" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'roleName',
+    label: '角色名称',
+    component: <Input placeholder="请输入角色名称" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'status',
+    label: '状态',
+    component: (
+      <Select
+        allowClear
+        placeholder="请选择状态"
+        options={[
+          { value: 1, label: '正常' },
+          { value: 0, label: '停用' },
+        ]}
+      />
+    ),
+  },
+];
+
+const ADVANCED_FIELDS = [
+  {
+    name: 'roleType',
+    label: '角色类型',
+    component: (
+      <Select
+        allowClear
+        placeholder="请选择角色类型"
+        options={[
+          { value: 0, label: '系统角色' },
+          { value: 1, label: '普通角色' },
+        ]}
+      />
+    ),
+  },
+  {
+    name: 'remark',
+    label: '描述',
+    component: <Input placeholder="请输入角色描述" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'createTime',
+    label: '创建时间',
+    component: (
+      <DatePicker className="w-full" placeholder="请选择创建时间" allowClear showTime={false} format="YYYY-MM-DD" />
+    ),
+  },
+];
+
+function ActionButtons({
+  className = '',
+  loading,
+  resetLabel,
+  searchLabel,
+  expanded,
+  onReset,
+  onToggle,
+}: {
+  className?: string;
+  loading: boolean;
+  resetLabel: string;
+  searchLabel: string;
+  expanded: boolean;
+  onReset: () => void;
+  onToggle: () => void;
+}) {
+  return (
+    <div className={`flex gap-3 justify-end ${className}`}>
+      <Button type="default" icon={<RedoOutlined />} onClick={onReset}>
+        {resetLabel}
+      </Button>
+      <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
+        {searchLabel}
+      </Button>
+      <Button
+        type="link"
+        onClick={onToggle}
+        classNames={{ content: 'text-(--ant-color-primary) flex items-center gap-1' }}
+      >
+        {expanded ? (
+          <UpOutlined className="text-(--ant-color-primary)!" />
+        ) : (
+          <DownOutlined className="text-(--ant-color-primary)!" />
+        )}
+        {expanded ? '收起' : '展开'}
+      </Button>
+    </div>
+  );
+}
+
 /**
  * 角色列表顶部搜索表单。
  *
@@ -33,68 +130,7 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
     setExpanded(!expanded);
   }
 
-  const allFields = [
-    {
-      name: 'roleCode',
-      label: '角色编码',
-      component: <Input placeholder="请输入角色编码" allowClear autoComplete="off" />,
-    },
-    {
-      name: 'roleName',
-      label: '角色名称',
-      component: <Input placeholder="请输入角色名称" allowClear autoComplete="off" />,
-    },
-    {
-      name: 'status',
-      label: '状态',
-      component: (
-        <Select
-          allowClear
-          placeholder="请选择状态"
-          options={[
-            { value: 1, label: '正常' },
-            { value: 0, label: '停用' },
-          ]}
-        />
-      ),
-    },
-    ...(expanded
-      ? [
-          {
-            name: 'roleType',
-            label: '角色类型',
-            component: (
-              <Select
-                allowClear
-                placeholder="请选择角色类型"
-                options={[
-                  { value: 0, label: '系统角色' },
-                  { value: 1, label: '普通角色' },
-                ]}
-              />
-            ),
-          },
-          {
-            name: 'remark',
-            label: '描述',
-            component: <Input placeholder="请输入角色描述" allowClear autoComplete="off" />,
-          },
-          {
-            name: 'createTime',
-            label: '创建时间',
-            component: (
-              <DatePicker
-                className="w-full"
-                placeholder="请选择创建时间"
-                allowClear
-                showTime={false}
-                format="YYYY-MM-DD"
-              />
-            ),
-          },
-        ]
-      : []),
-  ];
+  const allFields = expanded ? [...BASE_FIELDS, ...ADVANCED_FIELDS] : BASE_FIELDS;
 
   const fieldsPerRow = 4;
   const totalFields = allFields.length;
@@ -102,28 +138,14 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
   const shouldPlaceButtonInLastRow = fieldsInLastRow > 0 && fieldsInLastRow < fieldsPerRow;
   const shouldPlaceButtonInNewRow = fieldsInLastRow === 0;
 
-  const ActionButtons = ({ className = '' }: { className?: string }) => (
-    <div className={`flex gap-3 justify-end ${className}`}>
-      <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
-        {t('common.operation.reset')}
-      </Button>
-      <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
-        {t('common.operation.search')}
-      </Button>
-      <Button
-        type="link"
-        onClick={toggleAdvanced}
-        classNames={{ content: 'text-(--ant-color-primary) flex items-center gap-1' }}
-      >
-        {expanded ? (
-          <UpOutlined className="text-(--ant-color-primary)!" />
-        ) : (
-          <DownOutlined className="text-(--ant-color-primary)!" />
-        )}
-        {expanded ? '收起' : '展开'}
-      </Button>
-    </div>
-  );
+  const actionButtonProps = {
+    loading,
+    resetLabel: t('common.operation.reset'),
+    searchLabel: t('common.operation.search'),
+    expanded,
+    onReset: handleReset,
+    onToggle: toggleAdvanced,
+  };
 
   return (
     <ConfigProvider
@@ -148,10 +170,10 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
                 {field.component}
               </Form.Item>
             ))}
-            {!expanded && <ActionButtons className="items-end" />}
-            {expanded && shouldPlaceButtonInLastRow && <ActionButtons className="items-end" />}
+            {!expanded && <ActionButtons className="items-end" {...actionButtonProps} />}
+            {expanded && shouldPlaceButtonInLastRow && <ActionButtons className="items-end" {...actionButtonProps} />}
           </div>
-          {expanded && shouldPlaceButtonInNewRow && <ActionButtons />}
+          {expanded && shouldPlaceButtonInNewRow && <ActionButtons {...actionButtonProps} />}
         </Form>
       </Card>
     </ConfigProvider>

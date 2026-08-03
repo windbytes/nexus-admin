@@ -4,6 +4,18 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+function handleFullScreen() {
+  if (!document.fullscreenEnabled) {
+    message.warning('当前您的浏览器不支持全屏');
+    return;
+  }
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen();
+  }
+}
+
 /**
  * 全屏展示组件
  * @returns 组件内容
@@ -17,18 +29,6 @@ const FullScreen: React.FC = () => {
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
-
-  const handleFullScreen = () => {
-    if (!document.fullscreenEnabled) {
-      message.warning('当前您的浏览器不支持全屏');
-      return;
-    }
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      document.documentElement.requestFullscreen();
-    }
-  };
 
   return (
     <Tooltip title={t('layout.header.fullScreen')} placement="bottom">

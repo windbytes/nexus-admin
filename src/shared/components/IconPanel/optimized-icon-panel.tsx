@@ -108,7 +108,6 @@ import {
   WomanOutlined,
 } from '@ant-design/icons';
 import { Pagination } from 'antd';
-import { random } from 'lodash-es';
 import { useMemo, useState } from 'react';
 
 // 定义图标映射，只包含实际使用的图标
@@ -236,6 +235,17 @@ const iconList = Object.entries(iconMap).map(([name, Icon]) => ({
 }));
 
 /**
+ * 选择图标时的回调属性。
+ */
+interface IconPanelProps {
+  /**
+   * 用户点击某个图标后触发。
+   * @param icon - 图标组件名，例如 `'SettingOutlined'`，可直接写入表单 `icon` 字段
+   */
+  onSelect: (icon: string) => void;
+}
+
+/**
  * 优化后的图标选择面板。
  *
  * 仅加载项目常用图标子集，分页展示；点击图标后通过 {@link IconPanelProps.onSelect} 回传名称。
@@ -269,21 +279,19 @@ function OptimizedIconPanel(props: IconPanelProps) {
   return (
     <>
       <div className="icon-panel flex flex-wrap gap-2 p-4">
-        {paginatedIcons.map(({ name, Icon }) => {
-          const id = random();
-          return (
-            <div
-              key={`${name}-${id}`}
-              className={`icon-item cursor-pointer hover:bg-[#ddd] w-[20px] text-center ${
-                selectedIcon === name ? 'bg-[#1890ff] text-white' : ''
-              }`}
-              onClick={() => handleIconClick(name)}
-              title={name}
-            >
-              <Icon style={{ fontSize: '18px' }} />
-            </div>
-          );
-        })}
+        {paginatedIcons.map(({ name, Icon }) => (
+          <button
+            type="button"
+            key={name}
+            className={`icon-item cursor-pointer hover:bg-[#ddd] w-[20px] text-center border-0 bg-transparent p-0 ${
+              selectedIcon === name ? 'bg-[#1890ff] text-white' : ''
+            }`}
+            onClick={() => handleIconClick(name)}
+            title={name}
+          >
+            <Icon style={{ fontSize: '18px' }} />
+          </button>
+        ))}
       </div>
       {/* 分页组件 */}
       <Pagination
@@ -299,33 +307,3 @@ function OptimizedIconPanel(props: IconPanelProps) {
 }
 
 export default OptimizedIconPanel;
-
-/**
- * 选择图标时的回调属性。
- */
-export interface IconPanelProps {
-  /**
-   * 用户点击某个图标后触发。
-   * @param icon - 图标组件名，例如 `'SettingOutlined'`，可直接写入表单 `icon` 字段
-   */
-  onSelect: (icon: string) => void;
-}
-
-/**
- * 获取面板中可用的图标名称列表。
- *
- * @returns 图标名称字符串数组
- */
-export const getAvailableIcons = () => {
-  return Object.keys(iconMap);
-};
-
-/**
- * 根据图标名称获取对应的 React 图标组件。
- *
- * @param name - 图标名称，例如 `'UserOutlined'`
- * @returns 图标组件；名称不存在时为 `undefined`
- */
-export const getIconByName = (name: string) => {
-  return iconMap[name as keyof typeof iconMap];
-};

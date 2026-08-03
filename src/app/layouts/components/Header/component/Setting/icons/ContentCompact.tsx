@@ -4,7 +4,7 @@
 import { theme } from 'antd';
 
 const { useToken } = theme;
-export default () => {
+export default function ContentCompact() {
   const { token } = useToken();
   return (
     <svg className="custom-radio-image" fill="none" height="66" width="104" xmlns="http://www.w3.org/2000/svg">
@@ -17,31 +17,14 @@ export default () => {
           rx="4"
           stroke="null"
           width="104"
-          x="0.13514"
-          y="0.13514"
+          x="0.14"
+          y="0.14"
         />
-        <rect
-          id="svg_8"
-          fill={token.colorPrimary}
-          height="9.07027"
-          stroke="null"
-          width="104.07934"
-          x="-0.07419"
-          y="-0.05773"
-        />
-        <rect
-          id="svg_3"
-          fill="#e5e5e5"
-          height="2.789"
-          rx="1.395"
-          stroke="null"
-          width="7.52486"
-          x="15.58168"
-          y="3.20832"
-        />
+        <rect id="svg_8" fill={token.colorPrimary} height="9.07" stroke="null" width="104.08" x="-0.07" y="-0.06" />
+        <rect id="svg_3" fill="#e5e5e5" height="2.789" rx="1.395" stroke="null" width="7.52" x="15.58" y="3.21" />
         <path
           id="svg_12"
-          d="m98.19822,2.872c0,-0.54338 0.45662,-1 1,-1l1.925,0c0.54338,0 1,0.45662 1,1l0,2.4c0,0.54338 -0.45662,1 -1,1l-1.925,0c-0.54338,0 -1,-0.45662 -1,-1l0,-2.4z"
+          d="m98.2,2.872c0,-0.54 0.46,-1 1,-1l1.925,0c0.54,0 1,0.46 1,1l0,2.4c0,0.54 -0.46,1 -1,1l-1.925,0c-0.54,0 -1,-0.46 -1,-1l0,-2.4z"
           fill="#ffffff"
           opacity="undefined"
           stroke="null"
@@ -50,16 +33,16 @@ export default () => {
           id="svg_13"
           fill="currentColor"
           fillOpacity="0.08"
-          height="21.51892"
+          height="21.52"
           rx="2"
           stroke="null"
-          width="41.98275"
-          x="45.37589"
-          y="13.53192"
+          width="41.98"
+          x="45.38"
+          y="13.53"
         />
         <path
           id="svg_14"
-          d="m16.4123,15.53192c0,-1.08676 0.74096,-2 1.62271,-2l21.74653,0c0.88175,0 1.62271,0.91324 1.62271,2l0,17.24865c0,1.08676 -0.74096,2 -1.62271,2l-21.74653,0c-0.88175,0 -1.62271,-0.91324 -1.62271,-2l0,-17.24865z"
+          d="m16.41,15.53c0,-1.09 0.74,-2 1.62,-2l21.75,0c0.88,0 1.62,0.91 1.62,2l0,17.25c0,1.09 -0.74,2 -1.62,2l-21.75,0c-0.88,0 -1.62,-0.91 -1.62,-2l0,-17.25z"
           fill="currentColor"
           fillOpacity="0.08"
           opacity="undefined"
@@ -69,45 +52,18 @@ export default () => {
           id="svg_15"
           fill="currentColor"
           fillOpacity="0.08"
-          height="21.65405"
+          height="21.65"
           rx="2"
           stroke="null"
-          width="71.10636"
-          x="16.54743"
-          y="39.34689"
+          width="71.11"
+          x="16.55"
+          y="39.35"
         />
-        <rect
-          id="svg_21"
-          fill="#e5e5e5"
-          height="2.789"
-          rx="1.395"
-          stroke="null"
-          width="7.52486"
-          x="28.14924"
-          y="3.07319"
-        />
-        <rect
-          id="svg_22"
-          fill="#e5e5e5"
-          height="2.789"
-          rx="1.395"
-          stroke="null"
-          width="7.52486"
-          x="41.25735"
-          y="3.20832"
-        />
-        <rect
-          id="svg_23"
-          fill="#e5e5e5"
-          height="2.789"
-          rx="1.395"
-          stroke="null"
-          width="7.52486"
-          x="54.23033"
-          y="3.07319"
-        />
-        <rect id="svg_4" fill="#ffffff" height="7.13843" rx="2" stroke="null" width="7.78397" x="1.5327" y="0.881" />
+        <rect id="svg_21" fill="#e5e5e5" height="2.789" rx="1.395" stroke="null" width="7.52" x="28.15" y="3.07" />
+        <rect id="svg_22" fill="#e5e5e5" height="2.789" rx="1.395" stroke="null" width="7.52" x="41.26" y="3.21" />
+        <rect id="svg_23" fill="#e5e5e5" height="2.789" rx="1.395" stroke="null" width="7.52" x="54.23" y="3.07" />
+        <rect id="svg_4" fill="#ffffff" height="7.14" rx="2" stroke="null" width="7.78" x="1.53" y="0.881" />
       </g>
     </svg>
   );
-};
+}

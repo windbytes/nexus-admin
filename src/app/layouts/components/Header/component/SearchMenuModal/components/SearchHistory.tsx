@@ -28,7 +28,7 @@ const SearchHistory: React.FC<Props> = ({ items, selectedIndex, onSelect, onRemo
         <div
           key={item.id}
           data-index={index}
-          className="cursor-pointer px-4 py-2 flex items-center justify-between transition-all duration-200"
+          className="px-4 py-2 flex items-center justify-between transition-all duration-200"
           style={
             index === selectedIndex
               ? {
@@ -52,23 +52,27 @@ const SearchHistory: React.FC<Props> = ({ items, selectedIndex, onSelect, onRemo
               e.currentTarget.style.backgroundColor = '';
             }
           }}
-          onClick={() => onSelect(item)}
         >
-          <div className="flex items-center flex-1">
+          <button
+            type="button"
+            className="flex items-center flex-1 min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left"
+            onClick={() => onSelect(item)}
+          >
             <ClockCircleOutlined className="text-gray-400 mr-2" />
             <div>
               <div className="font-medium text-gray-900">{item.name}</div>
               <div className="text-xs text-gray-500">{item.path}</div>
               <div className="text-xs text-gray-400">{formatTime(item.timestamp)}</div>
             </div>
-          </div>
-          <DeleteOutlined
-            className="text-red-500! text-lg! cursor-pointer!"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(item.id);
-            }}
-          />
+          </button>
+          <button
+            type="button"
+            aria-label={`删除历史 ${item.name}`}
+            className="cursor-pointer border-0 bg-transparent p-0 text-red-500 text-lg"
+            onClick={() => onRemove(item.id)}
+          >
+            <DeleteOutlined />
+          </button>
         </div>
       ))}
     </div>

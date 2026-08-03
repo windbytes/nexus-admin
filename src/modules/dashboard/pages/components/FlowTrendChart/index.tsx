@@ -21,6 +21,8 @@ export const FlowTrendChart: React.FC = () => {
       return;
     }
 
+    let rafId = 0;
+
     const checkAndInitChart = () => {
       if (!chartRef.current) {
         return;
@@ -28,7 +30,7 @@ export const FlowTrendChart: React.FC = () => {
 
       const { clientWidth, clientHeight } = chartRef.current;
       if (clientWidth === 0 || clientHeight === 0) {
-        requestAnimationFrame(checkAndInitChart);
+        rafId = requestAnimationFrame(checkAndInitChart);
         return;
       }
 
@@ -42,7 +44,7 @@ export const FlowTrendChart: React.FC = () => {
       chartInstance.current.setOption(option);
     };
 
-    requestAnimationFrame(checkAndInitChart);
+    rafId = requestAnimationFrame(checkAndInitChart);
 
     resizeObserverRef.current = new ResizeObserver(() => {
       chartInstance.current?.resize();
@@ -59,6 +61,7 @@ export const FlowTrendChart: React.FC = () => {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
       if (resizeObserverRef.current) {
         resizeObserverRef.current.disconnect();

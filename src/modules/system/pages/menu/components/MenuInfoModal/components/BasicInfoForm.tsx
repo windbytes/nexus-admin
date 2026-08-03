@@ -3,6 +3,8 @@ import { Col, Form, Input, Radio, Row, TreeSelect } from 'antd';
 import type { RefObject } from 'react';
 import { MENU_TYPE, type MenuType } from '../../../constants';
 
+const TREE_SELECT_STYLES = { popup: { root: { maxHeight: 400, overflow: 'auto' } } };
+
 interface BasicInfoFormProps {
   /** 当前选中的菜单类型，用于切换标签文案与字段显隐 */
   menuType: MenuType;
@@ -26,8 +28,6 @@ interface BasicInfoFormProps {
  * @returns 表单字段行
  */
 function BasicInfoForm({ menuType, nameRef, directoryData, isFetching, onMenuTypeChange }: BasicInfoFormProps) {
-  const TREE_SELECT_STYLES = { popup: { root: { maxHeight: 400, overflow: 'auto' } } };
-
   return (
     <Row gutter={16}>
       <Form.Item name="id" hidden>

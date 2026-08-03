@@ -5,7 +5,7 @@ import { theme } from 'antd';
 
 const { useToken } = theme;
 
-export default () => {
+export default function SidebarNav() {
   const { token } = useToken();
   return (
     <svg className="custom-radio-image" fill="none" height="66" width="104" xmlns="http://www.w3.org/2000/svg">
@@ -13,7 +13,7 @@ export default () => {
         <rect id="svg_1" fill="currentColor" fillOpacity="0.02" height="66" rx="4" stroke="null" width="104" />
         <path
           id="svg_2"
-          d="m-3.37838,3.61916a4.4919,4.02457 0 0 1 4.4919,-4.02457l26.35848,0l0,66.40541l-26.35848,0a4.4919,4.02457 0 0 1 -4.4919,-4.02457l0,-58.35627z"
+          d="m-3.38,3.62a4.49,4.02 0 0 1 4.49,-4.02l26.36,0l0,66.41l-26.36,0a4.49,4.02 0 0 1 -4.49,-4.02l0,-58.36z"
           fill={token.colorPrimary}
           stroke="null"
         />
@@ -21,7 +21,7 @@ export default () => {
         <rect id="svg_4" fill="#ffffff" height="9.706" rx="2" width="9.811" x="8.83" y="5.881" />
         <path
           id="svg_5"
-          d="m4.906,35.833c0,-0.75801 0.63699,-1.395 1.395,-1.395l14.87,0c0.75801,0 1.395,0.63699 1.395,1.395l0,-0.001c0,0.75801 -0.63699,1.395 -1.395,1.395l-14.87,0c-0.75801,0 -1.395,-0.63699 -1.395,-1.395l0,0.001z"
+          d="m4.906,35.833c0,-0.76 0.64,-1.395 1.395,-1.395l14.87,0c0.76,0 1.395,0.64 1.395,1.395l0,-0.001c0,0.76 -0.64,1.395 -1.395,1.395l-14.87,0c-0.76,0 -1.395,-0.64 -1.395,-1.395l0,0.001z"
           fill="#ffffff"
           opacity="undefined"
         />
@@ -31,51 +31,51 @@ export default () => {
           id="svg_8"
           fill="currentColor"
           fillOpacity="0.08"
-          height="9.07027"
+          height="9.07"
           rx="2"
           stroke="null"
-          width="73.53879"
-          x="28.97986"
-          y="1.42876"
+          width="73.54"
+          x="28.98"
+          y="1.43"
         />
-        <rect id="svg_9" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="32.039" y="3.89903" />
-        <rect id="svg_10" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="80.75054" y="3.62876" />
-        <rect id="svg_11" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="87.58249" y="3.49362" />
-        <rect id="svg_12" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="94.6847" y="3.62876" />
+        <rect id="svg_9" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="32.039" y="3.9" />
+        <rect id="svg_10" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="80.75" y="3.63" />
+        <rect id="svg_11" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="87.58" y="3.49" />
+        <rect id="svg_12" fill="#b2b2b2" height="4.4" rx="1" stroke="null" width="3.925" x="94.68" y="3.63" />
         <rect
           id="svg_13"
           fill="currentColor"
           fillOpacity="0.08"
-          height="21.51892"
+          height="21.52"
           rx="2"
           stroke="null"
-          width="45.63141"
-          x="56.05157"
+          width="45.63"
+          x="56.05"
           y="14.613"
         />
         <rect
           id="svg_14"
           fill="currentColor"
           fillOpacity="0.08"
-          height="20.97838"
+          height="20.98"
           rx="2"
           stroke="null"
-          width="22.82978"
-          x="29.38527"
+          width="22.83"
+          x="29.39"
           y="14.613"
         />
         <rect
           id="svg_15"
           fill="currentColor"
           fillOpacity="0.08"
-          height="21.65405"
+          height="21.65"
           rx="2"
           stroke="null"
-          width="72.45771"
-          x="28.97986"
-          y="39.48203"
+          width="72.46"
+          x="28.98"
+          y="39.48"
         />
       </g>
     </svg>
   );
-};
+}

@@ -115,43 +115,43 @@ export function useColumnSettings<T>(
     });
 
     const processColumns = (cols: ProColumnType<T>[]): ProColumnType<T>[] => {
-      return cols
-        .map((col) => {
-          const key = getColumnKey(col);
-          if (!key) {
-            return col;
-          }
+      return cols.flatMap((col) => {
+        const key = getColumnKey(col);
+        if (!key) {
+          return [col];
+        }
 
-          const setting = settingsMap.get(key);
-          if (!setting) {
-            return col;
-          }
+        const setting = settingsMap.get(key);
+        if (!setting) {
+          return [col];
+        }
 
-          if (!setting.show) {
-            return null;
-          }
+        if (!setting.show) {
+          return [];
+        }
 
-          let children = col.children;
-          if (children && children.length > 0) {
-            children = processColumns(children);
-          }
+        let children = col.children;
+        if (children && children.length > 0) {
+          children = processColumns(children);
+        }
 
-          return {
+        return [
+          {
             ...col,
             fixed: setting.fixed || col.fixed,
             children,
-          };
-        })
-        .filter(Boolean) as ProColumnType<T>[];
+          },
+        ];
+      });
     };
 
-    const sortedSettings = [...columnSettings].sort((a, b) => a.order - b.order);
+    const sortedSettings = columnSettings.toSorted((a, b) => a.order - b.order);
     const orderMap = new Map<string, number>();
     sortedSettings.forEach((setting, index) => {
       orderMap.set(setting.key, index);
     });
 
-    const sorted = [...columns].sort((a, b) => {
+    const sorted = columns.toSorted((a, b) => {
       const aKey = getColumnKey(a);
       const bKey = getColumnKey(b);
       const aOrder = aKey ? (orderMap.get(aKey) ?? 999) : 999;

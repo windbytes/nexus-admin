@@ -39,9 +39,10 @@ const MessageList: React.FC<MessageListProps> = (props) => {
     <div className={styles['message-list-container']}>
       <div className={styles['message-list']}>
         {data.map((item, index) => (
-          <div
+          <button
+            type="button"
             key={item.id}
-            className={classNames(styles['message-item'], item.status && 'opacity-50')}
+            className={classNames(styles['message-item'], item.status && 'opacity-50', 'w-full text-left')}
             onClick={() => onItemClick(item, index)}
           >
             <div className={styles['message-item-content']}>
@@ -70,7 +71,7 @@ const MessageList: React.FC<MessageListProps> = (props) => {
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       <div className={styles['footer']}>

@@ -19,69 +19,67 @@ export interface SettingProps {
   setOpen: (open: boolean) => void;
 }
 
+const segmentedItems: SegmentedProps<string>['options'] = [
+  {
+    label: '外观',
+    value: 'theme',
+  },
+  {
+    label: '布局',
+    value: 'layout',
+  },
+  {
+    label: '快捷键',
+    value: 'shortcut',
+  },
+  {
+    label: '通用',
+    value: 'common',
+  },
+];
+
+const tabsItems: TabsProps['items'] = [
+  {
+    key: 'theme',
+    label: '',
+    children: <Theme />,
+  },
+  {
+    key: 'layout',
+    label: '',
+    children: <Layout />,
+  },
+  {
+    key: 'shortcut',
+    label: '',
+    children: (
+      <Block title="全局">
+        <Shortcut />
+      </Block>
+    ),
+  },
+  {
+    key: 'common',
+    label: '',
+    children: (
+      <>
+        <Block title="通用">
+          <General />
+        </Block>
+        <Block title="动画">
+          <Animation />
+        </Block>
+      </>
+    ),
+  },
+];
+
 /* 系统配置界面 */
 const Setting: React.FC<SettingProps> = ({ open, setOpen }) => {
   // 从全局状态库中获取数据
   const resetPreferences = usePreferencesStore((state) => state.resetPreferences);
   const [selectedKey, setSelectedKey] = useState<string>('theme');
   const { modal, message } = App.useApp();
-
-  // 分段器的值
-  const segmentedItems: SegmentedProps<string>['options'] = [
-    {
-      label: '外观',
-      value: 'theme',
-    },
-    {
-      label: '布局',
-      value: 'layout',
-    },
-    {
-      label: '快捷键',
-      value: 'shortcut',
-    },
-    {
-      label: '通用',
-      value: 'common',
-    },
-  ];
-
-  // Tabs的选项
-  const tabsItems: TabsProps['items'] = [
-    {
-      key: 'theme',
-      label: '',
-      children: <Theme />,
-    },
-    {
-      key: 'layout',
-      label: '',
-      children: <Layout />,
-    },
-    {
-      key: 'shortcut',
-      label: '',
-      children: (
-        <Block title="全局">
-          <Shortcut />
-        </Block>
-      ),
-    },
-    {
-      key: 'common',
-      label: '',
-      children: (
-        <>
-          <Block title="通用">
-            <General />
-          </Block>
-          <Block title="动画">
-            <Animation />
-          </Block>
-        </>
-      ),
-    },
-  ];
 
   /**
    * 重置所有偏好设置

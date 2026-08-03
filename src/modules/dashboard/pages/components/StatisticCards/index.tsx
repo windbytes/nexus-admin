@@ -39,7 +39,7 @@ function StatisticCard({ item, index }: { item: StatisticData; index: number }) 
       <Card
         hoverable
         variant="outlined"
-        className="h-full border-0 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden"
+        className="h-full border-0 shadow-sm hover:shadow-xl transition-shadow duration-500 relative overflow-hidden"
         styles={{
           body: {
             padding: '16px',
@@ -119,7 +119,7 @@ export const StatisticCards: React.FC = () => {
   return (
     <Row gutter={[8, 8]}>
       {statistics.map((item, index) => (
-        <Col xs={24} sm={12} lg={6} key={`stat-${item.title}-${index}`}>
+        <Col xs={24} sm={12} lg={6} key={item.title}>
           <StatisticCard item={item} index={index} />
         </Col>
       ))}

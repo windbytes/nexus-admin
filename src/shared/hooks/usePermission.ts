@@ -23,8 +23,9 @@ export function usePermission(requiredPermissions: string[], mode: 'AND' | 'OR' 
   if (buttonPermissions.length === 1 && buttonPermissions[0] === '*') {
     return true;
   }
+  const permissionSet = new Set(buttonPermissions);
   if (mode === 'AND') {
-    return requiredPermissions.every((perm) => buttonPermissions.includes(perm));
+    return requiredPermissions.every((perm) => permissionSet.has(perm));
   }
-  return requiredPermissions.some((perm) => buttonPermissions.includes(perm));
+  return requiredPermissions.some((perm) => permissionSet.has(perm));
 }

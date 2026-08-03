@@ -14,6 +14,38 @@ interface SearchFormProps {
   loading: boolean;
 }
 
+const ALL_FIELDS = [
+  {
+    name: 'apiName',
+    label: '接口名称',
+    component: <Input placeholder="请输入接口名称" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'path',
+    label: '接口路径',
+    component: <Input placeholder="请输入接口路径" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'method',
+    label: '请求方法',
+    component: <Select allowClear placeholder="请选择请求方法" options={METHOD_OPTIONS} />,
+  },
+  {
+    name: 'isPublic',
+    label: '是否公开',
+    component: (
+      <Select
+        allowClear
+        placeholder="请选择"
+        options={[
+          { value: true, label: '白名单（免认证）' },
+          { value: false, label: '需鉴权' },
+        ]}
+      />
+    ),
+  },
+];
+
 /**
  * 接口注册表顶部搜索表单。
  *
@@ -27,38 +59,6 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
     form.resetFields();
     onSearch(form.getFieldsValue());
   }
-
-  const allFields = [
-    {
-      name: 'apiName',
-      label: '接口名称',
-      component: <Input placeholder="请输入接口名称" allowClear autoComplete="off" />,
-    },
-    {
-      name: 'path',
-      label: '接口路径',
-      component: <Input placeholder="请输入接口路径" allowClear autoComplete="off" />,
-    },
-    {
-      name: 'method',
-      label: '请求方法',
-      component: <Select allowClear placeholder="请选择请求方法" options={METHOD_OPTIONS} />,
-    },
-    {
-      name: 'isPublic',
-      label: '是否公开',
-      component: (
-        <Select
-          allowClear
-          placeholder="请选择"
-          options={[
-            { value: true, label: '白名单（免认证）' },
-            { value: false, label: '需鉴权' },
-          ]}
-        />
-      ),
-    },
-  ];
 
   return (
     <ConfigProvider
@@ -78,7 +78,7 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
           wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {allFields.map((field) => (
+            {ALL_FIELDS.map((field) => (
               <Form.Item key={field.name} name={field.name} label={field.label} colon={false}>
                 {field.component}
               </Form.Item>

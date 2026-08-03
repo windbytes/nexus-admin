@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import MessageList, { type MessageListType } from './MessageList';
 import styles from './message-box.module.css';
 
+function readMessage(data: MessageListType) {
+  console.log('标记消息已读', data);
+}
+
 /**
  * 通知模块
  */
@@ -37,10 +41,6 @@ function Notify() {
 
     return () => window.clearTimeout(timerId);
   }, []);
-
-  const readMessage = (data: MessageListType) => {
-    console.log('标记消息已读', data);
-  };
 
   const tabList: TabsProps['items'] = [
     {

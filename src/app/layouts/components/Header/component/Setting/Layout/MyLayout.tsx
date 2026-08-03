@@ -56,9 +56,10 @@ const MyLayout: React.FC = () => {
   return (
     <div className="flex flex-wrap w-full gap-5">
       {PRESET.map((item) => (
-        <div
+        <button
+          type="button"
           key={item.name}
-          className="flex flex-col cursor-pointer w-[100px]"
+          className="flex flex-col cursor-pointer w-[100px] border-0 bg-transparent p-0 text-left"
           onClick={() => {
             updatePreferences('app', 'layout', item.type);
           }}
@@ -81,7 +82,7 @@ const MyLayout: React.FC = () => {
               </Tooltip>
             )}
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

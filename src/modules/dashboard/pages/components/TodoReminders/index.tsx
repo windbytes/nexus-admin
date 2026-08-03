@@ -4,77 +4,77 @@ import { Tag } from 'antd';
 import type React from 'react';
 import { fetchTodoRemindersData } from '@/modules/dashboard/api';
 
+function getIcon(type: string) {
+  switch (type) {
+    case 'warning':
+      return <WarningOutlined className="text-orange-500" />;
+    case 'error':
+      return <ExclamationCircleOutlined className="text-red-500" />;
+    case 'info':
+      return <InfoCircleOutlined className="text-blue-500" />;
+    default:
+      return <InfoCircleOutlined className="text-gray-500" />;
+  }
+}
+
+function getPriorityColor(priority: string) {
+  switch (priority) {
+    case 'high':
+      return 'red';
+    case 'medium':
+      return 'orange';
+    case 'low':
+      return 'blue';
+    default:
+      return 'default';
+  }
+}
+
+function getBackgroundStyle(type: string, priority: string) {
+  if (priority === 'high') {
+    switch (type) {
+      case 'error':
+        return 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 hover:border-red-300';
+      case 'warning':
+        return 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200 hover:border-orange-300';
+      case 'info':
+        return 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:border-blue-300';
+      default:
+        return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300';
+    }
+  }
+
+  if (priority === 'medium') {
+    switch (type) {
+      case 'error':
+        return 'bg-gradient-to-r from-red-25 to-red-75 border-red-150 hover:border-red-250';
+      case 'warning':
+        return 'bg-gradient-to-r from-orange-25 to-orange-75 border-orange-150 hover:border-orange-250';
+      case 'info':
+        return 'bg-gradient-to-r from-blue-25 to-blue-75 border-blue-150 hover:border-blue-250';
+      default:
+        return 'bg-gradient-to-r from-gray-25 to-gray-75 border-gray-150 hover:border-gray-250';
+    }
+  }
+
+  switch (type) {
+    case 'error':
+      return 'bg-gradient-to-r from-red-25 to-red-50 border-red-100 hover:border-red-200';
+    case 'warning':
+      return 'bg-gradient-to-r from-orange-25 to-orange-50 border-orange-100 hover:border-orange-200';
+    case 'info':
+      return 'bg-gradient-to-r from-blue-25 to-blue-50 border-blue-100 hover:border-blue-200';
+    default:
+      return 'bg-gradient-to-r from-gray-25 to-gray-50 border-gray-100 hover:border-gray-200';
+  }
+}
+
 export const TodoReminders: React.FC = () => {
   const { data: todoReminders, isFetching } = useQuery({
     queryKey: ['todoRemindersData'],
     queryFn: fetchTodoRemindersData,
     staleTime: 5 * 60 * 1000,
   });
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'warning':
-        return <WarningOutlined className="text-orange-500" />;
-      case 'error':
-        return <ExclamationCircleOutlined className="text-red-500" />;
-      case 'info':
-        return <InfoCircleOutlined className="text-blue-500" />;
-      default:
-        return <InfoCircleOutlined className="text-gray-500" />;
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'red';
-      case 'medium':
-        return 'orange';
-      case 'low':
-        return 'blue';
-      default:
-        return 'default';
-    }
-  };
-
-  const getBackgroundStyle = (type: string, priority: string) => {
-    if (priority === 'high') {
-      switch (type) {
-        case 'error':
-          return 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 hover:border-red-300';
-        case 'warning':
-          return 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200 hover:border-orange-300';
-        case 'info':
-          return 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:border-blue-300';
-        default:
-          return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:border-gray-300';
-      }
-    }
-
-    if (priority === 'medium') {
-      switch (type) {
-        case 'error':
-          return 'bg-gradient-to-r from-red-25 to-red-75 border-red-150 hover:border-red-250';
-        case 'warning':
-          return 'bg-gradient-to-r from-orange-25 to-orange-75 border-orange-150 hover:border-orange-250';
-        case 'info':
-          return 'bg-gradient-to-r from-blue-25 to-blue-75 border-blue-150 hover:border-blue-250';
-        default:
-          return 'bg-gradient-to-r from-gray-25 to-gray-75 border-gray-150 hover:border-gray-250';
-      }
-    }
-
-    switch (type) {
-      case 'error':
-        return 'bg-gradient-to-r from-red-25 to-red-50 border-red-100 hover:border-red-200';
-      case 'warning':
-        return 'bg-gradient-to-r from-orange-25 to-orange-50 border-orange-100 hover:border-orange-200';
-      case 'info':
-        return 'bg-gradient-to-r from-blue-25 to-blue-50 border-blue-100 hover:border-blue-200';
-      default:
-        return 'bg-gradient-to-r from-gray-25 to-gray-50 border-gray-100 hover:border-gray-200';
-    }
-  };
 
   if (isFetching) {
     return (

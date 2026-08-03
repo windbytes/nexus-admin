@@ -14,6 +14,70 @@ interface SearchFormProps {
   loading: boolean;
 }
 
+const ALL_FIELDS = [
+  {
+    name: 'name',
+    label: '菜单名称',
+    component: <Input placeholder="请输入菜单名称" allowClear autoComplete="off" />,
+  },
+  {
+    name: 'status',
+    label: '状态',
+    component: (
+      <Select
+        allowClear
+        placeholder="请选择状态"
+        className="rounded-md"
+        options={[
+          { value: true, label: '启用' },
+          { value: false, label: '停用' },
+        ]}
+      />
+    ),
+  },
+  {
+    name: 'menuType',
+    label: '菜单类型',
+    component: (
+      <Select
+        allowClear
+        placeholder="请选择菜单类型"
+        options={[
+          { value: 0, label: '目录' },
+          { value: 1, label: '子菜单' },
+          { value: 2, label: '子路由' },
+          { value: 3, label: '权限按钮' },
+        ]}
+      />
+    ),
+  },
+];
+
+function ActionButtons({
+  className = '',
+  loading,
+  resetLabel,
+  searchLabel,
+  onReset,
+}: {
+  className?: string;
+  loading: boolean;
+  resetLabel: string;
+  searchLabel: string;
+  onReset: () => void;
+}) {
+  return (
+    <div className={`flex gap-3 justify-end ${className}`}>
+      <Button type="default" icon={<RedoOutlined />} onClick={onReset}>
+        {resetLabel}
+      </Button>
+      <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
+        {searchLabel}
+      </Button>
+    </div>
+  );
+}
+
 /**
  * 菜单列表顶部搜索表单（名称 / 状态 / 类型）。
  *
@@ -30,58 +94,6 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
   function handleReset() {
     form.resetFields();
     onSearch(form.getFieldsValue());
-  }
-
-  const allFields = [
-    {
-      name: 'name',
-      label: '菜单名称',
-      component: <Input placeholder="请输入菜单名称" allowClear autoComplete="off" />,
-    },
-    {
-      name: 'status',
-      label: '状态',
-      component: (
-        <Select
-          allowClear
-          placeholder="请选择状态"
-          className="rounded-md"
-          options={[
-            { value: true, label: '启用' },
-            { value: false, label: '停用' },
-          ]}
-        />
-      ),
-    },
-    {
-      name: 'menuType',
-      label: '菜单类型',
-      component: (
-        <Select
-          allowClear
-          placeholder="请选择菜单类型"
-          options={[
-            { value: 0, label: '目录' },
-            { value: 1, label: '子菜单' },
-            { value: 2, label: '子路由' },
-            { value: 3, label: '权限按钮' },
-          ]}
-        />
-      ),
-    },
-  ];
-
-  function ActionButtons({ className = '' }: { className?: string }) {
-    return (
-      <div className={`flex gap-3 justify-end ${className}`}>
-        <Button type="default" icon={<RedoOutlined />} onClick={handleReset}>
-          {t('common.operation.reset')}
-        </Button>
-        <Button type="primary" htmlType="submit" loading={loading} icon={<SearchOutlined />}>
-          {t('common.operation.search')}
-        </Button>
-      </div>
-    );
   }
 
   return (
@@ -102,12 +114,18 @@ function SearchForm({ onSearch, loading }: SearchFormProps) {
           wrapperCol={SEARCH_FORM_GRID_WRAPPER_COL}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {allFields.map((field) => (
+            {ALL_FIELDS.map((field) => (
               <Form.Item key={field.name} name={field.name} label={field.label} colon={false}>
                 {field.component}
               </Form.Item>
             ))}
-            <ActionButtons className="items-end" />
+            <ActionButtons
+              className="items-end"
+              loading={loading}
+              resetLabel={t('common.operation.reset')}
+              searchLabel={t('common.operation.search')}
+              onReset={handleReset}
+            />
           </div>
         </Form>
       </Card>

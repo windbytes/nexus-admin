@@ -22,6 +22,13 @@ import useGlobalUIStore from '@/shared/stores/global-ui.store';
 
 const Setting = lazy(() => import('./component/Setting'));
 
+const GITHUB_REPO_URL = 'https://github.com/windbytes/syndra-admin';
+
+/** 跳转到 GitHub 仓库 */
+function routeGitHub() {
+  window.open(GITHUB_REPO_URL, '_blank', 'noopener,noreferrer');
+}
+
 /**
  * 顶部布局内容
  *
@@ -63,11 +70,6 @@ function Header() {
   const { globalSearch, lockScreen, languageToggle, fullscreen, sidebarToggle, notification, themeToggle } =
     widgetConfig;
   const { t } = useTranslation();
-
-  /** 跳转到 github */
-  const routeGitHub = () => {
-    window.open('https://github.com/windbytes/syndra-admin', '_blank');
-  };
 
   /** 开启锁屏 */
   const handleLockScreen = () => {

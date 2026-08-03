@@ -1,9 +1,11 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Divider, Space } from 'antd';
-import type { ToolbarProps } from '../types';
+import type { ColumnSetting, ToolbarProps } from '../types';
 import { ColumnSettingComponent } from './ColumnSetting';
 import { DensitySetting } from './DensitySetting';
 import './Toolbar.css';
+
+const EMPTY_COLUMN_SETTINGS: ColumnSetting[] = [];
 
 /**
  * 表格工具栏：左侧标题/操作按钮，右侧刷新、密度、列设置。
@@ -21,7 +23,7 @@ export function Toolbar({
   density = 'middle',
   onDensityChange,
   showColumnSetting = true,
-  columnSettings = [],
+  columnSettings = EMPTY_COLUMN_SETTINGS,
   onColumnSettingChange,
   onReset,
   extra,

@@ -181,7 +181,7 @@ const TabBar: React.FC = () => {
         break;
       case 'openInNewWindow':
         if (currentTab?.path) {
-          window.open(currentTab.path, '_blank');
+          window.open(currentTab.path, '_blank', 'noopener,noreferrer');
         }
         break;
       case 'closeLeft':

@@ -6,6 +6,36 @@ import { useEffect, useState } from 'react';
 import { announcementService, type AnnouncementItem } from '@/shared/api/system/announcement';
 import webSocketClient, { type AnnouncementMessagePayload } from '@/shared/utils/webscoketClient';
 
+function getTypeColor(type: string) {
+  switch (type) {
+    case 'success':
+      return 'blue';
+    case 'info':
+      return 'green';
+    case 'warning':
+      return 'orange';
+    case 'error':
+      return 'red';
+    default:
+      return 'default';
+  }
+}
+
+function getTypeText(type: string) {
+  switch (type) {
+    case 'success':
+      return '成功';
+    case 'info':
+      return '公告';
+    case 'warning':
+      return '通知';
+    case 'error':
+      return '紧急';
+    default:
+      return '其他';
+  }
+}
+
 export const Announcements: React.FC = () => {
   const [liveAnnouncements, setLiveAnnouncements] = useState<AnnouncementItem[]>([]);
 
@@ -26,36 +56,6 @@ export const Announcements: React.FC = () => {
   });
 
   const mergedAnnouncements = mergeAnnouncements(liveAnnouncements, announcements || []).slice(0, 4);
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'blue';
-      case 'info':
-        return 'green';
-      case 'warning':
-        return 'orange';
-      case 'error':
-        return 'red';
-      default:
-        return 'default';
-    }
-  };
-
-  const getTypeText = (type: string) => {
-    switch (type) {
-      case 'success':
-        return '成功';
-      case 'info':
-        return '公告';
-      case 'warning':
-        return '通知';
-      case 'error':
-        return '紧急';
-      default:
-        return '其他';
-    }
-  };
 
   if (isFetching) {
     return (

@@ -3,11 +3,18 @@
  * @description 展示 permType=0 分组与 permType=2 接口权限点；支持分组增删改，点选接口权限点过滤右侧注册表。
  */
 
-import { ApiOutlined, DeleteOutlined, EditOutlined, FolderOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FolderOutlined,
+  MoreOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { App, Button, Card, Dropdown, Empty, Form, Input, InputNumber, Spin, Switch, Tree, Typography } from 'antd';
 import type { TreeDataNode, TreeProps } from 'antd';
-import { type Key, useMemo, useState } from 'react';
+import { App, Button, Card, Dropdown, Empty, Form, Input, InputNumber, Spin, Switch, Tree, Typography } from 'antd';
+import { type Key, useCallback, useMemo, useRef, useState } from 'react';
 import { permissionService } from '@/modules/system/api/permission';
 import type { PermissionModel, PermissionSaveParams } from '@/shared/api/system/permission/type';
 import DragModal from '@/shared/components/modal/DragModal';
@@ -15,6 +22,26 @@ import { useApiPermissions } from '../hooks/useApiPermissions';
 
 /** 权限编码规则：{domain}:{resource}:{action} */
 const PERM_CODE_PATTERN = /^[a-z][a-z0-9]*(:[a-z][a-z0-9-]*){1,3}$/;
+
+/**
+ * 在权限点树中查找节点：返回接口权限点 ID，分组返回 null。
+ * @param nodes - 权限点节点
+ * @param key - 节点 key
+ */
+function findPermIdByKey(nodes: PermissionModel[], key: string): string | null {
+  for (const node of nodes) {
+    if (node.id === key) {
+      return node.permType === 2 ? node.id : null;
+    }
+    if (node.children?.length) {
+      const found = findPermIdByKey(node.children, key);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
 
 export interface PermissionGroupTreeProps {
   /** 权限点树原始数据 */
@@ -43,15 +70,16 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
   const [form] = Form.useForm();
   const [formOpen, setFormOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<PermissionModel | null>(null);
-  const [parentGroup, setParentGroup] = useState<PermissionModel | null>(null);
+  const parentGroupRef = useRef<PermissionModel | null>(null);
 
   const saveMutation = useMutation({
-    mutationFn: (params: PermissionSaveParams) => (params.id ? permissionService.update(params) : permissionService.add(params)),
+    mutationFn: (params: PermissionSaveParams) =>
+      params.id ? permissionService.update(params) : permissionService.add(params),
     onSuccess: () => {
       message.success('保存分组成功');
       setFormOpen(false);
       setEditingGroup(null);
-      setParentGroup(null);
+      parentGroupRef.current = null;
       form.resetFields();
       onTreeChanged();
     },
@@ -75,42 +103,51 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
    * 打开新增分组弹窗。
    * @param parent - 父分组；空表示根级
    */
-  function openAdd(parent: PermissionModel | null) {
-    setEditingGroup(null);
-    setParentGroup(parent);
-    form.setFieldsValue({ parentId: parent?.id ?? '0', sort: 0, status: true });
-    setFormOpen(true);
-  }
+  const openAdd = useCallback(
+    (parent: PermissionModel | null) => {
+      setEditingGroup(null);
+      parentGroupRef.current = parent;
+      form.setFieldsValue({ parentId: parent?.id ?? '0', sort: 0, status: true });
+      setFormOpen(true);
+    },
+    [form]
+  );
 
   /**
    * 打开编辑分组弹窗。
    * @param group - 目标分组
    */
-  function openEdit(group: PermissionModel) {
-    setEditingGroup(group);
-    setParentGroup(null);
-    form.setFieldsValue({
-      permCode: group.permCode,
-      permName: group.permName,
-      sort: group.sort ?? 0,
-      status: group.status ?? true,
-      remark: group.remark,
-    });
-    setFormOpen(true);
-  }
+  const openEdit = useCallback(
+    (group: PermissionModel) => {
+      setEditingGroup(group);
+      parentGroupRef.current = null;
+      form.setFieldsValue({
+        permCode: group.permCode,
+        permName: group.permName,
+        sort: group.sort ?? 0,
+        status: group.status ?? true,
+        remark: group.remark,
+      });
+      setFormOpen(true);
+    },
+    [form]
+  );
 
   /**
    * 删除分组前二次确认。
    * @param group - 目标分组
    */
-  function handleDelete(group: PermissionModel) {
-    modal.confirm({
-      title: '删除分组',
-      content: `确定删除分组「${group.permName}」吗？存在子分组或接口权限点时将删除失败。`,
-      okButtonProps: { danger: true },
-      onOk: () => deleteMutation.mutate([group.id]),
-    });
-  }
+  const handleDelete = useCallback(
+    (group: PermissionModel) => {
+      modal.confirm({
+        title: '删除分组',
+        content: `确定删除分组「${group.permName}」吗？存在子分组或接口权限点时将删除失败。`,
+        okButtonProps: { danger: true },
+        onOk: () => deleteMutation.mutate([group.id]),
+      });
+    },
+    [modal, deleteMutation]
+  );
 
   /**
    * 校验并提交分组表单。
@@ -119,7 +156,7 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
     const values = await form.validateFields();
     const payload: PermissionSaveParams = {
       id: editingGroup?.id,
-      parentId: editingGroup?.parentId ?? parentGroup?.id ?? '0',
+      parentId: editingGroup?.parentId ?? parentGroupRef.current?.id ?? '0',
       permCode: values.permCode?.trim(),
       permName: values.permName?.trim(),
       permType: 0,
@@ -136,11 +173,13 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
      * @param nodes - 权限点节点
      */
     function build(nodes: PermissionModel[]): TreeDataNode[] {
-      return nodes
-        .filter((node) => node.permType !== 1)
-        .map((node) => {
-          const isGroup = node.permType === 0;
-          return {
+      return nodes.flatMap((node) => {
+        if (node.permType === 1) {
+          return [];
+        }
+        const isGroup = node.permType === 0;
+        return [
+          {
             key: node.id,
             icon: isGroup ? <FolderOutlined /> : <ApiOutlined />,
             title: isGroup ? (
@@ -204,11 +243,12 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
               </div>
             ),
             children: node.children?.length ? build(node.children) : undefined,
-          };
-        });
+          },
+        ];
+      });
     }
     return build(tree);
-  }, [tree, canAddGroup, canEditGroup, canDeleteGroup]);
+  }, [tree, canAddGroup, canEditGroup, canDeleteGroup, openAdd, openEdit, handleDelete]);
 
   /**
    * 点选节点：接口权限点触发过滤，分组清除过滤。
@@ -224,26 +264,6 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
     // 通过 key 在原始树中定位节点类型
     onSelectPerm(findPermIdByKey(tree, String(key)));
   };
-
-  /**
-   * 在权限点树中查找节点：返回接口权限点 ID，分组返回 null。
-   * @param nodes - 权限点节点
-   * @param key - 节点 key
-   */
-  function findPermIdByKey(nodes: PermissionModel[], key: string): string | null {
-    for (const node of nodes) {
-      if (node.id === key) {
-        return node.permType === 2 ? node.id : null;
-      }
-      if (node.children?.length) {
-        const found = findPermIdByKey(node.children, key);
-        if (found) {
-          return found;
-        }
-      }
-    }
-    return null;
-  }
 
   return (
     <Card
@@ -278,7 +298,7 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
         onCancel={() => {
           setFormOpen(false);
           setEditingGroup(null);
-          setParentGroup(null);
+          parentGroupRef.current = null;
           form.resetFields();
         }}
         destroyOnHidden

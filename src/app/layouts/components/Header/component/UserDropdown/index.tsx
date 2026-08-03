@@ -311,7 +311,7 @@ const UserDropdown: React.FC = () => {
         root: 'w-[240px]',
       }}
     >
-      <div className="login-user flex items-center cursor-pointer justify-between h-[50] transition-all duration-300">
+      <div className="login-user flex items-center cursor-pointer justify-between h-[50] transition-colors duration-300">
         <Avatar size="default" src={avatar} />
         <span className="m-0 ml-1.5">{userStore.loginUser}</span>
       </div>

@@ -3,6 +3,10 @@ import { Button, Col, Dropdown, Form, Input, InputNumber, Row, Space, Switch, To
 import OptimizedIconPanel from '@/shared/components/IconPanel/optimized-icon-panel';
 import { MENU_TYPE, type MenuType } from '../../../constants';
 
+const ICON_PANEL_CLASSNAMES = {
+  root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
+};
+
 interface RouteInfoFormProps {
   /** 当前菜单类型，控制路由相关字段显隐与校验 */
   menuType: MenuType;
@@ -22,10 +26,6 @@ interface RouteInfoFormProps {
  * @returns 表单字段行
  */
 function RouteInfoForm({ menuType, onIconSelect, showRouteFields }: RouteInfoFormProps) {
-  const ICON_PANEL_CLASSNAMES = {
-    root: 'w-[360px] h-[300px] bg-white overflow-y-auto p-2 shadow-xl',
-  };
-
   return (
     <Row gutter={16}>
       <Col span={12}>

@@ -16,6 +16,26 @@ import { useMenuActions } from './useMenuActions';
 import type { ModalType } from './useMenuModals';
 import { useMenuPermissions } from './useMenuPermissions';
 
+/**
+ * 将菜单类型数值渲染为彩色 Tag。
+ * @param menuType - 菜单类型枚举值
+ * @returns Tag 元素
+ */
+function getMenuTypeTag(menuType: number) {
+  const typeMap: Record<number, { label: string; color: string }> = {
+    [MENU_TYPE.TOP_LEVEL]: { label: '目录', color: 'blue' },
+    [MENU_TYPE.SUB_MENU]: { label: '子菜单', color: 'green' },
+    [MENU_TYPE.SUB_ROUTE]: { label: '子路由', color: 'orange' },
+    [MENU_TYPE.PERMISSION_BUTTON]: { label: '权限按钮', color: 'purple' },
+  };
+  const typeInfo = typeMap[menuType] || { label: '未知', color: 'default' };
+  return (
+    <Tag variant="solid" color={typeInfo.color}>
+      {typeInfo.label}
+    </Tag>
+  );
+}
+
 interface UseMenuTableColumnProps {
   /** 当前操作上下文行（传给 actions，用于更新时带上 id） */
   currentRow: Partial<MenuModel> | null;
@@ -51,26 +71,6 @@ export function useMenuTableColumns(props: UseMenuTableColumnProps) {
   const { canEditMenu, canDeleteMenu, canCopyMenu } = useMenuPermissions();
   const { t } = useTranslation();
   const { deleteMenu, updateMenuStatus } = useMenuActions({ currentRow, onSuccess });
-
-  /**
-   * 将菜单类型数值渲染为彩色 Tag。
-   * @param menuType - 菜单类型枚举值
-   * @returns Tag 元素
-   */
-  function getMenuTypeTag(menuType: number) {
-    const typeMap: Record<number, { label: string; color: string }> = {
-      [MENU_TYPE.TOP_LEVEL]: { label: '目录', color: 'blue' },
-      [MENU_TYPE.SUB_MENU]: { label: '子菜单', color: 'green' },
-      [MENU_TYPE.SUB_ROUTE]: { label: '子路由', color: 'orange' },
-      [MENU_TYPE.PERMISSION_BUTTON]: { label: '权限按钮', color: 'purple' },
-    };
-    const typeInfo = typeMap[menuType] || { label: '未知', color: 'default' };
-    return (
-      <Tag variant="solid" color={typeInfo.color}>
-        {typeInfo.label}
-      </Tag>
-    );
-  }
 
   /**
    * 复制当前行：克隆字段并打开新增弹窗。

@@ -29,7 +29,7 @@ const KeepAliveLayout: React.FC = () => {
   const location = useLocation();
   const aliveRef = useKeepAliveRef();
 
-  const keepAliveIncludes = tabs.filter((tab) => tab.route?.meta?.keepAlive).map((tab) => tab.key);
+  const keepAliveIncludes = tabs.flatMap((tab) => (tab.route?.meta?.keepAlive ? [tab.key] : []));
 
   const currentTab = tabs.find((tab) => tab.key === activeKey);
   const reloadKey = currentTab?.reloadKey;

@@ -88,7 +88,7 @@ export const QuickAccess: React.FC = () => {
 
         return (
           <div
-            key={`quick-${item.title}-${index}`}
+            key={item.link}
             className={`${styles['quickAccessCard']} group cursor-pointer p-2 rounded-lg border transition-all duration-300 ${config.bgColor} ${config.borderColor} ${config.hoverBorderColor} ${config.hoverBgColor}`}
           >
             <div className="flex flex-col items-center text-center">
