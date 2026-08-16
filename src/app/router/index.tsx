@@ -1,12 +1,12 @@
-import { LoadingOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { Spin } from 'antd';
+import { useMemo } from 'react';
 import { commonService } from '@/shared/api/common';
 import { useMenuStore } from '@/shared/stores/preferences.store';
 import { useUserStore } from '@/shared/stores/user.store';
 import type { RouteItem } from '@/types/route';
 import { defaultMenus } from './default-menus';
+import { NotFoundPage, RouterPendingPage } from './fallback';
 import { buildRouteTree } from './routeTree';
 
 /** 基于菜单数据构建 TanStack Router 实例 */
@@ -15,6 +15,8 @@ function buildRouter(menus: RouteItem[]) {
     routeTree: buildRouteTree(menus),
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    defaultPendingComponent: RouterPendingPage,
+    defaultNotFoundComponent: NotFoundPage,
   });
 }
 
@@ -59,15 +61,13 @@ export function AppRouter() {
     retry: false,
   });
 
-  const router = buildRouter(menus);
+  // 仅在菜单引用变化时重建 router。每次渲染都 createRouter 会让 match 长期停在 pending，
+  // 且 defaultPendingComponent 为空时 RouterProvider 渲染 null，表现为整页空白且无报错。
+  const router = useMemo(() => buildRouter(menus), [menus]);
 
   // 已登录但菜单尚未就绪时展示加载态
   if (isLogin && roleId && isFetching && menus.length === 0) {
-    return (
-      <div className="flex h-full min-h-100 w-full items-center justify-center">
-        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} size="large" />
-      </div>
-    );
+    return <RouterPendingPage />;
   }
 
   return <RouterProvider router={router} />;

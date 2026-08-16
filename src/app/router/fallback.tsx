@@ -1,8 +1,17 @@
-import { ToolOutlined } from '@ant-design/icons';
+import { LoadingOutlined, ToolOutlined } from '@ant-design/icons';
 import { useLocation } from '@tanstack/react-router';
-import { Card, Result, Tag, Typography } from 'antd';
+import { Card, Result, Spin, Tag, Typography } from 'antd';
 import { useMenuStore } from '@/shared/stores/preferences.store';
 import { searchRoute } from '@/shared/utils/utils';
+
+/** 路由 pending / 懒加载时的占位，避免无 pendingComponent 时整页空白 */
+export function RouterPendingPage() {
+  return (
+    <div className="flex h-full min-h-100 w-full items-center justify-center">
+      <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} size="large" />
+    </div>
+  );
+}
 
 /**
  * 动态路由占位页
