@@ -121,9 +121,11 @@ export function useLoginPage() {
               wechatCode: poll.wechatCode,
             });
             await handleLoginApiResultRef.current(code, loginResponse as LoginResponse, message);
-          } finally {
-            setLoading(false);
+          } catch (error) {
+            // 请求层已弹出错误提示，此处记录日志即可（React Compiler 不支持 finally 及 catch 内 rethrow）
+            console.error('微信扫码登录失败:', error);
           }
+          setLoading(false);
         } else if (poll.status === 'EXPIRED') {
           setWechatTicket(null);
           antdUtils.message?.warning(t('login.wechatSessionExpired'));
@@ -158,9 +160,8 @@ export function useLoginPage() {
       return;
     }
 
-    try {
-      setLoading(true);
-
+    // React Compiler 不支持 try/finally：内层函数承载原逻辑使提前 return 仅退出该函数，loading 在调用后统一复位
+    const confirmAndEnter = async () => {
       const rolesToUse = roleData || userRoles;
 
       const selectedRole = rolesToUse.find((role) => role.id === roleId);
@@ -232,12 +233,16 @@ export function useLoginPage() {
       });
 
       navigate({ to: homePath });
+    };
+
+    setLoading(true);
+    try {
+      await confirmAndEnter();
     } catch (error) {
       console.error('角色选择失败:', error);
       antdUtils.message?.error('角色选择失败');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   async function processLoginSuccess(loginResponse: LoginResponse, rememberedUsername?: string, remember?: boolean) {
@@ -343,9 +348,11 @@ export function useLoginPage() {
         if (!cancelled) {
           await handleLoginApiResultRef.current(httpCode, loginResponse as LoginResponse, message);
         }
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        // 请求层已弹出错误提示，此处记录日志即可（React Compiler 不支持 finally 及 catch 内 rethrow）
+        console.error('GitHub 登录失败:', error);
       }
+      setLoading(false);
     };
 
     try {
@@ -428,9 +435,11 @@ export function useLoginPage() {
         });
         await handleLoginApiResult(code, loginResponse as LoginResponse, message);
       }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      // 请求层已弹出错误提示，此处记录日志即可（React Compiler 不支持 finally 及 catch 内 rethrow）
+      console.error('登录提交失败:', error);
     }
+    setLoading(false);
   };
 
   const setMode = (mode: UiLoginMode) => {

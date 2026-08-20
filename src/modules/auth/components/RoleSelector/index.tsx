@@ -48,9 +48,9 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ roles, defaultRoleId, onSel
       onSelect(effectiveSelectedRoleId);
     } catch {
       message.error('角色选择失败');
-    } finally {
-      setIsSubmitting(false);
     }
+    // React Compiler 不支持 try/finally，正常与异常路径统一在此复位
+    setIsSubmitting(false);
   };
 
   if (loading) {
