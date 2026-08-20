@@ -1,8 +1,7 @@
-import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig, loadEnv, type PluginOption, type UserConfig } from 'vite';
+import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { compression } from 'vite-plugin-compression2';
 import { mockDevServerPlugin } from 'vite-plugin-mock-dev-server';
 
@@ -18,12 +17,7 @@ export default defineConfig(({ mode }): UserConfig => {
 
   return {
     plugins: [
-      react(),
-      // @rolldown/plugin-babel 返回 Promise<rolldown Plugin>，与 Vite Plugin 结构比较过深（TS7 会报栈溢出），断言为 PluginOption 绕过
-      babel({
-        presets: [reactCompilerPreset()],
-        exclude: /node_modules/,
-      }) as PluginOption,
+      react({ compiler: true }),
       tailwindcss(),
       // 开发态 Mock：匹配到的接口返回 mock，其余仍走 server.proxy
       // Source: https://vite-plugin-mock-dev-server.netlify.app/guide/usage
