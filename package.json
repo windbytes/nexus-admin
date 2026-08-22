@@ -37,7 +37,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.9",
+    "@biomejs/biome": "^2.5.10",
     "@tailwindcss/vite": "^4.3.3",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash-es": "^4.17.12",
@@ -46,7 +46,6 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
-    "babel-plugin-react-compiler": "^1.0.0",
     "mockjs": "^1.1.0",
     "oxc-transform-react": "^0.145.0",
     "tailwindcss": "^4.3.3",
