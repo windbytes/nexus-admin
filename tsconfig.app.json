@@ -6,6 +6,8 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -40,5 +42,8 @@
     "forceConsistentCasingInFileNames": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["./src", "./public/font"]
+  "include": ["./src", "./public/font"],
+  "exclude": [
+    "src/modules/editor/pages/sdwriter/editor/**"
+  ]
 }

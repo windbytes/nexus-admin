@@ -11,7 +11,7 @@ import { ErrorFallback } from './ErrorBoundary';
 /**
  * 中间主内容区域
  *
- * tabbar 开启时，使用 KeepAlive（内部通过 useOutlet() 获取路由元素进行缓存）；
+ * tabbar 开启时，使用 KeepAlive（内部按 pathname 固化子路由页面快照进行缓存）；
  * tabbar 关闭时，直接渲染 <Outlet />。
  */
 const Content = () => {

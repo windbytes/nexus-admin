@@ -4,10 +4,11 @@
  */
 
 import type { RoleGrantTreeResponse, RoleModel, RoleSearchParams } from '@/shared/api/system/role/type';
-import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/shared/utils/request';
+import type { PageResult } from '@/types/global';
 
 const RoleApi = {
+  getRoleList: '/system/role/getRoleList',
   getRoleListPage: '/system/role/getRoleListPage',
   addRole: '/system/role/addRole',
   editRole: '/system/role/editRole',
@@ -24,6 +25,8 @@ const RoleApi = {
 interface IRoleService {
   /** 分页查询角色 */
   getRoleListPage(params: RoleSearchParams): Promise<PageResult<RoleModel>>;
+  /** 查询全部角色（不分页），供分配角色穿梭框使用 */
+  getRoleList(params: Record<string, unknown>): Promise<RoleModel[]>;
   /** 新增角色 */
   addRole(params: Partial<RoleModel>): Promise<boolean>;
   /** 编辑角色 */
@@ -55,6 +58,10 @@ export const roleService: IRoleService = {
     return HttpRequest.post({ url: RoleApi.getRoleListPage, data: params }, { successMessageMode: 'none' });
   },
 
+  getRoleList(params) {
+    return HttpRequest.post({ url: RoleApi.getRoleList, data: params }, { successMessageMode: 'none' });
+  },
+
   addRole(params) {
     return HttpRequest.post({ url: RoleApi.addRole, data: params });
   },
@@ -75,10 +82,7 @@ export const roleService: IRoleService = {
   },
 
   getGrantTree(roleId) {
-    return HttpRequest.get(
-      { url: RoleApi.grantTree, params: { roleId } },
-      { successMessageMode: 'none' }
-    );
+    return HttpRequest.get({ url: RoleApi.grantTree, params: { roleId } }, { successMessageMode: 'none' });
   },
 
   saveGrants(roleId, checkedKeys) {
@@ -89,9 +93,6 @@ export const roleService: IRoleService = {
   },
 
   checkRoleCodeExist(roleCode) {
-    return HttpRequest.get(
-      { url: RoleApi.checkRoleCodeExist, params: { roleCode } },
-      { successMessageMode: 'none' }
-    );
+    return HttpRequest.get({ url: RoleApi.checkRoleCodeExist, params: { roleCode } }, { successMessageMode: 'none' });
   },
 };

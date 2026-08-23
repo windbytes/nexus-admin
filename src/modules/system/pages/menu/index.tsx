@@ -45,12 +45,22 @@ function Menu() {
     refetch,
   } = useQuery({
     queryKey: ['sys_menu', searchParams],
-    queryFn: () =>
-      menuService.getAllMenus({
+    queryFn: () => {
+      // TODO: 临时诊断「菜单页打开调两次」——验证后移除
+      if (import.meta.env.DEV) {
+        console.debug(
+          '[menu] getAllMenus queryFn executed at',
+          new Date().toISOString(),
+          '| searchParams=',
+          searchParams
+        );
+      }
+      return menuService.getAllMenus({
         menuName: searchParams.name,
         menuType: searchParams.menuType,
         status: searchParams.status,
-      }),
+      });
+    },
   });
 
   /**
@@ -253,11 +263,7 @@ function Menu() {
         operation={modalName === 'add' ? 'add' : modalName === 'view' ? 'view' : 'edit'}
         copiedMenuData={copiedMenuData || undefined}
       />
-      <MenuButtonDrawer
-        open={!!buttonDrawerMenu}
-        menu={buttonDrawerMenu}
-        onClose={() => setButtonDrawerMenu(null)}
-      />
+      <MenuButtonDrawer open={!!buttonDrawerMenu} menu={buttonDrawerMenu} onClose={() => setButtonDrawerMenu(null)} />
     </>
   );
 }

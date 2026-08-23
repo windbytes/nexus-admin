@@ -4,8 +4,8 @@
  */
 
 import type { ApiModel, ApiSaveParams, ApiScanResult, ApiSearchParams } from '@/shared/api/system/api/type';
-import type { PageResult } from '@/types/global';
 import { HttpRequest } from '@/shared/utils/request';
+import type { PageResult } from '@/types/global';
 
 /** 后端接口路径 */
 const ApiPaths = {

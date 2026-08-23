@@ -1,0 +1,107 @@
+import { useMutation } from '@tanstack/react-query';
+import { App } from 'antd';
+import { userService } from '@/modules/system/api/user';
+import type { UserModel } from '@/shared/api/system/user/type';
+
+interface UseUserMutationsProps {
+  // 当前操作的行数据
+  currentRow: Partial<UserModel> | null;
+  // 成功的回调
+  onSuccess?: () => void;
+}
+
+/**
+ * 用户操作相关的 hooks（新增/编辑/改状态/删除/改密/分配角色）。
+ */
+export const useUserActions = ({ currentRow, onSuccess }: UseUserMutationsProps) => {
+  const { modal, message } = App.useApp();
+
+  // 新增用户
+  const createUserMutation = useMutation({
+    mutationFn: (values: Partial<UserModel>) => userService.createUser(values),
+    onSuccess,
+  });
+
+  // 更新用户
+  const updateUserMutation = useMutation({
+    mutationFn: (values: Partial<UserModel>) => {
+      if (!currentRow?.id) {
+        throw new Error('当前行数据不存在');
+      }
+      return userService.updateUser({ id: currentRow.id, ...values });
+    },
+    onSuccess,
+  });
+
+  // 更新用户状态
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ ids, status }: { ids: string[]; status: number }) => userService.updateBatchUserStatus(ids, status),
+    onSuccess,
+  });
+
+  // 更改用户状态
+  const updateUserStatus = (ids: string[], status: number) => {
+    updateStatusMutation.mutate({ ids, status });
+  };
+
+  // 更新用户密码
+  const updatePasswordMutation = useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) => userService.changeUserPwd(id, password),
+    onSuccess: () => {
+      message.success('更新用户密码成功');
+      onSuccess?.();
+    },
+    onError: (error) => {
+      modal.error({
+        title: '更新用户密码失败',
+        content: error.message,
+      });
+    },
+  });
+
+  // 分配角色
+  const assignRoleMutation = useMutation({
+    mutationFn: ({ userId, roleIds }: { userId: string; roleIds: string[] }) => userService.assignRole(userId, roleIds),
+    onSuccess: () => {
+      onSuccess?.();
+    },
+  });
+
+  // 分配角色
+  const assignRole = (userId: string, roleIds: string[]) => {
+    assignRoleMutation.mutate({ userId, roleIds });
+  };
+
+  // 更新用户密码
+  const updateUserPassword = (id: string, password: string) => {
+    updatePasswordMutation.mutate({ id, password });
+  };
+
+  // 逻辑删除用户
+  const deleteUsersMutation = useMutation({
+    mutationFn: (ids: string[]) => userService.logicDeleteUsers(ids),
+    onSuccess,
+  });
+
+  // 批量删除用户
+  const deleteUsers = (ids: string[]) => {
+    deleteUsersMutation.mutate(ids);
+  };
+
+  // 新增 / 编辑提交
+  const handleModalSave = (values: Partial<UserModel>) => {
+    if (currentRow?.id) {
+      updateUserMutation.mutate(values);
+    } else {
+      createUserMutation.mutate(values);
+    }
+  };
+
+  return {
+    handleModalSave,
+    updateUserStatus,
+    deleteUsers,
+    updateUserPassword,
+    assignRole,
+  };
+};

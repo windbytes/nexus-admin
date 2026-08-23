@@ -4,8 +4,9 @@
  * 聚合导出 menu / role / api / permission 等子服务。
  */
 
-export { menuService } from './menu';
-export type { MenuExportParams, MenuImportResult, MenuListQuery } from './menu';
-export { roleService } from './role';
 export { apiService } from './api';
+export type { MenuExportParams, MenuImportResult, MenuListQuery } from './menu';
+export { menuService } from './menu';
 export { permissionService } from './permission';
+export { roleService } from './role';
+export { userService } from './user';

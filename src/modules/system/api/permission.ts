@@ -3,9 +3,13 @@
  * @description 对接后端 `/system/permission/**`，供权限点树/按钮配置/角色授权等场景使用。
  */
 
-import type { PermissionModel, PermissionSaveParams, PermissionSearchParams } from '@/shared/api/system/permission/type';
-import type { PageResult } from '@/types/global';
+import type {
+  PermissionModel,
+  PermissionSaveParams,
+  PermissionSearchParams,
+} from '@/shared/api/system/permission/type';
 import { HttpRequest } from '@/shared/utils/request';
+import type { PageResult } from '@/types/global';
 
 const PermissionApi = {
   queryPermissionListPage: '/system/permission/queryPermissionListPage',

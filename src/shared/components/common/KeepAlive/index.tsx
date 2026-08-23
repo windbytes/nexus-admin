@@ -34,6 +34,12 @@ const KeepAliveLayout: React.FC = () => {
   const currentTab = tabs.find((tab) => tab.key === activeKey);
   const reloadKey = currentTab?.reloadKey;
 
+  // 仅对开启「路由缓存(keepAlive)」的页面走 KeepAlive 缓存流程；否则直接渲染 Outlet。
+  // 原因：KeepAlive 会对 activeCacheKey 所对应的页面先建立缓存项并 portal 挂载，再因该页不在
+  // include 列表而走销毁逻辑，从而对非 keepAlive 页面造成重复挂载（useQuery 等会重复请求）。
+  // 不在缓存名单的页面本就无需缓存，直接渲染即可，避免这个竞争。
+  const shouldKeepAlive = keepAliveIncludes.includes(location.pathname);
+
   useEffect(() => {
     if (reloadKey && aliveRef.current) {
       aliveRef.current.refresh(activeKey);
@@ -52,6 +58,22 @@ const KeepAliveLayout: React.FC = () => {
     }
   }, [tabs, aliveRef]);
 
+  const outletNode = (
+    <Suspense
+      fallback={
+        <div className="flex h-full w-full items-center justify-center">
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 32 }} spin />} />
+        </div>
+      }
+    >
+      <Outlet />
+    </Suspense>
+  );
+
+  if (!shouldKeepAlive) {
+    return outletNode;
+  }
+
   return (
     <KeepAlive
       aliveRef={aliveRef as React.RefObject<KeepAliveRef | undefined>}
@@ -60,15 +82,7 @@ const KeepAliveLayout: React.FC = () => {
       max={10}
       cacheNodeClassName="h-full w-full"
     >
-      <Suspense
-        fallback={
-          <div className="flex h-full w-full items-center justify-center">
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 32 }} spin />} />
-          </div>
-        }
-      >
-        <Outlet />
-      </Suspense>
+      {outletNode}
     </KeepAlive>
   );
 };

@@ -292,9 +292,7 @@ export const MOCK_MENUS: MockRouteItem[] = [
       'FileMarkdownOutlined'
     ),
   ]),
-  group('235123826202185737', '编辑器', '/editor/nwriter', 'EditOutlined', [
-    leaf('235123826202185775', '235123826202185737', 'NWriter', '/editor/nwriter', 'editor/NWriter', 'EditOutlined'),
-  ]),
+  leaf('235123826202185775', '', 'menu.editor.sdwriter', '/editor/sdwriter', 'editor/sdwriter', 'EditOutlined', 0),
 ];
 
 export const MOCK_HOME_PATH = '/dashboard/workbench';

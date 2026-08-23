@@ -1,7 +1,6 @@
 /**
  * @file 系统管理 - 角色管理页面
  * @description 角色列表 CRUD、统一授权（菜单/按钮/接口）；路由 component：`system/role`。
- * 授权用户未完整移植（用户模块未就绪）。
  */
 
 import { ExclamationCircleFilled } from '@ant-design/icons';
@@ -178,8 +177,7 @@ function Role() {
             total: total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (totalCount: number, range: [number, number]) =>
-              `${range[0]} - ${range[1]} / ${totalCount} 条`,
+            showTotal: (totalCount: number, range: [number, number]) => `${range[0]} - ${range[1]} / ${totalCount} 条`,
             hideOnSinglePage: false,
             onChange: handlePageChange,
           }}
