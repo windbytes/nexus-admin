@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { type LoginParams, type LoginResponse, loginService, type UserRole } from '@/modules/auth/api';
 import { commonService } from '@/shared/api/common';
 import type { RoleModel } from '@/shared/api/system/role/type';
+import type { RouteItem } from '@/types/route';
 import { HttpCodeEnum } from '@/shared/constants/httpEnum';
 import { useMenuStore, usePreferencesStore } from '@/shared/stores/preferences.store';
 import { useTabStore } from '@/shared/stores/tab.store';
@@ -169,7 +170,7 @@ export function useLoginPage() {
         antdUtils.message?.error('选择的角色不存在');
         return;
       }
-      const { accessToken, permissions } = await loginService.confirmRole(
+      const { accessToken } = await loginService.confirmRole(
         currentLoginData.accessToken,
         selectedRole.roleCode
       );
@@ -187,12 +188,20 @@ export function useLoginPage() {
 
       resetTabs();
 
-      const menu = await commonService.getMenuListByRoleId(roleId);
-      setMenus(menu);
-      queryClient.setQueryData(['menuData', roleId], menu);
-      const buttonPermissions = permissions;
-      setButtonPermissions(buttonPermissions);
-      queryClient.setQueryData(['buttonPermissions', roleId], buttonPermissions);
+      // 与 AppRouter（src/app/router/index.tsx）共用同一个 queryKey，由 react-query 去重，
+      // 保证登录成功后菜单接口只请求一次，而不是被「登录流程拉取 + AppRouter 拉取」并发发两份。
+      const menu = (await queryClient.fetchQuery({
+        queryKey: ['app-permission-data', roleId],
+        queryFn: async () => {
+          const [menuList, permissionPoint] = await Promise.all([
+            commonService.getMenuListByRoleId(roleId),
+            commonService.getPermissionsByRoleId(roleId),
+          ]);
+          setMenus(menuList ?? []);
+          setButtonPermissions(permissionPoint ?? []);
+          return menuList ?? [];
+        },
+      })) as RouteItem[];
       let homePath = currentLoginData.homePath;
       if (!homePath) {
         const firstRoute = findMenuByRoute(menu as unknown[]);

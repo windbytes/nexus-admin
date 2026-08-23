@@ -16,10 +16,10 @@
   background-position: center;
   background-size: cover;
 
-  .login-box {
+    .login-box {
     position: relative;
     width: 800px;
-    height: 540px;
+    height: 580px;
     display: flex;
     background: #fff;
     border-radius: 6px;
@@ -29,7 +29,7 @@
     .login-left {
       border: 0;
       width: 330px;
-      height: 540px;
+      height: 100%;
       display: flex;
       flex-direction: column;
       text-align: center;
@@ -402,18 +402,24 @@
 }
 
 .login-form-body {
-  flex: 1 1 0;
-  min-height: 0;
+  /* 中间留白可以长，但不能被压到低于表单项，否则「记住我」会溢出去盖住登录按钮 */
+  flex: 1 1 auto;
+  min-height: min-content;
+}
+
+.login-remember:global(.ant-form-item),
+.login-submit:global(.ant-form-item) {
+  margin-bottom: 0;
 }
 
 .login-form-footer {
   flex-shrink: 0;
-  padding-top: 4px;
+  padding-top: 16px;
 }
 
 /* 占位：微信/GitHub 无提交按钮时仍保留与密码/手机一致的高度，避免底部整体上移 */
 .login-form-submit-slot {
-  min-height: 72px;
+  min-height: 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

@@ -40,5 +40,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     radius,
   });
 
-  return <ConfigProvider theme={theme}>{children}</ConfigProvider>;
+  return (
+    <ConfigProvider theme={theme} input={{ autoComplete: 'off' }} textArea={{ autoComplete: 'off' }}>
+      {children}
+    </ConfigProvider>
+  );
 }

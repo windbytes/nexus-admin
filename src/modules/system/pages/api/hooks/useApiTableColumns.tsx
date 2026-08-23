@@ -82,7 +82,7 @@ export function useApiTableColumns(options: UseApiTableColumnsOptions): ColumnsT
       key: 'status',
       align: 'center',
       width: 70,
-      render: (v: boolean) => (v ? '启用' : <Typography.Text type="danger">停用</Typography.Text>),
+      render: (v: boolean) => (v ? <Tag color="success">启用</Tag> : <Tag color="error">停用</Tag>),
     },
     { title: '描述', dataIndex: 'remark', key: 'remark', width: 140, ellipsis: true },
     {

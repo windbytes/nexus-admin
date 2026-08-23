@@ -145,7 +145,7 @@ function PasswordLoginFields({
           autoFocus
           autoComplete="off"
           allowClear
-          placeholder={`${t('login.username')}:syndra`}
+          placeholder={t('login.username')}
           prefix={<UserOutlined />}
         />
       </Form.Item>
@@ -154,12 +154,16 @@ function PasswordLoginFields({
           size="large"
           allowClear
           autoComplete="off"
-          placeholder={`${t('login.password')}:123456`}
+          placeholder={t('login.password')}
           prefix={<LockOutlined />}
         />
       </Form.Item>
       <CaptchaRow t={t} animClass={animClass} captchaCode={captchaCode} onRefreshCaptcha={onRefreshCaptcha} />
-      <Form.Item name="remember" valuePropName="checked" className={animClass}>
+      <Form.Item
+        name="remember"
+        valuePropName="checked"
+        className={`${styles['login-remember']} ${animClass}`.trim()}
+      >
         <Checkbox>{t('login.remember')}</Checkbox>
       </Form.Item>
     </>
@@ -346,7 +350,7 @@ function LoginFormFooter({
     <div className={styles['login-form-footer']}>
       <div className={styles['login-form-submit-slot']}>
         {showSubmit && (
-          <Form.Item className={animClass}>
+          <Form.Item className={`${styles['login-submit']} ${animClass}`.trim()}>
             <Button loading={loading} size="large" className="w-full" type="primary" htmlType="submit">
               {t('login.login')}
             </Button>

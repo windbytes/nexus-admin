@@ -14,7 +14,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import type { TreeDataNode, TreeProps } from 'antd';
 import { App, Button, Card, Dropdown, Empty, Form, Input, InputNumber, Spin, Switch, Tree, Typography } from 'antd';
-import { type Key, useCallback, useMemo, useRef, useState } from 'react';
+import { type Key, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { permissionService } from '@/modules/system/api/permission';
 import type { PermissionModel, PermissionSaveParams } from '@/shared/api/system/permission/type';
 import DragModal from '@/shared/components/modal/DragModal';
@@ -47,8 +47,11 @@ export interface PermissionGroupTreeProps {
   /** 权限点树原始数据 */
   tree: PermissionModel[];
   loading: boolean;
-  /** 当前过滤的接口权限点 ID */
-  selectedPermId: string | null;
+  /**
+   * 页面打开时默认选中的树节点 key（通常为第一个根节点）。
+   * 用于实现「打开页面默认选中根节点、表格按其加载」。
+   */
+  defaultSelectedKey?: string | null;
   /**
    * 点选接口权限点（过滤）或分组（清除过滤）。
    * @param permId - 接口权限点 ID；`null` 表示不过滤
@@ -61,16 +64,32 @@ export interface PermissionGroupTreeProps {
 /**
  * 接口权限分组树：左侧导航 + 分组维护。
  *
- * @param props - 树数据、选中态与回调
+ * @param props - 树数据、默认选中与回调
  * @returns 卡片包裹的 Tree + 分组表单弹窗
  */
-function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTreeChanged }: PermissionGroupTreeProps) {
+function PermissionGroupTree({
+  tree,
+  loading,
+  defaultSelectedKey,
+  onSelectPerm,
+  onTreeChanged,
+}: PermissionGroupTreeProps) {
   const { modal, message } = App.useApp();
   const { canAddGroup, canEditGroup, canDeleteGroup } = useApiPermissions();
   const [form] = Form.useForm();
   const [formOpen, setFormOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<PermissionModel | null>(null);
   const parentGroupRef = useRef<PermissionModel | null>(null);
+
+  // 树当前高亮的节点 key（含分组，支持默认选中根节点）
+  const [selectedKey, setSelectedKey] = useState<string | null>(defaultSelectedKey ?? null);
+
+  // 树异步加载完成后，同步默认选中第一个根节点
+  useEffect(() => {
+    if (defaultSelectedKey) {
+      setSelectedKey(defaultSelectedKey);
+    }
+  }, [defaultSelectedKey]);
 
   const saveMutation = useMutation({
     mutationFn: (params: PermissionSaveParams) =>
@@ -182,9 +201,10 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
           {
             key: node.id,
             icon: isGroup ? <FolderOutlined /> : <ApiOutlined />,
+            isLeaf: !node.children?.length,
             title: isGroup ? (
-              <div className="group flex items-center justify-between gap-2 pr-1">
-                <Typography.Text ellipsis className="flex-1">
+              <span className="group inline-flex items-center justify-between gap-2 min-w-0">
+                <Typography.Text ellipsis={{ tooltip: node.permName }} className="flex-1 min-w-0">
                   {node.permName}
                 </Typography.Text>
                 <Dropdown
@@ -229,18 +249,13 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
                     type="text"
                     size="small"
                     icon={<MoreOutlined />}
-                    className="opacity-0 group-hover:opacity-100"
+                    className="opacity-0 group-hover:opacity-100 shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </Dropdown>
-              </div>
+              </span>
             ) : (
-              <div className="flex flex-col leading-tight py-0.5">
-                <span>{node.permName}</span>
-                <Typography.Text type="secondary" className="text-xs">
-                  {node.permCode}
-                </Typography.Text>
-              </div>
+              <span className="truncate min-w-0">{node.permName}</span>
             ),
             children: node.children?.length ? build(node.children) : undefined,
           },
@@ -257,11 +272,13 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
    */
   const handleSelect: TreeProps['onSelect'] = (keys, info) => {
     if (!keys.length) {
+      setSelectedKey(null);
       onSelectPerm(null);
       return;
     }
     const key: Key = info.node.key;
-    // 通过 key 在原始树中定位节点类型
+    // 高亮当前点选节点（含分组），再通过 key 定位节点类型并传过滤条件
+    setSelectedKey(String(key));
     onSelectPerm(findPermIdByKey(tree, String(key)));
   };
 
@@ -281,9 +298,10 @@ function PermissionGroupTree({ tree, loading, selectedPermId, onSelectPerm, onTr
           <Tree
             showIcon
             blockNode
+            showLine
             defaultExpandAll
             treeData={treeData}
-            selectedKeys={selectedPermId ? [selectedPermId] : []}
+            selectedKeys={selectedKey ? [selectedKey] : []}
             onSelect={handleSelect}
           />
         ) : (

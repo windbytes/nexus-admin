@@ -24,7 +24,6 @@ import { useApiTableColumns } from './hooks/useApiTableColumns';
 function Apis() {
   const { modal } = App.useApp();
   const permissions = useApiPermissions();
-  const [selectedPermId, setSelectedPermId] = useState<string | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Partial<ApiModel> | null>(null);
@@ -69,7 +68,6 @@ function Apis() {
    * @param permId - 接口权限点 ID；`null` 清除过滤
    */
   function handleSelectPerm(permId: string | null) {
-    setSelectedPermId(permId);
     setSelectedRowKeys([]);
     setSearchParams((prev) => ({ ...prev, permId: permId ?? undefined, pageNum: 1 }));
   }
@@ -112,11 +110,11 @@ function Apis() {
         <PermissionGroupTree
           tree={tree}
           loading={treeLoading}
-          selectedPermId={selectedPermId}
+          defaultSelectedKey={tree[0]?.id ?? null}
           onSelectPerm={handleSelectPerm}
           onTreeChanged={refetchTree}
         />
-        <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-w-0 flex flex-col gap-2">
           <SearchForm onSearch={handleSearch} loading={apiLoading} />
           <ProTable<ApiModel>
             title="接口注册表"
